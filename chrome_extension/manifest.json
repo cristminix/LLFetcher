@@ -1,0 +1,28 @@
+{
+	"name" : "LLFetcher",
+	"version" : "1.0",
+	"manifest_version" : 3,
+	"permissions":[
+		"scripting",
+        "webNavigation","tabs","cookies"
+	],
+	"content_scripts" : [
+		{
+			
+			"matches":["http://*/*", "https://*/*"],
+			"js":["function.js","content.js"]
+		}
+	],
+	"background" : {
+		"service_worker" : "background.js"
+	},
+	"host_permissions":[
+		"https://www.linkedin.com/learning/*"
+	],
+	"description" : "LinkedIn Learning Fetcher",
+	"action" : {
+		"default_title" : "LinkedIn Learning Fetcher",
+		"default_popup" : "index.html"
+
+	}
+}

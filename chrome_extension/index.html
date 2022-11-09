@@ -24,7 +24,7 @@
     <body>
         <div id="container">
             <div id="app">
-                <button @click="fetchCourseInfo()">Fetch Course Info</button>
+                <button v-if="true" @click="fetchCourseInfo()">Fetch Course Info</button>
                     <div v-for="(i,section) in sections">
                        
                             <h4>
@@ -33,19 +33,20 @@
                             <table class="table table-striped">
                                 <tr v-for="(j,item) in section.items">
                                     <td style="width:80%">
+                                        <h4>{{item.title}}</h4>
                                         <div v-show="bprs[item.slug]">
-                                            <a class="btn btn-sm" :href="bprs[item.slug].transcript.captionFile"><i class="fa fa-text"></i></a>
-                                            <a class="btn btn-sm" :href="bprs[item.slug].captionFile.url"><i class="fa fa-file-zip"></i></a>
+                                            <a class="btn btn-sm" :href="bprs[item.slug].transcript.captionFile"><i class="fa fa-file-text-o"></i></a>
+                                            <a class="btn btn-sm" :href="bprs[item.slug].exerciseFile.url"><i class="fa fa-file-o"></i></a>
                                             <div>
-                                                <a class="btn btn-sm" v-for="l in bprs[item.slug].strimingLocations" :href="l.url"><i class="fa file-video"></i></a>
+                                                <a class="btn btn-sm" v-for="l in bprs[item.slug].strimingLocations" :href="l.url">{{l.url|videoUrl}}</a>
                                                                                                 
                                             </div>
                                         </div>
-                                        <div>{{item.title}}</div>
+                                        
                                     </td>
                                     <td>{{item.duration}}</td>
                                    
-                                    <td><button class="btn btn-sm" @click="fetchToc(i,j)"><i class="fa fa-play"></i></button></td>
+                                    <td><button v-if="!item.fetched" class="btn btn-sm" @click="fetchToc(i,j)"><i class="fa fa-play"></i></button></td>
                                 </tr>
                             </table>
                     </div>

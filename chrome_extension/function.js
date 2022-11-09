@@ -104,13 +104,18 @@ const getCourseSections = () => {
 
         for(j in sec_['*items']){
             let si_urn = sec_['*items'][j];
-            let si_ = m3Rec[m3Rec[si_urn].__data.content.video].__data;
-            let si = {
-                duration : si_.duration.duration,
-                slug : m3Rec[si_.entityUrn].__data.slug,
-                title : si_.title
-            };
-            sec.items.push(si);
+            try{
+                let si_ = m3Rec[m3Rec[si_urn].__data.content.video].__data;
+                let si = {
+                    duration : si_.duration.duration,
+                    slug : m3Rec[si_.entityUrn].__data.slug,
+                    title : si_.title
+                };
+                sec.items.push(si);
+            }catch(e){
+                console.log(e);
+            }
+            
         }
         secs.push(sec);
         

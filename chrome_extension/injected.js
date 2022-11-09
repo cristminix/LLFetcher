@@ -5,9 +5,11 @@ window.onload = ()=>{
 
 	const COURSE_INFO = {
 		slug : getCourseSlug(),
-		sections : getCourseSections()
+		sections : getCourseSections(),
+		bprs : {}
 	};
-
+	
+	
 	let code = document.createElement('code');
 		code.id = 'EXT_COURSE_INFO';
 		code.setAttribute('data', JSON.stringify(COURSE_INFO));	

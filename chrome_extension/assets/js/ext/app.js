@@ -111,8 +111,8 @@ app = new Vue({
                 const codes = nd.find('code');
                 let bpr_guid = [];
                 
-                for(i in codes){
-                    let el = codes[i];
+                for(idx in codes){
+                    let el = codes[idx];
                     try{
                         if(el.id.match(/^bpr-guid/)){
                             bpr_guid.push(JSON.parse(el.textContent));
@@ -131,8 +131,8 @@ app = new Vue({
                 ];
 
                 app.search.results = [];
-                for(i in searchTerms){
-                    app.search.term = searchTerms[i];
+                for(is in searchTerms){
+                    app.search.term = searchTerms[is];
                     app.searchItem(bpr_guid);
                 }
                 // console.log(bpr_guid);

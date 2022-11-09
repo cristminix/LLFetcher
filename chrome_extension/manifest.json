@@ -3,19 +3,25 @@
 	"version" : "1.0",
 	"manifest_version" : 3,
 	"permissions":[
-		"scripting",
+		"scripting","storage",
         "webNavigation","tabs","cookies"
 	],
 	"content_scripts" : [
 		{
 			
 			"matches":["http://*/*", "https://*/*"],
-			"js":["function.js","content.js"]
+			"js":["inject.js","function.js","content.js"]
 		}
 	],
 	"background" : {
 		"service_worker" : "background.js"
 	},
+	"web_accessible_resources": [
+	   {
+	     "resources": ["injected.js","function.js","assets/bootstrap-3.4.1-dist/css/bootstrap.min.css","assets/bootstrap-3.4.1-dist/css/bootstrap.theme.min.css","assets/font-awesome-4.6.3/font-awesome.min.css"],
+	     "matches": ["http://*/*", "https://*/*"]
+	   }
+	 ],
 	"host_permissions":[
 		"https://www.linkedin.com/learning/*"
 	],
@@ -24,5 +30,8 @@
 		"default_title" : "LinkedIn Learning Fetcher",
 		"default_popup" : "index.html"
 
-	}
+	},
+	"default_icon": {
+      "32": "icon.png"
+    }
 }

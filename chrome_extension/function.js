@@ -16,7 +16,7 @@ const isCoursePage = () => {
     const pathArray = urlExtract.pathArray;
     let validCoursePage = false;
     if(pathArray.length >= 2){
-        if(pathArray[0] === 'learning'){
+        if(pathArray[0] === 'learning' && pathArray[1] !== 'topics' && pathArray[1] !== 'search'){
             validCoursePage = true;
         }
     }
@@ -77,3 +77,90 @@ const makeDelay = (ms) => {
         timer = setTimeout(callback, ms);
     };
 };
+
+const findProp = (key, src) => {
+    const regexObj = new RegExp('^'+key, "g");
+    for(k in src){
+        if(k.match(regexObj)){
+            return src[k];
+        }
+    }
+    return null;
+};
+const getCourseSections = () => {
+    let app = Ember.Namespace.NAMESPACES.find(namespace => namespace instanceof Ember.Application)
+    let routeCourseVideo = app.__container__.lookup('route:course/video');
+    let m3Rec = routeCourseVideo.store._globalM3RecordDataCache;
+    let lac_key = 'urn:li:learningApiCourse:';
+    console.log(m3Rec);
+    let lac = findProp(lac_key,m3Rec);
+    let secs_ = lac.__data.contents;
+    let secs = []
+    for(i in secs_){
+        let sec_urn = secs_[i]['*section'];
+        let sec = {items:[]};
+        let sec_ = m3Rec[sec_urn].__data;
+        sec.title = sec_.title;
+
+        for(j in sec_['*items']){
+            let si_urn = sec_['*items'][j];
+            let si_ = m3Rec[m3Rec[si_urn].__data.content.video].__data;
+            let si = {
+                duration : si_.duration.duration,
+                slug : m3Rec[si_.entityUrn].__data.slug,
+                title : si_.title
+            };
+            sec.items.push(si);
+        }
+        secs.push(sec);
+        
+    }
+    return secs;
+    // console.log(lac);
+}
+
+
+// localStorage['courseInfo'] = JSON.stringify(courseInfo);
+function getEachItem(object) {
+  object.forEach(item => {
+    searchItem(item)
+  })
+  let uniqueResults = [...new Set(result)]
+  return uniqueResults.length
+};
+function searchItem(item) { 
+    if('undefined' == typeof item || item == null){
+        return;
+    }
+  Object.keys(item).forEach(key => {
+    if (typeof item[key] === "object") {
+      searchItem(item[key])
+    }
+    if (typeof item[key] === "string") {
+      let searchAsRegEx = new RegExp(__searchTerm__, "gi");
+      if (item[key].match(searchAsRegEx)) {
+        __result__.push(item)
+      }
+    }
+  });   
+}
+
+
+
+
+const parseCodes = () => {
+    const codes = document.querySelectorAll('code');
+    let bpr_guid = [];
+    for(i in codes){
+        let el = codes[i];
+        try{
+            if(el.id.match(/^bpr-guid/)){
+                bpr_guid.push(JSON.parse(el.textContent));
+            }
+        }catch(e){
+            // console.log(el);
+        }
+    }
+    return bpr_guid;
+};
+

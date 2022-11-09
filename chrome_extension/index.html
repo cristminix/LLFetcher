@@ -1,11 +1,62 @@
+<!DOCTYPE html>
 <html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="assets/bootstrap-3.4.1-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/bootstrap-3.4.1-dist/css/bootstrap.theme.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/font-awesome-4.6.3/css/font-awesome.min.css">
+   
+    <style type="text/css">
+        body{
+            padding: 1em;
+            /*font-size: .7em;*/
+        }
+        table * {
+            font-size: 11px;
+        }
+        #app{
+            width: 400px;
+            height: 400px;
+        }
+    </style>
+</head>
     <body>
         <div id="container">
-            <div id="container_2">
-                <button id="fetch_btn">Fetch This Course</button>
+            <div id="app">
+                <button @click="fetchCourseInfo()">Fetch Course Info</button>
+                    <div v-for="(i,section) in sections">
+                       
+                            <h4>
+                                {{section.title}}
+                            </h4>
+                            <table class="table table-striped">
+                                <tr v-for="(j,item) in section.items">
+                                    <td style="width:80%">
+                                        <div v-show="bprs[item.slug]">
+                                            <a class="btn btn-sm" :href="bprs[item.slug].transcript.captionFile"><i class="fa fa-text"></i></a>
+                                            <a class="btn btn-sm" :href="bprs[item.slug].captionFile.url"><i class="fa fa-file-zip"></i></a>
+                                            <div>
+                                                <a class="btn btn-sm" v-for="l in bprs[item.slug].strimingLocations" :href="l.url"><i class="fa file-video"></i></a>
+                                                                                                
+                                            </div>
+                                        </div>
+                                        <div>{{item.title}}</div>
+                                    </td>
+                                    <td>{{item.duration}}</td>
+                                   
+                                    <td><button class="btn btn-sm" @click="fetchToc(i,j)"><i class="fa fa-play"></i></button></td>
+                                </tr>
+                            </table>
+                    </div>
+                
             </div>
         </div>
-        <script src="function.js"></script>
-        <script src="main.js"></script>
+        <script src="assets/js/lib/jquery-3.6.0.min.js"></script>
+        <script src="assets/bootstrap-3.4.1-dist/js/bootstrap.min.js"></script>
+        <script src="assets/js/lib/axios.min.js"></script>
+        <script src="assets/js/lib/vue1.0.28-csp.min.js"></script>
+        <script src="assets/js/ext/proxy.js"></script>
+        <script src="assets/js/ext/app.js"></script>
     </body>
 </html>

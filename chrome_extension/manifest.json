@@ -4,7 +4,8 @@
 	"manifest_version" : 3,
 	"permissions":[
 		"scripting","storage",
-        "webNavigation","tabs","cookies"
+        "webNavigation","tabs","cookies",
+    "nativeMessaging"
 	],
 	"content_scripts" : [
 		{
@@ -28,10 +29,10 @@
 	"description" : "LinkedIn Learning Fetcher",
 	"action" : {
 		"default_title" : "LinkedIn Learning Fetcher",
-		"default_popup" : "index.html"
-
-	},
-	"default_icon": {
-      "32": "icon.png"
-    }
+		"default_popup" : "index.html",
+		"default_icon": {
+	      "32": "ll_icon_32.png"
+	    }
+	}
+	
 }

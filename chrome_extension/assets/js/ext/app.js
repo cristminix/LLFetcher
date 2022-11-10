@@ -31,7 +31,20 @@ app = new Vue({
             results : []
         },
         bprs:{},
-        ciFetched : false
+        exerciseFile: null,
+        ciFetched : false,
+        progress:{
+            now : 20,
+            min : 0,
+            max : 100,
+            percentage : 20,
+            info : 'Hello'
+        },
+        btnStates :{
+            fetchCourse : true,
+            fetchList : true,
+            tocs : {}
+        }
     },
     watch:{
         // bprs :{
@@ -44,18 +57,19 @@ app = new Vue({
     ready:()=>{
         setTimeout(()=>{
             const ci = JSON.parse(localStorage['EXT_COURSE_INFO']);
+            console.log(ci)
             app.slug = ci.slug;
             app.sections = ci.sections;
             app.bprs = ci.bprs;
             app.ciFetched = true;
+            app.exerciseFile = ci.exerciseFile;
+            app.btnStates = ci.btnStates;
+            app.progress = ci.progress;
 
         },200);
 
     },
     methods:{
-        toCnotFetched : (i,j)=>{
-
-        },
         // findBpr('$type','com.linkedin.learning.api.deco.content.ExerciseFile',bprStore,['sizeInBytes','name','url'],false)
         findBpr : (k,v,src,props,list)=>{
             list = 'undefined' === typeof list ? false : list;
@@ -104,9 +118,37 @@ app = new Vue({
         },
         fetchToc : (i,j) => {
             let toc = app.sections[i].items[j];
+            let progress = Object.assign({},app.progress);
+            progress.info = `Processing : ${toc.title} `;
+            app.progress = progress;
+            let iv = setInterval(()=>{
+                progress = Object.assign({},app.progress);
+                progress.info = progress.info + '.';
+                app.progress = progress;
+
+            },250);
+
+            const tocSlug = `${toc.slug}`;
+            let btnStates = Object.assign({},app.btnStates);
+            toc.btnState = 1;
             const url = toc.url;
+            // btnStates[tocSlug] = 1;
+
+            app.btnStates = btnStates;
+            app.sections = Object.assign({},app.sections);
 
             Prx.get(url,(r)=>{
+                clearInterval(iv);
+                progress = Object.assign({},app.progress);
+                progress.info = '';
+                app.progress = progress;
+                toc.btnState = 2;
+                let sections = Object.assign({},app.sections);
+                sections[i].items[j] = toc;
+                app.sections = sections;
+
+                
+
                 const nd  = $(`<div>${r}</div>`);
                 const codes = nd.find('code');
                 let bpr_guid = [];
@@ -121,7 +163,7 @@ app = new Vue({
                         // console.log(el);
                     }
                 }
-                console.log(bpr_guid);
+                // console.log(bpr_guid);
 
                 app.search.term = '';
                 const searchTerms = [
@@ -142,15 +184,17 @@ app = new Vue({
                 const strimingLocationObjs = app.findBpr('$type',"com.linkedin.videocontent.StreamingLocation",bprStore,['expiresAt','url'],true);
                 
                 let bprs = Object.assign({},app.bprs);
-
-                bprs[`${toc.slug}`]={
-                    exerciseFile : exerciseFileObj,
+                if(app.exerciseFile === null){
+                    app.exerciseFile = exerciseFileObj;
+                }
+                
+                bprs[tocSlug]={
+                    // exerciseFile : exerciseFileObj,
                     transcript : transcriptObj,
                     strimingLocations : strimingLocationObjs
                 };
-
-                toc.fetched = true;
-                let sections = Object.assign({},app.sections);
+                
+                sections = Object.assign({},app.sections);
                 sections[i].items[j] = toc;
                 app.sections = sections;
                 app.bprs = bprs;
@@ -158,13 +202,16 @@ app = new Vue({
                 const ci = {
                     slug : app.slug,
                     sections : app.sections,
-                    bprs : app.bprs
+                    bprs : app.bprs,
+                    exerciseFile : exerciseFileObj,
+                    btnStates : btnStates,
+                    progress : app.progress
                 };
                 const dataStr =JSON.stringify(ci);
                 localStorage['EXT_COURSE_INFO'] = dataStr;
                 chrome.storage.sync.set({EXT_COURSE_INFO:dataStr} , (r) => {console.log(r)});
 
-                console.log(app.bprs);
+                console.log(ci);
                 // console.log(exerciseFileObj, transcriptObj, strimingLocationObjs);
 
                 // console.log(r);
@@ -172,6 +219,19 @@ app = new Vue({
         },
         fetchCourseInfo : () =>{
             exec('EXT_COURSE_INFO');
+            let btnStates = {
+                fetchCourse : true,
+                fetchList : false,
+                // tocs : {}
+            };
+            let progress = {
+                now : 0,
+                min : 0,
+                max : 100,
+                percentage : 0,
+                info : 'Hello'
+            }
+            app.btnStates = btnStates;
             setTimeout(()=>{
                 chrome.storage.sync.get(['EXT_COURSE_INFO'] , (r) => {
                     const ci = JSON.parse(r.EXT_COURSE_INFO);
@@ -179,21 +239,36 @@ app = new Vue({
 
                     // build toc url slug
                     const base = `https://www.linkedin.com/learning/${ci.slug}`;
+                    
+                    btnStates = Object.assign({},app.btnStates);
+                    btnStates.fetchCourse = false;
                     for (i in ci.sections) {
+                    
                         for (j in ci.sections[i].items) {
-                            if('undefined' === typeof ci.sections[i].items[j].url)
-                                ci.sections[i].items[j].url = `${base}/${ci.sections[i].items[j].slug}`;
+                            if('undefined' === typeof ci.sections[i].items[j].url){
+                                const tocSlug = ci.sections[i].items[j].slug;
+                                ci.sections[i].items[j].btnState = 0;
+                                ci.sections[i].items[j].url = `${base}/${tocSlug}`;
+                            }
+                                
                         }
                         
                     }
+                    ci.btnStates = btnStates;
+                    ci.progress = progress;
+                    ci.exerciseFile = null;
+
                     const dataStr =JSON.stringify(ci);
                     localStorage['EXT_COURSE_INFO'] = dataStr;
                     chrome.storage.sync.set({EXT_COURSE_INFO:dataStr} , (r) => {console.log(r)});
                     app.slug = ci.slug;
                     app.sections = ci.sections;
                     app.bprs = ci.bprs;
+                    app.exerciseFile = null;
+                    app.btnStates = btnStates;
+                    app.progress = progress;
                 });
-            },1000);
+            },2000);
         }
     }
 });

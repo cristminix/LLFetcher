@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="assets/bootstrap-3.4.1-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/bootstrap-4.6.2-dist/css/bootstrap.min.css">
     <!-- <link rel="stylesheet" type="text/css" href="assets/bootstrap-3.4.1-dist/css/bootstrap-theme.min.css"> -->
     <link rel="stylesheet" type="text/css" href="assets/font-awesome-4.6.3/css/font-awesome.min.css">
    
@@ -24,16 +24,17 @@
     <body>
         <div id="container">
             <div id="app">
+                
                 <div class="btn-group" role="group" aria-label="...">
                     <button :disabled="btnStates.fetchCourse" class="btn btn-sm btn-info" v-if="true" @click="fetchCourseInfo()"><i class="fa" :class="{'fa-bookmark' : !btnStates.fetchCourse , 'fa-spin fa-spinner': btnStates.fetchCourse}"></i> Fetch Course</button>
-                    <button :disabled="btnStates.fetchList" class="btn btn-sm btn-success"><i class="fa" :class="{'fa-align-justify' : !btnStates.fetchList , 'fa-spin fa-spinner': btnStates.fetchList}"></i> Fetch List</button>
+                    <button :disabled="btnStates.fetchList" class="btn btn-sm btn-success" @click="fetchVideoList()"><i class="fa" :class="{'fa-align-justify' : !btnStates.fetchList , 'fa-spin fa-spinner': btnStates.fetchList}"></i> Fetch List</button>
                     <a v-if="exerciseFile !== null" class="btn btn-sm btn-info" target="_blank" :href="exerciseFile.url"><i class="fa fa-file-o"></i> {{exerciseFile.name}}</a>
                         
                 </div>    
-                <div class="container" style="padding: 1em 0 0;">
+                <div v-if="progress.enabled" class="container" style="padding: 1em 0 0;">
                     <div class="progress" v-if="progress" style="margin-bottom: .25em;font-size: 11px;">
-                        <div class="progress-bar" role="progressbar" :aria-valuenow="progress.now" :aria-valuemin="progress.min" :aria-valuemax="progress.max" style="min-width: 2em;">
-                          <span v-text="progress.percentage"></span>%
+                        <div class="progress-bar" role="progressbar" :aria-valuenow="progress.now" :aria-valuemin="progress.min" :aria-valuemax="progress.max" :style="{width: progress.percentage+'%'}">
+                          <span v-text="progress.percentage+'%'"></span>
                         </div>
                       </div>
                       <div class="progress-info" style="font-size:11px"><span v-text="progress.info"></span></div>
@@ -48,17 +49,19 @@
                                 <tr v-for="(j,item) in section.items">
                                     <td style="width:80%">
                                         <h4>{{item.title}}</h4>
-                                        <div v-show="bprs[item.slug]">
-                                            <a class="btn btn-sm" :href="bprs[item.slug].transcript.captionFile"><i class="fa fa-file-text-o"></i></a>
-                                            <div>
-                                                <a class="btn btn-sm" v-for="l in bprs[item.slug].strimingLocations" :href="l.url">{{l.url|videoUrl}}</a>
-                                                                                                
-                                            </div>
-                                        </div>
                                         
                                     </td>
                                 
-                                   
+                                   <td>
+                                       <div v-show="bprs[item.slug]" class="btn-group btn-group-toggle" data-toggle="buttons">
+                                          <button class="btn btn-sm btn-success" :class="{active:dlConfig[item.slug].vtt}">vtt</button>
+                                          
+                                          <label v-for="l in bprs[item.slug].strimingLocations" class="btn btn-outlined btn-sm btn-primary" :class="{active:dlConfig[item.slug].fmt==l.fmt}">
+                                            <input @click="setDlConfig(item.slug, l.url, l.fmt)" type="radio" :active="dlConfig[item.slug].fmt==l.fmt"> {{l.fmt}}
+                                          </label>
+                                         
+                                        </div>
+                                   </td>
                                     <td><button :disabled="item.btnState!=0" class="btn btn-sm" @click="fetchToc(i,j)"><i class="fa" :class="{'fa-play':item.btnState==0,'fa-spin fa-spinner':item.btnState==1,'fa-check':item.btnState==2}"></i></button></td>
                                 </tr>
                             </table>
@@ -67,7 +70,8 @@
             </div>
         </div>
         <script src="assets/js/lib/jquery-3.6.0.min.js"></script>
-        <script src="assets/bootstrap-3.4.1-dist/js/bootstrap.min.js"></script>
+        <script src="assets/js/lib/popper.min.js"></script>
+        <script src="assets/bootstrap-4.6.2-dist/js/bootstrap.min.js"></script>
         <script src="assets/js/lib/axios.min.js"></script>
         <script src="assets/js/lib/vue1.0.28-csp.min.js"></script>
         <script src="assets/js/ext/proxy.js"></script>

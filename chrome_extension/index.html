@@ -28,7 +28,10 @@
                 <div class="btn-group" role="group" aria-label="...">
                     <button :disabled="btnStates.fetchCourse" class="btn btn-sm btn-info" v-if="true" @click="fetchCourseInfo()"><i class="fa" :class="{'fa-bookmark' : !btnStates.fetchCourse , 'fa-spin fa-spinner': btnStates.fetchCourse}"></i> Fetch Course</button>
                     <button :disabled="btnStates.fetchList" class="btn btn-sm btn-success" @click="fetchVideoList()"><i class="fa" :class="{'fa-align-justify' : !btnStates.fetchList , 'fa-spin fa-spinner': btnStates.fetchList}"></i> Fetch List</button>
-                    <a v-if="exerciseFile !== null" class="btn btn-sm btn-info" target="_blank" :href="exerciseFile.url"><i class="fa fa-file-o"></i> {{exerciseFile.name}}</a>
+                    <button @click="tgDlOpt()" class="btn btn-outlined btn-sm btn-info" :class="{active:dlOptEnabled}">
+                             <i class="fa fa-cog"></i> Option
+                       </button>
+                    <a v-if="exerciseFile.url !== null" class="btn btn-sm btn-info" target="_blank" :href="exerciseFile.url" :title="exerciseFile.name"><i class="fa fa-file-o"></i> Download Exercise File</a>
                         
                 </div>    
                 <div v-if="progress.enabled" class="container" style="padding: 1em 0 0;">
@@ -39,9 +42,33 @@
                       </div>
                       <div class="progress-info" style="font-size:11px"><span v-text="progress.info"></span></div>
                 </div>
-                
-                    <div v-for="(i,section) in sections">
+                <div class="alert alert-info" v-if="dlOptEnabled">
                        
+                           <div class="form-row">
+                            <div class="form-group">
+                              <label for="inputState">Prefered Media Format</label>
+                              <select v-model="dlOptFmt" class="form-control">
+                                <option :selected="dlOptFmt==''">Choose...</option>
+                                <option :value="d" v-for="d in dlOptFmtList" :selected="dlOptFmt==d">{{d}}</option>
+                                
+                              </select>
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <div class="form-check">
+                              <input v-model="dlOptTrans" class="form-check-input" type="checkbox" :checked="dlOptTrans"/>
+                              <label class="form-check-label">
+                                Include Transcript
+                              </label>
+                            </div>
+                          </div>
+                          <div class="form-row">
+                            <button @click="applyOpt()" class="btn btn-sm btn-primary"><i class="fa fa-save"></i> Apply</button>
+                          </div>
+                      
+                          
+                    </div>
+                    <div v-for="(i,section) in sections">
                             <h4>
                                 {{section.title}}
                             </h4>

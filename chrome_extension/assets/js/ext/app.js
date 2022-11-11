@@ -60,7 +60,15 @@ app = new Vue({
         dlConfig : {
             slug : {url:'',fmt:'',vtt:true}
         },
-        fetchListQueue:[]
+        fetchListQueue:[],
+
+        //download options
+        dlOptTrans : true,
+        dlOptFmt : '360',
+        dlOptFmtList : ['360','720','audio','hls'],
+        dlOptEnabled : true,
+        dlOptMsg : '',
+        dlOptCls : ''
     },
     ready:()=>{
         setTimeout(()=>{
@@ -79,6 +87,34 @@ app = new Vue({
 
     },
     methods:{
+        applyOpt:()=>{
+            if(app.dlOptFmtList.indexOf(app.dlOptFmt) != -1){
+                for(slug in app.bprs){
+                    app.dlConfig[slug].fmt = app.dlOptFmt;
+                    app.dlConfig[slug].vtt = app.dlOptTrans;
+
+                  
+                    for(sl in app.bprs[slug].strimingLocations){
+                        const sloc = app.bprs[slug].strimingLocations[sl];
+                        
+                        if(app.dlOptFmt === sloc.fmt){
+                            app.dlConfig[slug].url = sloc.url; 
+                            console.log(sloc)
+                        }
+                    }
+                }
+            }
+
+            app.dlConfig = Object.assign({},app.dlConfig); 
+            app.sections = Object.assign({},app.sections); 
+            ci = JSON.parse(localStorage.EXT_COURSE_INFO);
+            ci.dlConfig = app.dlConfig;
+            ci.sections = app.sections;
+            localStorage['EXT_COURSE_INFO'] = JSON.stringify(ci);
+        },
+        tgDlOpt:()=>{
+            app.dlOptEnabled = !app.dlOptEnabled;
+        },
         processFetchListQueue:()=>{
             const q = app.fetchListQueue.shift();
 
@@ -387,7 +423,7 @@ app = new Vue({
                             if('undefined' === typeof ci.sections[i].items[j].url){
                                 const tocSlug = ci.sections[i].items[j].slug;
                                 ci.sections[i].items[j].btnState = 0;
-                                dlConfig[tocSlug] = {fetched:false,vtt:true};
+                                dlConfig[tocSlug] = {fetched:false,vtt:true,sectionIndex:i,itemIndex:j};
                                 ci.sections[i].items[j].url = `${base}/${tocSlug}`;
                             }
                                 

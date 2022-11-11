@@ -312,6 +312,10 @@ app = new Vue({
 
                     app.progress = progress;
                     delete bprs[toc.slug];
+
+                    if(processQueue){
+                        app.fetchListQueue.push({sectionIndex:i,itemIndex:j,slug:toc.slug});
+                    }
                 }
                 sections = Object.assign({},app.sections);
                 sections[i].items[j] = toc;

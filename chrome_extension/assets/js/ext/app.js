@@ -8,13 +8,7 @@ const exec = (fn, args) => {
    
     });
 }
-const fetchCIBtn = document.getElementById('fetchCIBtn');
-const fetchCICode = document.getElementById('fetchCICode');
 
-
-// chrome.runtime.onMessage.addListener(function (response, sendResponse) {
-//     console.log(response);
-// });
 
 const getFmt=(url)=>{
     let str = url.split('?')[0].split('/').filter(item => item !== '')[4].replace(/^learning-original-video-/,'');
@@ -327,9 +321,19 @@ app = new Vue({
                 if(app.exerciseFile === null){
                     app.exerciseFile = exerciseFileObj;
                 }
-                for(stlIdx in strimingLocationObjs){
-                    strimingLocationObjs[stlIdx].fmt = getFmt(strimingLocationObjs[stlIdx].url);
+                if(strimingLocationObjs.length>0){
+                    app.dlOptFmtList = [];
+                }
+                
 
+                for(stlIdx in strimingLocationObjs){
+                    const fmt = getFmt(strimingLocationObjs[stlIdx].url);
+                    strimingLocationObjs[stlIdx].fmt = fmt;
+                    app.dlOptFmtList.push(fmt);
+                }
+
+                if(strimingLocationObjs.length>0){
+                    app.dlOptFmtList = Object.assign([],app.dlOptFmtList);
                 }
                 
                 bprs[tocSlug]={

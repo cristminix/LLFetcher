@@ -59,15 +59,8 @@ app = new Vue({
         },
         dlConfig : {
             slug : {url:'',fmt:'',vtt:true}
-        }
-    },
-    watch:{
-        // bprs :{
-        //     deep : true
-        // },
-        // sections:{
-        //     deep:true
-        // }
+        },
+        fetchListQueue:[]
     },
     ready:()=>{
         setTimeout(()=>{
@@ -86,9 +79,34 @@ app = new Vue({
 
     },
     methods:{
-        fetchVideoList :async ()=>{
+        processFetchListQueue:()=>{
+            const q = app.fetchListQueue.shift();
+
+            app.fetchToc(q.sectionIndex, q.itemIndex,true,()=>{
+
+                if(app.fetchListQueue.length == 0) {
+                    app.updatePropObj('btnStates',{fetchList:false});
+                    app.updatePropObj('progress',{enabled:false});
+
+                    ci = JSON.parse(localStorage.EXT_COURSE_INFO);
+                    ci.btnStates.fetchList = false;
+                    ci.progress.enabled = false;
+                    localStorage['EXT_COURSE_INFO'] = JSON.stringify(ci);
+                }else{
+                    setTimeout(()=>{
+                        app.processFetchListQueue();
+                    },1000)
+                    
+                }
+                
+            },()=>{
+
+            });
+        },
+        fetchVideoList : ()=>{
             app.updatePropObj('btnStates',{fetchList:true});
             app.updatePropObj('progress',{enabled:true});
+            let fetchListQueue = [];
             for(sectionIndex in app.sections){
                 const tocItems = app.sections[sectionIndex].items;
                 for(itemIndex in tocItems){
@@ -96,21 +114,12 @@ app = new Vue({
                     const tocSlug = toc.slug;
                     // check if fetched
                     if(!app.dlConfig[tocSlug].fetched){
-                        // processing ajax
-                        // const url = toc.url;
-                        // const resp = await Prx.create(url,'get');
-                        const r = await app.fetchToc(sectionIndex, itemIndex);
-                        console.log(r)
+                        fetchListQueue.push({sectionIndex:sectionIndex,itemIndex:itemIndex,slug:tocSlug});                        
                     }
                 }
             }
-            app.updatePropObj('btnStates',{fetchList:false});
-            app.updatePropObj('progress',{enabled:false});
-
-            ci = JSON.parse(localStorage.EXT_COURSE_INFO);
-            ci.btnStates.fetchList = false;
-            localStorage['EXT_COURSE_INFO'] = JSON.stringify(ci);
-
+            app.fetchListQueue = fetchListQueue;
+            app.processFetchListQueue();
         },
         calculateProgress:(sectionIndex,itemIndex)=>{
             const tocSlugs = Object.keys(app.dlConfig);
@@ -143,6 +152,10 @@ app = new Vue({
 
             app.updatePropObj('dlConfig',dlConfig_tocs);
             app.updatePropObj('sections',{});
+
+            ci = JSON.parse(localStorage.EXT_COURSE_INFO);
+            ci.dlConfig = app.dlConfig;
+            localStorage['EXT_COURSE_INFO'] = JSON.stringify(ci);
         },
         tglDlConfigVtt:(tocSlug)=>{
             let dlConfig_toc = Object.assign({},app.dlConfig[tocSlug]);
@@ -152,6 +165,10 @@ app = new Vue({
             
             app.updatePropObj('dlConfig',dlConfig_tocs);
             app.updatePropObj('sections',{});
+
+            ci = JSON.parse(localStorage.EXT_COURSE_INFO);
+            ci.dlConfig = app.dlConfig;
+            localStorage['EXT_COURSE_INFO'] = JSON.stringify(ci);
         },
         // findBpr('$type','com.linkedin.learning.api.deco.content.ExerciseFile',bprStore,['sizeInBytes','name','url'],false)
         findBpr : (k,v,src,props,list)=>{
@@ -199,18 +216,26 @@ app = new Vue({
             }
           });   
         },
-        fetchToc : async (i,j) => {
+        fetchToc :  (i,j,processQueue, cbSuccess, cbError) => {
             let toc = app.sections[i].items[j];
             let dlConfig_tocs = Object.assign({},app.dlConfig);
 
             let progress = Object.assign({},app.progress);
+            let dots = ['.'];
             progress.info = `Processing : ${toc.title} `;
             app.progress = progress;
             let iv = setInterval(()=>{
                 
                 progress = Object.assign({},app.progress);
-                progress.info = progress.info + ' .';
+                
+                progress.info = progress.info + ' ' +dots.join(' ');
                 app.progress = progress;
+
+                dots.push('.');
+
+                if(dots.length > 5){
+                    dots = ['.'];
+                }
 
             },750);
 
@@ -222,86 +247,104 @@ app = new Vue({
             app.btnStates = btnStates;
             app.sections = Object.assign({},app.sections);
 
-            const r = await Prx.create(url,'get');
+            Prx.get(url,(r)=>{
+                clearInterval(iv);
+                progress = Object.assign({},app.progress);
+                progress.info = '';
+                app.progress = progress;
 
-            progress = Object.assign({},app.progress);
-            progress.info = '';
-            app.progress = progress;
-            toc.btnState = 2;
-            let sections = Object.assign({},app.sections);
-            sections[i].items[j] = toc;
-            app.sections = sections;
-            dlConfig_tocs[toc.slug].fetched = true;
-            
-
-            const nd  = $(`<div>${r.data}</div>`);
-            const codes = nd.find('code');
-            let bpr_guid = [];
-            
-            for(idx in codes){
-                let el = codes[idx];
-                try{
-                    if(el.id.match(/^bpr-guid/)){
-                        bpr_guid.push(JSON.parse(el.textContent));
+                const nd  = $(`<div>${r}</div>`);
+                const codes = nd.find('code');
+                let bpr_guid = [];
+                
+                for(idx in codes){
+                    let el = codes[idx];
+                    try{
+                        if(el.id.match(/^bpr-guid/)){
+                            bpr_guid.push(JSON.parse(el.textContent));
+                        }
+                    }catch(e){
+                        // console.log(el);
                     }
-                }catch(e){
-                    // console.log(el);
                 }
-            }
-            // console.log(bpr_guid);
+                // console.log(bpr_guid);
 
-            app.search.term = '';
-            const searchTerms = [
-                "com.linkedin.learning.api.deco.content.ExerciseFile",
-                "com.linkedin.videocontent.Transcript",
-                "com.linkedin.videocontent.StreamingLocation"
-            ];
+                app.search.term = '';
+                const searchTerms = [
+                    "com.linkedin.learning.api.deco.content.ExerciseFile",
+                    "com.linkedin.videocontent.Transcript",
+                    "com.linkedin.videocontent.StreamingLocation"
+                ];
 
-            app.search.results = [];
-            for(is in searchTerms){
-                app.search.term = searchTerms[is];
-                app.searchItem(bpr_guid);
-            }
-            // console.log(bpr_guid);
-            const bprStore = app.search.results;
-            const exerciseFileObj = app.findBpr('$type','com.linkedin.learning.api.deco.content.ExerciseFile',bprStore,['sizeInBytes','name','url']);
-            const transcriptObj = app.findBpr('$type',"com.linkedin.videocontent.Transcript",bprStore,['captionFile','captionFormat']);
-            let strimingLocationObjs = app.findBpr('$type',"com.linkedin.videocontent.StreamingLocation",bprStore,['expiresAt','url'],true);
+                app.search.results = [];
+                for(is in searchTerms){
+                    app.search.term = searchTerms[is];
+                    app.searchItem(bpr_guid);
+                }
+                // console.log(bpr_guid);
+                const bprStore = app.search.results;
+                const exerciseFileObj = app.findBpr('$type','com.linkedin.learning.api.deco.content.ExerciseFile',bprStore,['sizeInBytes','name','url']);
+                const transcriptObj = app.findBpr('$type',"com.linkedin.videocontent.Transcript",bprStore,['captionFile','captionFormat']);
+                let strimingLocationObjs = app.findBpr('$type',"com.linkedin.videocontent.StreamingLocation",bprStore,['expiresAt','url'],true);
+                
+                let bprs = Object.assign({},app.bprs);
+                if(app.exerciseFile === null){
+                    app.exerciseFile = exerciseFileObj;
+                }
+                for(stlIdx in strimingLocationObjs){
+                    strimingLocationObjs[stlIdx].fmt = getFmt(strimingLocationObjs[stlIdx].url);
+
+                }
+                
+                bprs[tocSlug]={
+                    // exerciseFile : exerciseFileObj,
+                    transcript : transcriptObj,
+                    strimingLocations : strimingLocationObjs
+                };
+                if(strimingLocationObjs.length>0){
+                    dlConfig_tocs[toc.slug].fetched = true;
+                    toc.btnState = 2;
+                }else{
+                    toc.btnState = 0;
+                    progress = Object.assign({},app.progress);
+                    progress.percentage = progress.percentage - 1;
+                    progress.now=progress.percentage;
+
+                    app.progress = progress;
+                    delete bprs[toc.slug];
+                }
+                sections = Object.assign({},app.sections);
+                sections[i].items[j] = toc;
+                app.sections = sections;
+                app.bprs = bprs;
+                app.dlConfig = dlConfig_tocs;
+                app.calculateProgress();
+                const ci = {
+                    slug : app.slug,
+                    sections : app.sections,
+                    bprs : app.bprs,
+                    exerciseFile : exerciseFileObj,
+                    btnStates : btnStates,
+                    progress : app.progress,
+                    dlConfig : dlConfig_tocs
+                };
+                const dataStr =JSON.stringify(ci);
+                console.log('save LS',ci);
+                localStorage['EXT_COURSE_INFO'] = dataStr;
+
+                if(processQueue){
+                    if(typeof cbSuccess === 'function'){
+                        cbSuccess();
+                    }
+                }
+                
+            },(r)=>{
+
+            });
+
             
-            let bprs = Object.assign({},app.bprs);
-            if(app.exerciseFile === null){
-                app.exerciseFile = exerciseFileObj;
-            }
-            for(stlIdx in strimingLocationObjs){
-                strimingLocationObjs[stlIdx].fmt = getFmt(strimingLocationObjs[stlIdx].url);
 
-            }
-            bprs[tocSlug]={
-                // exerciseFile : exerciseFileObj,
-                transcript : transcriptObj,
-                strimingLocations : strimingLocationObjs
-            };
             
-            sections = Object.assign({},app.sections);
-            sections[i].items[j] = toc;
-            app.sections = sections;
-            app.bprs = bprs;
-            app.dlConfig = dlConfig_tocs;
-            app.calculateProgress();
-            const ci = {
-                slug : app.slug,
-                sections : app.sections,
-                bprs : app.bprs,
-                exerciseFile : exerciseFileObj,
-                btnStates : btnStates,
-                progress : app.progress,
-                dlConfig : dlConfig_tocs
-            };
-            const dataStr =JSON.stringify(ci);
-            console.log('save LS',ci);
-            localStorage['EXT_COURSE_INFO'] = dataStr;
-
-            return [i,j,tocSlug];
             
         },
         fetchCourseInfo : () =>{

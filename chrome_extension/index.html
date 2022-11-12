@@ -28,12 +28,18 @@
                 <div class="btn-group" role="group" aria-label="...">
                     <button :disabled="btnStates.fetchCourse" class="btn btn-sm btn-info" v-if="true" @click="fetchCourseInfo()"><i class="fa" :class="{'fa-bookmark' : !btnStates.fetchCourse , 'fa-spin fa-spinner': btnStates.fetchCourse}"></i> Fetch Course</button>
                     <button :disabled="btnStates.fetchList" class="btn btn-sm btn-success" @click="fetchVideoList()"><i class="fa" :class="{'fa-align-justify' : !btnStates.fetchList , 'fa-spin fa-spinner': btnStates.fetchList}"></i> Fetch List</button>
+                   
+                    <a v-if="exerciseFile.url !== null" class="btn btn-sm btn-info" target="_blank" :href="exerciseFile.url" :title="exerciseFile.name"><i class="fa fa-file-archive-o"></i> Download Exercise File</a>
+                        
+                </div>  
+                <div class="btn-group" role="group" aria-label="...">
+                    <button class="btn btn-sm btn-info" @click="dlPlayList()"><i class="fa" :class="{'fa-list-ol' : true , 'fa-spin fa-spinner': false}"></i> Download Playlist</button>
+                    <button class="btn btn-sm btn-success" @click="dlScriptUtil()"><i class="fa" :class="{'fa-file-code-o' : true , 'fa-spin fa-spinner': false}"></i> Util Script</button>
                     <button @click="tgDlOpt()" class="btn btn-outlined btn-sm btn-info" :class="{active:dlOptEnabled}">
                              <i class="fa fa-cog"></i> Option
                        </button>
-                    <a v-if="exerciseFile.url !== null" class="btn btn-sm btn-info" target="_blank" :href="exerciseFile.url" :title="exerciseFile.name"><i class="fa fa-file-o"></i> Download Exercise File</a>
-                        
-                </div>    
+                    
+                </div>   
                 <div v-if="progress.enabled" class="container" style="padding: 1em 0 0;">
                     <div class="progress" v-if="progress" style="margin-bottom: .25em;font-size: 11px;">
                         <div class="progress-bar" role="progressbar" :aria-valuenow="progress.now" :aria-valuemin="progress.min" :aria-valuemax="progress.max" :style="{width: progress.percentage+'%'}">

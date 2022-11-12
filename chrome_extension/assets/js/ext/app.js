@@ -81,17 +81,94 @@ app = new Vue({
 
     },
     methods:{
+        generateShellScript : ()=>{
+            const ci = JSON.parse(localStorage.EXT_COURSE_INFO);
+
+            const scriptFile = `${ci.slug}-util.sh`;
+            const courseDir = ci.slug;
+            const playlistFile = `${ci.slug}.m3u`;
+            const rootDir = 'LinkedIn_Learning';
+            const targetDir = `${rootDir}/${courseDir}`;
+
+            let buffer = "#!/usr/bin/sh\n";
+            
+            buffer += `mkdir -p ${rootDir}\n`;
+            buffer += `mkdir -p ${targetDir}\n`;
+
+            for(sectionIndex in app.sections){
+                for(itemIndex in app.sections[sectionIndex].items){
+                    const item = app.sections[sectionIndex].items[itemIndex];
+                    const slug = item.slug;
+                    const fmt = app.dlConfig[slug].fmt;
+                    const filename = `${slug}-${fmt}.mp4`;
+                    const filenameVtt = `${slug}-${fmt}.vtt`;
+
+                    buffer += `mv -v ${filename} ${targetDir}\n`;
+                    buffer += `mv -v ${filenameVtt} ${targetDir}\n`;
+                }
+            }
+
+            buffer += `mv -v ${playlistFile} ${targetDir}\n`;
+
+            if('string' === typeof app.exerciseFile.name){
+                buffer += `mv -v ${app.exerciseFile.name} ${targetDir}\n`;
+            }
+            buffer += `rm -f ${scriptFile}\n`;
+
+            return {filename:scriptFile, buffer:buffer};
+
+        },
+        generateM3u : ()=>{
+            const ci = JSON.parse(localStorage.EXT_COURSE_INFO);
+            const playlistFile = `${ci.slug}.m3u`;
+
+            let buffer = "#EXTM3U\n";
+            
+            for(sectionIndex in app.sections){
+                for(itemIndex in app.sections[sectionIndex].items){
+                    const item = app.sections[sectionIndex].items[itemIndex];
+                    const slug = item.slug;
+                    const fmt = app.dlConfig[slug].fmt;
+                    const filename = `${slug}-${fmt}.mp4`;
+                    const duration = item.duration;
+                    const filenameEncoded = encodeURI(filename);
+                    buffer += `#EXTINF:${duration},${filename}\n`;
+                    buffer += `${filenameEncoded}\n`
+                }
+            }
+
+            return {filename: playlistFile,buffer:buffer};
+            
+        },
+        dlPlayList:()=>{
+            const ss = app.generateM3u();
+            let objectURL = window.URL.createObjectURL(new Blob([ss.buffer]));
+            let a = document.createElement('a');
+            a.download = ss.filename;
+            a.href = objectURL;
+            a.click();
+        },
+        dlScriptUtil:()=>{
+            const ss = app.generateShellScript();
+            let objectURL = window.URL.createObjectURL(new Blob([ss.buffer]));
+            let a = document.createElement('a');
+            a.download = ss.filename;
+            a.href = objectURL;
+            a.click();
+        },
         dlToc:(slug,i,j) => {
             const videoUrl = app.dlConfig[slug].url;
             const transcriptUrl = app.bprs[slug].transcript.captionFile;
+            const fmt = app.dlConfig[slug].fmt;
+
             const optVideo = {
                 url : videoUrl,
-                filename : `${slug}-${app.dlConfig[slug].fmt}.mp4`
+                filename : `${slug}-${fmt}.mp4`
             };
 
             const optTranscript = {
                 url : transcriptUrl,
-                filename : `${slug}.vtt`
+                filename : `${slug}-${fmt}.vtt`
             };
 
             const dlCallback = {

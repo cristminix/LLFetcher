@@ -47,8 +47,8 @@ app = new Vue({
             enabled : false
         },
         btnStates :{
-            fetchCourse : true,
-            fetchList : true,
+            fetchCourse : false,
+            fetchList : false,
             tocs : {},
             batchDl : false
         },
@@ -73,17 +73,20 @@ app = new Vue({
     },
     ready:()=>{
         setTimeout(()=>{
-            const ci = JSON.parse(localStorage['EXT_COURSE_INFO']);
-            console.log('autoload LS',ci);
-            app.slug = ci.slug;
-            app.sections = ci.sections;
-            app.bprs = ci.bprs;
-            app.ciFetched = true;
-            app.exerciseFile = ci.exerciseFile;
-            app.btnStates = ci.btnStates;
-            app.progress = ci.progress;
-            app.dlConfig = ci.dlConfig;
-            app.dlOptFmtList = ci.dlOptFmtList;
+            if('undefined' != localStorage['EXT_COURSE_INFO']){
+               const ci = JSON.parse(localStorage['EXT_COURSE_INFO']);
+                console.log('autoload LS',ci);
+                app.slug = ci.slug;
+                app.sections = ci.sections;
+                app.bprs = ci.bprs;
+                app.ciFetched = true;
+                app.exerciseFile = ci.exerciseFile;
+                app.btnStates = ci.btnStates;
+                app.progress = ci.progress;
+                app.dlConfig = ci.dlConfig;
+                app.dlOptFmtList = ci.dlOptFmtList; 
+            }
+            
 
         },200);
 

@@ -1,4 +1,4 @@
-// chrome.action.disable();
+chrome.action.disable();
 const isValidCoursePage = (url) => {
     const urlPathArray = url.split('?')[0].split("/").filter(item => item);
     let validCoursePage = false;
@@ -24,7 +24,7 @@ const sendCoookieMessage=() => {
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) =>{
 	if(changeInfo.status == "complete"){
 		if(isValidCoursePage(tab.url)){
-			// chrome.action.enable(tabId);
+			chrome.action.enable(tabId);
             chrome.tabs.sendMessage(tab.id, {event: 'onTabUpdated',url: tab.url}, (r) => { });
             
             sendCoookieMessage();
@@ -39,7 +39,7 @@ chrome.webNavigation.onHistoryStateUpdated.addListener(function(tab) {
     // chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         // const tab = tabs[0];
         if(isValidCoursePage(tab.url)){
-            // chrome.action.enable(tab.tabId);
+            chrome.action.enable(tab.tabId);
             chrome.tabs.sendMessage(tab.tabId, {event: 'onHistoryStateUpdated',url: tab.url}, (r) => { });
             sendCoookieMessage();
         }

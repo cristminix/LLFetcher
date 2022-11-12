@@ -81,6 +81,42 @@ app = new Vue({
 
     },
     methods:{
+        dlToc:(slug,i,j) => {
+            const videoUrl = app.dlConfig[slug].url;
+            const transcriptUrl = app.bprs[slug].transcript.captionFile;
+            const optVideo = {
+                url : videoUrl,
+                filename : `${slug}-${app.dlConfig[slug].fmt}.mp4`
+            };
+
+            const optTranscript = {
+                url : transcriptUrl,
+                filename : `${slug}.vtt`
+            };
+
+            const dlCallback = {
+                onCreated : (item) => {
+                    console.log('onCreated:', item);
+                },
+                onErased : (id) => {
+                    console.log('onErased:', id);
+                },
+                onChanged : (delta) => {
+                    console.log('onChanged:', delta);
+                }
+            };
+
+            chrome.downloads.download(optVideo,(id)=>{
+
+            });
+            chrome.downloads.download(optTranscript,(id)=>{
+
+            });
+
+            chrome.downloads.onCreated.addListener(dlCallback.onCreated);
+            chrome.downloads.onErased.addListener(dlCallback.onErased);
+            chrome.downloads.onChanged.addListener(dlCallback.onChanged);
+        },
         applyOpt:()=>{
             if(app.dlOptFmtList.indexOf(app.dlOptFmt) != -1){
                 for(slug in app.bprs){

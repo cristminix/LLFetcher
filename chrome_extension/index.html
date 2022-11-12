@@ -69,29 +69,29 @@
                           
                     </div>
                     <div v-for="(i,section) in sections">
-                            <h4>
-                                {{section.title}}
-                            </h4>
-                            <table class="table table-striped">
-                                <tr v-for="(j,item) in section.items">
-                                    <td style="width:80%">
-                                        <h4>{{item.title}}</h4>
-                                        
-                                    </td>
-                                
-                                   <td>
-                                       <div v-show="bprs[item.slug]" class="btn-group btn-group-toggle" data-toggle="buttons">
-                                          <button class="btn btn-sm btn-success" :class="{active:dlConfig[item.slug].vtt}">vtt</button>
-                                          
-                                          <label v-for="l in bprs[item.slug].strimingLocations" class="btn btn-outlined btn-sm btn-primary" :class="{active:dlConfig[item.slug].fmt==l.fmt}">
-                                            <input @click="setDlConfig(item.slug, l.url, l.fmt)" type="radio" :active="dlConfig[item.slug].fmt==l.fmt"> {{l.fmt}}
-                                          </label>
-                                         
-                                        </div>
-                                   </td>
-                                    <td><button :disabled="item.btnState!=0" class="btn btn-sm" @click="fetchToc(i,j)"><i class="fa" :class="{'fa-play':item.btnState==0,'fa-spin fa-spinner':item.btnState==1,'fa-check':item.btnState==2}"></i></button></td>
-                                </tr>
-                            </table>
+                        <h4>
+                            {{section.title}}
+                        </h4>
+                        <table class="table table-striped">
+                            <tr v-for="(j,item) in section.items">
+                                <td style="width:80%">
+                                    <h4>{{item.title}}</h4>
+                                </td>
+                               <td>
+                                   <div v-show="bprs[item.slug]" class="btn-group btn-group-toggle" data-toggle="buttons">
+                                      <button class="btn btn-sm btn-success" :class="{active:dlConfig[item.slug].vtt}">vtt</button>
+                                      
+                                      <label v-for="l in bprs[item.slug].strimingLocations" class="btn btn-outlined btn-sm btn-primary" :class="{active:dlConfig[item.slug].fmt==l.fmt}">
+                                        <input @click="setDlConfig(item.slug, l.url, l.fmt)" type="radio" :active="dlConfig[item.slug].fmt==l.fmt"> {{l.fmt}}
+                                      </label>
+                                    </div>
+                               </td>
+                                <td>
+                                    <button v-if="item.btnState<2" class="btn btn-sm" @click="fetchToc(i,j)"><i class="fa" :class="{'fa-play':item.btnState==0,'fa-spin fa-spinner':item.btnState==1,'fa-check':item.btnState==2}"></i></button>
+                                    <button v-if="item.btnState==2 && dlConfig[item.slug].fmt" class="btn btn-sm btn-danger" @click="dlToc(item.slug,i,j)"><i class="fa" :class="{'fa-download':item.btnState==2,'fa-spin fa-spinner':item.btnState==3}"></i></button>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
                 
             </div>

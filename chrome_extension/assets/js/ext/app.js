@@ -60,7 +60,7 @@ app = new Vue({
         dlOptTrans : true,
         dlOptFmt : '360',
         dlOptFmtList : ['360','720','audio','hls'],
-        dlOptEnabled : true,
+        dlOptEnabled : false,
         dlOptMsg : '',
         dlOptCls : ''
     },
@@ -109,9 +109,12 @@ app = new Vue({
             chrome.downloads.download(optVideo,(id)=>{
 
             });
-            chrome.downloads.download(optTranscript,(id)=>{
+            if(app.dlConfig[slug].vtt){
+                chrome.downloads.download(optTranscript,(id)=>{
 
-            });
+                });
+            }
+            
 
             chrome.downloads.onCreated.addListener(dlCallback.onCreated);
             chrome.downloads.onErased.addListener(dlCallback.onErased);

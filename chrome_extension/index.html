@@ -24,21 +24,26 @@
     <body>
         <div id="container">
             <div id="app">
+                <div style="text-align: center;">
                 
                 <div class="btn-group" role="group" aria-label="...">
-                    <button :disabled="btnStates.fetchCourse" class="btn btn-sm btn-info" v-if="true" @click="fetchCourseInfo()"><i class="fa" :class="{'fa-bookmark' : !btnStates.fetchCourse , 'fa-spin fa-spinner': btnStates.fetchCourse}"></i> Fetch Course</button>
-                    <button :disabled="btnStates.fetchList" class="btn btn-sm btn-success" @click="fetchVideoList()"><i class="fa" :class="{'fa-align-justify' : !btnStates.fetchList , 'fa-spin fa-spinner': btnStates.fetchList}"></i> Fetch List</button>
-                   
-                    <a v-if="exerciseFile.url !== null" class="btn btn-sm btn-info" target="_blank" :href="exerciseFile.url" :title="exerciseFile.name"><i class="fa fa-file-archive-o"></i> Download Exercise File</a>
-                        
-                </div>  
-                <div class="btn-group" role="group" aria-label="...">
-                    <button class="btn btn-sm btn-info" @click="dlPlayList()"><i class="fa" :class="{'fa-list-ol' : true , 'fa-spin fa-spinner': false}"></i> Download Playlist</button>
-                    <button class="btn btn-sm btn-success" @click="dlScriptUtil()"><i class="fa" :class="{'fa-file-code-o' : true , 'fa-spin fa-spinner': false}"></i> Util Script</button>
+                    <button :disabled="btnStates.fetchCourse" class="btn btn-sm btn-danger" v-if="true" @click="fetchCourseInfo()"><i class="fa" :class="{'fa-play' : !btnStates.fetchCourse , 'fa-spin fa-spinner': btnStates.fetchCourse}"></i> Fetch Course</button>
+                    <button :disabled="btnStates.fetchList" class="btn btn-sm btn-danger" @click="fetchVideoList()"><i class="fa" :class="{'fa-play' : !btnStates.fetchList , 'fa-spin fa-spinner': btnStates.fetchList}"></i> Fetch Items</button>
                     <button @click="tgDlOpt()" class="btn btn-outlined btn-sm btn-info" :class="{active:dlOptEnabled}">
-                             <i class="fa fa-cog"></i> Option
-                       </button>
+                         <i class="fa fa-cog"></i> Batch Option
+                    </button>
+                    <button :disabled="btnStates.batchDl" class="btn btn-sm btn-danger" @click="batchDownload()"><i class="fa" :class="{'fa-play' : !btnStates.batchDl , 'fa-spin fa-spinner': btnStates.batchDl}"></i> Batch Download</button>
+                       
+                </div> 
+                </div> 
+                <div style="text-align: center;">
+                <div class="btn-group" role="group" aria-label="...">
+                    <a v-if="exerciseFile.url !== null" class="btn btn-sm btn-warning" target="_blank" :href="exerciseFile.url" :title="exerciseFile.name"><i class="fa fa-download"></i> Exercise File</a>
+                    <button v-if="dlOptFmtList.length" class="btn btn-sm btn-info" @click="dlPlayList()"><i class="fa" :class="{'fa-download' : true , 'fa-spin fa-spinner': false}"></i> Playlist</button>
+                    <button v-if="dlOptFmtList.length" class="btn btn-sm btn-danger" @click="dlScriptUtil()"><i class="fa" :class="{'fa-download' : true , 'fa-spin fa-spinner': false}"></i> Util Script</button>
                     
+                    
+                </div>
                 </div>   
                 <div v-if="progress.enabled" class="container" style="padding: 1em 0 0;">
                     <div class="progress" v-if="progress" style="margin-bottom: .25em;font-size: 11px;">
@@ -94,7 +99,7 @@
                                </td>
                                 <td>
                                     <button v-if="item.btnState<2" class="btn btn-sm" @click="fetchToc(i,j)"><i class="fa" :class="{'fa-play':item.btnState==0,'fa-spin fa-spinner':item.btnState==1,'fa-check':item.btnState==2}"></i></button>
-                                    <button v-if="item.btnState==2 && dlConfig[item.slug].fmt" class="btn btn-sm btn-danger" @click="dlToc(item.slug,i,j)"><i class="fa" :class="{'fa-download':item.btnState==2,'fa-spin fa-spinner':item.btnState==3}"></i></button>
+                                    <button :disabled="item.btnState==3" v-if="item.btnState>=2 && (dlConfig[item.slug].fmt || dlConfig[item.slug].vtt)" class="btn btn-sm" :class="{'btn-danger':item.btnState==2,'btn-success':item.btnState==4}" @click="dlToc(item.slug,i,j)"><i class="fa" :class="{'fa-refresh':item.btnState==4,'fa-download':item.btnState==2,'fa-spin fa-spinner':item.btnState==3}"></i></button>
                                 </td>
                             </tr>
                         </table>

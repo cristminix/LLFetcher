@@ -49,20 +49,27 @@ app = new Vue({
         btnStates :{
             fetchCourse : true,
             fetchList : true,
-            tocs : {}
+            tocs : {},
+            batchDl : false
         },
         dlConfig : {
             slug : {url:'',fmt:'',vtt:true}
         },
         fetchListQueue:[],
+        batchDlQueue:[],
 
         //download options
         dlOptTrans : true,
-        dlOptFmt : '360',
-        dlOptFmtList : ['360','720','audio','hls'],
+        dlOptFmt : '',
+        dlOptFmtList : [],
         dlOptEnabled : false,
         dlOptMsg : '',
-        dlOptCls : ''
+        dlOptCls : '',
+
+        
+    },
+    computed :{
+        
     },
     ready:()=>{
         setTimeout(()=>{
@@ -76,11 +83,75 @@ app = new Vue({
             app.btnStates = ci.btnStates;
             app.progress = ci.progress;
             app.dlConfig = ci.dlConfig;
+            app.dlOptFmtList = ci.dlOptFmtList;
 
         },200);
 
     },
     methods:{
+        setBtnState : (i,j,stateCode) => {
+            let sections = Object.assign({},app.sections);
+                sections[i].items[j].btnState = stateCode;
+                 app.sections = sections;
+        },
+        processBatchDlQueue : ()=>{
+            const q = app.batchDlQueue.shift();
+
+            app.dlToc(q.slug,q.sectionIndex,q.itemIndex,true,(item)=>{
+                console.log('BATCH_CREATE',item);
+                
+                app.setBtnState(q.sectionIndex,q.itemIndex,3);
+            },(delta)=>{
+                console.log('BATCH_CHANGE',delta);
+                if('object' === typeof delta.state){
+                    if(delta.state.current == 'complete'){
+                        q.fileCompletes += 1;
+                        let maxFile = 1;
+                       
+                        if(app.dlConfig[q.slug].vtt){
+                            maxFile = 2;
+                        }
+                        if(q.fileCompletes ==maxFile){
+                           
+                            app.setBtnState(q.sectionIndex,q.itemIndex,4);
+
+                            setTimeout(()=>{
+                                if(app.batchDlQueue.length > 0){
+                                    app.processBatchDlQueue();
+                                }else{
+                                    app.updatePropObj('btnStates',{batchDl:false});
+                                }
+                                
+                            },1000);
+                        }
+                    }
+
+                }
+            });
+
+            // setTimeout(()=>{
+
+            //     console.log(q);
+
+            // },1000);
+        },
+        batchDownload : () =>{
+            let batchDlQueue = [];
+            app.updatePropObj('btnStates',{batchDl:true});
+            for(sectionIndex in app.sections){
+                const tocItems = app.sections[sectionIndex].items;
+                for(itemIndex in tocItems){
+                    const toc = tocItems[itemIndex];
+                    const tocSlug = toc.slug;
+                    batchDlQueue.push({sectionIndex:sectionIndex,itemIndex:itemIndex,slug:tocSlug,fileCompletes:0});                        
+                }
+            }
+            app.batchDlQueue = batchDlQueue;
+            app.processBatchDlQueue();
+        },
+        validBprs : ()=>{
+            return Object.keys(app.bprs).length > 0;
+        },
         generateShellScript : ()=>{
             const ci = JSON.parse(localStorage.EXT_COURSE_INFO);
 
@@ -99,7 +170,10 @@ app = new Vue({
                 for(itemIndex in app.sections[sectionIndex].items){
                     const item = app.sections[sectionIndex].items[itemIndex];
                     const slug = item.slug;
-                    const fmt = app.dlConfig[slug].fmt;
+                    let fmt = app.dlConfig[slug].fmt;
+                    if('undefined' === typeof fmt){
+                        fmt = app.dlOptFmt;
+                    }
                     const filename = `${slug}-${fmt}.mp4`;
                     const filenameVtt = `${slug}-${fmt}.vtt`;
 
@@ -156,11 +230,13 @@ app = new Vue({
             a.href = objectURL;
             a.click();
         },
-        dlToc:(slug,i,j) => {
+        dlToc:(slug,i,j,batch,cbCreated,cbChanged) => {
             const videoUrl = app.dlConfig[slug].url;
             const transcriptUrl = app.bprs[slug].transcript.captionFile;
-            const fmt = app.dlConfig[slug].fmt;
-
+            let fmt = app.dlConfig[slug].fmt;
+            if('undefined' === typeof fmt){
+                fmt = app.dlOptFmt;
+            }
             const optVideo = {
                 url : videoUrl,
                 filename : `${slug}-${fmt}.mp4`
@@ -170,22 +246,36 @@ app = new Vue({
                 url : transcriptUrl,
                 filename : `${slug}-${fmt}.vtt`
             };
-
+            if('undefined' === typeof batch){
+                batch = false;
+            }
             const dlCallback = {
                 onCreated : (item) => {
                     console.log('onCreated:', item);
+                    if(batch){
+                        if('function' === typeof cbChanged){
+                            cbCreated(item);
+                        }
+                    }
                 },
                 onErased : (id) => {
                     console.log('onErased:', id);
+                     
                 },
                 onChanged : (delta) => {
                     console.log('onChanged:', delta);
+                    if(batch){
+                        if('function' === typeof cbChanged){
+                            cbChanged(delta);
+                        }
+                    }
                 }
             };
+            if(app.dlConfig[slug].fmt){
+                chrome.downloads.download(optVideo,(id)=>{
 
-            chrome.downloads.download(optVideo,(id)=>{
-
-            });
+                });
+            }
             if(app.dlConfig[slug].vtt){
                 chrome.downloads.download(optTranscript,(id)=>{
 
@@ -383,7 +473,7 @@ app = new Vue({
                     dots = ['.'];
                 }
 
-            },750);
+            },250);
 
             const tocSlug = `${toc.slug}`;
             let btnStates = Object.assign({},app.btnStates);
@@ -486,7 +576,8 @@ app = new Vue({
                     exerciseFile : exerciseFileObj,
                     btnStates : btnStates,
                     progress : app.progress,
-                    dlConfig : dlConfig_tocs
+                    dlConfig : dlConfig_tocs,
+                    dlOptFmtList : app.dlOptFmtList
                 };
                 const dataStr =JSON.stringify(ci);
                 console.log('save LS',ci);
@@ -512,6 +603,7 @@ app = new Vue({
             let btnStates = {
                 fetchCourse : true,
                 fetchList : false,
+                batchDl : false
                 // tocs : {}
             };
             let progress = {

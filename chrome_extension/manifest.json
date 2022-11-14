@@ -11,7 +11,7 @@
 		{
 			
 			"matches":["https://www.linkedin.com/*"],
-			"js":["inject.js","function.js","content.js"]
+			"js":["assets/js/lib/underscore-min.js","inject.js","function.js","content.js"]
 		}
 	],
 	"background" : {

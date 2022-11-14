@@ -95,7 +95,7 @@ app = new Vue({
         setBtnState : (i,j,stateCode) => {
             let sections = Object.assign({},app.sections);
                 sections[i].items[j].btnState = stateCode;
-                 app.sections = sections;
+                app.sections = sections;
         },
         processBatchDlQueue : ()=>{
             const q = app.batchDlQueue.shift();
@@ -284,11 +284,33 @@ app = new Vue({
 
                 });
             }
-            
+            // try{
+            //     chrome.downloads.onCreated.removeListener(dlCallback.onCreated);
+            //     chrome.downloads.onErased.removeListener(dlCallback.onErased);
+            //     chrome.downloads.onChanged.removeListener(dlCallback.onChanged);
+            // }catch(e){
 
-            chrome.downloads.onCreated.addListener(dlCallback.onCreated);
-            chrome.downloads.onErased.addListener(dlCallback.onErased);
-            chrome.downloads.onChanged.addListener(dlCallback.onChanged);
+            // }
+
+            chrome.downloads.onCreated.addListener((item_)=>{
+                console.log('onCreated:', item_);
+                if(batch){
+                    if('function' === typeof cbChanged){
+                        cbCreated(item_);
+                    }
+                }
+            });
+            chrome.downloads.onErased.addListener(()=>{
+
+            });
+            chrome.downloads.onChanged.addListener((delta_)=>{
+                console.log('onChanged:', delta_);
+                if(batch){
+                    if('function' === typeof cbChanged){
+                        cbChanged(delta_);
+                    }
+                }
+            });
         },
         applyOpt:()=>{
             if(app.dlOptFmtList.indexOf(app.dlOptFmt) != -1){
@@ -496,7 +518,7 @@ app = new Vue({
                 const codes = nd.find('code');
                 let bpr_guid = [];
                 
-                for(idx in codes){
+                for(let idx in codes){
                     let el = codes[idx];
                     try{
                         if(el.id.match(/^bpr-guid/)){
@@ -535,7 +557,7 @@ app = new Vue({
                 }
                 
 
-                for(stlIdx in strimingLocationObjs){
+                for(let stlIdx in strimingLocationObjs){
                     const fmt = getFmt(strimingLocationObjs[stlIdx].url);
                     strimingLocationObjs[stlIdx].fmt = fmt;
                     app.dlOptFmtList.push(fmt);
@@ -588,7 +610,7 @@ app = new Vue({
 
                 if(processQueue){
                     if(typeof cbSuccess === 'function'){
-                        cbSuccess();
+                        cbSuccess({sectionIndex:i,itemIndex:j,slug:toc.slug});
                     }
                 }
                 
@@ -632,9 +654,9 @@ app = new Vue({
                     btnStates = Object.assign({},app.btnStates);
 
                     btnStates.fetchCourse = false;
-                    for (i in ci.sections) {
+                    for (let i in ci.sections) {
                     
-                        for (j in ci.sections[i].items) {
+                        for (let j in ci.sections[i].items) {
                             if('undefined' === typeof ci.sections[i].items[j].url){
                                 const tocSlug = ci.sections[i].items[j].slug;
                                 ci.sections[i].items[j].btnState = 0;

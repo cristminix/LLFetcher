@@ -87,6 +87,84 @@ const findProp = (key, src) => {
     }
     return null;
 };
+const getM3RecByType = (type,m3Rec)=>{
+    let results = [];
+    for(m in m3Rec){
+        
+        if('undefined' !== typeof m3Rec[m]._data.$type){
+            if(m3Rec[m]._data.$type == type){
+                results.push( [m, m3Rec[m]._data]);
+            }
+        }
+    }
+    return results;
+};
+const getM3Rec = ()=>{
+    let app = Ember.Namespace.NAMESPACES.find(namespace => namespace instanceof Ember.Application)
+    let routeCourseVideo = app.__container__.lookup('route:course/video');
+    let m3Rec = routeCourseVideo.store._globalM3RecordDataCache;
+
+    const selectUrns = [
+        'com.linkedin.learning.api.deco.content.Author',
+        'com.linkedin.learning.api.deco.content.Course',
+        'com.linkedin.learning.api.deco.content.Video',
+        'com.linkedin.learning.api.deco.content.toc.Item',
+        'com.linkedin.learning.api.deco.content.toc.Section',
+        'com.linkedin.learning.api.deco.content.Transcript'
+    ];
+
+    for(let surnIndex in selectUrns){
+        const [m,data] = getM3RecByType(selectUrns[surnIndex],m3Rec);
+        console.log(m,data);
+    }
+};
+const getCourseInfo=()=>{
+    let app = Ember.Namespace.NAMESPACES.find(namespace => namespace instanceof Ember.Application)
+    const routeCourseVideo = app.__container__.lookup('route:course/video');
+    const m3Rec = routeCourseVideo.store._globalM3RecordDataCache;
+
+    let results = getM3RecByType('com.linkedin.learning.api.deco.content.Course',m3Rec);
+    const courseSlug = getCourseSlug();
+    let course = {
+        title : courseSlug,
+        slug : courseSlug,
+        duration : 0,
+        sourceCodeRepository : '',
+        subtitle : '',
+        description : '',
+        urn : '',
+        authors:[]
+    };
+
+    if(results.length>0){
+        const [urn, courseTmp] = results[0];
+        course.title = courseTmp.title;
+        course.duration = courseTmp.duration.duration;
+        course.sourceCodeRepository = courseTmp.sourceCodeRepository;
+        course.subtitle = courseTmp.subtitle; 
+        course.slug = courseTmp.slug;
+        course.urn = urn;
+        try{
+            course.description = courseTmp.descriptionV2.text;
+        }catch(e){}
+    }
+
+    results = getM3RecByType('com.linkedin.learning.api.deco.content.Author',m3Rec);
+
+    for(let authorIndex in results){
+        const [urn,authorTmp] = results[authorIndex];
+        const author = {
+            biography : authorTmp.biographyV2.text,
+            shortBiography : authorTmp.shortBiographyV2.text,
+            slug : authorTmp.slug,
+            urn : urn
+        };
+
+        course.authors.push(author);
+    }
+
+    return course;
+};
 const getCourseSections = () => {
     let app = Ember.Namespace.NAMESPACES.find(namespace => namespace instanceof Ember.Application)
     let routeCourseVideo = app.__container__.lookup('route:course/video');
@@ -126,6 +204,14 @@ const getCourseSections = () => {
 
 
 // localStorage['courseInfo'] = JSON.stringify(courseInfo);
+function resultExist(resultItem){
+    for(let index in __result__){
+        if(_.isEqual(resultItem, __result__[index])){
+            return true;
+        }
+    }
+    return false;
+}
 function getEachItem(object) {
   object.forEach(item => {
     searchItem(item)
@@ -144,7 +230,9 @@ function searchItem(item) {
     if (typeof item[key] === "string") {
       let searchAsRegEx = new RegExp(__searchTerm__, "gi");
       if (item[key].match(searchAsRegEx)) {
-        __result__.push(item)
+        if(!resultExist(item)){
+            __result__.push(item);
+        }
       }
     }
   });   

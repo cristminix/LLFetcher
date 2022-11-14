@@ -65,6 +65,11 @@ app = new Vue({
         dlOptEnabled : false,
         dlOptMsg : '',
         dlOptCls : '',
+        dlSlug : '',
+        dlFinished : [],
+        dlFailed : [],
+        dlQueued : [],
+        dlExclude : []
 
         
     },
@@ -72,6 +77,7 @@ app = new Vue({
         
     },
     ready:()=>{
+        
         setTimeout(()=>{
             if('undefined' != localStorage['EXT_COURSE_INFO']){
                const ci = JSON.parse(localStorage['EXT_COURSE_INFO']);
@@ -92,6 +98,15 @@ app = new Vue({
 
     },
     methods:{
+        excludeDl:(slug)=>{
+            const slugIndex = app.dlExclude.indexOf(slug);
+            if(slugIndex == -1){
+                app.dlExclude.push(slug);
+            }else{
+                app.dlExclude.splice(slugIndex,1);
+            }
+            app.sections = Object.assign({},app.sections);
+        },
         setBtnState : (i,j,stateCode) => {
             let sections = Object.assign({},app.sections);
                 sections[i].items[j].btnState = stateCode;
@@ -99,13 +114,25 @@ app = new Vue({
         },
         processBatchDlQueue : ()=>{
             const q = app.batchDlQueue.shift();
-
-            app.dlToc(q.slug,q.sectionIndex,q.itemIndex,true,(item)=>{
-                console.log('BATCH_CREATE',item);
+            app.dlSlug = q.slug;
+            if(app.dlExclude.indexOf(q.slug) != -1){
+                if(app.batchDlQueue.length > 0){
+                    app.processBatchDlQueue();
+                    return;
+                }
+            }
+            app.dlToc(q.slug,q.sectionIndex,q.itemIndex,true,(item,i,j,slug)=>{
+                if(slug !== app.dlSlug){
+                    return;
+                }
+                console.log('BATCH_CREATE',item,i,j,slug);
                 
                 app.setBtnState(q.sectionIndex,q.itemIndex,3);
-            },(delta)=>{
-                console.log('BATCH_CHANGE',delta);
+            },(delta,i,j,slug)=>{
+                if(slug !== app.dlSlug){
+                    return;
+                }
+                console.log('BATCH_CHANGE',delta,i,j,slug);
                 if('object' === typeof delta.state){
                     if(delta.state.current == 'complete'){
                         q.fileCompletes += 1;
@@ -257,7 +284,7 @@ app = new Vue({
                     console.log('onCreated:', item);
                     if(batch){
                         if('function' === typeof cbChanged){
-                            cbCreated(item);
+                            cbCreated(item,i,j,slug);
                         }
                     }
                 },
@@ -269,7 +296,7 @@ app = new Vue({
                     console.log('onChanged:', delta);
                     if(batch){
                         if('function' === typeof cbChanged){
-                            cbChanged(delta);
+                            cbChanged(delta,i,j,slug);
                         }
                     }
                 }
@@ -292,25 +319,9 @@ app = new Vue({
 
             // }
 
-            chrome.downloads.onCreated.addListener((item_)=>{
-                console.log('onCreated:', item_);
-                if(batch){
-                    if('function' === typeof cbChanged){
-                        cbCreated(item_);
-                    }
-                }
-            });
-            chrome.downloads.onErased.addListener(()=>{
-
-            });
-            chrome.downloads.onChanged.addListener((delta_)=>{
-                console.log('onChanged:', delta_);
-                if(batch){
-                    if('function' === typeof cbChanged){
-                        cbChanged(delta_);
-                    }
-                }
-            });
+            chrome.downloads.onCreated.addListener(dlCallback.onCreated);
+            chrome.downloads.onErased.addListener(dlCallback.onErased);
+            chrome.downloads.onChanged.addListener(dlCallback.onChanged);
         },
         applyOpt:()=>{
             if(app.dlOptFmtList.indexOf(app.dlOptFmt) != -1){

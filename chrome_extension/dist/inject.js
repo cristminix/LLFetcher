@@ -1,0 +1,1 @@
+(()=>{"use strict";!function(t,e){let c=document.getElementsByTagName("body")[0],r=document.createElement("script");r.setAttribute("type","text/javascript"),r.setAttribute("src",t),c.appendChild(r)}(chrome.runtime.getURL("create_data_codes.js"))})();

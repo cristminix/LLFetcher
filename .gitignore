@@ -1,2 +1,6 @@
 /olds/
 /.vscode/
+*.DS_Store
+node_modules
+olds
+package-lock.json

@@ -1,4 +1,9 @@
-chrome.action.disable();
+let ENV = 'development';
+
+if(ENV === 'production'){
+    chrome.action.disable();
+}
+
 function _isValidCoursePage  (url : string) : boolean {
     const urlPathArray = url.split('?')[0].split("/").filter(item => item);
     let validCoursePage = false;
@@ -14,7 +19,6 @@ function _sendCoookieMessage() : void {
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs ) {
             try{
                 const tab = tabs[0];
-                
                 chrome.tabs.sendMessage(tab.id as number, {event: 'sendCoookie',cookie: _cookie}, (r) => {});
             }catch(e){}
         });
@@ -24,26 +28,34 @@ function _sendCoookieMessage() : void {
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) =>{
 	if(changeInfo.status == "complete"){
 		if(_isValidCoursePage(tab.url as string)){
-			chrome.action.enable(tabId);
+            if(ENV === 'production'){
+                chrome.action.enable(tabId);
+            }
             chrome.tabs.sendMessage(tab.id as number, {event: 'onTabUpdated',url: tab.url}, (r) => { });
             
             _sendCoookieMessage();
 		}
 		else{
-			chrome.action.disable(tabId);
-		}
+            if(ENV === 'production'){
+			    chrome.action.disable(tabId);
+            }    
+        }
     }
 });
 
 chrome.webNavigation.onHistoryStateUpdated.addListener(function(tab) {
 
         if(_isValidCoursePage(tab.url)){
-            chrome.action.enable(tab.tabId);
+            if(ENV === 'production'){
+                chrome.action.enable(tab.tabId);
+            }
             chrome.tabs.sendMessage(tab.tabId, {event: 'onHistoryStateUpdated',url: tab.url}, (r) => { });
             _sendCoookieMessage();
         }
         else{
-			chrome.action.disable(tab.tabId);
-		}
+            if(ENV === 'production'){
+			    chrome.action.disable(tab.tabId);
+		    }
+        }
 });
 

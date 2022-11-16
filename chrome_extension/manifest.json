@@ -29,7 +29,7 @@
 	"description" : "LLFetcher is stand for Linked Learning Fetcher, which just simple chrome extension that can help you download all resource in Linked learning Course",
 	"action" : {
 		"default_title" : "LinkedIn Learning Fetcher",
-		"default_popup" : "index.html",
+		"default_popup" : "popup.html",
 		"default_icon": {
 	      "32": "ll_icon_32.png",
 	      "48": "ll_icon_32.png",

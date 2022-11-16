@@ -1,10 +1,23 @@
 const path = require("path");
-
+const { VueLoaderPlugin } = require('vue-loader')
 module.exports = {
+	plugins: [
+		new VueLoaderPlugin(),
+		
+	  ],
+	  resolve: {
+		alias: {
+		  // this isn't technically needed, since the default `vue` entry for bundlers
+		  // is a simple `export * from '@vue/runtime-dom`. However having this
+		  // extra re-export somehow causes webpack to always invalidate the module
+		  // on the first HMR update and causes the page to reload.
+		  vue: "@vue/runtime-dom"
+		}
+	  },
     mode: 'production',
 	// moduleResolution : 'node',
 	entry : {
-		popup:"./src/popup/popup.ts",
+		popup:"./src/popup/popup.js",
 		content:"./src/content_scripts/content.ts",
 		inject:"./src/content_scripts/inject.ts",
 		function:"./src/content_scripts/function.ts",
@@ -15,7 +28,7 @@ module.exports = {
 	},
 	output : {
 		filename : "[name].js",
-		path : path.resolve(__dirname, "dist")
+		path : path.resolve(__dirname, "chrome_extension")
 	},
 	// optimization:{
 	// 	splitChunks:{
@@ -29,11 +42,24 @@ module.exports = {
 	module:{
 		rules:[
 			{
-				test : /\.ts$/,
-				use : 'ts-loader',
-                // include : [path.resolve(__dirname,'src')]
+				test: /\.vue$/,
+				loader: 'vue-loader',
+			},
+			{
+				test: /\.ts$/,
+				loader: 'ts-loader',
+				options: {
+				  appendTsSuffixTo: [/\.vue$/],
+				  transpileOnly: true,
+				},
 				exclude : /node_modules/
 			},
+			// {
+			// 	test : /\.ts$/,
+			// 	use : 'ts-loader',
+            //     // include : [path.resolve(__dirname,'src')]
+				
+			// },
 			{
 				test : /\.js$/,
 				exclude:/(node_modules)/,

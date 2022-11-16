@@ -1,5 +1,5 @@
-import Author from './Author';
-import Section from './Section';
+import Author from './author';
+import Section from './section';
 
 interface Course{
     title : string,

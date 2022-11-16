@@ -1,4 +1,4 @@
-import Toc from './Toc';
+import Toc from './toc';
 
 interface Section{
     title : string,

@@ -1,19 +1,17 @@
+<template>
+  <div class="about-page page">
+    ABOUT
+  </div>
+</template>
 <script lang="ts">
 import { defineComponent } from 'vue'
 
 export default defineComponent({
   data() {
     return {
-      count: 1
+      nav: 'welcome'
     }
   }
 })
 </script>
 
-<template>
-  
-  <div>
-    Hello : {{ count.toFixed(2) }}
-  </div>
-  
-</template>

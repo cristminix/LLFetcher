@@ -8,15 +8,13 @@ module.exports = {
 	  resolve: {
 		extensions: ['.tsx', '.ts', '.js']
 	  },
-    mode: 'production',
+    mode: 'development',
 	entry : {
 		popup:"./src/popup/popup.ts",
-		content:"./src/content_scripts/content.ts",
-		inject:"./src/content_scripts/inject.ts",
-		// function:"./src/content_scripts/function.ts",
-		create_data_codes:"./src/content_scripts_inject/create_data_codes.js",
-		// getM3rec:"./src/content_scripts_inject/getM3rec.js",
-        background: "./src/service_workers/background.ts",
+		// content:"./src/content_scripts/content.ts",
+		// inject:"./src/content_scripts/inject.ts",
+		// create_data_codes:"./src/content_scripts_inject/create_data_codes.js",
+        // background: "./src/service_workers/background.ts",
 
 	},
 	output : {

@@ -1,1 +1,0 @@
-(()=>{var e,t,a;e=chrome.runtime.getURL("create_data_codes.js"),t=document.getElementsByTagName("body")[0],(a=document.createElement("script")).setAttribute("type","text/javascript"),a.setAttribute("src",e),t.appendChild(a)})();

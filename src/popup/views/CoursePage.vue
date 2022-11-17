@@ -1,12 +1,12 @@
 <template>
   <div class="course-page page">
     <div class="course">
-      <h2><i class="fa-regular fa-bookmark"></i> {{course.title}} by {{makeTitle(authors[0].slug)}}</h2>
+      <h2><i class="fa fa-bookmark"></i> {{course.title}} by {{makeTitle(authors[0].slug)}}</h2>
     </div>
     <div class="sections-view">
       <ul class="section-list">
         <li v-for="(section,sectionIndex ) in sections" :key="sectionIndex">
-          <h4><i class="fa fa-tag"></i> {{section.title}}</h4>
+          <h4>{{section.title}}</h4>
           <TocItem :items="section.items" :sectionIndex="sectionIndex" @update="onTocUpdate($event)"/>
         </li>
       </ul>
@@ -70,6 +70,7 @@ ul.section-list{
 
 ul.section-list > li > h4{
   font-size : 100%;
-  padding:2px;
+  padding:.5em;
+  background: rgb(168, 210, 218);
 }
 </style>

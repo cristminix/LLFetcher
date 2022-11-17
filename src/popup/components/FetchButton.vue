@@ -1,7 +1,7 @@
 <template>
   <div class="btn-group">
-    <button @click="fetchToc()" class="btn btn-sm btn-default" :title="'Click to fetch TOC resources ' + toc.title">
-      <i class="fa-solid fa-fw fa-play"></i>
+    <button :disabled="btnState > 1 && btnState < 4" @click="fetchToc()" class="btn btn-sm" :title="'Click to fetch TOC resources ' + toc.title">
+      <i class="fa" :class="{'fa-play':btnState==1,'fa-spin fa-spinner':btnState==2,'fa-check':btnState==3,'fa-retry':btnState==4}"></i>
     </button>
   </div>
 </template>
@@ -32,24 +32,29 @@ export default defineComponent({
         const toc = ref(props.toc as Toc);
         const sectionIndex = ref(props.sectionIndex as number);
         const tocIndex = ref(props.tocIndex as number);
-        let exerciseFile  = ref<ExerciseFile>({name:'',url:''})
-        return {toc, sectionIndex, tocIndex, exerciseFile};
+        let exerciseFile  = ref<ExerciseFile>({name:'',url:''});
+        const btnState = ref(1);
+        return {toc, sectionIndex, tocIndex, exerciseFile, btnState};
     },
     methods:{
       fetchToc(){
         // 1. set btn state icon to [loading]
-        const url = '/chrome_extension/content.html';
+        this.btnState = 2;
+        const url = '/chrome_extension/content.html?rand='+(Math.random().toString());
         //const url = this.toc.url;
         Proxy.get(url, (responseText : string)=>{
           let validResource = this.parseToc(responseText);
           if(validResource){
             // 3. set btn state to [checked]
+            this.btnState = 3;
             this.$emit('update',{src: 'Popup.CoursePage.TocItem.FetchButton',toc : this.toc, exerciseFile: this.exerciseFile});
           }else{
             // 3. set btn state to icon [retry]
+            this.btnState = 4;
           }
         },(r:any)=>{
           // 3. set btn state to icon [retry]
+          this.btnState = 4;
         });
       },
       // Rebuild toc data to populate 

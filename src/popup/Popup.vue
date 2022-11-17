@@ -1,10 +1,10 @@
 <template>
   <div class="app-container">
-    <PageNavigation @update="onUpdate($event)" :nav="nav" ref="pageNavigation"/>
+    <PageNavigation @update="onNavUpdate($event)" :nav="nav" ref="pageNavigation"/>
     <WelcomePage v-if="nav=='welcome'"/>
     <LoadingPage v-if="nav=='loading'" text="Fetching Course Data"/>
     <HomePage v-if="nav=='home'"/>
-    <CoursePage v-if="nav=='course'" :course="courseInfo.course" :sections="courseInfo.sections"/>
+    <CoursePage @update="onCourseUpdate($event)" v-if="nav=='course'" :course="courseInfo.course" :sections="courseInfo.sections" ref="coursePage"/>
     <DownloadPage v-if="nav=='downloads'"/>
     <HelpPage v-if="nav=='help'"/>
     <AboutPage v-if="nav=='about'"/>
@@ -43,24 +43,49 @@ export default defineComponent({
   },
   setup(){
     const nav = ref<NavTerm>('welcome');
-    const onUpdate = (target : NavTerm) => {
+    const courseInfo = ref({} as CourseInfo);
+
+    const onNavUpdate = (target : NavTerm) => {
       nav.value = target;
     };
-    const courseInfo = ref<CourseInfo>();
-    return {nav, onUpdate, courseInfo};
+    
+    
+    const onCourseUpdate = (target:any) => {
+      console.log(target);
+      // this.rebuildCourseInfo(sectionIndex, tocIndex, toc);
+    };
+    return {nav, courseInfo, onNavUpdate, onCourseUpdate};
   },
   mounted(){
     console.log('Popout is ready please initialize everythings here');
-    Store.getCourseJson((courseInfo)=>{
-      this.extractCourseData(courseInfo)
+    Store.getCourseJson((courseInfo : CourseInfo)=>{
+      this.parseCourseData(courseInfo)
     });
   },
   methods:{
-    extractCourseData(courseInfo:CourseInfo){
+    // Rebuild course info by updated TOC
+    rebuildCourseInfo(sectionIndex : number, tocIndex : number, toc : Toc){
+      this.courseInfo.sections[sectionIndex].items[tocIndex] = toc; 
+    },
+    // Rebuild Source Data
+    parseCourseData(courseInfo : CourseInfo){
+      
+      for(let sectionIndex in courseInfo.sections){
+        let sections = courseInfo.sections[sectionIndex];
+        for(let tocIndex in sections.items){
+          let toc = sections.items[tocIndex] as Toc;
+          // rebuild toc url
+          toc.url = `https://www.linkedin.com/learning/${toc.slug}`;
+                    
+        }
+      }
       this.courseInfo = courseInfo;
+
       setTimeout(()=>{
-        console.log(courseInfo);
+      
+      console.log(courseInfo);
         this.nav = this.$refs.pageNavigation.nav = 'course';
+      
       },250);
       
     }

@@ -7,7 +7,7 @@
       <ul class="section-list">
         <li v-for="(section,sectionIndex ) in sections" :key="sectionIndex">
           <h4><i class="fa fa-tag"></i> {{section.title}}</h4>
-          <TocItem :items="section.items" :sectionIndex="sectionIndex"/>
+          <TocItem :items="section.items" :sectionIndex="sectionIndex" @update="onTocUpdate($event)"/>
         </li>
       </ul>
     </div>
@@ -20,6 +20,7 @@ import Section from '../../types/section';
 import Author from '../../types/author';
 import ExerciseFile from '../../types/ExerciseFile';
 import TocItem from '../components/TocItem.vue';
+import {makeTitle} from '../../libs/utils';
 
 export default defineComponent({
   components:{
@@ -41,19 +42,17 @@ export default defineComponent({
     const sections = ref(props.sections as Section[]); 
     const exerciseFile = ref({} as ExerciseFile);
 
-    // console.log(sections);
+    
     return {course,authors,sections,exerciseFile};
   },
   methods:{
+    onTocUpdate(target:any){
+      // console.log(target);
+      // this.exerciseFile = {name: target.exerciseFile.name, url: target.exerciseFile.url};
+      this.$emit('update',target);
+    },
     makeTitle(slug : string) {
-        const words = slug.split('-');
-        
-        for (let i = 0; i < words.length; i++) {
-            var word = words[i];
-            words[i] = word.charAt(0).toUpperCase() + word.slice(1);
-        }
-        
-        return words.join(' ');
+        return makeTitle(slug);
     }
   }
 })

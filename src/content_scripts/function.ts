@@ -70,45 +70,7 @@ function isLogedIn(){
     return document.querySelector('li[data-live-test-me-menu]') !== null;
 };
 
-function makeDelay(ms : number) : any {
-    let timer:any;
-    return function(callback : any){
-        clearTimeout (timer);
-        timer = setTimeout(callback, ms);
-    };
-};
 
-let __result__ : any[] = [];
-let __searchTerm__ = '';
-
-function resultExist(resultItem : any){
-    for(let index in __result__){
-        if(_.isEqual(resultItem, __result__[index])){
-            return true;
-        }
-    }
-    return false;
-}
-
-function searchItem(item : any) { 
-    if('undefined' == typeof item || item == null){
-        return;
-    }
-    Object.keys(item).forEach(key => {
-    if (typeof item[key] === "object") {
-      searchItem(item[key])
-    }
-    if (typeof item[key] === "string") {
-      let searchAsRegEx = new RegExp(__searchTerm__, "gi");
-      if (item[key].match(searchAsRegEx)) {
-        if(!resultExist(item)){
-            __result__.push(item);
-        }
-      }
-    }
-  });   
-}
-
-console.log(`is course page : ${isCoursePage()}`);
+// console.log(`is course page : ${isCoursePage()}`);
 
 export {isCoursePage,redirectNoAutoPlay};

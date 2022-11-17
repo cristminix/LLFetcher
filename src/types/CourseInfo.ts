@@ -1,7 +1,10 @@
+import Course from './course';
+import Section from './section';
+
 interface CourseInfo {
     bprs : Object,
-    course : Object,
-    sections : Object[]
+    course : Course,
+    sections : Section[]
 
 }
 

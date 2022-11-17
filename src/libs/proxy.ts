@@ -39,10 +39,14 @@ class Proxy{
 
         })
         .then((response) => {
-            cbSuccess(response.data);
+            if('function' === typeof cbSuccess){
+                cbSuccess(response.data);
+            }
         })
         .catch((error) => {
-            cbError(error);
+            if('function' === typeof cbError){
+                cbError(error);
+            }
             console.log(error)
         });
     }
@@ -77,10 +81,14 @@ class Proxy{
 
         })
         .then((response) => {
-            cbSuccess(response.data);
+            if('function' === typeof cbSuccess){
+                cbSuccess(response.data);
+            }
         })
         .catch((error) => {
-            cbError(error);
+            if('function' === typeof cbError){
+                cbError(error);
+            }
             console.log(error)
         });
    

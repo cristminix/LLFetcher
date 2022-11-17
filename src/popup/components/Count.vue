@@ -11,9 +11,9 @@ export default defineComponent({
 </script>
 
 <template>
-  <!-- type checking and auto-completion enabled -->
+  
   <div>
-    {{ count.toFixed(2) }}
+    Hello : {{ count.toFixed(2) }}
   </div>
   
 </template>

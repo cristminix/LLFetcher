@@ -6,21 +6,14 @@ module.exports = {
 		
 	  ],
 	  resolve: {
-		alias: {
-		  // this isn't technically needed, since the default `vue` entry for bundlers
-		  // is a simple `export * from '@vue/runtime-dom`. However having this
-		  // extra re-export somehow causes webpack to always invalidate the module
-		  // on the first HMR update and causes the page to reload.
-		  vue: "@vue/runtime-dom"
-		}
+		extensions: ['.tsx', '.ts', '.js']
 	  },
     mode: 'production',
-	// moduleResolution : 'node',
 	entry : {
-		popup:"./src/popup/popup.js",
+		popup:"./src/popup/popup.ts",
 		content:"./src/content_scripts/content.ts",
 		inject:"./src/content_scripts/inject.ts",
-		function:"./src/content_scripts/function.ts",
+		// function:"./src/content_scripts/function.ts",
 		create_data_codes:"./src/content_scripts_inject/create_data_codes.js",
 		// getM3rec:"./src/content_scripts_inject/getM3rec.js",
         background: "./src/service_workers/background.ts",
@@ -54,12 +47,7 @@ module.exports = {
 				},
 				exclude : /node_modules/
 			},
-			// {
-			// 	test : /\.ts$/,
-			// 	use : 'ts-loader',
-            //     // include : [path.resolve(__dirname,'src')]
-				
-			// },
+			
 			{
 				test : /\.js$/,
 				exclude:/(node_modules)/,

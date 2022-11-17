@@ -1,3 +1,5 @@
+import {isCoursePage,redirectNoAutoPlay} from './function';
+
 chrome.runtime.onMessage.addListener(function (response, sendResponse) {
 	console.log(response);
 	if(typeof response.event != 'undefined'){

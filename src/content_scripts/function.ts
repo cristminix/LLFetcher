@@ -108,3 +108,7 @@ function searchItem(item : any) {
     }
   });   
 }
+
+console.log(`is course page : ${isCoursePage()}`);
+
+export {isCoursePage,redirectNoAutoPlay};

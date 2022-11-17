@@ -1,1 +1,1 @@
-(()=>{"use strict";var t,e,r;t=chrome.runtime.getURL("create_data_codes.js"),e=document.getElementsByTagName("body")[0],(r=document.createElement("script")).setAttribute("type","text/javascript"),r.setAttribute("src",t),e.appendChild(r)})();
+(()=>{var e,t,a;e=chrome.runtime.getURL("create_data_codes.js"),t=document.getElementsByTagName("body")[0],(a=document.createElement("script")).setAttribute("type","text/javascript"),a.setAttribute("src",e),t.appendChild(a)})();

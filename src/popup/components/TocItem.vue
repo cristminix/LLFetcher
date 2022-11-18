@@ -1,5 +1,6 @@
 <template>
   <div class="toc-item-view">
+    <FetchQueue ref="fetchQueue"/>
     <table class="table table-bordered toc-item-list">
         <thead>
             <tr>
@@ -9,7 +10,7 @@
             </tr>
         </thead>
         <tbody>
-        <tr v-for="(toc,tocIndex) in items" class="toc-item" :class="{ods:(tocIndex as number)%2==0}" :key="tocIndex">
+        <tr v-for="(toc,tocIndex) in items" class="toc-item" :class="{ods:tocIndex%2==0}" :key="tocIndex">
             <td  class="text-center">
                 <input @click="tgQueue(tocIndex)" class="form-check-input" type="checkbox" v-model="checkedQueues[tocIndex]"/> 
             </td>
@@ -25,12 +26,12 @@
 <script lang="ts">
 import { defineComponent, ref, PropType } from 'vue';
 import FetchButton from '../components/FetchButton.vue';
-
+import FetchQueue from '../components/FetchQueue.vue';
 import Toc from '../../types/toc';
 
 export default defineComponent({
     components:{
-        FetchButton
+        FetchButton,FetchQueue
     },
     props:{
         items: {
@@ -49,7 +50,8 @@ export default defineComponent({
         const checkedQueues = ref([]);
         const excludeQueues = ref([]);
         let fetchBtns = ref([]);
-        return {items, sectionIndex, checkedQueues, excludeQueues,fetchBtns};
+        let fetchQueue= ref();
+        return {items, sectionIndex, checkedQueues, excludeQueues,fetchBtns,checkAll,fetchQueue};
     },
     mounted(){
         setTimeout(()=>{
@@ -60,30 +62,35 @@ export default defineComponent({
         },250);
     },
     methods:{
+        triggerFailedFetchQueue(tocIndex:number){
+            setTimeout(()=>{
+                this.fetchQueue.btnState=4;
+            },1000);
+            
+        },
         triggerExcludeFetchQueue(tocIndex:number){
             console.log(tocIndex);
+            const peak = tocIndex + 1;
+            const maxPeak = this.items.length;
+            const percentage = Math.round(peak / maxPeak * 100);
+            this.fetchQueue.setProgress(tocIndex,percentage);
             if(this.excludeQueues.indexOf(tocIndex) == -1){
                 this.excludeQueues.push(tocIndex);
             }
             this.checkedQueues[tocIndex] = false;
-
-            // let totalCheckedIsTrue = 0;
-            // for(let index in this.items){
-            //     if(this.checkedQueues[index]){
-            //         totalCheckedIsTrue += 1;
-            //     }
-            // }
-
-            // if(totalCheckedIsTrue == this.items.length){
             this.checkAll = false;
-            // }
+       
         },
         triggerFetchQueue(tocIndex:number){
             console.log(tocIndex);
-            if(tocIndex <= this.checkedQueues.length){
+            const nextTocIndex = tocIndex + 1;
+            if(nextTocIndex < this.checkedQueues.length){
                 // process next fetch button
-                const nextTocIndex = tocIndex + 1;
-                console.log(this.fetchBtns[nextTocIndex]);
+                
+                this.fetchBtns[nextTocIndex].fetchToc(true);
+                // console.log();
+            }else{
+                
             }
             // calling fetch button next index
             // this.$ref

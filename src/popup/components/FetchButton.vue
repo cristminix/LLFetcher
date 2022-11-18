@@ -1,7 +1,7 @@
 <template>
   <div class="btn-group">
     <button :disabled="btnState > 1 && btnState < 4" @click="fetchToc(false)" class="btn btn-sm" :title="'Click to fetch TOC resources ' + toc.title">
-      <i class="fa" :class="{'fa-play':btnState==1,'fa-spin fa-spinner':btnState==2,'fa-check':btnState==3,'fa-retry':btnState==4}"></i>
+      <i class="fa" :class="{'fa-play':btnState==1,'fa-spin fa-spinner':btnState==2,'fa-check':btnState==3,'fa-refresh':btnState==4}"></i>
     </button>
 
   </div>
@@ -42,7 +42,7 @@ export default defineComponent({
 
     methods:{
       isQueued(fetchQueueEnabled:boolean){
-        return fetchQueueEnabled ? (this.$parent.checkedQueues[this.tocIndex] && this.$parent.excludeQueues.indexOf(this.tocIndex) == -1) : this.btnState == 1;
+        return fetchQueueEnabled ? (this.$parent.checkedQueues[this.tocIndex] && this.$parent.excludeQueues.indexOf(this.tocIndex) == -1) : (this.btnState == 1&&this.btnState == 4);
       },
       fetchToc(fetchQueueEnabled:boolean){
         // 0. check if queues
@@ -68,11 +68,12 @@ export default defineComponent({
               }
               // addToParent excludeQueue
               this.$parent.triggerExcludeFetchQueue(this.tocIndex);
-              
+
             }else{
               // 3. set btn state to icon [retry]
               this.btnState = 4;
               if(fetchQueueEnabled){
+                this.$parent.triggerFailedFetchQueue(this.tocIndex);
                 console.log('Queue Failed: triggering fetchToc from FetchButton, lastTocIndex:',this.tocIndex);
               }
             }
@@ -80,6 +81,7 @@ export default defineComponent({
             // 3. set btn state to icon [retry]
             this.btnState = 4;
             if(fetchQueueEnabled){
+              this.$parent.triggerFailedFetchQueue(this.tocIndex);
               console.log('Queue Failed: triggering fetchToc from FetchButton, lastTocIndex:',this.tocIndex);
             }
           });

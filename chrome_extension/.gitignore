@@ -1,4 +1,7 @@
 *.DS_Store
-node_modules
-olds
-package-lock.json
+*.js
+*.ttf
+*.svg
+*.eot
+*.woff
+*.woff2

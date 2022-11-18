@@ -1,7 +1,8 @@
 import { createApp } from 'vue';
 import Popup from './Popup.vue';
 import 'bootstrap/dist/css/bootstrap.min.css';
-// import '@fortawesome/fontawesome-free/css/fontawesome.min.css';
+import 'jquery/dist/jquery.min.js'
+import 'bootstrap/dist/js/bootstrap.min.js'
 import 'fontawesome-4.7/css/font-awesome.min.css';
 
 import '../styles/popup.css';

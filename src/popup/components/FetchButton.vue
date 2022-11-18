@@ -1,12 +1,13 @@
 <template>
   <div class="btn-group">
-    <button :disabled="btnState > 1 && btnState < 4" @click="fetchToc()" class="btn btn-sm" :title="'Click to fetch TOC resources ' + toc.title">
+    <button :disabled="btnState > 1 && btnState < 4" @click="fetchToc(false)" class="btn btn-sm" :title="'Click to fetch TOC resources ' + toc.title">
       <i class="fa" :class="{'fa-play':btnState==1,'fa-spin fa-spinner':btnState==2,'fa-check':btnState==3,'fa-retry':btnState==4}"></i>
     </button>
+
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref, PropType } from 'vue'
+import { defineComponent, ref, PropType, watchEffect } from 'vue'
 import Toc from '../../types/toc';
 import Proxy from '../../libs/proxy';
 import jQuery from 'jquery';
@@ -27,35 +28,67 @@ export default defineComponent({
             requied : true,
             type : Number
         }
-    },
+  },
     setup(props) {
         const toc = ref(props.toc as Toc);
         const sectionIndex = ref(props.sectionIndex as number);
         const tocIndex = ref(props.tocIndex as number);
         let exerciseFile  = ref<ExerciseFile>({name:'',url:''});
         const btnState = ref(1);
+      
+        
         return {toc, sectionIndex, tocIndex, exerciseFile, btnState};
     },
+
     methods:{
-      fetchToc(){
-        // 1. set btn state icon to [loading]
-        this.btnState = 2;
-        const url = '/chrome_extension/content.html?rand='+(Math.random().toString());
-        //const url = this.toc.url;
-        Proxy.get(url, (responseText : string)=>{
-          let validResource = this.parseToc(responseText);
-          if(validResource){
-            // 3. set btn state to [checked]
-            this.btnState = 3;
-            this.$emit('update',{src: 'Popup.CoursePage.TocItem.FetchButton',toc : this.toc, exerciseFile: this.exerciseFile});
-          }else{
+      isQueued(fetchQueueEnabled:boolean){
+        return fetchQueueEnabled ? (this.$parent.checkedQueues[this.tocIndex] && this.$parent.excludeQueues.indexOf(this.tocIndex) == -1) : this.btnState == 1;
+      },
+      fetchToc(fetchQueueEnabled:boolean){
+        // 0. check if queues
+        const isQueued = this.isQueued(fetchQueueEnabled);
+        console.log('isQueued:',isQueued);
+
+        if(isQueued){
+          // 1. set btn state icon to [loading]
+          this.btnState = 2;
+        
+          const url = '/chrome_extension/content.html?rand='+(Math.random().toString());
+          //const url = this.toc.url;
+          Proxy.get(url, (responseText : string)=>{
+            let validResource = this.parseToc(responseText);
+            if(validResource){
+              // 3. set btn state to [checked]
+              this.btnState = 3;
+              this.$emit('update',{src: 'Popup.CoursePage.TocItem.FetchButton',toc : this.toc, exerciseFile: this.exerciseFile});
+
+              if(fetchQueueEnabled){
+                console.log('Queue Complete: triggering next fetchToc from parent, lastTocIndex:',this.tocIndex);
+                this.$parent.triggerFetchQueue(this.tocIndex);
+              }
+              // addToParent excludeQueue
+              this.$parent.triggerExcludeFetchQueue(this.tocIndex);
+              
+            }else{
+              // 3. set btn state to icon [retry]
+              this.btnState = 4;
+              if(fetchQueueEnabled){
+                console.log('Queue Failed: triggering fetchToc from FetchButton, lastTocIndex:',this.tocIndex);
+              }
+            }
+          },(r:any)=>{
             // 3. set btn state to icon [retry]
             this.btnState = 4;
+            if(fetchQueueEnabled){
+              console.log('Queue Failed: triggering fetchToc from FetchButton, lastTocIndex:',this.tocIndex);
+            }
+          });
+          
+        }else{
+          if(fetchQueueEnabled){
+          
           }
-        },(r:any)=>{
-          // 3. set btn state to icon [retry]
-          this.btnState = 4;
-        });
+        }
       },
       // Rebuild toc data to populate 
       // StremLocations

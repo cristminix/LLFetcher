@@ -1,6 +1,6 @@
 <template>
   <div class="toc-item-view">
-    <FetchQueue ref="fetchQueue"/>
+    <FetchQueue v-show="false" ref="fetchQueue"/>
     <table class="table table-bordered toc-item-list">
         <thead>
             <tr>
@@ -79,6 +79,7 @@ export default defineComponent({
                 const percentage = Math.round(peak / maxPeak * 100);
                 setTimeout(()=>{
                     this.fetchQueue.setProgress(tocIndex,percentage);
+                    this.$parent.fetchQueueBar[this.sectionIndex].setProgress(tocIndex,percentage);
                 },500);
                 
                 
@@ -100,6 +101,9 @@ export default defineComponent({
                 setTimeout(()=>{
                     this.fetchQueue.btnState=this.fetchQueue.percentage==100?3:1;
                     this.fetchQueue.lastTocIndex=0;
+
+                    this.$parent.fetchQueueBar[this.sectionIndex].btnState=this.$parent.fetchQueueBar[this.sectionIndex].percentage==100?3:1;
+                    this.$parent.fetchQueueBar[this.sectionIndex].lastTocIndex=0;
                 },1000);
             }
             // calling fetch button next index

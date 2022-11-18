@@ -6,7 +6,7 @@
             </div>
         </div>
         <div class="btn-fetch-cnt">
-            <button @click="startQueue()" class="btn btn-sm btn-fetch"><i class="fa" :class="{'fa-play':btnState==1,'fa-spin fa-spinner':btnState==2,'fa-check':btnState==3,'fa-refresh':btnState==4}"></i></button>
+            <button :disabled="btnState!=1&&btnState!=4" @click="startQueue()" class="btn btn-sm btn-fetch"><i class="fa" :class="{'fa-play':btnState==1,'fa-spin fa-spinner':btnState==2,'fa-check':btnState==3,'fa-refresh':btnState==4}"></i></button>
         </div>
     </div>
 </template>
@@ -46,6 +46,7 @@ export default defineComponent({
 .btn-fetch{
     margin-top:-8px;
     padding:0;
+    border:none !important;
 }
 .fetch-queue{
     margin-bottom: 1em;

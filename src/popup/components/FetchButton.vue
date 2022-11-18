@@ -1,6 +1,6 @@
 <template>
   <div class="btn-group">
-    <button :disabled="btnState > 1 && btnState < 4" @click="fetchToc(false)" class="btn btn-sm" :title="'Click to fetch TOC resources ' + toc.title">
+    <button :style="{border:(btnState!=1 && btnState!=4?'none':'inherit')}" :disabled="btnState > 1 && btnState < 4" @click="fetchToc(false)" class="btn btn-sm" :title="'Click to fetch TOC resources ' + toc.title">
       <i class="fa" :class="{'fa-play':btnState==1,'fa-spin fa-spinner':btnState==2,'fa-check':btnState==3,'fa-refresh':btnState==4}"></i>
     </button>
 
@@ -42,7 +42,7 @@ export default defineComponent({
 
     methods:{
       isQueued(fetchQueueEnabled:boolean){
-        return fetchQueueEnabled ? (this.$parent.checkedQueues[this.tocIndex] && this.$parent.excludeQueues.indexOf(this.tocIndex) == -1) : (this.btnState == 1&&this.btnState == 4);
+        return fetchQueueEnabled ? (this.$parent.checkedQueues[this.tocIndex] && this.$parent.excludeQueues.indexOf(this.tocIndex) == -1) : (this.btnState == 1 || this.btnState == 4);
       },
       fetchToc(fetchQueueEnabled:boolean){
         // 0. check if queues
@@ -67,7 +67,7 @@ export default defineComponent({
                 this.$parent.triggerFetchQueue(this.tocIndex);
               }
               // addToParent excludeQueue
-              this.$parent.triggerExcludeFetchQueue(this.tocIndex);
+              this.$parent.triggerExcludeFetchQueue(this.tocIndex,fetchQueueEnabled);
 
             }else{
               // 3. set btn state to icon [retry]
@@ -88,7 +88,7 @@ export default defineComponent({
           
         }else{
           if(fetchQueueEnabled){
-          
+            this.$parent.triggerFetchQueue(this.tocIndex);
           }
         }
       },

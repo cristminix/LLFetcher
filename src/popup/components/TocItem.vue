@@ -68,15 +68,22 @@ export default defineComponent({
             },1000);
             
         },
-        triggerExcludeFetchQueue(tocIndex:number){
+        triggerExcludeFetchQueue(tocIndex:number, fetchQueueEnabled:boolean){
             console.log(tocIndex);
-            const peak = tocIndex + 1;
-            const maxPeak = this.items.length;
-            const percentage = Math.round(peak / maxPeak * 100);
-            this.fetchQueue.setProgress(tocIndex,percentage);
             if(this.excludeQueues.indexOf(tocIndex) == -1){
                 this.excludeQueues.push(tocIndex);
             }
+            if(fetchQueueEnabled){
+                const peak = this.excludeQueues.length;
+                const maxPeak = this.items.length;
+                const percentage = Math.round(peak / maxPeak * 100);
+                setTimeout(()=>{
+                    this.fetchQueue.setProgress(tocIndex,percentage);
+                },500);
+                
+                
+            }
+            
             this.checkedQueues[tocIndex] = false;
             this.checkAll = false;
        
@@ -90,7 +97,10 @@ export default defineComponent({
                 this.fetchBtns[nextTocIndex].fetchToc(true);
                 // console.log();
             }else{
-                
+                setTimeout(()=>{
+                    this.fetchQueue.btnState=this.fetchQueue.percentage==100?3:1;
+                    this.fetchQueue.lastTocIndex=0;
+                },1000);
             }
             // calling fetch button next index
             // this.$ref

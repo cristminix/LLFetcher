@@ -1,5 +1,11 @@
 <template>
   <div class="course-page page">
+    <div class="lbc">
+      <LogBar ref="logBar"/>
+    </div>
+    <div class="fsqc">
+      <FetchSectionQueue ref="fetchSectionQueue"/>
+    </div>
     <div class="course">
       <h2><i class="fa fa-bookmark"></i> {{course.title}} by {{makeTitle(authors[0].slug)}}</h2>
     </div>
@@ -30,12 +36,14 @@ import Author from '../../types/author';
 import ExerciseFile from '../../types/ExerciseFile';
 import TocItem from '../components/TocItem.vue';
 import FetchQueueBar from '../components/FetchQueueBar.vue';
+import FetchSectionQueue from '../components/FetchSectionQueue.vue';
+import LogBar from '../components/LogBar.vue';
 import {makeTitle} from '../../libs/utils';
 import $ from 'jquery';
 
 export default defineComponent({
   components:{
-    TocItem,FetchQueueBar
+    TocItem,FetchQueueBar,FetchSectionQueue,LogBar
   },
   props:{
     course : {
@@ -54,8 +62,10 @@ export default defineComponent({
     const exerciseFile = ref({} as ExerciseFile);
     const tocItems = ref([]);
     const fetchQueueBar = ref([]);
-    
-    return {course,authors,sections,exerciseFile,tocItems,fetchQueueBar};
+    const fetchSectionQueue=ref({});
+    const logBar=ref({});
+    return {course,authors,sections,exerciseFile,tocItems,
+    fetchQueueBar,fetchSectionQueue,logBar};
   },
   mounted(){
     $('.btn-collapse').click(function() {
@@ -64,6 +74,7 @@ export default defineComponent({
   },
   methods:{
     onTocUpdate(target:any){
+      console.log(target.src)
       // console.log(target);
       // this.exerciseFile = {name: target.exerciseFile.name, url: target.exerciseFile.url};
       this.$emit('update',target);

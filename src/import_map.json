@@ -1,0 +1,6 @@
+{
+    "imports": {
+        "/": "./node_modules",
+        "./": "./src"
+    }
+}

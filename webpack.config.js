@@ -6,7 +6,7 @@ module.exports = {
 		
 	  ],
 	  resolve: {
-		extensions: ['.tsx', '.ts', '.js']
+		extensions: [',tsx','.ts', '.js']
 	  },
     mode: 'development',
 	entry : {
@@ -19,7 +19,8 @@ module.exports = {
 	},
 	output : {
 		filename : "[name].js",
-		path : path.resolve(__dirname, "chrome_extension")
+		path : path.resolve(__dirname, "chrome_extension"),
+		// publicPath : 'auto'
 	},
 	// optimization:{
 	// 	splitChunks:{
@@ -27,7 +28,7 @@ module.exports = {
 	// 	}
 	// },
 	devServer:{
-		static: {directory:path.join(__dirname,'dist')},
+		static: {directory:path.join(__dirname,'chrome_extension')},
 		port:9000
 	},
 	module:{

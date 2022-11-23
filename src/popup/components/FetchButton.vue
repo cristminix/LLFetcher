@@ -53,7 +53,7 @@ export default defineComponent({
           // 1. set btn state icon to [loading]
           this.btnState = 2;
         
-          const url = '/chrome_extension/content.html?rand='+(Math.random().toString());
+          const url = '/content.html?rand='+(Math.random().toString());
           //const url = this.toc.url;
           Proxy.get(url, (responseText : string)=>{
             let validResource = this.parseToc(responseText);

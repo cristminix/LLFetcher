@@ -61,7 +61,7 @@ class Proxy{
         // }
         try{
             if(typeof optArgs === 'object'){
-                for(n in optArgs){
+                for(let n in optArgs){
                     let f = optArgs[n];
                     formData.append(n,f);
                 }

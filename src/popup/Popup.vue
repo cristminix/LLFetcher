@@ -12,12 +12,10 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, ref, PropType} from 'vue';
+import {defineComponent, ref} from 'vue';
 import NavTerm from '../types/navterm'; 
 import CourseInfo from '../types/CourseInfo'; 
-import Course from '../types/course'; 
-import Toc from '../types/toc'; 
-import Author from '../types/author';
+import Toc from '../types/toc';
 
 import PageNavigation from './components/PageNavigation.vue';
 import WelcomePage from './views/WelcomePage.vue'
@@ -57,7 +55,7 @@ export default defineComponent({
     return {nav, courseInfo, onNavUpdate, onCourseUpdate};
   },
   mounted(){
-    console.log('Popout is ready please initialize everythings here');
+    console.log('Popout is ready please initialize everything here');
     Store.getCourseJson((courseInfo : CourseInfo)=>{
       this.parseCourseData(courseInfo)
     });

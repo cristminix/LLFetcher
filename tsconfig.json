@@ -1,7 +1,12 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "esnext",
-    "baseUrl": "./"
-  }
+    "target": "ESNext",
+    "module": "ESNext",
+    "baseUrl": "./",
+    "allowJs": true,
+    "moduleResolution": "Node",
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["chrome_extension/*","node_modules/*"]
 }

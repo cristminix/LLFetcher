@@ -165,8 +165,6 @@ table.toc-item-list{
     padding-bottom: 1em;
     padding-right: 0;
 }
-.toc-row.ods{
-    /* background:#dededee2; */
-}
+
 
 </style>

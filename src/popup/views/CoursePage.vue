@@ -108,13 +108,13 @@ export default defineComponent({
 }
 .accordion-button:focus {
     z-index: 3;
-    border-color: none;
+    border-color: transparent;
     outline: 0;
     box-shadow: none;
 }
 .accordion-button:not(.collapsed) {
     color: inherit; 
-    background-color: none;
+    background-color: transparent;
     box-shadow: none; 
 }
 .accordion-button:not(.collapsed),
@@ -135,15 +135,4 @@ position: absolute;
  .accordion-body{
   padding:0;
  }
-/* ul.section-list{
-  list-style-type:none;
-  margin:0;
-  padding:0;
-}
-
-ul.section-list > li > h4{
-  font-size : 100%;
-  padding:.5em;
-  background: rgb(168, 210, 218);
-} */
 </style>

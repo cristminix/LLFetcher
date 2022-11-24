@@ -13,7 +13,7 @@ function _isValidCoursePage  (url : string) : boolean {
         }
     }
     return validCoursePage;
-};
+}
 function _sendCoookieMessage() : void {
     chrome.cookies.getAll({domain: "linkedin.com"}, function(_cookie) {
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs ) {

@@ -7,7 +7,7 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref, PropType, watchEffect } from 'vue'
+import { defineComponent, ref, PropType } from 'vue';
 import Toc from '../../types/toc';
 import Proxy from '../../libs/proxy';
 import jQuery from 'jquery';
@@ -21,11 +21,11 @@ export default defineComponent({
             type : Object as PropType<Toc>
         },
         sectionIndex : {
-            requied : true,
+            required : true,
             type : Number
         },
         tocIndex : {
-            requied : true,
+            required : true,
             type : Number
         }
   },
@@ -93,7 +93,7 @@ export default defineComponent({
         }
       },
       // Rebuild toc data to populate 
-      // StremLocations
+      // StreamLocations
       // ExerciseFile
       parseToc(responseText : string){
         let validResource = false;

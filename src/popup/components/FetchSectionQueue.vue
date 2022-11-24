@@ -25,7 +25,7 @@ export default defineComponent({
         const queueSlugs = ref([]);
         const showData = ref(false);
         const btnState = ref(1);
-        const percentage = ref(10);
+        const percentage = ref(0);
         const lastSectionIndex = ref(0);
         const sectionIndexQueues = ref([]);
         return {queueSlugs,showData,btnState,percentage,lastSectionIndex,sectionIndexQueues};
@@ -97,12 +97,14 @@ export default defineComponent({
     font-size: 10px;
 }
 .fetch-section-queue{
-    margin-bottom: 1em;
+    position: absolute;
+    right: 49px;
+    margin-top: 12px;
 }
 .btn-fetch-section-queue-cnt{
    width: 25px;
     position: absolute;
-    right: 38px;
+    right: -12px;
     margin-top: 2.5px;
 }
 </style>

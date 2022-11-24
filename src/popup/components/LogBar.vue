@@ -11,8 +11,8 @@ import {defineComponent,ref} from 'vue';
 
 export default defineComponent({
     setup(){
-        const mode = ref(1);
-        const message = ref('An Error Occured');
+        const mode = ref(-1);
+        const message = ref('');
 
         return {mode,message};
     },
@@ -27,13 +27,23 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.log-message{
+    font-family: monospace;
+    padding: .25em .5em;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 10px;
+}    
 .log-message.error{
-    color:red;
+    color:#fff;
+    background: red;
 }
 .log-message.success{
-    color:green;
+    color:#fff;
+    background: green;
 }
 .log-message.warning{
-    color:yellow;
+    color:maroon;
+    background: yellow;
 }
 </style>

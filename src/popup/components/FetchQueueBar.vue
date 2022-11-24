@@ -36,6 +36,7 @@ export default defineComponent({
         if(percentage==100){
             this.btnState = 3;
         }
+        this.$parent.fetchSectionQueue.report(this.sectionIndex,lastTocIndex,0);
         console.log(percentage)
     },
     startQueue(){
@@ -58,6 +59,7 @@ export default defineComponent({
     margin-top:-8px;
     padding:0;
     border:none !important;
+    font-size: 10px;
 }
 .fetch-queue{
     margin-bottom: 1em;
@@ -65,7 +67,7 @@ export default defineComponent({
 .btn-fetch-cnt{
    width: 25px;
     position: absolute;
-    right: 43px;
-    margin-top: 2px;
+    right: 38px;
+    margin-top: 2.5px;
 }
 </style>

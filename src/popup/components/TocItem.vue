@@ -1,23 +1,22 @@
 <template>
   <div class="toc-item-view">
     <FetchQueue v-show="false" ref="fetchQueue"/>
-    <table class="table table-bordered toc-item-list">
+    <table class="toc-item-list">
         <thead>
             <tr>
-                <th class="text-center" style="width:20px"><input @click="onCheckAll()" v-model="checkAll" class="form-check-input" type="checkbox"/></th>
-                <th>Title</th>
-                <th class="text-center" style="width:80px">Action</th>
+                <th colspan="2"><label><input @click="onCheckAll()" v-model="checkAll" class="form-check-input" type="checkbox"/> <span style="padding-left:.5em">Check All</span></label></th>
+               
+                <th></th>
+                <th class="text-center" style="width:80px"></th>
             </tr>
         </thead>
         <tbody>
         <tr v-for="(toc,tocIndex) in items" class="toc-item" :class="{ods:tocIndex%2==0}" :key="tocIndex">
-            <td  class="text-center">
+            <td class="fcc">
                 <input @click="tgQueue(tocIndex)" class="form-check-input" type="checkbox" v-model="checkedQueues[tocIndex]"/> 
             </td>
-            <td>
-                <i class="fa"></i> {{toc.title}}
-            </td>
-            <td class="text-center"><FetchButton @update="onFetchUpdate($event)" :sectionIndex="sectionIndex" :tocIndex="tocIndex" :toc="toc" checkedQueues="checkedQueues" ref="fetchBtns"/></td>
+            <td style="padding-left:.5em">{{toc.title}}</td>
+            <td colspan="2" style="text-align: right;"><FetchButton @update="onFetchUpdate($event)" :sectionIndex="sectionIndex" :tocIndex="tocIndex" :toc="toc" checkedQueues="checkedQueues" ref="fetchBtns"/></td>
         </tr>
         </tbody>
     </table>
@@ -68,21 +67,27 @@ export default defineComponent({
             },1000);
             
         },
+        calculatePercentageQueue(callback){
+            const peak = this.excludeQueues.length;
+            const maxPeak = this.items.length;
+            const percentage = Math.round(peak / maxPeak * 100);
+
+            if('function' == typeof callback){
+                callback(percentage,peak,maxPeak);
+            }
+        },
         triggerExcludeFetchQueue(tocIndex:number, fetchQueueEnabled:boolean){
             console.log(tocIndex);
             if(this.excludeQueues.indexOf(tocIndex) == -1){
                 this.excludeQueues.push(tocIndex);
             }
             if(fetchQueueEnabled){
-                const peak = this.excludeQueues.length;
-                const maxPeak = this.items.length;
-                const percentage = Math.round(peak / maxPeak * 100);
-                setTimeout(()=>{
-                    this.fetchQueue.setProgress(tocIndex,percentage);
-                    this.$parent.fetchQueueBar[this.sectionIndex].setProgress(tocIndex,percentage);
-                },500);
-                
-                
+                this.calculatePercentageQueue((percentage)=>{
+                    setTimeout(()=>{
+                        this.fetchQueue.setProgress(tocIndex,percentage);
+                        this.$parent.fetchQueueBar[this.sectionIndex].setProgress(tocIndex,percentage);
+                    },500);
+                });
             }
             
             this.checkedQueues[tocIndex] = false;
@@ -98,6 +103,12 @@ export default defineComponent({
                 this.fetchBtns[nextTocIndex].fetchToc(true);
                 // console.log();
             }else{
+                this.calculatePercentageQueue((percentage)=>{
+                    setTimeout(()=>{
+                        this.fetchQueue.setProgress(tocIndex,percentage);
+                        this.$parent.fetchQueueBar[this.sectionIndex].setProgress(tocIndex,percentage);
+                    },500);
+                });
                 setTimeout(()=>{
                     this.fetchQueue.btnState=this.fetchQueue.percentage==100?3:1;
                     this.fetchQueue.lastTocIndex=0;
@@ -136,14 +147,23 @@ export default defineComponent({
 </script>
 
 <style scoped>
+td.fcc{
+    text-align: right;
+    width:2.5em;
+}
 ul.toc-item-list{
   list-style-type:none;
   margin:0;
   padding:0;
 }
-.toc-row{
-    /* margin-bottom: .6em; */
-    /* padding :.5em; */
+table.toc-item-list{
+    width: 100%;
+}
+.toc-item-view{
+    padding: 0 2em;
+    font-size: 80%;
+    padding-bottom: 1em;
+    padding-right: 0;
 }
 .toc-row.ods{
     /* background:#dededee2; */

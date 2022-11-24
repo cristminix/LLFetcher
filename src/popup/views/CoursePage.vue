@@ -1,6 +1,8 @@
 <template>
   <div class="course-page page">
-    
+    <div class="course-data-cnt">
+      <CourseData ref="courseData"/>
+    </div>
     <div class="fsqc">
       <FetchSectionQueue ref="fetchSectionQueue"/>
     </div>
@@ -39,12 +41,13 @@ import TocItem from '../components/TocItem.vue';
 import FetchQueueBar from '../components/FetchQueueBar.vue';
 import FetchSectionQueue from '../components/FetchSectionQueue.vue';
 import LogBar from '../components/LogBar.vue';
+import CourseData from '../components/CourseData.vue';
 import {makeTitle} from '../../libs/utils';
 import $ from 'jquery';
 
 export default defineComponent({
   components:{
-    TocItem,FetchQueueBar,FetchSectionQueue,LogBar
+    TocItem,FetchQueueBar,FetchSectionQueue,LogBar,CourseData
   },
   props:{
     course : {
@@ -65,8 +68,9 @@ export default defineComponent({
     const fetchQueueBar = ref([]);
     const fetchSectionQueue=ref({});
     const logBar=ref({});
+    const courseData=ref({});
     return {course,authors,sections,exerciseFile,tocItems,
-    fetchQueueBar,fetchSectionQueue,logBar};
+    fetchQueueBar,fetchSectionQueue,logBar,courseData};
   },
   mounted(){
     $('.btn-collapse').click(function() {

@@ -23,6 +23,10 @@ class Store{
         }
 
     }
+    static getExerciseFile(courseId){
+        const db = Store.db();
+        return db.queryAll('exerciseFile',{query: {courseId}});
+    }
     static getCourse(slug){
         const db = Store.db();
         return db.queryAll('course',{query: {slug}});
@@ -34,6 +38,65 @@ class Store{
     static getToc(slug){
         const db = Store.db();
         return db.queryAll('toc',{query: {slug}});
+    }
+    static updateTocCaption(slug:string,captionUrl:string,captionFmt:string){
+        const db = Store.db();
+        const tocs = Store.getToc(slug);
+        if(tocs.length > 0){
+            const toc = tocs[0];
+            db.update("toc", {slug}, function(newToc) {
+                newToc.captionUrl = captionUrl;
+                newToc.captionFmt = captionFmt;
+                return newToc;
+            });
+        }
+    }
+
+    static getStreamLocation(tocId:number,fmt:string){
+        const db = Store.db();
+        return db.queryAll('streamLocation',{query: {tocId,fmt}});
+    }
+    static createStreamLocation(tocId:number,fmt:string,url:string){
+        const db = Store.db();
+        const streamLocations = Store.getStreamLocation(tocId,fmt);
+        if(streamLocations.length > 0){
+            const streamLocation = streamLocations[0];
+            db.update('streamLocation',(row)=>{
+                row.url = url;
+                return row;
+            })
+        }else{
+            db.insert('streamLocation',{tocId,fmt,url});
+        }
+        db.commit()
+    }
+    static createStreamLocationList(slug:string,streamLocations:any[]){
+        const db = Store.db();
+        const tocs = Store.getToc(slug);
+        if(tocs.length > 0){
+            const toc = tocs[0];
+            streamLocations.map((streamLocation)=>{
+                console.log(streamLocation);
+                Store.createStreamLocation(toc.ID,streamLocation.fmt,streamLocation.url);
+            });
+        }
+    }
+    static createExerciseFile(courseId:number,name:string,url:string,size:number){
+        const db = Store.db();
+        const exerciseFiles = Store.getExerciseFile(courseId);
+        let exerciseFile = null;
+
+        if(exerciseFiles.length === 0){
+            const ID = 0;
+            exerciseFile = {ID,courseId,name,url,size};
+            exerciseFile.ID = db.insert('exerciseFile',exerciseFile);
+            db.commit();
+
+        }else{
+            exerciseFile = exerciseFiles[0];
+        }
+
+        return exerciseFile;
     }
     static createSection(courseId:number,title:string){
         const db = Store.db();

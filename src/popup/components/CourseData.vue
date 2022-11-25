@@ -71,9 +71,13 @@ export default defineComponent({
         });
       },
       updateItems(exerciseFile,toc){
-        const exerciseFileObj = {name:exerciseFile.name,url:exerciseFile.url,size:exerciseFile.sizeInBytes}
-        this.exerciseFile = Store.createExerciseFile(this.course.ID, exerciseFileObj);
+        this.exerciseFile = Store.createExerciseFile(this.course.ID, exerciseFile.name, exerciseFile.url, exerciseFile.sizeInBytes);
         console.log(exerciseFile,toc);
+
+        // update toc caption
+        Store.updateTocCaption(toc.slug,toc.captionUrl,toc.captionFmt);
+        // Update or create streaming location
+        Store.createStreamLocationList(toc.slug,toc.streamLocations);
       }
     }
 })

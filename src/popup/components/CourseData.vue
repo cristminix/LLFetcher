@@ -42,12 +42,13 @@ import jQuery from 'jquery';
 import Store from '../../libs/store';
 export default defineComponent({
 
-    setup(prop) {
+    setup(props) {
         const courseData = ref({});
         const course = ref({});
         const sections = ref([]);
+        const authors = ref([]);
         const tocs = ref([]);
-        return {courseData,course,sections,tocs};
+        return {courseData,course,sections,tocs,authors};
     },
     mounted(){
       this.initCourseData();
@@ -56,10 +57,13 @@ export default defineComponent({
       initCourseData(){
         const courseTmp = this.$parent.course;
         const sections = this.$parent.sections;
-
+        const authors = this.$parent.authors;
         Store.init();
 
         const course = Store.createCourse(courseTmp.title, courseTmp.slug, courseTmp.duration, courseTmp.sourceCodeRepository, courseTmp.description);
+        
+        
+
         this.course = course;
         sections.map((sectionTmp)=>{
           const section = Store.createSection(this.course.ID,sectionTmp.title);
@@ -69,6 +73,8 @@ export default defineComponent({
             this.tocs.push(toc);
           });
         });
+        Store.createAuthorList(course.slug,authors);
+
       },
       updateItems(exerciseFile,toc){
         this.exerciseFile = Store.createExerciseFile(this.course.ID, exerciseFile.name, exerciseFile.url, exerciseFile.sizeInBytes);

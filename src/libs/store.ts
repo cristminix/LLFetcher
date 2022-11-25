@@ -1,6 +1,6 @@
 import localStorageDB from "localStorageDB";
 import Proxy  from "./proxy";
-import {makeSlug} from "./utils";
+import {makeSlug, makeTitle} from "./utils";
 class Store{
     static db(){
         return new localStorageDB("learning", 'localStorage');
@@ -9,8 +9,8 @@ class Store{
         const db = Store.db();
         if(db.isNew()){
             const schema = {
-                course : ["title", "slug", "duration", "sourceCodeRepository", "description"],
-                author : ["courseId","slug","biography", "shortBiography"],
+                course : ["title", "slug", "duration", "sourceCodeRepository", "description",'authorIds'],
+                author : ["name","slug","biography", "shortBiography","courseIds"],
                 exerciseFile : ["courseId","name","url","size"],
                 section : ["courseId","slug","title"],
                 toc : ["sectionId","title","slug","duration","captionUrl","captionFmt"],
@@ -23,21 +23,92 @@ class Store{
         }
 
     }
-    static getExerciseFile(courseId){
+    static getExerciseFile(courseId:number){
         const db = Store.db();
         return db.queryAll('exerciseFile',{query: {courseId}});
     }
-    static getCourse(slug){
+    static getCourse(slug:string){
         const db = Store.db();
         return db.queryAll('course',{query: {slug}});
     }
-    static getSection(slug){
+    static getCourseById(ID:number){
+        const db = Store.db();
+        return db.queryAll('course',{query: {ID}});
+    }
+    static getSection(slug:string){
         const db = Store.db();
         return db.queryAll('section',{query: {slug}});
     }
-    static getToc(slug){
+    static getToc(slug:string){
         const db = Store.db();
         return db.queryAll('toc',{query: {slug}});
+    }
+    static getAuthor(slug:string){
+        const db = Store.db();
+        return db.queryAll('author',{query: {slug}});
+    }
+    static createAuthor(name:string,slug:string,biography:string,shortBiography:string,courseId:number){
+        const db = Store.db();
+        const authors = Store.getAuthor(slug);
+        let author = null;
+        if(authors.length > 0){
+            author = authors[0];
+            if(typeof courseId === 'number'){
+                const courseIds = author.courseIds;
+                if(!courseIds.includes(courseId)){
+                    courseIds.push(courseId);
+
+                    db.update('author',{slug},(row)=>{
+                        row.courseIds = courseIds;
+
+                        return row;
+                    });
+                    setTimeout(()=>{db.commit()},100);
+                    author.courseIds = courseIds;
+                }
+
+            }
+        }else{
+            
+            const courseIds = [];
+            if(typeof courseId === 'number'){
+                courseIds.push(courseId);
+            }
+            const ID = 0;
+            author = {ID,name,slug,biography,shortBiography,courseIds};
+
+            author.ID = db.insert('author',author);
+
+            setTimeout(()=>{db.commit()},100);
+        }
+        
+
+        return author;
+    }
+    
+    static createAuthorList(courseSlug:string,authors:any[]){
+        const db = Store.db();
+        const courses = Store.getCourse(courseSlug);
+        if(courses.length > 0){
+            const course = courses[0];
+            let authorIds = course.authorIds;
+            authors.map((authorTmp)=>{
+                console.log(authorTmp);
+                const name = makeTitle(authorTmp.slug);
+                const author = Store.createAuthor(name,authorTmp.slug,authorTmp.biography,authorTmp.shortBiography,course.ID);
+                if(!authorIds.includes(author.ID)){
+                    authorIds.push(author.ID);
+                }
+                
+            });
+            
+            db.update('course',{slug:courseSlug},(row)=>{
+                row.authorIds = authorIds;
+
+                return row;
+            });
+            db.commit();
+        }
     }
     static updateTocCaption(slug:string,captionUrl:string,captionFmt:string){
         const db = Store.db();
@@ -139,7 +210,8 @@ class Store{
         let course = null;
         if(courses.length === 0){
             const ID = 0;
-            course = {ID,title,slug,duration,sourceCodeRepository,description};
+            const authorIds = [];
+            course = {ID,title,slug,duration,sourceCodeRepository,description,authorIds};
             course.ID = db.insert('course',course);
             db.commit();
         }else{

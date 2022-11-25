@@ -146,7 +146,7 @@ export default defineComponent({
                     for(let stlIdx in streamLocationObjs){
                       const url = streamLocationObjs[stlIdx].url;
                       const fmt = getFmt(url);
-                      toc.streamLocations.push({url:url,fmt:fmt})
+                      toc.streamLocations.push({url,fmt})
                   }
                 }
 

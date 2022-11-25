@@ -94,3 +94,8 @@ export function makeTitle(slug) {
   
   return words.join(' ');
 }
+
+export function makeSlug(str) {
+    const words = str.replace(/\W+/g,' ').split(' ');
+    return words.join('-').toLowerCase();
+}

@@ -79,11 +79,12 @@ export default defineComponent({
     });
   },
   methods:{
-    onTocUpdate(target:any){
-      console.log(target.src) 
-      // console.log(target);
-      // this.exerciseFile = {name: target.exerciseFile.name, url: target.exerciseFile.url};
-      this.$emit('update',target);
+    onTocUpdate(evt:any){
+      if(evt.src === 'Popup.CoursePage.TocItem.FetchButton'){
+        this.courseData.updateItems(evt.exerciseFile, evt.toc);
+      }
+
+      this.$emit('update',evt);
     },
     makeTitle(slug : string) {
         return makeTitle(slug);

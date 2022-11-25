@@ -1,6 +1,6 @@
 interface StreamLocation{
-    url : string,
-    fmt : string
+    fmt : string,
+    url : string
 }
 
 

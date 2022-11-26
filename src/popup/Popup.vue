@@ -8,7 +8,7 @@
     <DownloadPage v-if="nav=='downloads'"/>
     <HelpPage v-if="nav=='help'"/>
     <AboutPage v-if="nav=='about'"/>
-    <div class="console">
+    <div class="console" v-show="message.length>0">
       <highlightjs
           language="console"
           :code="JSON.stringify(message,null,2)"
@@ -58,14 +58,14 @@ export default defineComponent({
       console.log(target);
       // this.rebuildCourseInfo(sectionIndex, tocIndex, toc);
     };
-    const message = ref('Hello World');
+    const message = ref('');
     return {nav, courseInfo, onNavUpdate, onCourseUpdate, message};
   },
   mounted(){
-    console.log('Popout is ready please initialize everything here...');
-    // Store.getCourseJson((courseInfo : CourseInfo)=>{
-    //   this.parseCourseData(courseInfo)
-    // });
+    console.log('App Entry Point Start here...');
+    Store.prepareAppStorage();
+
+    this.log(`AppState:${Store.getAppState()}`);
   },
   methods:{
     log(message:string){

@@ -17,7 +17,7 @@ class Store{
                 streamLocation : ["tocId","fmt","url"],
                 downloadConfig : ["courseId","fmtList","selectedFmtList"],
                 downloads : ["tocId","downloadId","filename","progress","status"],
-                app: ["version","state","lastCourseId"]
+                app: ["version","state","lastCourseSlug"]
             };
             Object.keys(schema).map((table)=>{
                 db.createTable(table, schema[table]);
@@ -255,6 +255,66 @@ class Store{
         setTimeout(()=>{
             chrome.storage.sync.get(['dataCodes'] , (r)=>{callback(JSON.parse(r.dataCodes))});
         },1000);
+    }
+
+    static extractDataCodes(dataCodes:any){
+
+    }
+    static prepareAppStorage(){
+        
+    }
+    static initApp(courseSlug:string){
+        const db = Store.db();
+        const version = '1.0';
+        const apps = db.queryAll('app',{version});
+        let app = null;
+        if(apps.length === 0){
+            const state = 0;
+            const ID = 0;
+            const lastCourseSlug = courseSlug;
+            app = {ID,state,version,lastCourseSlug};
+            app.ID = db.insert('app',app);
+            db.commit();
+        }else{
+            app = apps[0];
+            if(app.lastCourseSlug !== courseSlug){
+                app.lastCourseSlug = courseSlug;
+                db.update('app',{version},(row)=>{
+                    row.lastCourseSlug = courseSlug;
+                    return row;
+                });
+                db.commit();
+            } 
+        }
+
+        return app;
+    }
+
+    static getAppState(){
+        const db = Store.db();
+        let appState = 0;
+        const version = '1.0';
+        const apps = db.queryAll('app',{version});
+        let app = null;
+        if(apps.length > 0){
+            app = apps[0];
+            if(app.lastCourseSlug === courseSlug){
+                appState = app.state;
+            }
+        }
+        return appState;
+    }
+    static setAppState(state : number){
+        const db = Store.db();
+        const version = '1.0';
+        const apps = db.queryAll('app',{version});
+        if(apps.length > 0){
+            db.update('app',{version},(row)=>{
+                row.state = state;
+                return row;
+            });
+            db.commit();
+        }
     }
 }
 

@@ -8,6 +8,12 @@
     <DownloadPage v-if="nav=='downloads'"/>
     <HelpPage v-if="nav=='help'"/>
     <AboutPage v-if="nav=='about'"/>
+    <div class="console">
+      <highlightjs
+          language="console"
+          :code="JSON.stringify(message,null,2)"
+      />
+    </div>
   </div>
 </template>
 
@@ -52,38 +58,39 @@ export default defineComponent({
       console.log(target);
       // this.rebuildCourseInfo(sectionIndex, tocIndex, toc);
     };
-    return {nav, courseInfo, onNavUpdate, onCourseUpdate};
+    const message = ref('Hello World');
+    return {nav, courseInfo, onNavUpdate, onCourseUpdate, message};
   },
   mounted(){
-    console.log('Popout is ready please initialize everything here');
-    Store.getCourseJson((courseInfo : CourseInfo)=>{
-      this.parseCourseData(courseInfo)
-    });
+    console.log('Popout is ready please initialize everything here...');
+    // Store.getCourseJson((courseInfo : CourseInfo)=>{
+    //   this.parseCourseData(courseInfo)
+    // });
   },
   methods:{
+    log(message:string){
+      this.message = message;
+
+    },
     // Rebuild course info by updated TOC
     rebuildCourseInfo(sectionIndex : number, tocIndex : number, toc : Toc){
       this.courseInfo.sections[sectionIndex].items[tocIndex] = toc; 
     },
     // Rebuild Source Data
     parseCourseData(courseInfo : CourseInfo){
-      
       for(let sectionIndex in courseInfo.sections){
         let sections = courseInfo.sections[sectionIndex];
         for(let tocIndex in sections.items){
           let toc = sections.items[tocIndex] as Toc;
           // rebuild toc url
-          toc.url = `https://www.linkedin.com/learning/${toc.slug}`;
-                    
+          toc.url = `https://www.linkedin.com/learning/${courseInfo.course.slug}/${toc.slug}`;
         }
       }
       this.courseInfo = courseInfo;
 
       setTimeout(()=>{
-      
-      console.log(courseInfo);
+        console.log(courseInfo);
         this.nav = this.$refs.pageNavigation.nav = 'course';
-      
       },250);
       
     }

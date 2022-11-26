@@ -1,21 +1,29 @@
 const path = require("path");
-const { VueLoaderPlugin } = require('vue-loader')
+const { VueLoaderPlugin } = require('vue-loader');
+const WebpackShellPluginNext = require('webpack-shell-plugin-next');
+
 module.exports = {
 	plugins: [
 		new VueLoaderPlugin(),
-		
-	  ],
+		new WebpackShellPluginNext({
+			onAfterDone: {
+				scripts: ['ffplay -autoexit -nodisp hero.wav;curl localhost:7700/reload'],
+				blocking: true,
+				parallel: false
+			}
+		})
+	],
 	  resolve: {
-		extensions: [',tsx','.ts', '.js']
+		extensions: ['.tsx','.ts', '.js']
 	  },
-    mode: 'development',
+	mode: 'development',
+	devtool: 'inline-source-map',
 	entry : {
 		popup:"./src/popup/popup.ts",
-		// content:"./src/content_scripts/content.ts",
+		content:"./src/content_scripts/content.ts",
 		// inject:"./src/content_scripts/inject.ts",
-		// create_data_codes:"./src/content_scripts_inject/create_data_codes.js",
-        // background: "./src/service_workers/background.ts",
-
+		create_data_codes:"./src/content_scripts_inject/create_data_codes.js",
+        // background: "./src/service_workers/background.ts"
 	},
 	output : {
 		filename : "[name].js",
@@ -29,7 +37,10 @@ module.exports = {
 	// },
 	devServer:{
 		static: {directory:path.join(__dirname,'chrome_extension')},
-		port:9000
+		port:9000,
+		devMiddleware: {
+			writeToDisk: true
+		}
 	},
 	module:{
 		rules:[
@@ -46,7 +57,6 @@ module.exports = {
 				},
 				exclude : /node_modules/
 			},
-			
 			{
 				test : /\.js$/,
 				exclude:/(node_modules)/,

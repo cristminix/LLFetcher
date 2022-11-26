@@ -99,3 +99,19 @@ export function makeSlug(str) {
     const words = str.replace(/\W+/g,' ').split(' ');
     return words.join('-').toLowerCase();
 }
+
+export function sendMessageSaveDataCodesToLS(){
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        const tab = tabs[0];
+        chrome.tabs.sendMessage(tab.id, {event: 'SaveDataCodesToLS'}, (r) => {});
+
+    });
+}
+
+export function contentConsoleLog(data){
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        const tab = tabs[0];
+        chrome.tabs.sendMessage(tab.id, {event: 'ContentConsoleLog',param:data}, (r) => {});
+
+    });
+}

@@ -17,18 +17,16 @@ chrome.runtime.onMessage.addListener(function (response, sendResponse) {
             chrome.storage.sync.set({activeCookie: cookieStr});
 			
 		}
-		else if(response.event == 'exec'){
-            switch(response.fn){
-            	case 'EXT_COURSE_INFO':
-            		let node : HTMLElement | null = document.getElementById('course_info');
-                    if(node !== null){
-                        let dataStr = node.getAttribute('data');
-                        localStorage["EXT_COURSE_INFO"] = dataStr;
-                        chrome.storage.sync.set({EXT_COURSE_INFO: dataStr});
-                    }
-            	break;
+		else if(response.event == 'SaveDataCodesToLS'){
+            let node : HTMLElement | null = document.getElementById('dataCodes');
+            if(node !== null) {
+                let dataStr = node.getAttribute('data');
+                localStorage["dataCodes"] = dataStr;
+                chrome.storage.sync.set({dataCodes: dataStr});
             }
-			
 		}
+        else if(response.event == 'ContentConsoleLog'){
+            console.log('Popup.log:',response.param);
+        }
 	}
 });

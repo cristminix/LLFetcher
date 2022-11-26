@@ -11,26 +11,7 @@
             />
           </div>
         </li>
-        <li>
-          <div class="data-title">SECTIONS</div>
-          <div class="data-content">
 
-            <highlightjs
-                language="json"
-                :code="JSON.stringify(sections,null,2)"
-            />
-          </div>
-        </li>
-        <li>
-          <div class="data-title">TOCS</div>
-          <div class="data-content">
-
-            <highlightjs
-                language="json"
-                :code="JSON.stringify(tocs,null,2)"
-            />
-          </div>
-        </li>
       </ul>
     </div>
 </template>
@@ -74,7 +55,10 @@ export default defineComponent({
           });
         });
         Store.createAuthorList(course.slug,authors);
-
+        this.updateItemFromLS();
+      },
+      updateItemFromLS(){
+        console.log('Please update everything from localStorage here..');
       },
       updateItems(exerciseFile,toc){
         this.exerciseFile = Store.createExerciseFile(this.course.ID, exerciseFile.name, exerciseFile.url, exerciseFile.sizeInBytes);

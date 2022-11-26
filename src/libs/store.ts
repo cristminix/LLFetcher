@@ -13,8 +13,11 @@ class Store{
                 author : ["name","slug","biography", "shortBiography","courseIds"],
                 exerciseFile : ["courseId","name","url","size"],
                 section : ["courseId","slug","title"],
-                toc : ["sectionId","title","slug","duration","captionUrl","captionFmt"],
-                streamLocation : ["tocId","fmt","url"]
+                toc : ["sectionId","title","slug","duration","captionUrl","captionFmt","streamLocationIds"],
+                streamLocation : ["tocId","fmt","url"],
+                downloadConfig : ["courseId","fmtList","selectedFmtList"],
+                downloads : ["tocId","downloadId","filename","progress","status"],
+                app: ["version","state","lastCourseId"]
             };
             Object.keys(schema).map((table)=>{
                 db.createTable(table, schema[table]);
@@ -120,6 +123,7 @@ class Store{
                 newToc.captionFmt = captionFmt;
                 return newToc;
             });
+            db.commit();
         }
     }
 
@@ -130,26 +134,43 @@ class Store{
     static createStreamLocation(tocId:number,fmt:string,url:string){
         const db = Store.db();
         const streamLocations = Store.getStreamLocation(tocId,fmt);
+        let streamLoc = null;
         if(streamLocations.length > 0){
-            const streamLocation = streamLocations[0];
+            streamLoc = streamLocations[0];
+            streamLoc.url = url;
             db.update('streamLocation',(row)=>{
                 row.url = url;
                 return row;
-            })
+            });
         }else{
-            db.insert('streamLocation',{tocId,fmt,url});
+            const ID = 0;
+            streamLoc = {ID,tocId,fmt,url};
+            streamLoc.ID = db.insert('streamLocation',streamLoc);
         }
-        db.commit()
+        setTimeout(()=>db.commit(),100);
+
+        return streamLoc;
     }
     static createStreamLocationList(slug:string,streamLocations:any[]){
         const db = Store.db();
         const tocs = Store.getToc(slug);
         if(tocs.length > 0){
             const toc = tocs[0];
+            const streamLocationIds = toc.streamLocationIds;
             streamLocations.map((streamLocation)=>{
                 console.log(streamLocation);
-                Store.createStreamLocation(toc.ID,streamLocation.fmt,streamLocation.url);
+                const streamLoc = Store.createStreamLocation(toc.ID,streamLocation.fmt,streamLocation.url);
+                if(!streamLocationIds.includes(streamLoc.ID)){
+                    streamLocationIds.push(streamLoc.ID);
+                }
             });
+
+            db.update('toc',{slug},(row)=>{
+               row.streamLocationIds = streamLocationIds;
+               return row;
+            });
+
+            db.commit();
         }
     }
     static createExerciseFile(courseId:number,name:string,url:string,size:number){
@@ -194,7 +215,8 @@ class Store{
 
         if(tocs.length === 0){
             const ID = 0;
-            toc = {ID,sectionId,title,slug,duration,captionUrl,captionFmt};
+            const streamLocationIds = [];
+            toc = {ID,sectionId,title,slug,duration,captionUrl,captionFmt,streamLocationIds};
             toc.ID = db.insert('toc',toc);
             db.commit();
 
@@ -228,6 +250,11 @@ class Store{
                 callback(r);
             }
         })
+    }
+    static getDataCodesLS(callback:Function){
+        setTimeout(()=>{
+            chrome.storage.sync.get(['dataCodes'] , (r)=>{callback(JSON.parse(r.dataCodes))});
+        },1000);
     }
 }
 

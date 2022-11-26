@@ -51,6 +51,7 @@
     "localstoragedb": "^2.3.2",
     "underscore": "^1.13.6",
     "vue": "^3.2.36",
-    "vue-loader": "^17.0.1"
+    "vue-loader": "^17.0.1",
+    "webpack-shell-plugin-next": "^2.3.1"
   }
 }

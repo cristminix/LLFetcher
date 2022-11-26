@@ -17,3 +17,4 @@ const app = createApp(Popup);
 
 app.use(hljsVuePlugin);
 app.mount('#popup');
+

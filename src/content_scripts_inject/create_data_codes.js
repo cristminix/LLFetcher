@@ -119,11 +119,36 @@ function createDataCodes(){
 	console.log(courseInfo);
 	
 	let code = document.createElement('code');
-    code.id = 'course_info';
+    code.id = 'dataCodes';
     code.setAttribute('data', JSON.stringify(courseInfo));	
 	let node = document.getElementsByTagName('body')[0];
     node.appendChild(code);
 }
 
 
-window.onload = ()=>{createDataCodes()};
+window.onload = ()=>{
+    try{
+        createDataCodes();
+    }catch(e){
+        console.log(e);
+    }
+    const replacedContent = '<h1>@replaced</h1>';
+    try{
+        document.querySelector('.linkedin-logo').innerHTML = replacedContent;
+    }catch(e){
+        console.log(e);
+    }
+    try{
+        document.getElementById('replacedContent').innerHTML = replacedContent;
+    }catch(e){
+        console.log(e);
+    }
+    // setTimeout(()=>{
+    //     console.log('Hello');
+    // });
+    //
+    // chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
+    //
+    //     console.log(msg,sender,sendResponse);
+    // });
+};

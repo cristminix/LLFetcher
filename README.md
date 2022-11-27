@@ -22,7 +22,7 @@ To be able to successfully using this stuff you might prepare for high and stabl
 3. Search and Go to valid course page identified by url like `https://linkedin.com/learning/<YOUR_COURSE_NAME>` 
 4. Click on the extension button on the top right of your browser then pin it
 5. Once you had clicked button popup would shown
-6. Try to explore thats button from left to right
+6. Try to explore and get experiance from clicking the buttons from the popup from left to right, so you should know whats going on?
 7. Remember to set config before clicking button that contains download or direct link
 
 `Note:` Since this extension is still in development, if you are in the download stage please dont close the extension popup or the download process will be interupted.

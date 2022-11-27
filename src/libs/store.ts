@@ -261,7 +261,7 @@ class Store{
 
     }
     static prepareAppStorage(){
-        
+        Store.initApp('');
     }
     static initApp(courseSlug:string){
         const db = Store.db();
@@ -277,7 +277,7 @@ class Store{
             db.commit();
         }else{
             app = apps[0];
-            if(app.lastCourseSlug !== courseSlug){
+            if(app.lastCourseSlug !== courseSlug && courseSlug !==''){
                 app.lastCourseSlug = courseSlug;
                 db.update('app',{version},(row)=>{
                     row.lastCourseSlug = courseSlug;
@@ -298,9 +298,7 @@ class Store{
         let app = null;
         if(apps.length > 0){
             app = apps[0];
-            if(app.lastCourseSlug === courseSlug){
-                appState = app.state;
-            }
+            appState = app.state;
         }
         return appState;
     }
@@ -316,6 +314,17 @@ class Store{
             db.commit();
         }
     }
+    static getAppInfo(){
+        const db = Store.db();
+        const version = '1.0';
+        const apps = db.queryAll('app',{version});
+        if(apps.length > 0){
+            return apps[0];
+        }
+
+        return null;
+    }
+    
 }
 
 export default Store;

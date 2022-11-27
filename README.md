@@ -1,29 +1,30 @@
-# ™ LLFetcher
-Linked Learning Fetcher
+# **LLFetcher**
+**LLFetcher** is stand for *Linked Learning Fetcher* which is just a simple chrome extension purposed to enable you easily download course content resources including course video with multiple size format, video caption or transcript, exercise file from E-Learning website specially Linked In Learning.
 
-- Open google chrome
-- Go to settings -->  extensions
-- In the extensions tab click Enable developer mode
-- Then click in the Load Unpacked  
-- Next locate to project directory and Choose chrome_extension folder
+# **How to install this extension to your Chrome browser**
+To install this chrome extension manually we recommend you download zip file in from the release page, since this page created.
 
-# ∑ Logic
+# **Downloading and installing this extension**
+1. Grab in this release file [LLFetcher-1.0.0.zip](https://github.com/cristminix/LLFetcher/releases/download/v1.0.0/LLFetcher-1.0.0.zip) then download to whatever directory you wants.
+2. Extract / Unzip this file 
+3. Open google chrome
+4. Go to settings -->  extensions
+5. In the extensions tab click Enable developer mode
+6. Then click in the Load Unpacked  
+7. Next locate to project directory and Choose chrome_extension folder
 
-# © content script
-- Retrieve data from current emberjs app
-- Save data to datacodes element
+# **Using this chrome extension**
+To be able to successfully using this stuff you might prepare for high and stable internet connection speed, and the rest you have to land to valid Linked In Learning course page and you must logedin or if you were not , this extension will went inactive or gone wrong.
 
-# ∞ extension script
-- Retrieve data from datacodes content script
-- Extract data to relational model
-- Save to local storage
-- init app
- 
-# ¶ App State
-- 0 : no datacodes exists on db
-- 1 : datacodes exists but not fetched
-- 2 : datacodes exists and fetched but incomplete
-- 3 : datacodes exists and fetched and complete
-- 4 : datacodes exists and download started
-- 5 : datacodes exists and download started but uncomplete
-- 6 : datacodes exists and download complete
+# **Preparation for using this extension**
+1. Navigate your browser to `https://linkedin.com/learning/`
+2. Login using individual or organization account
+3. Search and Go to valid course page identified by url like `https://linkedin.com/learning/<YOUR_COURSE_NAME>` 
+4. Click on the extension button on the top right of your browser then pin it
+5. Once you had clicked button popup would shown
+6. Try to explore thats button from left to right
+7. Remember to set config before clicking button that contains download or direct link
+
+`Note:` Since this extension is still in development, if you are in the download stage please dont close the extension popup or the download process will be interupted.
+
+`Disclaimer:` This purpose of this project is just for educational process as part of the journey of the creator in the programming world, please use at your own responsibiity.

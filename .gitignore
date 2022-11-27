@@ -5,3 +5,4 @@ node_modules
 olds
 package-lock.json
 /.DS_Store
+/hero_.wav

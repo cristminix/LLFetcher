@@ -1,16 +1,22 @@
 <template>
   <div class="welcome-page page">
+    <p>{{greeting}}</p>
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent,ref } from 'vue';
 
 
 export default defineComponent({
-  data() {
+  setup() {
+    const nav = ref('welcome'),
+    const greeting = ref('Welcome to LLFetcher, what do you want to do ?');
     return {
-      nav: 'welcome'
+      nav,greeting
     }
+  },
+  mounted(){
+
   },
   methods:{
     

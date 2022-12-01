@@ -3,9 +3,65 @@ import Proxy  from "./proxy";
 import {makeSlug, makeTitle} from "./utils";
 import Toc from "../types/toc";
 import CourseInfo from "../types/CourseInfo";
+
+class MyLS {
+    db : localStorageDB; 
+    subscribers = {};
+    lastTable = '';
+    lastTablePk = {};
+
+    constructor(db,engine){
+        this.db = new localStorageDB(db,engine);
+    }
+    subscribe(table:string,fn:Function){
+        this.subscribers[table] = fn;
+    }
+
+    update(table: string, query: localStorageDB_dynamicFields | localStorageDB_callbackFilter, update?: localStorageDB_callback):number{
+
+        const ret = this.db.update(table,query,update);
+        this.lastTable = table;
+        this.lastTablePk = ret;
+
+        return ret;
+    }
+    
+    insert(a,b){
+        return this.db.insert(a,b);
+    }
+    queryAll(a,b,c){
+        return this.db.queryAll(a,b,c);
+    }
+    getRow(table,ID){
+        return this.db.queryAll(table,{ID})[0];
+    }
+    commit():boolean{
+        const ret = this.db.commit();
+
+        if(this.lastTable !== ''){
+            if(typeof this.subscribers[this.lastTable] === 'function'){
+                const row = this.getRow(this.lastTable,this.lastTablePk);
+                this.subscribers[this.lastTable](row);
+                this.lastTable = '';
+                this.lastTableData = {};
+            }
+        }
+        return ret;
+    }
+    isNew(){
+        return this.db.isNew();
+    }
+    createTable(a){
+        return this.db.createTable(a);
+    }
+}
 class Store{
-    static db(){
-        return new localStorageDB("learning", 'localStorage');
+    static __db__;
+    static db() : undefined| MyLS{
+        if(typeof Store.__db__ === 'undefined'){
+            Store.__db__ = new MyLS("learning", 'localStorage');
+        }
+        return Store.__db__;
     }
     static init(){
         const db = Store.db();
@@ -38,7 +94,14 @@ class Store{
     }
     static getLastCourses(){
         const db = Store.db();
-        return db.queryAll('course',{query: {}});
+        const appState = Store.getAppState();
+
+        return db.queryAll('course',{query: (row)=>{
+                if(row.slug !== appState.lastCourseSlug){
+                    return true;
+                }
+            }
+        });
     }
     static getCourseById(ID:number){
         const db = Store.db();
@@ -234,7 +297,7 @@ class Store{
         if(tocs.length === 0){
             const ID = 0;
             const streamLocationIds = [];
-            toc = {ID,sectionId,title,slug,duration,captionUrl,captionFmt,streamLocationIds};
+            toc = {ID,sectionId,title,slug,url,duration,captionUrl,captionFmt,streamLocationIds};
             toc.ID = db.insert('toc',toc);
             db.commit();
 
@@ -290,7 +353,7 @@ class Store{
         });
 
         Store.createAuthorList(course.slug,authors);
-
+        Store.setAppState(1,course.slug);
         return course;
     }
     static prepareAppStorage(){
@@ -326,23 +389,26 @@ class Store{
 
     static getAppState(){
         const db = Store.db();
-        let appState = 0;
+        //let appState = 0;
         const version = '1.0';
         const apps = db.queryAll('app',{version});
         let app = null;
         if(apps.length > 0){
             app = apps[0];
-            appState = app.state;
+            //appState = app.state;
         }
-        return appState;
+        return app;
     }
-    static setAppState(state : number){
+    static setAppState(state : number,courseSlug?:string){
         const db = Store.db();
         const version = '1.0';
         const apps = db.queryAll('app',{version});
         if(apps.length > 0){
             db.update('app',{version},(row)=>{
                 row.state = state;
+                if(typeof courseSlug !== 'undefined'){
+                    row.lastCourseSlug = courseSlug;
+                }
                 return row;
             });
             db.commit();

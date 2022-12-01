@@ -1,0 +1,9 @@
+{
+  "name": "org.vim.stayfresh",
+  "description": "Reacts to Vim events and refreshes Chrome accordingly.",
+  "path": "C:\\Users\\Ratu\\Desktop\\LLFetcher\\tools\\chrome-stay-fresh\\host\\stay-fresh-listener.exe",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://kdbaidabfeghlkcipajbikhihkegomcm/"
+  ]
+}

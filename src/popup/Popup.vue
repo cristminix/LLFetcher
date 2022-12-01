@@ -22,6 +22,7 @@ import {defineComponent, ref} from 'vue';
 import NavTerm from '../types/navterm'; 
 import CourseInfo from '../types/CourseInfo'; 
 import Toc from '../types/toc';
+import Course from '../types/course';
 
 import PageNavigation from './components/PageNavigation.vue';
 import WelcomePage from './views/WelcomePage.vue'
@@ -59,13 +60,23 @@ export default defineComponent({
       // this.rebuildCourseInfo(sectionIndex, tocIndex, toc);
     };
     const message = ref('');
-    return {nav, course, onNavUpdate, onCourseUpdate, message};
+    const app = ref({state:0})
+    return {nav, course, onNavUpdate, onCourseUpdate, message,app};
   },
   mounted(){
     console.log('App Entry Point Start here...');
     Store.prepareAppStorage();
 
-    this.log(`AppState:${Store.getAppState()}`);
+    setTimeout(()=>{
+      const db = Store.db();
+      console.log(db);
+      db.subscribe('app',(row)=>{
+        // console.log(row);
+        this.app = row;
+        this.log(`AppState:${row.state}`);
+      });
+    },1000)
+
   },
   methods:{
     log(message:string){

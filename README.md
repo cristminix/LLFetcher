@@ -28,3 +28,14 @@ To be able to successfully using this stuff you might prepare for high and stabl
 `Note:` Since this extension is still in development, if you are in the download stage please dont close the extension popup or the download process will be interupted.
 
 `Disclaimer:` This purpose of this project is just for educational process as part of the journey of the creator in the programming world, please use at your own responsibiity.
+
+
+# Extensions development
+
+Currently this extension development requirement are :
+0. `nodejs >= v15` `Vue >= 3.0` , `webpack >= 5.75.0`, a little `typescript`
+1. `bash` shell
+2. `ffplay` for playing sound on webpack
+3. `curl` used for reloading extension
+4. modified version from original [`chrome-stay-fresh`](https://github.com/ahw/chrome-stay-fresh) for auto reloading extension
+5. a little patient 

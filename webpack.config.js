@@ -7,7 +7,7 @@ module.exports = {
 		new VueLoaderPlugin(),
 		new WebpackShellPluginNext({
 			onAfterDone: {
-				scripts: ['ffplay -autoexit -nodisp hero.wav;curl localhost:7700/reload'],
+				scripts: ['bash play_and_reload.sh'],
 				blocking: true,
 				parallel: false
 			}

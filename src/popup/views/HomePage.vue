@@ -23,9 +23,10 @@ export default defineComponent({
       // load data codes from ls
       Store.getDataCodesLS((dataCodes)=>{
         this.btnRetrieveState = 2;
-        console.log(dataCodes)
-        this.$parent.parseCourseData(dataCodes)
-        contentConsoleLog(dataCodes);
+        // console.log(dataCodes)
+        Store.saveDataCodes(dataCodes);
+        this.$parent.setCourse(dataCodes.course);
+        // contentConsoleLog(dataCodes);
       })
 
     }

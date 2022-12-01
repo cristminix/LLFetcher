@@ -1,6 +1,8 @@
 import localStorageDB from "localStorageDB";
 import Proxy  from "./proxy";
 import {makeSlug, makeTitle} from "./utils";
+import Toc from "../types/toc";
+import CourseInfo from "../types/CourseInfo";
 class Store{
     static db(){
         return new localStorageDB("learning", 'localStorage');
@@ -13,7 +15,7 @@ class Store{
                 author : ["name","slug","biography", "shortBiography","courseIds"],
                 exerciseFile : ["courseId","name","url","size"],
                 section : ["courseId","slug","title"],
-                toc : ["sectionId","title","slug","duration","captionUrl","captionFmt","streamLocationIds"],
+                toc : ["sectionId","title","slug","url","duration","captionUrl","captionFmt","streamLocationIds"],
                 streamLocation : ["tocId","fmt","url"],
                 downloadConfig : ["courseId","fmtList","selectedFmtList"],
                 downloads : ["tocId","downloadId","filename","progress","status"],
@@ -34,6 +36,10 @@ class Store{
         const db = Store.db();
         return db.queryAll('course',{query: {slug}});
     }
+    static getLastCourses(){
+        const db = Store.db();
+        return db.queryAll('course',{query: {}});
+    }
     static getCourseById(ID:number){
         const db = Store.db();
         return db.queryAll('course',{query: {ID}});
@@ -42,6 +48,14 @@ class Store{
         const db = Store.db();
         return db.queryAll('section',{query: {slug}});
     }
+    static getSectionByCourseId(courseId:number){
+        const db = Store.db();
+        return db.queryAll('section',{query: {courseId}});
+    }
+    static getTocBySectionId(sectionId:number){
+        const db = Store.db();
+        return db.queryAll('toc',{query: {sectionId}});
+    }
     static getToc(slug:string){
         const db = Store.db();
         return db.queryAll('toc',{query: {slug}});
@@ -49,6 +63,10 @@ class Store{
     static getAuthor(slug:string){
         const db = Store.db();
         return db.queryAll('author',{query: {slug}});
+    }
+    static getAuthorById(ID:number){
+        const db = Store.db();
+        return db.queryAll('author',{query: {ID}});
     }
     static createAuthor(name:string,slug:string,biography:string,shortBiography:string,courseId:number){
         const db = Store.db();
@@ -208,7 +226,7 @@ class Store{
 
         return section;
     }
-    static createToc(sectionId:number,title:string,slug:string,duration:number, captionUrl?:string, captionFmt?:string){
+    static createToc(sectionId:number,title:string,slug:string,url:string,duration:number, captionUrl?:string, captionFmt?:string){
         const db = Store.db();
         const tocs = Store.getToc(slug);
         let toc = null;
@@ -257,10 +275,26 @@ class Store{
         },1000);
     }
 
-    static extractDataCodes(dataCodes:any){
+    static saveDataCodes(dataCodes:CourseInfo){
+        const courseTmp = dataCodes.course;
+        const authors = courseTmp.authors;
+        const course = Store.createCourse(courseTmp.title, courseTmp.slug, courseTmp.duration, courseTmp.sourceCodeRepository, courseTmp.description);
 
+        const sections = dataCodes.sections;
+        sections.map((sectionTmp)=>{
+            const section = Store.createSection(course.ID,sectionTmp.title);
+            sectionTmp.items.map((tocTmp)=>{
+                tocTmp.url = `https://www.linkedin.com/learning/${course.slug}/${tocTmp.slug}`;
+                const toc = Store.createToc(section.ID,tocTmp.title,tocTmp.slug,tocTmp.url,tocTmp.duration);
+            });
+        });
+
+        Store.createAuthorList(course.slug,authors);
+
+        return course;
     }
     static prepareAppStorage(){
+        Store.init();
         Store.initApp('');
     }
     static initApp(courseSlug:string){
@@ -326,5 +360,5 @@ class Store{
     }
     
 }
-
+Store.init();
 export default Store;

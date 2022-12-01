@@ -4,7 +4,7 @@
     <WelcomePage v-if="nav=='welcome'"/>
     <LoadingPage v-if="nav=='loading'" text="Fetching Course Data"/>
     <HomePage v-if="nav=='home'"/>
-    <CoursePage @update="onCourseUpdate($event)" v-if="nav=='course'" :course="courseInfo.course" :sections="courseInfo.sections" ref="coursePage"/>
+    <CoursePage @update="onCourseUpdate($event)" v-if="nav=='course'" :course="course"  ref="coursePage"/>
     <DownloadPage v-if="nav=='downloads'"/>
     <HelpPage v-if="nav=='help'"/>
     <AboutPage v-if="nav=='about'"/>
@@ -47,7 +47,7 @@ export default defineComponent({
   },
   setup(){
     const nav = ref<NavTerm>('welcome');
-    const courseInfo = ref({} as CourseInfo);
+    const course = ref({} as Course);
 
     const onNavUpdate = (target : NavTerm) => {
       nav.value = target;
@@ -59,7 +59,7 @@ export default defineComponent({
       // this.rebuildCourseInfo(sectionIndex, tocIndex, toc);
     };
     const message = ref('');
-    return {nav, courseInfo, onNavUpdate, onCourseUpdate, message};
+    return {nav, course, onNavUpdate, onCourseUpdate, message};
   },
   mounted(){
     console.log('App Entry Point Start here...');
@@ -72,27 +72,11 @@ export default defineComponent({
       this.message = message;
 
     },
-    // Rebuild course info by updated TOC
-    rebuildCourseInfo(sectionIndex : number, tocIndex : number, toc : Toc){
-      this.courseInfo.sections[sectionIndex].items[tocIndex] = toc; 
-    },
-    // Rebuild Source Data
-    parseCourseData(courseInfo : CourseInfo){
-      for(let sectionIndex in courseInfo.sections){
-        let sections = courseInfo.sections[sectionIndex];
-        for(let tocIndex in sections.items){
-          let toc = sections.items[tocIndex] as Toc;
-          // rebuild toc url
-          toc.url = `https://www.linkedin.com/learning/${courseInfo.course.slug}/${toc.slug}`;
-        }
-      }
-      this.courseInfo = courseInfo;
-
+    setCourse(course){
+      this.course = course;
       setTimeout(()=>{
-        console.log(courseInfo);
         this.nav = this.$refs.pageNavigation.nav = 'course';
       },250);
-      
     }
   }
 })
@@ -101,7 +85,7 @@ export default defineComponent({
 
 <style scoped>
 #popup {
-    width : 600px;
+    width : 680px;
     min-height: 480px;
     padding: 1em;
     background: rgb(249, 242, 249);
@@ -110,7 +94,7 @@ export default defineComponent({
 
 .page{
   margin :0 2em 2em;
-  border: solid 1px #dedede;
+  /*border: solid 1px #dedede;*/
   padding: 1em;
   border-radius: 4px;
 }

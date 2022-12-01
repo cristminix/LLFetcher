@@ -1,13 +1,10 @@
 <template>
   <div class="course-page page">
-    <div class="course-data-cnt">
-      <CourseData ref="courseData"/>
-    </div>
     <div class="fsqc">
       <FetchSectionQueue ref="fetchSectionQueue"/>
     </div>
     <div class="course">
-      <h2><i class="fa fa-bookmark"></i> {{course.title}} by {{makeTitle(authors[0].slug)}}</h2>
+      <h2><i class="fa fa-bookmark"></i> {{course.title}} by <span v-for="author in authors">{{makeTitle(author.slug)}}</span></h2>
     </div>
     <div class="accordion accordion-flush" id="accordionCourse">
     <div v-for="(section,sectionIndex ) in sections" :key="sectionIndex" class="accordion-item">
@@ -34,6 +31,7 @@
 <script lang="ts">
 import { defineComponent,ref,PropType } from 'vue';
 import Course from '../../types/course';
+import Toc from '../../types/toc';
 import Section from '../../types/section';
 import Author from '../../types/author';
 import ExerciseFile from '../../types/ExerciseFile';
@@ -44,6 +42,7 @@ import LogBar from '../components/LogBar.vue';
 import CourseData from '../components/CourseData.vue';
 import {makeTitle} from '../../libs/utils';
 import $ from 'jquery';
+import Store from "../../libs/store";
 
 export default defineComponent({
   components:{
@@ -61,8 +60,8 @@ export default defineComponent({
   },
   setup(props) {
     const course = ref(props.course);
-    const authors = ref(props.course.authors as Author[]); 
-    const sections = ref(props.sections as Section[]); 
+    const authors = ref([] as Author[]);
+    const sections = ref([] as Section[]);
     const exerciseFile = ref({} as ExerciseFile);
     const tocItems = ref([]);
     const fetchQueueBar = ref([]);
@@ -77,11 +76,38 @@ export default defineComponent({
         $(this).find('i').toggleClass('fa fa-plus fa fa-minus');
         $('.btn-collapse').not(this).find('i').removeClass('fa-minus').addClass('fa-plus ');
     });
+
+    this.loadCourseData();
   },
   methods:{
+    loadCourseData(){
+      const courseSlug = this.course.slug;
+      this.course = Store.getCourse(courseSlug)[0];
+      const sections = Store.getSectionByCourseId(this.course.ID);
+      sections.map((sectionTmp)=>{
+        const sectionId = sectionTmp.ID;
+        let section = sectionTmp as Section;
+        section.items = Store.getTocBySectionId(section.ID) as Toc[];
+        this.sections.push(section);
+      });
+      console.log(this.course);
+      this.course.authorIds.map((ID)=>{
+        this.authors.push(Store.getAuthorById(ID)[0]);
+      })
+      // this.authors =
+    },
+    updateTocItems(exerciseFile,toc){
+      this.exerciseFile = Store.createExerciseFile(this.course.ID, exerciseFile.name, exerciseFile.url, exerciseFile.sizeInBytes);
+      console.log(exerciseFile,toc);
+
+      // update toc caption
+      Store.updateTocCaption(toc.slug,toc.captionUrl,toc.captionFmt);
+      // Update or create streaming location
+      Store.createStreamLocationList(toc.slug,toc.streamLocations);
+    },
     onTocUpdate(evt:any){
       if(evt.src === 'Popup.CoursePage.TocItem.FetchButton'){
-        this.courseData.updateItems(evt.exerciseFile, evt.toc);
+        this.updateTocItems(evt.exerciseFile, evt.toc);
       }
 
       this.$emit('update',evt);

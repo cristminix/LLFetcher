@@ -32,10 +32,12 @@ export default defineComponent({
         return {courseData,course,sections,tocs,authors};
     },
     mounted(){
-      this.initCourseData();
+      // this.initCourseData();
     },
     methods:{
       initCourseData(){
+        /*
+        // moved to src/libs/Store.ts
         const courseTmp = this.$parent.course;
         const sections = this.$parent.sections;
         const authors = this.$parent.authors;
@@ -56,6 +58,8 @@ export default defineComponent({
         });
         Store.createAuthorList(course.slug,authors);
         this.updateItemFromLS();
+
+         */
       },
       updateItemFromLS(){
         console.log('Please update everything from localStorage here..');

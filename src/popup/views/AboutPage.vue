@@ -10,7 +10,7 @@ import Store from '../../libs/store';
 export default defineComponent({
   setup() {
     const nav = ref('about');
-    const app = ref({})
+    const app = ref({version:0})
     return {
       nav,
       app

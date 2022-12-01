@@ -21,10 +21,6 @@
 <script lang="ts">
 import { defineComponent,ref } from 'vue';
 import Store from '../../libs/store';
-import course from "../../types/course";
-// import jQuery from 'jquery';
-// import 'bootstrap';
-// import 'bootstrap/js/dist/dropdown';
 
 export default defineComponent({
   setup() {
@@ -40,9 +36,7 @@ export default defineComponent({
   mounted(){
     setTimeout(()=>{
       const appInfo = Store.getAppInfo();
-      // if(appInfo.lastCourse !== ''){
-      //
-      // }
+      
       const lastCourses = Store.getLastCourses();
       if(lastCourses.length > 0){
         this.lastCourseList = [];
@@ -50,8 +44,6 @@ export default defineComponent({
             this.lastCourseList.push(course);
         });
       }
-      console.log(appInfo);
-      // jQuery('.dropdown-toggle').dropdown();
     },1000);
 
   },

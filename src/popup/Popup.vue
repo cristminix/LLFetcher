@@ -20,8 +20,6 @@
 <script lang="ts">
 import {defineComponent, ref} from 'vue';
 import NavTerm from '../types/navterm'; 
-import CourseInfo from '../types/CourseInfo'; 
-import Toc from '../types/toc';
 import Course from '../types/course';
 
 import PageNavigation from './components/PageNavigation.vue';
@@ -67,7 +65,7 @@ export default defineComponent({
     console.log('App Entry Point Start here...');
     Store.prepareAppStorage();
 
-    setTimeout(()=>{
+    setTimeout(()=>{ 
       const db = Store.db();
       console.log(db);
       db.subscribe('app',(row)=>{

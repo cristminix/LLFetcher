@@ -1,16 +1,16 @@
 import localStorageDB from "localStorageDB";
 import Proxy  from "./proxy";
 import {makeSlug, makeTitle} from "./utils";
-import Toc from "../types/toc";
+// import Toc from "../types/toc";
 import CourseInfo from "../types/CourseInfo";
 
 class MyLS {
     db : localStorageDB; 
     subscribers = {};
-    lastTable = '';
-    lastTablePk = {};
+    lastTable:string = '';
+    lastTablePk:number;
 
-    constructor(db,engine){
+    constructor(db:string,engine:string){
         this.db = new localStorageDB(db,engine);
     }
     subscribe(table:string,fn:Function){
@@ -26,14 +26,14 @@ class MyLS {
         return ret;
     }
     
-    insert(a,b){
+    insert(a:string,b){
         return this.db.insert(a,b);
     }
-    queryAll(a,b,c){
-        return this.db.queryAll(a,b,c);
+    queryAll(a:string,b){
+        return this.db.queryAll(a,b);
     }
-    getRow(table,ID){
-        return this.db.queryAll(table,{ID})[0];
+    getRow(table:string,ID:number){
+        return this.db.queryAll(table,{ID} as localStorageDB_queryParams)[0];
     }
     commit():boolean{
         const ret = this.db.commit();
@@ -43,7 +43,7 @@ class MyLS {
                 const row = this.getRow(this.lastTable,this.lastTablePk);
                 this.subscribers[this.lastTable](row);
                 this.lastTable = '';
-                this.lastTableData = {};
+                this.lastTablePk = -1;
             }
         }
         return ret;
@@ -51,13 +51,13 @@ class MyLS {
     isNew(){
         return this.db.isNew();
     }
-    createTable(a){
-        return this.db.createTable(a);
+    createTable(a:string,b:string[]){
+        return this.db.createTable(a,b);
     }
 }
 class Store{
-    static __db__;
-    static db() : undefined| MyLS{
+    static __db__:undefined | MyLS;
+    static db() : undefined | MyLS{
         if(typeof Store.__db__ === 'undefined'){
             Store.__db__ = new MyLS("learning", 'localStorage');
         }

@@ -30,11 +30,11 @@ module.exports = {
 		path : path.resolve(__dirname, "chrome_extension"),
 		// publicPath : 'auto'
 	},
-	// optimization:{
-	// 	splitChunks:{
-	// 		chunks:'all'
-	// 	}
-	// },
+	optimization:{
+		splitChunks:{
+			chunks:'all'
+		}
+	},
 	devServer:{
 		static: {directory:path.join(__dirname,'chrome_extension')},
 		port:9000,

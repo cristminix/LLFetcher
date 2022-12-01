@@ -52,10 +52,6 @@ export default defineComponent({
     course : {
       required : true,
       type : Object as PropType<Course>
-    },
-    sections:{
-      required : true,
-      type : Array as PropType<Section[]>
     }
   },
   setup(props) {
@@ -76,8 +72,9 @@ export default defineComponent({
         $(this).find('i').toggleClass('fa fa-plus fa fa-minus');
         $('.btn-collapse').not(this).find('i').removeClass('fa-minus').addClass('fa-plus ');
     });
-
-    this.loadCourseData();
+    try{
+      this.loadCourseData();
+    }catch(e){}
   },
   methods:{
     loadCourseData(){
@@ -86,8 +83,8 @@ export default defineComponent({
       const sections = Store.getSectionByCourseId(this.course.ID);
       sections.map((sectionTmp)=>{
         const sectionId = sectionTmp.ID;
-        let section = sectionTmp as Section;
-        section.items = Store.getTocBySectionId(section.ID) as Toc[];
+        let section = sectionTmp ;
+        section.items = Store.getTocBySectionId(section.ID) ;
         this.sections.push(section);
       });
       console.log(this.course);

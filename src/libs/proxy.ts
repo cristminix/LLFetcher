@@ -1,8 +1,7 @@
 import axios from 'axios';
 
 class Proxy{
-    static async create(url:string,method:string,postData:any){
-        
+    static async create(url:string,method:string,postData:any){      
         let headers = {
             'Accept': 'application/json',
             'Access-Control-Allow-Origin' : '*'
@@ -56,9 +55,7 @@ class Proxy{
         for(let key in postData){
             formData.append(key, postData[key]);
         }
-        // if(Config.debug){
-        //     console.log(`NET,POST:${url}\n`);       
-        // }
+        
         try{
             if(typeof optArgs === 'object'){
                 for(let n in optArgs){

@@ -12,7 +12,6 @@
                 </div>
             </div>
         </div>
-       <code v-if="showData" class="data-codes">{{toJSONStr(queueSlugs)}}</code>
     </div>
 </template>
 
@@ -23,12 +22,17 @@ export default defineComponent({
 
     setup() {
         const queueSlugs = ref([]);
-        const showData = ref(false);
         const btnState = ref(1);
         const percentage = ref(0);
         const lastSectionIndex = ref(0);
         const sectionIndexQueues = ref([]);
-        return {queueSlugs,showData,btnState,percentage,lastSectionIndex,sectionIndexQueues};
+        return {
+            queueSlugs,
+            btnState,
+            percentage,
+            lastSectionIndex,
+            sectionIndexQueues
+        };
     },
     mounted(){
         setTimeout(()=> {

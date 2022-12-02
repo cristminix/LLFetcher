@@ -48,6 +48,11 @@ export default defineComponent({
 });
 </script>
 <style scoped>
+.fetch-queue-bar{
+    position: absolute;
+    right: 49px;
+    margin-top: -22px;;
+}    
 .fetch-queue-pb{
     width: 102px;
     height: 24px;
@@ -67,7 +72,7 @@ export default defineComponent({
 .btn-fetch-cnt{
    width: 25px;
     position: absolute;
-    right: 38px;
+    right: -12px;
     margin-top: 2.5px;
 }
 </style>

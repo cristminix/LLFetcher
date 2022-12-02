@@ -13,7 +13,7 @@ done
 
 firstString=""
 secondString=""
-new_file="${new_file/chrome_extension\//"$secondString"}" 
+new_file="${new_file/chrome_extension\//$secondString}" 
 script_content_1='<script src="'$new_file'"></script>'
 
 script_file_1=$new_file
@@ -29,7 +29,7 @@ done
 firstString=""
 secondString=""
 
-new_file="${new_file/chrome_extension\//"$secondString"}" 
+new_file="${new_file/chrome_extension\//$secondString}" 
 script_content_2='<script src="'$new_file'"></script>'
 
 script_file_2=$new_file
@@ -53,10 +53,10 @@ cat chrome_extension/templates/popup_close.html >> $target_file_tmp
 
 
 
-sha_t1=`sha1sum -t $target_file`
+sha_t1=`shasum -t $target_file`
 sha_t1="${sha_t1/$target_file/}"
 
-sha_t2=`sha1sum -t $target_file_tmp`
+sha_t2=`shasum -t $target_file_tmp`
 sha_t2="${sha_t2/$target_file_tmp/}"
 
 # echo $sha_t1

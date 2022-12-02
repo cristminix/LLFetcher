@@ -16,7 +16,14 @@
                 <input @click="tgQueue(tocIndex)" class="form-check-input" type="checkbox" v-model="checkedQueues[tocIndex]"/> 
             </td>
             <td style="padding-left:.5em">{{toc.title}}</td>
-            <td colspan="2" style="text-align: right;"><FetchButton @update="onFetchUpdate($event)" :sectionIndex="sectionIndex" :tocIndex="tocIndex" :toc="toc" checkedQueues="checkedQueues" ref="fetchBtns"/></td>
+            <td colspan="2" style="text-align: right;">
+                <FetchButton @update="onFetchUpdate($event)" 
+                :sectionIndex="sectionIndex" 
+                :tocIndex="tocIndex" 
+                :toc="toc" 
+                :queue="enableQueue" 
+                ref="fetchBtns"/>
+            </td>
         </tr>
         </tbody>
     </table>
@@ -25,12 +32,11 @@
 <script lang="ts">
 import { defineComponent, ref, PropType } from 'vue';
 import FetchButton from '../components/FetchButton.vue';
-import FetchQueue from '../components/FetchQueue.vue';
 import Toc from '../../types/toc';
 
 export default defineComponent({
     components:{
-        FetchButton,FetchQueue
+        FetchButton
     },
     props:{
         items: {
@@ -43,14 +49,14 @@ export default defineComponent({
         }
     },
     setup(props) {
+        const enableQueue = ref(false);
         const items = ref(props.items as Toc[]);
         const sectionIndex = ref(props.sectionIndex as number);
         const checkAll = ref(false);
         const checkedQueues = ref([]);
         const excludeQueues = ref([]);
         let fetchBtns = ref([]);
-        let fetchQueue= ref();
-        return {items, sectionIndex, checkedQueues, excludeQueues,fetchBtns,checkAll,fetchQueue};
+        return {items, sectionIndex, checkedQueues, excludeQueues,fetchBtns,checkAll,enableQueue};
     },
     mounted(){
         setTimeout(()=>{

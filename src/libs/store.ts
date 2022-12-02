@@ -1,8 +1,9 @@
 import localStorageDB from "localStorageDB";
 import Proxy  from "./proxy";
 import {makeSlug, makeTitle} from "./utils";
-// import Toc from "../types/toc";
+import {Course_tableField,ExerciseFile_tableField,Author_tableField,Section_tableField,Toc_tableField,StreamLocation_tableField,Downloads_tableField,DownloadConfig_tableField,App_tableField } from "../types/tableFields";
 import CourseInfo from "../types/CourseInfo";
+import { StreamLocation } from "../types/lynda";
 
 class MyLS {
     db : localStorageDB; 
@@ -29,7 +30,7 @@ class MyLS {
     insert(a:string,b){
         return this.db.insert(a,b);
     }
-    queryAll(a:string,b){
+    queryAll(a:string,b:localStorageDB_queryParams){
         return this.db.queryAll(a,b);
     }
     getRow(table:string,ID:number){
@@ -84,59 +85,93 @@ class Store{
         }
 
     }
-    static getExerciseFile(courseId:number){
+    static getExerciseFile(courseId:number) : ExerciseFile_tableField{
         const db = Store.db();
-        return db.queryAll('exerciseFile',{query: {courseId}});
+        const results =  db.queryAll('exerciseFile',{query: {courseId}});
+        if(results.length>0){
+            return results[0] as unknown as ExerciseFile_tableField;
+        }
+        return null;
     }
-    static getCourse(slug:string){
+    static getCourse(slug:string): Course_tableField{
         const db = Store.db();
-        return db.queryAll('course',{query: {slug}});
+        const results =  db.queryAll('course',{query: {slug}});
+        if(results.length>0){
+            return results[0] as Course_tableField
+        }
+        return null;
     }
-    static getLastCourses(){
+    static getLastCourses(slug?:string): Course_tableField[]{
         const db = Store.db();
-        const appState = Store.getAppState();
+        if(typeof slug === 'undefined'){
+            const appState = Store.getAppState();
+            slug = appState.lastCourseSlug;
 
-        return db.queryAll('course',{query: (row)=>{
-                if(row.slug !== appState.lastCourseSlug){
+        }
+
+        const results = db.queryAll('course',{query: (row)=>{
+                if(row.slug !== slug){
                     return true;
                 }
             }
         });
+
+        return results as Course_tableField[];
     }
-    static getCourseById(ID:number){
+    static getCourseById(ID:number) : Course_tableField{
         const db = Store.db();
-        return db.queryAll('course',{query: {ID}});
+        const results = db.queryAll('course',{query: {ID}});
+        if(results.length>0){
+            return results[0] as Course_tableField
+        }
+        return null;
     }
-    static getSection(slug:string){
+    static getSection(slug:string):Section_tableField{
         const db = Store.db();
-        return db.queryAll('section',{query: {slug}});
+        const results = db.queryAll('section',{query: {slug}});
+        if(results.length>0){
+            return results[0] as Section_tableField
+        }
+        return null;
     }
-    static getSectionByCourseId(courseId:number){
+    static getSectionsByCourseId(courseId:number):Section_tableField[]{
         const db = Store.db();
-        return db.queryAll('section',{query: {courseId}});
+        const results = db.queryAll('section',{query: {courseId}});
+        return results  as Section_tableField[];
     }
-    static getTocBySectionId(sectionId:number){
+    static getTocsBySectionId(sectionId:number):Toc_tableField[]{
         const db = Store.db();
-        return db.queryAll('toc',{query: {sectionId}});
+        const results = db.queryAll('toc',{query: {sectionId}});
+        return results as Toc_tableField[];
     }
-    static getToc(slug:string){
+    static getToc(slug:string):Toc_tableField{
         const db = Store.db();
-        return db.queryAll('toc',{query: {slug}});
+        const results = db.queryAll('toc',{query: {slug}});
+        if(results.length>0){
+            return results[0] as Toc_tableField
+        }
+        return null;
     }
-    static getAuthor(slug:string){
+    static getAuthor(slug:string):Author_tableField{
         const db = Store.db();
-        return db.queryAll('author',{query: {slug}});
+        const results = db.queryAll('toc',{query: {slug}});
+        if(results.length>0){
+            return results[0] as Author_tableField
+        }
+        return null;
     }
-    static getAuthorById(ID:number){
+    static getAuthorById(ID:number):Author_tableField{
         const db = Store.db();
-        return db.queryAll('author',{query: {ID}});
+        const results = db.queryAll('author',{query: {ID}});
+        if(results.length>0){
+            return results[0] as Author_tableField
+        }
+        return null;
     }
-    static createAuthor(name:string,slug:string,biography:string,shortBiography:string,courseId:number){
+    static createAuthor(name:string,slug:string,biography:string,shortBiography:string,courseId:number):Author_tableField{
         const db = Store.db();
-        const authors = Store.getAuthor(slug);
-        let author = null;
-        if(authors.length > 0){
-            author = authors[0];
+        let author = Store.getAuthor(slug);
+        if(author){
             if(typeof courseId === 'number'){
                 const courseIds = author.courseIds;
                 if(!courseIds.includes(courseId)){
@@ -170,11 +205,11 @@ class Store{
         return author;
     }
     
-    static createAuthorList(courseSlug:string,authors:any[]){
+    static createAuthorList(courseSlug:string,authors:any[]) : Author_tableField[]{
         const db = Store.db();
-        const courses = Store.getCourse(courseSlug);
-        if(courses.length > 0){
-            const course = courses[0];
+        const course = Store.getCourse(courseSlug);
+        const authorResults : Author_tableField[] = [];
+        if(course){
             let authorIds = course.authorIds;
             authors.map((authorTmp)=>{
                 console.log(authorTmp);
@@ -182,8 +217,8 @@ class Store{
                 const author = Store.createAuthor(name,authorTmp.slug,authorTmp.biography,authorTmp.shortBiography,course.ID);
                 if(!authorIds.includes(author.ID)){
                     authorIds.push(author.ID);
-                }
-                
+                }  
+                authorResults.push(author);              
             });
             
             db.update('course',{slug:courseSlug},(row)=>{
@@ -193,12 +228,12 @@ class Store{
             });
             db.commit();
         }
+        return authorResults;
     }
     static updateTocCaption(slug:string,captionUrl:string,captionFmt:string){
         const db = Store.db();
-        const tocs = Store.getToc(slug);
-        if(tocs.length > 0){
-            const toc = tocs[0];
+        const toc = Store.getToc(slug);
+        if(toc){
             db.update("toc", {slug}, function(newToc) {
                 newToc.captionUrl = captionUrl;
                 newToc.captionFmt = captionFmt;
@@ -208,14 +243,15 @@ class Store{
         }
     }
 
-    static getStreamLocation(tocId:number,fmt:string){
+    static getStreamLocations(tocId:number,fmt:string):StreamLocation_tableField[]{
         const db = Store.db();
-        return db.queryAll('streamLocation',{query: {tocId,fmt}});
+        const results = db.queryAll('streamLocation',{query: {tocId,fmt}});
+        return results as StreamLocation_tableField[];
     }
-    static createStreamLocation(tocId:number,fmt:string,url:string){
+    static createStreamLocation(tocId:number,fmt:string,url:string):StreamLocation_tableField{
         const db = Store.db();
-        const streamLocations = Store.getStreamLocation(tocId,fmt);
-        let streamLoc = null;
+        const streamLocations = Store.getStreamLocations(tocId,fmt);
+        let streamLoc : StreamLocation_tableField = null;
         if(streamLocations.length > 0){
             streamLoc = streamLocations[0];
             streamLoc.url = url;
@@ -232,11 +268,11 @@ class Store{
 
         return streamLoc;
     }
-    static createStreamLocationList(slug:string,streamLocations:any[]){
+    static createStreamLocationList(slug:string,streamLocations:StreamLocation[]):StreamLocation_tableField[]{
         const db = Store.db();
-        const tocs = Store.getToc(slug);
-        if(tocs.length > 0){
-            const toc = tocs[0];
+        const toc = Store.getToc(slug);
+        const streamLocationResults : StreamLocation_tableField[] = [];
+        if(toc){
             const streamLocationIds = toc.streamLocationIds;
             streamLocations.map((streamLocation)=>{
                 console.log(streamLocation);
@@ -244,6 +280,7 @@ class Store{
                 if(!streamLocationIds.includes(streamLoc.ID)){
                     streamLocationIds.push(streamLoc.ID);
                 }
+                streamLocationResults.push(streamLoc);
             });
 
             db.update('toc',{slug},(row)=>{
@@ -253,78 +290,66 @@ class Store{
 
             db.commit();
         }
+        return streamLocationResults;
     }
-    static createExerciseFile(courseId:number,name:string,url:string,size:number){
+    static createExerciseFile(courseId:number,name:string,url:string,size:number):ExerciseFile_tableField{
         const db = Store.db();
-        const exerciseFiles = Store.getExerciseFile(courseId);
-        let exerciseFile = null;
+        let exerciseFile = Store.getExerciseFile(courseId);
 
-        if(exerciseFiles.length === 0){
+        if(!exerciseFile){
             const ID = 0;
             exerciseFile = {ID,courseId,name,url,size};
             exerciseFile.ID = db.insert('exerciseFile',exerciseFile);
             db.commit();
 
-        }else{
-            exerciseFile = exerciseFiles[0];
         }
 
         return exerciseFile;
     }
-    static createSection(courseId:number,title:string){
+    static createSection(courseId:number,title:string):Section_tableField{
         const db = Store.db();
         const slug = makeSlug(title);
-        const sections = Store.getSection(slug);
-        let section = null;
+        let section = Store.getSection(slug);
 
-        if(sections.length === 0){
+        if(!section){
             const ID = 0;
             section = {ID,courseId,title,slug};
             section.ID = db.insert('section',section);
             db.commit();
 
-        }else{
-            section = sections[0];
         }
 
         return section;
     }
-    static createToc(sectionId:number,title:string,slug:string,url:string,duration:number, captionUrl?:string, captionFmt?:string){
+    static createToc(sectionId:number,title:string,slug:string,url:string,duration:number, captionUrl?:string, captionFmt?:string):Toc_tableField{
         const db = Store.db();
-        const tocs = Store.getToc(slug);
-        let toc = null;
+        let toc = Store.getToc(slug);
 
-        if(tocs.length === 0){
+        if(!toc){
             const ID = 0;
             const streamLocationIds = [];
             toc = {ID,sectionId,title,slug,url,duration,captionUrl,captionFmt,streamLocationIds};
             toc.ID = db.insert('toc',toc);
             db.commit();
 
-        }else{
-            toc = tocs[0];
         }
 
         return toc;
     }
-    static createCourse(title:string,slug:string,duration:number,sourceCodeRepository:string,description:string){
+    static createCourse(title:string,slug:string,duration:number,sourceCodeRepository:string,description:string):Course_tableField{
         const db = Store.db();
-        const courses = Store.getCourse(slug);
-        let course = null;
-        if(courses.length === 0){
+        let course = Store.getCourse(slug);
+        if(!course){
             const ID = 0;
             const authorIds = [];
             course = {ID,title,slug,duration,sourceCodeRepository,description,authorIds};
             course.ID = db.insert('course',course);
             db.commit();
-        }else{
-            course = courses[0];
         }
-
 
         return course;
     }
-    static getCourseJson(callback:any){
+    static getCourseJson(callback?:Function){
         Proxy.get('/data/course.json',(r)=>{
             // console.log(r);
             if('function' === typeof callback){
@@ -338,7 +363,7 @@ class Store{
         },1000);
     }
 
-    static saveDataCodes(dataCodes:CourseInfo){
+    static saveDataCodes(dataCodes:CourseInfo):Course_tableField{
         const courseTmp = dataCodes.course;
         const authors = courseTmp.authors;
         const course = Store.createCourse(courseTmp.title, courseTmp.slug, courseTmp.duration, courseTmp.sourceCodeRepository, courseTmp.description);
@@ -360,10 +385,10 @@ class Store{
         Store.init();
         Store.initApp('');
     }
-    static initApp(courseSlug:string){
+    static initApp(courseSlug:string):App_tableField{
         const db = Store.db();
         const version = '1.0';
-        const apps = db.queryAll('app',{version});
+        const apps = db.queryAll('app',{version} as localStorageDB_queryParams);
         let app = null;
         if(apps.length === 0){
             const state = 0;
@@ -387,22 +412,20 @@ class Store{
         return app;
     }
 
-    static getAppState(){
+    static getAppState():App_tableField{
         const db = Store.db();
-        //let appState = 0;
         const version = '1.0';
-        const apps = db.queryAll('app',{version});
+        const apps = db.queryAll('app',{version} as localStorageDB_queryParams);
         let app = null;
         if(apps.length > 0){
             app = apps[0];
-            //appState = app.state;
         }
         return app;
     }
     static setAppState(state : number,courseSlug?:string){
         const db = Store.db();
         const version = '1.0';
-        const apps = db.queryAll('app',{version});
+        const apps = db.queryAll('app',{version} as localStorageDB_queryParams);
         if(apps.length > 0){
             db.update('app',{version},(row)=>{
                 row.state = state;
@@ -414,12 +437,12 @@ class Store{
             db.commit();
         }
     }
-    static getAppInfo(){
+    static getAppInfo():App_tableField{
         const db = Store.db();
         const version = '1.0';
-        const apps = db.queryAll('app',{version});
+        const apps = db.queryAll('app',{version} as localStorageDB_queryParams);
         if(apps.length > 0){
-            return apps[0];
+            return apps[0] as App_tableField;
         }
 
         return null;

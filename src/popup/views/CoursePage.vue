@@ -30,35 +30,32 @@
 </template>
 <script lang="ts">
 import { defineComponent,ref,PropType } from 'vue';
-import Course from '../../types/course';
-import Toc from '../../types/toc';
-import Section from '../../types/section';
-import Author from '../../types/author';
-import ExerciseFile from '../../types/ExerciseFile';
+import {Course,Section,ExerciseFile,Toc,StreamLocation} from '../../types/lynda';
 import TocItem from '../components/TocItem.vue';
 import FetchQueueBar from '../components/FetchQueueBar.vue';
 import FetchSectionQueue from '../components/FetchSectionQueue.vue';
 import LogBar from '../components/LogBar.vue';
-import CourseData from '../components/CourseData.vue';
 import {makeTitle} from '../../libs/utils';
 import $ from 'jquery';
 import Store from "../../libs/store";
+import { contentConsoleLog } from '../../libs/utils';
+import { Course_tableField,Author_tableField,Section_tableField,ExerciseFile_tableField } from '../../types/tableFields';
 
 export default defineComponent({
   components:{
-    TocItem,FetchQueueBar,FetchSectionQueue,LogBar,CourseData
+    TocItem,FetchQueueBar,FetchSectionQueue,LogBar
   },
   props:{
     course : {
-      required : true,
-      type : Object as PropType<Course>
+      required : false,
+      type : Object as PropType<Course_tableField>
     }
   },
   setup(props) {
-    const course = ref(props.course);
-    const authors = ref([] as Author[]);
-    const sections = ref([] as Section[]);
-    const exerciseFile = ref({} as ExerciseFile);
+    const course = ref<Course_tableField>(props.course);
+    const authors = ref<Author_tableField[]>([]);
+    const sections = ref<Section[]>([]);
+    const exerciseFile = ref<ExerciseFile_tableField>();
     const tocItems = ref([]);
     const fetchQueueBar = ref([]);
     const fetchSectionQueue=ref({});
@@ -68,34 +65,48 @@ export default defineComponent({
     fetchQueueBar,fetchSectionQueue,logBar,courseData};
   },
   mounted(){
-    $('.btn-collapse').click(function() {
-        $(this).find('i').toggleClass('fa fa-plus fa fa-minus');
-        $('.btn-collapse').not(this).find('i').removeClass('fa-minus').addClass('fa-plus ');
-    });
+    setTimeout(()=>{
+      $('.course-page .btn-collapse').click((evt)=> {
+        const el = $(evt.target).closest('button')[0];
+        $(el).find('i').toggleClass('fa fa-plus fa fa-minus');
+        $('.course-page .btn-collapse').not(el).find('i').removeClass('fa-minus').addClass('fa-plus ');
+      });
+    },1000);
+    
     try{
+      if(typeof this.course.slug == 'undefined'){
+        const appInfo = Store.getAppInfo();
+        contentConsoleLog(appInfo)
+        this.course = Store.getCourse(appInfo.lastCourseSlug);
+      }
+      
       this.loadCourseData();
     }catch(e){}
   },
   methods:{
     loadCourseData(){
-      const courseSlug = this.course.slug;
-      this.course = Store.getCourse(courseSlug)[0];
-      const sections = Store.getSectionByCourseId(this.course.ID);
-      sections.map((sectionTmp)=>{
-        const sectionId = sectionTmp.ID;
-        let section = sectionTmp ;
-        section.items = Store.getTocBySectionId(section.ID) ;
+      console.log(this.course)
+      if(typeof this.course.ID == 'undefined'){
+        this.course = Store.getCourse(this.course.slug);
+      }
+      
+      const sections = Store.getSectionsByCourseId(this.course.ID);
+      sections.map((sectionTmp:Section_tableField)=>{
+        let section = sectionTmp as unknown as Section;
+        section.items = Store.getTocsBySectionId(sectionTmp.ID) as unknown as Toc[];
         this.sections.push(section);
       });
-      console.log(this.course);
       this.course.authorIds.map((ID)=>{
-        this.authors.push(Store.getAuthorById(ID)[0]);
+        const author = Store.getAuthorById(ID);
+        if(author){
+          this.authors.push();
+
+        }
       })
-      // this.authors =
     },
-    updateTocItems(exerciseFile,toc){
+    updateTocItems(exerciseFile:ExerciseFile,toc:Toc){
       this.exerciseFile = Store.createExerciseFile(this.course.ID, exerciseFile.name, exerciseFile.url, exerciseFile.sizeInBytes);
-      console.log(exerciseFile,toc);
+      // console.log(exerciseFile,toc);
 
       // update toc caption
       Store.updateTocCaption(toc.slug,toc.captionUrl,toc.captionFmt);
@@ -114,7 +125,7 @@ export default defineComponent({
     },
     getTotalTocs(){
         let totalTocs =0;
-        this.sections.map((s)=>{
+        this.sections.map((s:Section)=>{
           totalTocs += s.items.length;
         });
         return totalTocs;
@@ -122,41 +133,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style scoped>
-.course{
-  margin-bottom:1em;
-}
-.course-section{
-  padding:.5em 0;
-}
-.accordion-button:focus {
-    z-index: 3;
-    border-color: transparent;
-    outline: 0;
-    box-shadow: none;
-}
-.accordion-button:not(.collapsed) {
-    color: inherit; 
-    background-color: transparent;
-    box-shadow: none; 
-}
-.accordion-button:not(.collapsed),
-.accordion-button.collapsed,
-.accordion-button:not(.collapsed)::after,
-.accordion-button.collapsed::after{
-  background:none;
-}
-.accordion-button.custom {
-position: absolute;
-    width: 24px;
-    padding: 0px 6px;
-    left: 51px;
-    margin-top: 3px;
-    background: none;
-    font-size: 10px;
- }
- .accordion-body{
-  padding:0;
- }
-</style>

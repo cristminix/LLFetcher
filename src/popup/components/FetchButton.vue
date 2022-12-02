@@ -1,6 +1,6 @@
 <template>
   <div class="btn-group">
-    <button :style="{border:(btnState!=1 && btnState!=4?'none':'inherit')}" :disabled="btnState > 1 && btnState < 4" @click="fetchToc(false)" class="btn btn-sm" :title="'Click to fetch TOC resources ' + toc.title">
+    <button :style="{border:(btnState!=1 && btnState!=4?'none':'inherit')}" :disabled="btnState > 1 && btnState < 4" @click="fetchToc()" class="btn btn-sm" :title="'Click to fetch TOC resources ' + toc.title">
       <i class="fa" :class="{'fa-play':btnState==1,'fa-spin fa-spinner':btnState==2,'fa-check':btnState==3,'fa-refresh':btnState==4}"></i>
     </button>
 
@@ -27,9 +27,14 @@ export default defineComponent({
         tocIndex : {
             required : true,
             type : Number
+        },
+        queue : {
+            required : false,
+            type : Boolean
         }
   },
     setup(props) {
+        const fetchQueueEnabled = ref(props.queue);
         const toc = ref(props.toc as Toc);
         const sectionIndex = ref(props.sectionIndex as number);
         const tocIndex = ref(props.tocIndex as number);
@@ -37,16 +42,16 @@ export default defineComponent({
         const btnState = ref(1);
       
         
-        return {toc, sectionIndex, tocIndex, exerciseFile, btnState};
+        return {toc, sectionIndex, tocIndex, exerciseFile, btnState, fetchQueueEnabled};
     },
 
     methods:{
-      isQueued(fetchQueueEnabled:boolean){
-        return fetchQueueEnabled ? (this.$parent.checkedQueues[this.tocIndex] && this.$parent.excludeQueues.indexOf(this.tocIndex) == -1) : (this.btnState == 1 || this.btnState == 4);
+      isQueued(){
+        return this.fetchQueueEnabled ? (this.$parent.checkedQueues[this.tocIndex] && this.$parent.excludeQueues.indexOf(this.tocIndex) == -1) : (this.btnState == 1 || this.btnState == 4);
       },
-      fetchToc(fetchQueueEnabled:boolean){
+      fetchToc(){
         // 0. check if queues
-        const isQueued = this.isQueued(fetchQueueEnabled);
+        const isQueued = this.isQueued();
         console.log('isQueued:',isQueued);
 
         if(isQueued){
@@ -62,17 +67,19 @@ export default defineComponent({
               this.btnState = 3;
               this.$emit('update',{src: 'Popup.CoursePage.TocItem.FetchButton',toc : this.toc, exerciseFile: this.exerciseFile});
 
-              if(fetchQueueEnabled){
+              if(this.fetchQueueEnabled){
                 console.log('Queue Complete: triggering next fetchToc from parent, lastTocIndex:',this.tocIndex);
                 this.$parent.triggerFetchQueue(this.tocIndex);
+              }else{
+                // this.$parent.triggerFetchQueue(this.tocIndex);
               }
               // addToParent excludeQueue
-              this.$parent.triggerExcludeFetchQueue(this.tocIndex,fetchQueueEnabled);
+              this.$parent.triggerExcludeFetchQueue(this.tocIndex,this.fetchQueueEnabled);
 
             }else{
               // 3. set btn state to icon [retry]
               this.btnState = 4;
-              if(fetchQueueEnabled){
+              if(this.fetchQueueEnabled){
                 this.$parent.triggerFailedFetchQueue(this.tocIndex);
                 console.log('Queue Failed: triggering fetchToc from FetchButton, lastTocIndex:',this.tocIndex);
               }
@@ -80,14 +87,14 @@ export default defineComponent({
           },(r:any)=>{
             // 3. set btn state to icon [retry]
             this.btnState = 4;
-            if(fetchQueueEnabled){
+            if(this.fetchQueueEnabled){
               this.$parent.triggerFailedFetchQueue(this.tocIndex);
               console.log('Queue Failed: triggering fetchToc from FetchButton, lastTocIndex:',this.tocIndex);
             }
           });
           
         }else{
-          if(fetchQueueEnabled){
+          if(this.fetchQueueEnabled){
             this.$parent.triggerFetchQueue(this.tocIndex);
           }
         }

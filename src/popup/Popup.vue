@@ -2,8 +2,6 @@
   <div class="app-container">
     <PageNavigation @update="onNavUpdate($event)" :nav="nav" ref="pageNavigation"/>
     <WelcomePage v-if="nav=='welcome'"/>
-    <LoadingPage v-if="nav=='loading'" text="Fetching Course Data"/>
-    <HomePage v-if="nav=='home'"/>
     <CoursePage @update="onCourseUpdate($event)" v-if="nav=='course'" :course="course"  ref="coursePage"/>
     <DownloadPage v-if="nav=='downloads'"/>
     <HelpPage v-if="nav=='help'"/>
@@ -20,25 +18,22 @@
 <script lang="ts">
 import {defineComponent, ref} from 'vue';
 import NavTerm from '../types/navterm'; 
-import Course from '../types/course';
+import {Course} from '../types/lynda';
 
 import PageNavigation from './components/PageNavigation.vue';
 import WelcomePage from './views/WelcomePage.vue'
-import HomePage from './views/HomePage.vue'
-import LoadingPage from './views/LoadingPage.vue'
 import CoursePage from './views/CoursePage.vue'
 import DownloadPage from './views/DownloadPage.vue'
 import AboutPage from './views/AboutPage.vue'
 import HelpPage from './views/HelpPage.vue'
 import Store from '../libs/store';
+import { App_tableField,Course_tableField } from '../types/tableFields';
 
 export default defineComponent({
   name: 'Popup',
   components: {
     PageNavigation,
     WelcomePage,
-    LoadingPage,
-    HomePage,
     CoursePage,
     DownloadPage,
     AboutPage,
@@ -46,7 +41,7 @@ export default defineComponent({
   },
   setup(){
     const nav = ref<NavTerm>('welcome');
-    const course = ref({} as Course);
+    const course = ref<Course_tableField>();
 
     const onNavUpdate = (target : NavTerm) => {
       nav.value = target;
@@ -55,10 +50,10 @@ export default defineComponent({
     
     const onCourseUpdate = (target:any) => {
       console.log(target);
-      // this.rebuildCourseInfo(sectionIndex, tocIndex, toc);
     };
-    const message = ref('');
-    const app = ref({state:0})
+    const message = ref<string>('');
+    const app = ref<App_tableField>();
+
     return {nav, course, onNavUpdate, onCourseUpdate, message,app};
   },
   mounted(){
@@ -68,8 +63,7 @@ export default defineComponent({
     setTimeout(()=>{ 
       const db = Store.db();
       console.log(db);
-      db.subscribe('app',(row)=>{
-        // console.log(row);
+      db.subscribe('app',(row:App_tableField)=>{
         this.app = row;
         this.log(`AppState:${row.state}`);
       });
@@ -79,10 +73,10 @@ export default defineComponent({
   methods:{
     log(message:string){
       this.message = message;
-
     },
-    setCourse(course){
+    setCourse(course:Course){
       this.course = course;
+      Store.setAppState(1,course.slug);
       setTimeout(()=>{
         this.nav = this.$refs.pageNavigation.nav = 'course';
       },250);
@@ -90,21 +84,3 @@ export default defineComponent({
   }
 })
 </script>
-
-
-<style scoped>
-#popup {
-    width : 680px;
-    min-height: 480px;
-    padding: 1em;
-    background: rgb(249, 242, 249);
-    border: solid 1px #ddd;
-}
-
-.page{
-  margin :0 2em 2em;
-  /*border: solid 1px #dedede;*/
-  padding: 1em;
-  border-radius: 4px;
-}
-</style>

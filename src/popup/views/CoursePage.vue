@@ -3,7 +3,7 @@
     <div class="fsqc">
       <FetchSectionQueue ref="fetchSectionQueue"/>
     </div>
-    <div class="course">
+    <div class="course" v-if="course">
       <h2><i class="fa fa-bookmark"></i> {{course.title}} by <span v-for="author in authors">{{makeTitle(author.slug)}}</span></h2>
     </div>
     <div class="accordion accordion-flush" id="accordionCourse">
@@ -65,41 +65,46 @@ export default defineComponent({
     fetchQueueBar,fetchSectionQueue,logBar,courseData};
   },
   mounted(){
+    this.loadCourseData();
+
     setTimeout(()=>{
       $('.course-page .btn-collapse').click((evt)=> {
         const el = $(evt.target).closest('button')[0];
         $(el).find('i').toggleClass('fa fa-plus fa fa-minus');
         $('.course-page .btn-collapse').not(el).find('i').removeClass('fa-minus').addClass('fa-plus ');
       });
-    },1000);
+    },50);
     
-    try{
-      if(typeof this.course.slug == 'undefined'){
-        const appInfo = Store.getAppInfo();
-        contentConsoleLog(appInfo)
-        this.course = Store.getCourse(appInfo.lastCourseSlug);
-      }
-      
-      this.loadCourseData();
-    }catch(e){}
+
   },
   methods:{
-    loadCourseData(){
-      console.log(this.course)
-      if(typeof this.course.ID == 'undefined'){
-        this.course = Store.getCourse(this.course.slug);
+    isValidCourse(){
+      if(!this.course){
+        return false;
       }
-      
+      if(typeof this.course.ID === 'undefined'){
+        return false;
+      }
+      return true;
+    },
+    loadCourseData(){
+      // console.log(this.course)
+      if(!this.isValidCourse()){
+        const appInfo = Store.getAppInfo();
+        // console.log(appInfo)
+        this.course = Store.getCourse(appInfo.lastCourseSlug);
+      }
+      Store.setAppState(1,this.course.slug);
       const sections = Store.getSectionsByCourseId(this.course.ID);
       sections.map((sectionTmp:Section_tableField)=>{
         let section = sectionTmp as unknown as Section;
         section.items = Store.getTocsBySectionId(sectionTmp.ID) as unknown as Toc[];
         this.sections.push(section);
       });
-      this.course.authorIds.map((ID)=>{
+      this.course.authorIds.map((ID:number)=>{
         const author = Store.getAuthorById(ID);
         if(author){
-          this.authors.push();
+          this.authors.push(author);
 
         }
       })
@@ -111,7 +116,7 @@ export default defineComponent({
       // update toc caption
       Store.updateTocCaption(toc.slug,toc.captionUrl,toc.captionFmt);
       // Update or create streaming location
-      Store.createStreamLocationList(toc.slug,toc.streamLocations);
+      Store.createStreamLocationList(toc.slug,toc.streamLocations,this.course.ID);
     },
     onTocUpdate(evt:any){
       if(evt.src === 'Popup.CoursePage.TocItem.FetchButton'){

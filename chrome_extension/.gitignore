@@ -7,3 +7,4 @@
 *.woff2
 *.txt
 *.hot-update.json
+/popup.html.tmp

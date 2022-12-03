@@ -2,8 +2,7 @@ import localStorageDB from "localStorageDB";
 import Proxy  from "./proxy";
 import {makeSlug, makeTitle} from "./utils";
 import {Course_tableField,ExerciseFile_tableField,Author_tableField,Section_tableField,Toc_tableField,StreamLocation_tableField,Downloads_tableField,DownloadConfig_tableField,App_tableField } from "../types/tableFields";
-import CourseInfo from "../types/CourseInfo";
-import { StreamLocation } from "../types/lynda";
+import { Author, CourseInfo, StreamLocation } from "../types/lynda";
 
 class MyLS {
     db : localStorageDB; 
@@ -55,6 +54,10 @@ class MyLS {
     createTable(a:string,b:string[]){
         return this.db.createTable(a,b);
     }
+    tableExists(table:string){
+        return this.db.tableExists(table);
+    }
+
 }
 class Store{
     static __db__:undefined | MyLS;
@@ -79,7 +82,10 @@ class Store{
                 app: ["version","state","lastCourseSlug"]
             };
             Object.keys(schema).map((table)=>{
-                db.createTable(table, schema[table]);
+                if(!db.tableExists(table)){
+                    db.createTable(table, schema[table]);
+
+                }
             });
             db.commit();
         }
@@ -154,7 +160,7 @@ class Store{
     }
     static getAuthor(slug:string):Author_tableField{
         const db = Store.db();
-        const results = db.queryAll('toc',{query: {slug}});
+        const results = db.queryAll('author',{query: {slug}});
         if(results.length>0){
             return results[0] as Author_tableField
         }
@@ -168,25 +174,31 @@ class Store{
         }
         return null;
     }
+    static getDownloadConfig(courseId:number):DownloadConfig_tableField{
+        const db = Store.db();
+        const results = db.queryAll('downloadConfig',{query: {courseId}});
+        if(results.length>0){
+            return results[0] as DownloadConfig_tableField
+        }
+        return null;
+    }
     static createAuthor(name:string,slug:string,biography:string,shortBiography:string,courseId:number):Author_tableField{
         const db = Store.db();
         let author = Store.getAuthor(slug);
         if(author){
-            if(typeof courseId === 'number'){
-                const courseIds = author.courseIds;
-                if(!courseIds.includes(courseId)){
-                    courseIds.push(courseId);
+            const courseIds = author.courseIds;
+            if(!courseIds.includes(courseId)){
+                courseIds.push(courseId);
 
-                    db.update('author',{slug},(row)=>{
-                        row.courseIds = courseIds;
+                db.update('author',{slug},(row)=>{
+                    row.courseIds = courseIds;
 
-                        return row;
-                    });
-                    setTimeout(()=>{db.commit()},100);
-                    author.courseIds = courseIds;
-                }
-
+                    return row;
+                });
+                setTimeout(()=>{db.commit()},100);
+                author.courseIds = courseIds;
             }
+
         }else{
             
             const courseIds = [];
@@ -205,7 +217,7 @@ class Store{
         return author;
     }
     
-    static createAuthorList(courseSlug:string,authors:any[]) : Author_tableField[]{
+    static createAuthorList(courseSlug:string,authors:Author[]) : Author_tableField[]{
         const db = Store.db();
         const course = Store.getCourse(courseSlug);
         const authorResults : Author_tableField[] = [];
@@ -243,39 +255,72 @@ class Store{
         }
     }
 
-    static getStreamLocations(tocId:number,fmt:string):StreamLocation_tableField[]{
+    static getStreamLocation(tocId:number,fmt:string):StreamLocation_tableField{
         const db = Store.db();
         const results = db.queryAll('streamLocation',{query: {tocId,fmt}});
+        if(results.length>0){
+            return results[0] as StreamLocation_tableField;
+        }
+        return null;
+        
+    }
+    static getStreamLocations(tocId:number):StreamLocation_tableField[]{
+        const db = Store.db();
+        const results = db.queryAll('streamLocation',{query: {tocId}});
         return results as StreamLocation_tableField[];
     }
     static createStreamLocation(tocId:number,fmt:string,url:string):StreamLocation_tableField{
         const db = Store.db();
-        const streamLocations = Store.getStreamLocations(tocId,fmt);
-        let streamLoc : StreamLocation_tableField = null;
-        if(streamLocations.length > 0){
-            streamLoc = streamLocations[0];
-            streamLoc.url = url;
+        let streamLocation = Store.getStreamLocation(tocId,fmt);
+        if(streamLocation){
+            streamLocation.url = url;
             db.update('streamLocation',(row)=>{
                 row.url = url;
                 return row;
             });
         }else{
             const ID = 0;
-            streamLoc = {ID,tocId,fmt,url};
-            streamLoc.ID = db.insert('streamLocation',streamLoc);
+            streamLocation = {ID,tocId,fmt,url};
+            streamLocation.ID = db.insert('streamLocation',streamLocation);
         }
         setTimeout(()=>db.commit(),100);
 
-        return streamLoc;
+        return streamLocation;
     }
-    static createStreamLocationList(slug:string,streamLocations:StreamLocation[]):StreamLocation_tableField[]{
+    static updateDownloadConfig(fieldName:string,data:any,courseId:number){
+        const db =  Store.db();
+        let downloadConfig = Store.getDownloadConfig(courseId);
+        if(downloadConfig){
+            db.update('downloadConfig',{courseId},(row)=>{
+                row[fieldName] = data;
+                return row;
+            });
+        }else{
+            const ID = 0;
+            const fmtList =[];
+            const selectedFmtList ='';
+            downloadConfig = {ID,courseId,fmtList,selectedFmtList};
+            downloadConfig[fieldName] = data;
+
+            downloadConfig.ID = db.insert('downloadConfig',downloadConfig);
+
+        }
+        setTimeout(()=>db.commit(),100);
+        return downloadConfig;
+
+    }
+    static createStreamLocationList(slug:string,streamLocations:StreamLocation[],courseId?:number):StreamLocation_tableField[]{
         const db = Store.db();
         const toc = Store.getToc(slug);
         const streamLocationResults : StreamLocation_tableField[] = [];
+        const fmtList : string[]=[];
         if(toc){
             const streamLocationIds = toc.streamLocationIds;
             streamLocations.map((streamLocation)=>{
-                console.log(streamLocation);
+                // console.log(streamLocation);
+                if(!fmtList.includes(streamLocation.fmt)){
+                    fmtList.push(streamLocation.fmt);
+                }
                 const streamLoc = Store.createStreamLocation(toc.ID,streamLocation.fmt,streamLocation.url);
                 if(!streamLocationIds.includes(streamLoc.ID)){
                     streamLocationIds.push(streamLoc.ID);
@@ -289,6 +334,10 @@ class Store{
             });
 
             db.commit();
+            if(courseId){
+                Store.updateDownloadConfig('fmtList',fmtList,courseId);
+            }
+            
         }
         return streamLocationResults;
     }
@@ -449,5 +498,5 @@ class Store{
     }
     
 }
-Store.init();
+Store.prepareAppStorage();
 export default Store;

@@ -58,7 +58,7 @@ export default defineComponent({
   },
   mounted(){
     console.log('App Entry Point Start here...');
-    Store.prepareAppStorage();
+    // Store.prepareAppStorage();
 
     setTimeout(()=>{ 
       const db = Store.db();
@@ -76,7 +76,7 @@ export default defineComponent({
     },
     setCourse(course:Course){
       this.course = course;
-      Store.setAppState(1,course.slug);
+      
       setTimeout(()=>{
         this.nav = this.$refs.pageNavigation.nav = 'course';
       },250);

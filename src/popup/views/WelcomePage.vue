@@ -23,6 +23,7 @@ import { sendMessageSaveDataCodesToLS } from '../../libs/utils';
 import { defineComponent,ref } from 'vue';
 import Store from '../../libs/store';
 import { Course_tableField } from '../../types/tableFields';
+import { Course } from '../../types/lynda';
 
 export default defineComponent({
   setup() {
@@ -51,7 +52,7 @@ export default defineComponent({
 
   },
   methods:{
-    loadRecentCourse(course){
+    loadRecentCourse(course:Course_tableField){
       this.$parent.setCourse(course);
     },
     retrieveDataCodesFromContent(){

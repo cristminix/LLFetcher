@@ -1,8 +1,11 @@
 <template>
     <div class="fetch-queue-bar">
+        <div class="test-data" v-if="0">
+            <pre>{{JSON.stringify(queueTocIndex,null,2)}}</pre>
+        </div>
         <div class="fetch-queue-pb">
             <div class="progress" v-show="percentage > 0">
-                <div class="progress-bar bg-info" role="progressbar" :style="{width:percentage+'%'}" :aria-valuenow="percentage" aria-valuemin="0" aria-valuemax="100"></div>
+                <div class="progress-bar bg-info" role="progressbar" :style="{width:percentage+'%'}" :aria-valuenow="percentage" :aria-valuemin="0" :aria-valuemax="100"></div>
             </div>
         </div>
         <div class="btn-fetch-cnt">
@@ -22,12 +25,13 @@ export default defineComponent({
   },
   setup(props){
     let queueSlugs = ref([]);
+    let queueTocIndex = ref([]);
     let excludeSlugs = ref([]);
     let percentage = ref(0);
     let btnState = ref(1);
     let lastTocIndex = ref(0);
     const sectionIndex = ref(props.sectionIndex);
-    return {queueSlugs,excludeSlugs,percentage,btnState,lastTocIndex,sectionIndex};
+    return {queueTocIndex,queueSlugs,excludeSlugs,percentage,btnState,lastTocIndex,sectionIndex};
   },
   methods:{
     setProgress(lastTocIndex:number,percentage:number){

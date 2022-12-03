@@ -132,9 +132,9 @@ class Store{
         }
         return null;
     }
-    static getSection(slug:string):Section_tableField{
+    static getSection(slug:string,courseId:number):Section_tableField{
         const db = Store.db();
-        const results = db.queryAll('section',{query: {slug}});
+        const results = db.queryAll('section',{query: {slug,courseId}});
         if(results.length>0){
             return results[0] as Section_tableField
         }
@@ -358,7 +358,7 @@ class Store{
     static createSection(courseId:number,title:string):Section_tableField{
         const db = Store.db();
         const slug = makeSlug(title);
-        let section = Store.getSection(slug);
+        let section = Store.getSection(slug,courseId);
 
         if(!section){
             const ID = 0;

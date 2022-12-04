@@ -3,8 +3,10 @@
     <PageNavigation @update="onNavUpdate($event)" :nav="nav" ref="pageNavigation"/>
     <WelcomePage v-if="nav=='welcome'"/>
     <CoursePage @update="onCourseUpdate($event)" v-if="nav=='course'" :course="course"  ref="coursePage"/>
+    <BgFetcher @update="onCourseUpdate($event)" v-if="nav=='bg-fetcher'" :course="course"  ref="bgFetcher"/>
     <DownloadPage v-if="nav=='downloads'"/>
     <HelpPage v-if="nav=='help'"/>
+    <AboutPage v-if="nav=='about'"/>
     <AboutPage v-if="nav=='about'"/>
     <div class="console" v-show="message.length>0">
       <highlightjs
@@ -25,6 +27,7 @@ import WelcomePage from './views/WelcomePage.vue'
 import CoursePage from './views/CoursePage.vue'
 import DownloadPage from './views/DownloadPage.vue'
 import AboutPage from './views/AboutPage.vue'
+import BgFetcher from './views/BgFetcher.vue'
 import HelpPage from './views/HelpPage.vue'
 import Store from '../libs/store';
 import { App_tableField,Course_tableField } from '../types/tableFields';
@@ -37,7 +40,8 @@ export default defineComponent({
     CoursePage,
     DownloadPage,
     AboutPage,
-    HelpPage
+    HelpPage,
+    BgFetcher
   },
   setup(){
     const nav = ref<NavTerm>('welcome');

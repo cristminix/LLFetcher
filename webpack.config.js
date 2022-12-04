@@ -23,7 +23,7 @@ module.exports = {
 		// content:"./src/content_scripts/content.ts",
 		// inject:"./src/content_scripts/inject.ts",
 		// create_data_codes:"./src/content_scripts_inject/create_data_codes.js",
-        // background: "./src/service_workers/background.ts"
+        background: "./src/service_workers/background.js"
 	},
 	output : {
 		filename : "[name].js",
@@ -31,9 +31,9 @@ module.exports = {
 		// publicPath : 'auto'
 	},
 	optimization:{
-		splitChunks:{
-			chunks:'all'
-		}
+		// splitChunks:{
+		// 	chunks:'all'
+		// }
 	},
 	devServer:{
 		static: {directory:path.join(__dirname,'chrome_extension')},

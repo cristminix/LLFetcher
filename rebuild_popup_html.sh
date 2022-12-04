@@ -3,36 +3,23 @@
 old_file=
 new_file=
 
+script_content_1=
 for n in chrome_extension/vendor*.js 
 do 
 	if [ "$old_file" -ot "$n" ]; then
     	new_file="$n"
+    	secondString=""
+		new_file="${new_file/chrome_extension\//$secondString}" 
+		script_content_1=$script_content_1'<script src="'$new_file'"></script>'
+
+		script_file_1=$new_file
 	fi
 	old_file=$new_file
 done
 
-firstString=""
-secondString=""
-new_file="${new_file/chrome_extension\//$secondString}" 
-script_content_1='<script src="'$new_file'"></script>'
 
-script_file_1=$new_file
-old_file=
-new_file=
-for n in chrome_extension/*hot-update.js 
-do 
-	if [ "$old_file" -ot "$n" ]; then
-    	new_file="$n"
-	fi
-	old_file=$new_file
-done
-firstString=""
-secondString=""
 
-new_file="${new_file/chrome_extension\//$secondString}" 
-script_content_2='<script src="'$new_file'"></script>'
 
-script_file_2=$new_file
 script_file_3=popup.js
 
 script_content_3='<script src="popup.js"></script>'

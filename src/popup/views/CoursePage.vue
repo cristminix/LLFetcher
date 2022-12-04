@@ -38,7 +38,6 @@ import LogBar from '../components/LogBar.vue';
 import {makeTitle} from '../../libs/utils';
 import $ from 'jquery';
 import Store from "../../libs/store";
-import { contentConsoleLog } from '../../libs/utils';
 import { Course_tableField,Author_tableField,Section_tableField,ExerciseFile_tableField } from '../../types/tableFields';
 
 export default defineComponent({

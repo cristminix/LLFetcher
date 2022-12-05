@@ -13,7 +13,7 @@ declare class chromeStorageDB {
     constructor(database_name: string, storage_engine?: Storage); // Constructor: storage_engine can either be sync (default) or local
     isNew(fn?:chromeStorageDB_callback): void; // Returns true if a database was created at the time of initialisation with the constructor
     drop(): void; // Deletes a database, and purges it from chrome.storage
-    getItem(key: string): Promise<chrome.storage.StorageArea>; // Retrieve specified value from chrome.storage
+    getItem(key: string): any; // Retrieve specified value from chrome.storage
     replace(json: string): void; // Replaced entire contents of chrome.storage database with passed in json
     setItem(key: string, value: string): void; // Set value for chrome.storage
     tableCount(): number; // Returns the number of tables in a database
@@ -100,6 +100,4 @@ interface chromeStorageDB_queryParams {
     distinct?: string[]; // - distinct is an array of fields whose values have to be unique in the returned rows
 }
 
-declare module 'chromeStorageDB' {
-    export = chromeStorageDB;
-}
+

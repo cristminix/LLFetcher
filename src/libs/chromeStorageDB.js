@@ -5,8 +5,7 @@
 */
 
 
-!(function (_global, undefined) {
-class chromeStorageDB{
+export default class chromeStorageDB{
     db_prefix = 'db_';
     db_id ;
     db_new ; // this flag determines whether a new database was created during an object initialisation
@@ -677,19 +676,3 @@ class chromeStorageDB{
     }
 
 }
-
-// export to Node...
-if ( typeof module !== 'undefined' && module.exports ) {
-    module.exports = chromeStorageDB;
-}
-
-// ...or as AMD module...
-else if ( typeof define === 'function' && define.amd ) {
-    define( function () { return chromeStorageDB; });
-}
-
-// ...or as browser global
-else {
-    _global['localStorageDB'] = chromeStorageDB;
-}
-}(typeof window !== 'undefined' ? window : this));

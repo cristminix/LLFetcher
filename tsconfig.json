@@ -5,7 +5,8 @@
     "baseUrl": "./",
     "allowJs": true,
     "moduleResolution": "Node",
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    
   },
   "include": ["src/**/*"],
   "exclude": ["chrome_extension/*","node_modules/*"]

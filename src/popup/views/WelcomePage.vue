@@ -36,7 +36,7 @@ export default defineComponent({
     }
   },
   mounted(){
-    // setTimeout(()=>{
+    setTimeout(()=>{
       const appInfo = Store.getAppInfo();
       this.$parent.log(`AppState:${appInfo.state}`);
       
@@ -48,7 +48,7 @@ export default defineComponent({
         });
       }
       
-    // },1000);
+    },1000);
 
   },
   methods:{

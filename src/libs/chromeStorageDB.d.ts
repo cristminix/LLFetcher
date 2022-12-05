@@ -1,12 +1,16 @@
 /**
- * Adapted from localstorageDB
+ * Created by [BombSquad Inc](http://www.bmbsqd.com)
+ * User: Andy Hawkins
+ * Date: 6/29/15
+ * Time: 11:19 AM
+ *   V 2.3.2 Mar 2018 Contribution: Ken Kohler.
  */
 
 declare type chromeStorageDB_callback = (object: chromeStorageDB_fields) => chromeStorageDB_dynamicFields;
 declare type chromeStorageDB_callbackFilter = (object: chromeStorageDB_fields) => boolean;
 
 declare class chromeStorageDB {
-    constructor(database_name: string, storage_engine?: Storage); // Constructor: storage_engine can either be chrome.storage (default) or sessionStorage
+    constructor(database_name: string, storage_engine?: Storage); // Constructor: storage_engine can either be sync (default) or local
     isNew(fn?:chromeStorageDB_callback): void; // Returns true if a database was created at the time of initialisation with the constructor
     drop(): void; // Deletes a database, and purges it from chrome.storage
     getItem(key: string): Promise<chrome.storage.StorageArea>; // Retrieve specified value from chrome.storage

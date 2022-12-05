@@ -5,7 +5,8 @@
 */
 
 
- export default class chromeStorageDB{
+!(function (_global, undefined) {
+class chromeStorageDB{
     db_prefix = 'db_';
     db_id ;
     db_new ; // this flag determines whether a new database was created during an object initialisation
@@ -97,13 +98,16 @@
 
     // check whether a table exists
     tableExists(table_name) {
+        if(typeof this.db.tables[table_name] !== 'object'){
+            return false;
+        }
         return this.db.tables[table_name] ? true : false;
     }
 
     // check whether a table exists, and if not, throw an error
     tableExistsWarn(table_name) {
-		if(!tableExists(table_name)) {
-            error("The table '" + table_name + "' does not exist");
+		if(!this.tableExists(table_name)) {
+            this.error("The table '" + table_name + "' does not exist");
         }
     }
 
@@ -188,7 +192,7 @@
         for(i=0; i<ids.length; i++) {
             ID = ids[i];
             row = this.db.data[table_name][ID];
-            results.push( clone(row) );
+            results.push( this.clone(row) );
         }
 
         // there are sorting params
@@ -369,11 +373,16 @@
     }
 
     // commit the database to localStorage
-    commit() {
+    commit(fn) {
         try {
             const data = {};
             data[this.db_id] = this.db;
-            this.storage.set(data,(data_)=>{console.log(data_)});
+            this.storage.set(data,(data_)=>{
+                if(typeof fn === 'function'){
+                    fn(data_);
+                }
+                // console.log(data_)
+            });
             return true;
         } catch(e) {
             return false;
@@ -423,7 +432,7 @@
     // given a data list, populate with valid field names of a table
     validateData(table_name, data) {
         var field = '', new_data = {};
-        for(var i=0; i<db.tables[table_name].fields.length; i++) {
+        for(var i=0; i<this.db.tables[table_name].fields.length; i++) {
             field = this.db.tables[table_name].fields[i];
             new_data[field] = (data[field] === null || data[field] === undefined) ? null : data[field];
         }
@@ -669,3 +678,18 @@
 
 }
 
+// export to Node...
+if ( typeof module !== 'undefined' && module.exports ) {
+    module.exports = chromeStorageDB;
+}
+
+// ...or as AMD module...
+else if ( typeof define === 'function' && define.amd ) {
+    define( function () { return chromeStorageDB; });
+}
+
+// ...or as browser global
+else {
+    _global['localStorageDB'] = chromeStorageDB;
+}
+}(typeof window !== 'undefined' ? window : this));

@@ -2,7 +2,7 @@ var listeningTabIds = {};
 var exactMatchTabIds = {};
 var port = null; // This is the port used to communicate to the native host
 var enableRefreshActivePage = false;
-var extensionIdToReload = 'dpfficmmckfbhpbncblgnkkdjnhoaffp';
+var extensionIdToReload = 'blmicldgeaccfgddgcijgedbplbcgbac';
 
 function changeToActiveIcon(tabId) {
     if (typeof tabId === "undefined") {
@@ -81,9 +81,12 @@ function sendNativeMessage(message) {
     port.postMessage(message);
 }
 function reloadExtension(id) {
-    chrome.management.setEnabled(id, false, function() {
-        chrome.management.setEnabled(id, true);
-    });
+    setTimeout(()=>{
+        chrome.management.setEnabled(id, false, function() {
+            chrome.management.setEnabled(id, true);
+        });
+    },2000)
+    
 }
 function onNativeMessage(eventName) {
     console.log('Event page got native message from host:', eventName);

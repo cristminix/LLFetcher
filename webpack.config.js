@@ -19,7 +19,7 @@ module.exports = {
 	mode: 'development',
 	devtool: 'inline-source-map',
 	entry : {
-		popup:"./src/popup/popup.ts",
+		// popup:"./src/popup/popup.ts",
 		// content:"./src/content_scripts/content.ts",
 		// inject:"./src/content_scripts/inject.ts",
 		// create_data_codes:"./src/content_scripts_inject/create_data_codes.js",
@@ -28,7 +28,6 @@ module.exports = {
 	output : {
 		filename : "[name].js",
 		path : path.resolve(__dirname, "chrome_extension"),
-		// publicPath : 'auto'
 	},
 	optimization:{
 		// splitChunks:{
@@ -51,11 +50,11 @@ module.exports = {
 			{
 				test: /\.ts$/,
 				loader: 'ts-loader',
-				options: {
-				  appendTsSuffixTo: [/\.vue$/],
-				  transpileOnly: true,
-				},
-				exclude : /node_modules/
+				// options: {
+				//   appendTsSuffixTo: [/\.vue$/],
+				//   transpileOnly: true,
+				// },
+				exclude : /(node_modules)/
 			},
 			{
 				test : /\.js$/,

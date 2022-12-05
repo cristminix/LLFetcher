@@ -1,3 +1,31 @@
+import chromeStorageDB from '../libs/chromeStorageDB';
+
+const db = new chromeStorageDB('course','sync');
+
+db.isNew((isNew)=>{
+    if(isNew){
+        const schema = {
+            course : ["title", "slug", "duration", "sourceCodeRepository", "description",'authorIds'],
+            author : ["name","slug","biography", "shortBiography","courseIds"],
+            exerciseFile : ["courseId","name","url","size"],
+            section : ["courseId","slug","title"],
+            toc : ["sectionId","title","slug","url","duration","captionUrl","captionFmt","streamLocationIds"],
+            streamLocation : ["tocId","fmt","url"],
+            downloadConfig : ["courseId","fmtList","selectedFmtList"],
+            downloads : ["tocId","downloadId","filename","progress","status"],
+            app: ["version","state","lastCourseSlug"]
+        };
+        Object.keys(schema).forEach((table)=>{
+            if(!db.tableExists(table)){
+                db.createTable(table, schema[table]);
+    
+            }
+        });
+        db.commit();
+    }
+})   
+
+
 let ENV = 'development';
 
 if(ENV === 'production'){
@@ -58,7 +86,7 @@ chrome.webNavigation.onHistoryStateUpdated.addListener(function(tab) {
 		    }
         }
 });
-setInterval(()=>{
-console.log('hello workers, iam here 123')
+setTimeout(()=>{
+console.log(db)
 
 },1000)

@@ -58,7 +58,9 @@ chrome.webNavigation.onHistoryStateUpdated.addListener(function(tab) {
 		    }
         }
 });
-setInterval(()=>{
-console.log('hello workers, iam here 123')
+setInterval(async ()=>{
+console.log('hello workers, iam here one two three four five six ')
 
-},1000)
+
+},2000)
+

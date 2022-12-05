@@ -42,5 +42,10 @@ interface ExerciseFile{
     url : string,
     sizeInBytes:number
 }
+interface CourseInfo{
+    bprs : Object,
+    course : Course,
+    sections : Section[]
+}
 
 export {Author,Course,Section,Toc,StreamLocation,ExerciseFile,CourseInfo,DataCodes}

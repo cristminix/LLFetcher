@@ -24,7 +24,8 @@
 	 ],
 	"host_permissions":[
 		"https://www.linkedin.com/learning/*",
-		"http://localhost:9000/*"
+		"http://localhost:9000/*",
+		"chrome://extensions/"
 	],
 	"description" : "LLFetcher is stand for Linked Learning Fetcher, which just simple chrome extension that can help you download all resource in Linked learning Course",
 	"action" : {

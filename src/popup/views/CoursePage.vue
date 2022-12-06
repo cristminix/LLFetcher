@@ -4,7 +4,8 @@
       <FetchSectionQueue ref="fetchSectionQueue"/>
     </div>
     <div class="course" v-if="course">
-      <h2><i class="fa fa-bookmark"></i> {{course.title}} by <span v-for="author in authors">{{makeTitle(author.slug)}}</span></h2>
+      <h2><i class="fa fa-bookmark"></i> <span>{{course.title}}</span></h2>
+      <div style="font-style:italic"><h4> <span v-if="authors.length>0">By</span> <span v-for="author in authors">{{makeTitle(author.slug)}}</span></h4></div>
     </div>
     <div class="accordion accordion-flush" id="accordionCourse">
     <div v-for="(section,sectionIndex ) in sections" :key="sectionIndex" class="accordion-item">
@@ -38,7 +39,7 @@ import LogBar from '../components/LogBar.vue';
 import {makeTitle} from '../../libs/utils';
 import $ from 'jquery';
 import Store from "../../libs/store";
-import { Course_tableField,Author_tableField,Section_tableField,ExerciseFile_tableField } from '../../types/tableFields';
+import { Course_tableField,Author_tableField,Section_tableField,ExerciseFile_tableField,Toc_tableField } from '../../types/tableFields';
 
 export default defineComponent({
   components:{
@@ -108,18 +109,18 @@ export default defineComponent({
         }
       })
     },
-    updateTocItems(exerciseFile:ExerciseFile,toc:Toc){
+    updateTocItems(exerciseFile:ExerciseFile,toc:Toc,sectionId:number){
       this.exerciseFile = Store.createExerciseFile(this.course.ID, exerciseFile.name, exerciseFile.url, exerciseFile.sizeInBytes);
       // console.log(exerciseFile,toc);
 
       // update toc caption
-      Store.updateTocCaption(toc.slug,toc.captionUrl,toc.captionFmt);
+      Store.updateTocCaption(toc.slug,toc.captionUrl,toc.captionFmt,sectionId);
       // Update or create streaming location
-      Store.createStreamLocationList(toc.slug,toc.streamLocations,this.course.ID);
+      Store.createStreamLocationList(toc.slug,sectionId,toc.streamLocations,this.course.ID);
     },
     onTocUpdate(evt:any){
       if(evt.src === 'Popup.CoursePage.TocItem.FetchButton'){
-        this.updateTocItems(evt.exerciseFile, evt.toc);
+        this.updateTocItems(evt.exerciseFile, evt.toc, evt.sectionId);
       }
 
       this.$emit('update',evt);
@@ -129,8 +130,18 @@ export default defineComponent({
     },
     getTotalTocs(){
         let totalTocs =0;
-        this.sections.map((s:Section)=>{
-          totalTocs += s.items.length;
+        this.sections.map((section:Section)=>{
+          // section.items.forEach((toc_)=>{
+          //   const toc = toc_ as unknown as Toc_tableField;
+          //   if(typeof toc.streamLocationIds === 'object'){
+          //     if(toc.streamLocationIds.length == 0){
+          //       totalTocs += 1;
+          //     }
+          //   }else{
+          //     totalTocs += 1;
+          //   }
+          // });
+          totalTocs += section.items.length;
         });
         return totalTocs;
     }

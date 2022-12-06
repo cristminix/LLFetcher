@@ -101,3 +101,6 @@ interface chromeStorageDB_queryParams {
 }
 
 
+declare module 'chromeStorageDB'{
+	export = chromeStorageDB;
+}

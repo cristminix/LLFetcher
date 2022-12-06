@@ -1,9 +1,9 @@
 <template>
   <div class="toc-item-view">
     <table class="toc-item-list">
-        <thead>
-            <tr>
-                <th colspan="2"><label><input @click="onCheckAll()" v-model="checkAll" class="form-check-input" type="checkbox"/> <span style="padding-left:.5em">Check All</span></label></th>
+        <thead v-if="fetchQueueBar">
+            <tr v-if="fetchQueueBar.queueTocIndex.length>0">
+                <th colspan="2"><label><input  @click="onCheckAll()" v-model="checkAll" class="form-check-input" type="checkbox"/> <span style="padding-left:.5em">Check All</span></label></th>
                
                 <th></th>
                 <th class="text-center" style="width:80px"></th>
@@ -12,7 +12,7 @@
         <tbody>
         <tr v-for="(toc,tocIndex) in items" class="toc-item" :class="{ods:tocIndex%2==0}" :key="tocIndex">
             <td class="fcc">
-                <input @click="tgQueue(tocIndex)" class="form-check-input" type="checkbox" v-model="checkedQueues[tocIndex]"/> 
+                <input v-if="toc.streamLocationIds.length == 0"  @click="tgQueue(tocIndex)" class="form-check-input" type="checkbox" v-model="checkedQueues[tocIndex]"/> 
             </td>
             <td style="padding-left:.5em">{{toc.title}}</td>
             <td colspan="2" style="text-align: right;">
@@ -20,7 +20,8 @@
                 :sectionIndex="sectionIndex" 
                 :tocIndex="tocIndex" 
                 :toc="toc" 
-                :queue="enableQueue" 
+                :queue="enableQueue"
+                :exclude="toc.streamLocationIds.length > 0" 
                 ref="fetchBtns"/>
             </td>
         </tr>
@@ -32,6 +33,7 @@
 import { defineComponent, ref, PropType } from 'vue';
 import FetchButton from '../components/FetchButton.vue';
 import {Toc} from '../../types/lynda';
+import {Toc_tableField} from '../../types/tableFields';
 
 export default defineComponent({
     components:{
@@ -40,7 +42,7 @@ export default defineComponent({
     props:{
         items: {
             required : true,
-            type : Array as PropType<Toc[]>
+            type : Array as PropType<Toc_tableField[]>
         },
         sectionIndex : {
             requied : true,
@@ -49,7 +51,7 @@ export default defineComponent({
     },
     setup(props) {
         const enableQueue = ref(true);
-        const items = ref(props.items as Toc[]);
+        const items = ref(props.items);
         const sectionIndex = ref(props.sectionIndex as number);
         const checkAll = ref(false);
         const checkedQueues = ref([]);
@@ -65,8 +67,8 @@ export default defineComponent({
             this.checkAll = true;
             for(let tocIndex in this.items){
                 this.checkedQueues[tocIndex] = true;
-                // const tocSlug = this.items[tocIndex].slug;
-                if(!this.fetchQueueBar.queueTocIndex.includes(tocIndex)){
+                const toc = this.items[tocIndex];
+                if(!this.fetchQueueBar.queueTocIndex.includes(tocIndex) && toc.streamLocationIds.length == 0){
                     this.fetchQueueBar.queueTocIndex.push(tocIndex);    
                 }
                 
@@ -139,8 +141,8 @@ export default defineComponent({
                 console.log(this.checkAll);
                 for(let tocIndex in this.items){
                     this.checkedQueues[tocIndex] = this.checkAll;
-                    // const tocSlug = this.items[tocIndex].slug;
-                    if(this.checkedQueues[tocIndex]){
+                    const toc = this.items[tocIndex];
+                    if(this.checkedQueues[tocIndex] && toc.streamLocationIds.length == 0){
                         if(!this.fetchQueueBar.queueTocIndex.includes(tocIndex)){
                             this.fetchQueueBar.queueTocIndex.push(tocIndex);    
                         }
@@ -158,8 +160,8 @@ export default defineComponent({
             setTimeout(()=>{
                 // this.$refs.fetchBtns[tocIndex].isQueued =this.checkedQueues[tocIndex];
                 // console.log(this.$refs.fetchBtns);
-                // const tocSlug = this.items[tocIndex].slug;
-                if(this.checkedQueues[tocIndex]){
+                const toc = this.items[tocIndex];
+                if(this.checkedQueues[tocIndex] && toc.streamLocationIds.length == 0){
                     if(!this.fetchQueueBar.queueTocIndex.includes(tocIndex)){
                         this.fetchQueueBar.queueTocIndex.push(tocIndex);    
                     }

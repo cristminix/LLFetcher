@@ -4,10 +4,10 @@
             <div class="fetch-section-queue-bar">
                 <div class="fetch-section-queue-pb">
                     <div class="progress" v-show="percentage > 0">
-                        <div class="progress-bar bg-success" role="progressbar" :style="{width:percentage+'%'}" :aria-valuenow="percentage" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar bg-danger" role="progressbar" :style="{width:percentage+'%'}" :aria-valuenow="percentage" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                 </div>
-                <div class="btn-fetch-section-queue-cnt">
+                <div class="btn-fetch-section-queue-cnt" v-if="sectionIndexQueues.length>0 || percentage==100">
                     <button :style="{color:btnState==3?'white':'inherit'}" :disabled="btnState!=1&&btnState!=4" @click="startQueue()" class="btn btn-sm btn-fetch-section-queue"><i class="fa" :class="{'fa-play':btnState==1,'fa-spin fa-spinner':btnState==2,'fa-check':btnState==3,'fa-refresh':btnState==4}"></i></button>
                 </div>
             </div>
@@ -22,24 +22,53 @@ export default defineComponent({
 
     setup() {
         const queueSlugs = ref([]);
+        const excludeTocCount = ref(0);
         const btnState = ref(1);
         const percentage = ref(0);
         const lastSectionIndex = ref(0);
         const sectionIndexQueues = ref([]);
+        const successTocSlugs = ref([]);
         return {
             queueSlugs,
             btnState,
             percentage,
             lastSectionIndex,
-            sectionIndexQueues
+            sectionIndexQueues,
+            excludeTocCount,
+            successTocSlugs
         };
     },
     mounted(){
         setTimeout(()=> {
-            this.sectionIndexQueues =  Object.keys(this.$parent.sections);
+             Object.keys(this.$parent.sections).forEach((sectionIndex)=>{
+                const fetchQueueBar = this.$parent.fetchQueueBar[sectionIndex];
+                // const tocItem = this.$parent.tocItems[sectionIndex];
+                if(fetchQueueBar.queueTocIndex.length>0){
+                    this.sectionIndexQueues.push(sectionIndex);
+                }
+
+             });
+            //  this.calculatePercentageInit();
         },250)
     },
     methods:{
+        calculatePercentageInit(tocSlugs?:string[]){
+            //  = tocSlugs;
+            if(typeof tocSlugs !== 'undefined'){
+                this.successTocSlugs = tocSlugs;
+            }
+            const peak = this.successTocSlugs.length;
+            const maxPeak = this.$parent.getTotalTocs();
+            const percentage = Math.round(peak / maxPeak * 100);
+            setTimeout(()=>{
+                this.percentage = percentage;
+
+                if(percentage==100){
+                    this.btnState = 3;
+                }
+            },250);
+            
+        },
         toJSONStr(obj:any){
             return JSON.stringify(obj);
         },
@@ -101,9 +130,10 @@ export default defineComponent({
     font-size: 10px;
 }
 .fetch-section-queue{
-    position: absolute;
+   position: absolute;
     right: 49px;
-    margin-top: 12px;
+    margin-top: 8px;
+    opacity: .9;
 }
 .btn-fetch-section-queue-cnt{
    width: 25px;

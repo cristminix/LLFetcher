@@ -1,20 +1,21 @@
 <template>
     <div class="fetch-queue-bar">
-        <div class="test-data" v-if="0">
-            <pre>{{JSON.stringify(queueTocIndex,null,2)}}</pre>
+        <div class="test-data" v-if="false">
+            <code>{{JSON.stringify(queueTocIndex,null,2)}}</code>
         </div>
         <div class="fetch-queue-pb">
             <div class="progress" v-show="percentage > 0">
                 <div class="progress-bar bg-info" role="progressbar" :style="{width:percentage+'%'}" :aria-valuenow="percentage" :aria-valuemin="0" :aria-valuemax="100"></div>
             </div>
         </div>
-        <div class="btn-fetch-cnt">
+        <div class="btn-fetch-cnt" v-if="queueTocIndex.length>0 || percentage==100">
             <button :style="{color:btnState==3?'white':'inherit'}" :disabled="btnState!=1&&btnState!=4" @click="startQueue()" class="btn btn-sm btn-fetch"><i class="fa" :class="{'fa-play':btnState==1,'fa-spin fa-spinner':btnState==2,'fa-check':btnState==3,'fa-refresh':btnState==4}"></i></button>
         </div>
     </div>
 </template>
 
 <script lang="ts">
+import { Toc_tableField } from '../../types/tableFields';
 import {defineComponent,ref} from 'vue'
 export default defineComponent({
   props:{
@@ -33,7 +34,37 @@ export default defineComponent({
     const sectionIndex = ref(props.sectionIndex);
     return {queueTocIndex,queueSlugs,excludeSlugs,percentage,btnState,lastTocIndex,sectionIndex};
   },
+  mounted(){
+    setTimeout(()=>{
+        this.calculatePercentageInit();
+    },1000);
+  },
   methods:{
+    calculatePercentageInit(){
+        let maxPeak = 0;
+        let peak = 0;
+        let tocSlugs = Object.assign([],this.$parent.fetchSectionQueue.successTocSlugs);
+        console.log(tocSlugs);
+        this.$parent.tocItems[this.sectionIndex].items.forEach((toc:Toc_tableField)=>{
+            maxPeak += 1;
+            if(toc.streamLocationIds.length > 0){
+                peak += 1;
+                tocSlugs.push(toc.slug);
+            }
+        });
+        const percentage = Math.round(peak / maxPeak * 100);
+        
+        setTimeout(()=>{
+            this.percentage = percentage;
+
+            if(percentage==100){
+                this.btnState = 3;
+            }
+
+        },250);
+        
+        this.$parent.fetchSectionQueue.calculatePercentageInit(tocSlugs);
+    },
     setProgress(lastTocIndex:number,percentage:number){
         this.lastTocIndex = lastTocIndex;
         this.percentage = percentage;

@@ -8,17 +8,17 @@
 </template>
 <script lang="ts">
 import { defineComponent, ref, PropType } from 'vue';
-import Toc from '../../types/toc';
+import {ExerciseFile,Toc} from '../../types/lynda';
 import Proxy from '../../libs/proxy';
 import jQuery from 'jquery';
 import {findItems,findDS,getFmt} from '../../libs/utils';
-import ExerciseFile from 'src/types/ExerciseFile';
+import {Toc_tableField} from '../../types/tableFields';
 
 export default defineComponent({
   props:{
         toc: {
             required : true,
-            type : Object as PropType<Toc>
+            type : Object as PropType<Toc_tableField>
         },
         sectionIndex : {
             required : true,
@@ -31,18 +31,26 @@ export default defineComponent({
         queue : {
             required : false,
             type : Boolean
+        },
+        exclude : {
+            required : false,
+            type : Boolean
         }
   },
     setup(props) {
         const fetchQueueEnabled = ref(props.queue);
-        const toc = ref(props.toc as Toc);
+        const exclude = ref(props.exclude);
+        const toc = ref<Toc_tableField>(props.toc);
         const sectionIndex = ref(props.sectionIndex as number);
         const tocIndex = ref(props.tocIndex as number);
-        let exerciseFile  = ref<ExerciseFile>({name:'',url:''});
+        let exerciseFile  = ref<ExerciseFile>();
         const btnState = ref(1);
-      
+
+        if(exclude.value){
+          btnState.value = 3;
+        }
         
-        return {toc, sectionIndex, tocIndex, exerciseFile, btnState, fetchQueueEnabled};
+        return {exclude,toc, sectionIndex, tocIndex, exerciseFile, btnState, fetchQueueEnabled};
     },
 
     methods:{
@@ -57,7 +65,14 @@ export default defineComponent({
         if(isQueued){
           // 1. set btn state icon to [loading]
           this.btnState = 2;
-        
+          if(this.toc.streamLocationIds.length > 0){
+            if(this.fetchQueueEnabled){
+                this.btnState = 3;
+                console.log('Queue Complete: triggering next fetchToc from parent, lastTocIndex:',this.tocIndex);
+                this.$parent.triggerFetchQueue(this.tocIndex);
+            }
+            return;
+          }
           // const url = '/content.html?rand='+(Math.random().toString());
           const url = this.toc.url;
           Proxy.get(url, (responseText : string)=>{
@@ -65,7 +80,7 @@ export default defineComponent({
             if(validResource){
               // 3. set btn state to [checked]
               this.btnState = 3;
-              this.$emit('update',{src: 'Popup.CoursePage.TocItem.FetchButton',toc : this.toc, exerciseFile: this.exerciseFile});
+              this.$emit('update',{src: 'Popup.CoursePage.TocItem.FetchButton',toc : this.toc, exerciseFile: this.exerciseFile, sectionId:this.toc.sectionId});
 
               if(this.fetchQueueEnabled){
                 console.log('Queue Complete: triggering next fetchToc from parent, lastTocIndex:',this.tocIndex);

@@ -151,9 +151,9 @@ class Store{
         const results = db.queryAll('toc',{query: {sectionId}});
         return results as Toc_tableField[];
     }
-    static getToc(slug:string):Toc_tableField{
+    static getToc(slug:string,sectionId:number):Toc_tableField{
         const db = Store.db();
-        const results = db.queryAll('toc',{query: {slug}});
+        const results = db.queryAll('toc',{query: {slug,sectionId}});
         if(results.length>0){
             return results[0] as Toc_tableField
         }
@@ -243,9 +243,9 @@ class Store{
         }
         return authorResults;
     }
-    static updateTocCaption(slug:string,captionUrl:string,captionFmt:string){
+    static updateTocCaption(slug:string,captionUrl:string,captionFmt:string,sectionId:number){
         const db = Store.db();
-        const toc = Store.getToc(slug);
+        const toc = Store.getToc(slug,sectionId);
         if(toc){
             db.update("toc", {slug}, function(newToc) {
                 newToc.captionUrl = captionUrl;
@@ -310,9 +310,9 @@ class Store{
         return downloadConfig;
 
     }
-    static createStreamLocationList(slug:string,streamLocations:StreamLocation[],courseId?:number):StreamLocation_tableField[]{
+    static createStreamLocationList(slug:string,sectionId:number,streamLocations:StreamLocation[],courseId?:number):StreamLocation_tableField[]{
         const db = Store.db();
-        const toc = Store.getToc(slug);
+        const toc = Store.getToc(slug,sectionId);
         const streamLocationResults : StreamLocation_tableField[] = [];
         const fmtList : string[]=[];
         if(toc){
@@ -373,7 +373,7 @@ class Store{
     }
     static createToc(sectionId:number,title:string,slug:string,url:string,duration:number, captionUrl?:string, captionFmt?:string):Toc_tableField{
         const db = Store.db();
-        let toc = Store.getToc(slug);
+        let toc = Store.getToc(slug,sectionId);
 
         if(!toc){
             const ID = 0;

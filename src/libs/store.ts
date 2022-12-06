@@ -225,7 +225,7 @@ class Store{
         if(course){
             let authorIds = course.authorIds;
             authors.map((authorTmp)=>{
-                console.log(authorTmp);
+                // console.log(authorTmp);
                 const name = makeTitle(authorTmp.slug);
                 const author = Store.createAuthor(name,authorTmp.slug,authorTmp.biography,authorTmp.shortBiography,course.ID);
                 if(!authorIds.includes(author.ID)){

@@ -12,7 +12,7 @@
         <tbody>
         <tr v-for="(toc,tocIndex) in items" class="toc-item" :class="{ods:tocIndex%2==0}" :key="tocIndex">
             <td class="fcc">
-                <input v-if="toc.streamLocationIds.length == 0"  @click="tgQueue(tocIndex)" class="form-check-input" type="checkbox" v-model="checkedQueues[tocIndex]"/> 
+                <input v-if="0"  @click="tgQueue(tocIndex)" class="form-check-input" type="checkbox" v-model="checkedQueues[tocIndex]"/> 
             </td>
             <td style="padding-left:.5em">{{toc.title}}</td>
             <td colspan="2" style="text-align: right;">
@@ -32,7 +32,7 @@
 <script lang="ts">
 import { defineComponent, ref, PropType } from 'vue';
 import FetchButton from '../components/FetchButton.vue';
-import {Toc} from '../../types/lynda';
+// import {Toc} from '../../types/lynda';
 import {Toc_tableField} from '../../types/tableFields';
 
 export default defineComponent({
@@ -50,16 +50,18 @@ export default defineComponent({
         }
     },
     setup(props) {
-        const hideCheckAll = ref(false);
+        const hideCheckAll = ref(true);
         const enableQueue = ref(true);
         const items = ref(props.items);
         const sectionIndex = ref(props.sectionIndex as number);
         const checkAll = ref(false);
         const checkedQueues = ref([]);
-        const excludeQueues = ref([]);
+        // const excludeQueues = ref([]);
         const fetchQueueBar = ref();
         let fetchBtns = ref([]);
-        return {hideCheckAll,fetchQueueBar,items, sectionIndex, checkedQueues, excludeQueues,fetchBtns,checkAll,enableQueue};
+        return {hideCheckAll,fetchQueueBar,items, sectionIndex, checkedQueues, 
+        // excludeQueues,
+        fetchBtns,checkAll,enableQueue};
     },
     mounted(){
         this.fetchQueueBar = this.$parent.fetchQueueBar[this.sectionIndex];
@@ -70,73 +72,11 @@ export default defineComponent({
             this.checkAll = true;
             for(let tocIndex in this.items){
                 this.checkedQueues[tocIndex] = true;
-                const toc = this.items[tocIndex];
-                if(!this.fetchQueueBar.itemIndexQueues.includes(tocIndex) && toc.streamLocationIds.length == 0){
-                    this.fetchQueueBar.itemIndexQueues.push(tocIndex);    
-                }
-                
             }
         },250);
     },
     methods:{
-        triggerFailedFetchQueue(tocIndex:number){
-            console.log(`TocItem[${this.sectionIndex}].triggerFailedFetchQueue(${tocIndex})`);
-
-            setTimeout(()=>{
-                this.fetchQueueBar.btnState=4;
-            },1000);
-            
-        },
-        calculatePercentageQueue(callback){
-            const peak = this.excludeQueues.length;
-            const maxPeak = this.items.length;
-            const percentage = Math.round(peak / maxPeak * 100);
-
-            if('function' == typeof callback){
-                callback(percentage,peak,maxPeak);
-            }
-        },
-        triggerExcludeFetchQueue(tocIndex:number, fetchQueueEnabled:boolean){
-            console.log(`TocItem[${this.sectionIndex}].triggerExcludeFetchQueue(${tocIndex},${fetchQueueEnabled})`);
-            // console.log(tocIndex);
-            if(this.excludeQueues.indexOf(tocIndex) == -1){
-                this.excludeQueues.push(tocIndex);
-            }
-            if(fetchQueueEnabled){
-                this.calculatePercentageQueue((percentage:number)=>{
-                    setTimeout(()=>{
-                        this.fetchQueueBar.setProgress(tocIndex,percentage);
-                    },500);
-                });
-            }
-            
-            this.checkedQueues[tocIndex] = false;
-            this.checkAll = false;
-       
-        },
-        triggerFetchQueue(tocIndex:number){
-            console.log(`TocItem[${this.sectionIndex}].startQueue(${tocIndex})`);
-
-            // console.log(tocIndex);
-            const nextTocIndex = tocIndex + 1;
-            if(nextTocIndex < this.checkedQueues.length){
-                // process next fetch button
-                this.fetchBtns[nextTocIndex].fetchToc(true);
-                // console.log();
-            }else{
-                this.calculatePercentageQueue((percentage:number)=>{
-                    setTimeout(()=>{
-                        this.fetchQueueBar.setProgress(tocIndex,percentage);
-                    },500);
-                });
-                setTimeout(()=>{
-
-                    this.fetchQueueBar.btnState=this.fetchQueueBar.percentage==100?3:1;
-                    this.fetchQueueBar.lastTocIndex=0;
-                },1000);
-            }
-
-        },
+     
         onFetchUpdate(target:any){
             this.$emit('update',target);
         },
@@ -145,38 +85,13 @@ export default defineComponent({
                 console.log(this.checkAll);
                 for(let tocIndex in this.items){
                     this.checkedQueues[tocIndex] = this.checkAll;
-                    const toc = this.items[tocIndex];
-                    if(this.checkedQueues[tocIndex] && toc.streamLocationIds.length == 0){
-                        if(!this.fetchQueueBar.itemIndexQueues.includes(tocIndex)){
-                            this.fetchQueueBar.itemIndexQueues.push(tocIndex);    
-                        }
-                    }else{
-                        const aIndex = this.fetchQueueBar.itemIndexQueues.indexOf(tocIndex);
-                        if( aIndex != -1){
-                            this.fetchQueueBar.itemIndexQueues.splice(aIndex,1);
-                        }
-                    }
                 }
             },250);
             
         },
         tgQueue(tocIndex:number){
-            setTimeout(()=>{
-          
-                const toc = this.items[tocIndex];
-                if(this.checkedQueues[tocIndex] && toc.streamLocationIds.length == 0){
-                    if(!this.fetchQueueBar.itemIndexQueues.includes(tocIndex)){
-                        this.fetchQueueBar.itemIndexQueues.push(tocIndex);    
-                    }
-                }else{
-                    const aIndex = this.fetchQueueBar.itemIndexQueues.indexOf(tocIndex);
-                    if( aIndex != -1){
-                        this.fetchQueueBar.itemIndexQueues.splice(aIndex,1);
-                    }
-                }
-                
-                // console.log(this.checkedQueues[tocIndex]);
-            },250);
+            // setTimeout(()=>{
+            // },250);
         }
         
     }
@@ -186,7 +101,7 @@ export default defineComponent({
 <style scoped>
 td.fcc{
     text-align: right;
-    width:2.5em;
+    width:10px;
 }
 ul.toc-item-list{
   list-style-type:none;

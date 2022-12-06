@@ -72,16 +72,16 @@ export default defineComponent({
       if(this.app.nav !== ''){
         this.nav = this.$refs.pageNavigation.nav = this.app.nav;
       }
-      db.subscribe('app',(row:App_tableField)=>{
-        this.app = row;
-        this.log(`AppState:${row.state}`);
-      });
-    },50)
+      // db.subscribe('app',(row:App_tableField)=>{
+      //   this.app = row;
+      //   this.log(`AppState:${row.state}`);
+      // });
+    },1250)
 
   },
   methods:{
     log(message:string){
-      this.message = message;
+      // this.message = message;
     },
     setCourse(course:Course){
       this.course = course;

@@ -54,26 +54,18 @@ export default defineComponent({
     },
 
     methods:{
-      isQueued(){
-        return this.fetchQueueEnabled ? (this.$parent.checkedQueues[this.tocIndex] && this.$parent.excludeQueues.indexOf(this.tocIndex) == -1) : (this.btnState == 1 || this.btnState == 4);
-      },
+      
       fetchToc(){
-        // 0. check if queues
-        const isQueued = this.isQueued();
-        console.log('isQueued:',isQueued);
-
-        if(isQueued){
-          // 1. set btn state icon to [loading]
+        
           this.btnState = 2;
           if(this.toc.streamLocationIds.length > 0){
             if(this.fetchQueueEnabled){
                 this.btnState = 3;
                 console.log('Queue Complete: triggering next fetchToc from parent, lastTocIndex:',this.tocIndex);
-                this.$parent.triggerFetchQueue(this.tocIndex);
+                this.$parent.fetchQueueBar.afterProcessQueue(true);
             }
             return;
           }
-          // const url = '/content.html?rand='+(Math.random().toString());
           const url = this.toc.url;
           Proxy.get(url, (responseText : string)=>{
             let validResource = this.parseToc(responseText);
@@ -82,37 +74,25 @@ export default defineComponent({
               this.btnState = 3;
               this.$emit('update',{src: 'Popup.CoursePage.TocItem.FetchButton',toc : this.toc, exerciseFile: this.exerciseFile, sectionId:this.toc.sectionId});
 
-              if(this.fetchQueueEnabled){
                 console.log('Queue Complete: triggering next fetchToc from parent, lastTocIndex:',this.tocIndex);
-                this.$parent.triggerFetchQueue(this.tocIndex);
-              }else{
-                // this.$parent.triggerFetchQueue(this.tocIndex);
-              }
-              // addToParent excludeQueue
-              this.$parent.triggerExcludeFetchQueue(this.tocIndex,this.fetchQueueEnabled);
-
+                this.$parent.fetchQueueBar.afterProcessQueue(true);
+              
             }else{
               // 3. set btn state to icon [retry]
               this.btnState = 4;
               if(this.fetchQueueEnabled){
-                this.$parent.triggerFailedFetchQueue(this.tocIndex);
+                this.$parent.fetchQueueBar.afterProcessQueue(false);
                 console.log('Queue Failed: triggering fetchToc from FetchButton, lastTocIndex:',this.tocIndex);
               }
             }
           },(r:any)=>{
             // 3. set btn state to icon [retry]
             this.btnState = 4;
-            if(this.fetchQueueEnabled){
-              this.$parent.triggerFailedFetchQueue(this.tocIndex);
+              this.$parent.fetchQueueBar.afterProcessQueue(false);
               console.log('Queue Failed: triggering fetchToc from FetchButton, lastTocIndex:',this.tocIndex);
-            }
           });
           
-        }else{
-          if(this.fetchQueueEnabled){
-            this.$parent.triggerFetchQueue(this.tocIndex);
-          }
-        }
+       
       },
       // Rebuild toc data to populate 
       // StreamLocations

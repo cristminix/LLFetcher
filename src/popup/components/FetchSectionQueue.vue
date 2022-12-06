@@ -56,62 +56,41 @@ export default defineComponent({
         
         setTimeout(()=> {
             this.populateSectionIndexQueue();
-            /*
-             Object.keys(this.$parent.sections).forEach((sectionIndex)=>{
-                const fetchQueueBar = this.$parent.fetchQueueBar[sectionIndex];
-                // const tocItem = this.$parent.tocItems[sectionIndex];
-                if(fetchQueueBar.queueTocIndex.length>0){
-                    this.sectionIndexQueues.push(sectionIndex);
-                }
-
-             });
-             */
-            //  this.calculatePercentageInit();
             console.log('FetchSectionQueue : mounted');
         },500)
     },
     methods:{
+        populateProgress(percentage,sectionIndex){
+            console.log(percentage,sectionIndex)
+            if(percentage == 100){
+                if(!this.sectionIndexSuccessQueues.includes(sectionIndex)){
+                    this.sectionIndexSuccessQueues.push(sectionIndex);
+                    this.setProgress((p)=>{
+                        if(p == 100){
+                            this.btnState = 3;
+                        }
+                    });
+                }
+            }
+        },
         populateSectionIndexQueue(){
             this.sectionIndexQueues = Object.keys(this.$parent.sections);
             this.itemQueuesLength = this.sectionIndexQueues.length;
         },
-        calculatePercentageInit(tocSlugs?:string[]){
-            //  = tocSlugs;
-            if(typeof tocSlugs !== 'undefined'){
-                this.successTocSlugs = tocSlugs;
-            }
-            const peak = this.successTocSlugs.length;
-            const maxPeak = this.$parent.getTotalTocs();
-            const percentage = Math.round(peak / maxPeak * 100);
-            setTimeout(()=>{
-                this.percentage = percentage;
-
-                if(percentage==100){
-                    this.btnState = 3;
-                }
-            },250);
-            
-        },
         toJSONStr(obj:any){
             return JSON.stringify(obj);
         },
-        setProgress(){
+        setProgress(fn?:Function){
             const peak = this.sectionIndexSuccessQueues.length;
             const maxPeak = this.itemQueuesLength ;
             const percentage = Math.round(peak / maxPeak * 100);
+            if(typeof fn == 'function'){
+                fn(percentage);
+            }
             setTimeout(()=>{
                 this.percentage = percentage;
             },250);
         },
-        // calculatePercentageQueue(callback:Function){
-        //     const peak = this.queueSlugs.length;
-        //     const maxPeak = this.$parent.getTotalTocs();
-        //     const percentage = Math.round(peak / maxPeak * 100);
-
-        //     if('function' == typeof callback){
-        //         callback(percentage,peak,maxPeak);
-        //     }
-        // },
         afterProcessQueue(sectionIndex:number,itemIndex:number,success:boolean){
             console.log(`FetchSectionQueue.afterProcessQueue(${sectionIndex},${itemIndex},${success})`);
             if(success){
@@ -119,23 +98,9 @@ export default defineComponent({
                 this.setProgress();
                 this.processQueue(success);
             }else{
-                this.sectionIndexFailedQueues.push(sectionIndex);
-            }
-            /*
-            const section = this.$parent.sections[sectionIndex];
-            const slug = section.items[tocIndex].slug;
-            if(!this.queueSlugs.includes(slug)){
-                this.queueSlugs.push(slug);
-            }
-            const remainingText = `${this.queueSlugs.length} of ${this.$parent.getTotalTocs()}`
-            this.$parent.logBar.log(`${section.title} : ${slug} ${remainingText}`,status);
-
-            this.calculatePercentageQueue((percentage)=>this.percentage=percentage);
-
-            if(this.$parent.fetchQueueBar[sectionIndex].percentage==100){
+                this.sectionIndexSuccessQueues.push(sectionIndex);
                 this.processQueue();
             }
-            */
         },
         processQueue(success?:boolean){
             console.log(`FetchSectionQueue.processQueue()`);

@@ -15,10 +15,13 @@
 
       </div>
       <div class="dl-playlist-cnt" v-if="downloadConfig.selectedFmtList">
-        <label class="form-label">Playlist File : </label><a href="javascript:;">{{course.slug}}-{{downloadConfig.selectedFmtList}}.m3u</a>
+        <label class="form-label">Playlist : </label><a href="javascript:;">{{course.slug}}-{{downloadConfig.selectedFmtList}}.m3u</a>
       </div>
       <div class="dl-playlist-cnt" v-if="downloadConfig.selectedFmtList">
-        <label class="form-label">Helper Script : </label><a href="javascript:;">{{course.slug}}-{{downloadConfig.selectedFmtList}}-util.sh</a>
+        <label class="form-label">Helper Bash : </label><a href="javascript:;">{{course.slug}}-{{downloadConfig.selectedFmtList}}-helper.sh</a>
+      </div>
+      <div class="dl-playlist-cnt" v-if="downloadConfig.selectedFmtList">
+        <label class="form-label">Helper Cmd : </label><a href="javascript:;">{{course.slug}}-{{downloadConfig.selectedFmtList}}-helper.bat</a>
       </div>
       <div class="exercise-file-cnt" v-if="course.sourceCodeRepository">
         <div><label class="form-label">Source Repository : </label> {{course.sourceCodeRepository}}</div>

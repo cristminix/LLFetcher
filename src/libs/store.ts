@@ -80,7 +80,7 @@ class Store{
                     streamLocation : ["tocId","fmt","url"],
                     downloadConfig : ["courseId","fmtList","selectedFmtList"],
                     downloads : ["tocId","downloadId","filename","progress","status"],
-                    app: ["version","state","lastCourseSlug"]
+                    app: ["version","state","lastCourseSlug","nav"]
                 };
                 Object.keys(schema).forEach((table)=>{
                     if(!db.tableExists(table)){
@@ -447,7 +447,8 @@ class Store{
             const state = 0;
             const ID = 0;
             const lastCourseSlug = courseSlug;
-            app = {ID,state,version,lastCourseSlug};
+            const nav = 'welcome';
+            app = {ID,state,version,lastCourseSlug,nav};
             app.ID = db.insert('app',app);
             db.commit();
         }else{
@@ -485,6 +486,18 @@ class Store{
                 if(typeof courseSlug !== 'undefined'){
                     row.lastCourseSlug = courseSlug;
                 }
+                return row;
+            });
+            db.commit();
+        }
+    }
+    static setAppNav(nav : string){
+        const db = Store.db();
+        const version = '1.0';
+        const apps = db.queryAll('app',{version} as chromeStorageDB_queryParams);
+        if(apps.length > 0){
+            db.update('app',{version},(row)=>{
+                row.nav = nav;
                 return row;
             });
             db.commit();

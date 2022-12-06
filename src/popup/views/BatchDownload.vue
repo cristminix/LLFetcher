@@ -1,5 +1,5 @@
 <template>
-	<div class="bg-fetcher">
+	<div class="batch-download">
 		hello
 	</div>
 </template>
@@ -12,7 +12,7 @@ import Store from '../../libs/store';
 export default defineComponent({
   data() {
     return {
-      nav: 'bg-fetcher'
+      nav: 'batch-download'
     }
   },
   props:{

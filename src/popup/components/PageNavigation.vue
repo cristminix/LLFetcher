@@ -3,8 +3,8 @@
     <ul class="btn-group">
         <li @click="onNavClick('welcome')" class="btn btn-sm btn-primary" :class="{active : nav=='welcome'}">Welcome</li>
         <li @click="onNavClick('course')" class="btn btn-sm btn-primary" :class="{active : nav=='course'}">Course</li>
-        <li @click="onNavClick('bg-fetcher')" class="btn btn-sm btn-primary" :class="{active : nav=='bg-fetcher'}">Bg Fetcher</li>
         <li @click="onNavClick('downloads')" class="btn btn-sm btn-primary" :class="{active : nav=='downloads'}">Downloads</li>
+        <li @click="onNavClick('batch-download')" class="btn btn-sm btn-primary" :class="{active : nav=='batch-download'}">Batch Download</li>
         <li v-if="0" @click="onNavClick('help')" class="btn btn-sm btn-primary" :class="{active : nav=='help'}">Help</li>
         <li v-if="0" @click="onNavClick('about')" class="btn btn-sm btn-primary" :class="{active : nav=='about'}">About</li>
     </ul>
@@ -13,6 +13,7 @@
 <script lang="ts">
 import { defineComponent, ref, PropType } from 'vue'
 import NavTerm from '../../types/navterm';
+import Store from '../../libs/store';
 export default defineComponent({
   props:{
     nav :{
@@ -29,6 +30,7 @@ export default defineComponent({
     onNavClick(target : NavTerm){
         console.log(target);
         this.nav = target;
+        Store.setAppNav(this.nav);
         this.$emit('update', target);
     }
   }

@@ -1,8 +1,8 @@
 <template>
   <div class="toc-item-view">
     <table class="toc-item-list">
-        <thead v-if="fetchQueueBar">
-            <tr v-if="fetchQueueBar.queueTocIndex.length>0">
+        <thead v-if="!hideCheckAll">
+            <tr>
                 <th colspan="2"><label><input  @click="onCheckAll()" v-model="checkAll" class="form-check-input" type="checkbox"/> <span style="padding-left:.5em">Check All</span></label></th>
                
                 <th></th>
@@ -50,6 +50,7 @@ export default defineComponent({
         }
     },
     setup(props) {
+        const hideCheckAll = ref(false);
         const enableQueue = ref(true);
         const items = ref(props.items);
         const sectionIndex = ref(props.sectionIndex as number);
@@ -58,18 +59,20 @@ export default defineComponent({
         const excludeQueues = ref([]);
         const fetchQueueBar = ref();
         let fetchBtns = ref([]);
-        return {fetchQueueBar,items, sectionIndex, checkedQueues, excludeQueues,fetchBtns,checkAll,enableQueue};
+        return {hideCheckAll,fetchQueueBar,items, sectionIndex, checkedQueues, excludeQueues,fetchBtns,checkAll,enableQueue};
     },
     mounted(){
         this.fetchQueueBar = this.$parent.fetchQueueBar[this.sectionIndex];
 
         setTimeout(()=>{
+            console.log('TocItem['+this.sectionIndex+'] : mounted');
+
             this.checkAll = true;
             for(let tocIndex in this.items){
                 this.checkedQueues[tocIndex] = true;
                 const toc = this.items[tocIndex];
-                if(!this.fetchQueueBar.queueTocIndex.includes(tocIndex) && toc.streamLocationIds.length == 0){
-                    this.fetchQueueBar.queueTocIndex.push(tocIndex);    
+                if(!this.fetchQueueBar.itemIndexQueues.includes(tocIndex) && toc.streamLocationIds.length == 0){
+                    this.fetchQueueBar.itemIndexQueues.push(tocIndex);    
                 }
                 
             }
@@ -77,6 +80,8 @@ export default defineComponent({
     },
     methods:{
         triggerFailedFetchQueue(tocIndex:number){
+            console.log(`TocItem[${this.sectionIndex}].triggerFailedFetchQueue(${tocIndex})`);
+
             setTimeout(()=>{
                 this.fetchQueueBar.btnState=4;
             },1000);
@@ -92,7 +97,8 @@ export default defineComponent({
             }
         },
         triggerExcludeFetchQueue(tocIndex:number, fetchQueueEnabled:boolean){
-            console.log(tocIndex);
+            console.log(`TocItem[${this.sectionIndex}].triggerExcludeFetchQueue(${tocIndex},${fetchQueueEnabled})`);
+            // console.log(tocIndex);
             if(this.excludeQueues.indexOf(tocIndex) == -1){
                 this.excludeQueues.push(tocIndex);
             }
@@ -109,11 +115,12 @@ export default defineComponent({
        
         },
         triggerFetchQueue(tocIndex:number){
-            console.log(tocIndex);
+            console.log(`TocItem[${this.sectionIndex}].startQueue(${tocIndex})`);
+
+            // console.log(tocIndex);
             const nextTocIndex = tocIndex + 1;
             if(nextTocIndex < this.checkedQueues.length){
                 // process next fetch button
-                
                 this.fetchBtns[nextTocIndex].fetchToc(true);
                 // console.log();
             }else{
@@ -128,12 +135,9 @@ export default defineComponent({
                     this.fetchQueueBar.lastTocIndex=0;
                 },1000);
             }
-            // calling fetch button next index
-            // this.$ref
 
         },
         onFetchUpdate(target:any){
-            // console.log(target)
             this.$emit('update',target);
         },
         onCheckAll(){
@@ -143,13 +147,13 @@ export default defineComponent({
                     this.checkedQueues[tocIndex] = this.checkAll;
                     const toc = this.items[tocIndex];
                     if(this.checkedQueues[tocIndex] && toc.streamLocationIds.length == 0){
-                        if(!this.fetchQueueBar.queueTocIndex.includes(tocIndex)){
-                            this.fetchQueueBar.queueTocIndex.push(tocIndex);    
+                        if(!this.fetchQueueBar.itemIndexQueues.includes(tocIndex)){
+                            this.fetchQueueBar.itemIndexQueues.push(tocIndex);    
                         }
                     }else{
-                        const aIndex = this.fetchQueueBar.queueTocIndex.indexOf(tocIndex);
+                        const aIndex = this.fetchQueueBar.itemIndexQueues.indexOf(tocIndex);
                         if( aIndex != -1){
-                            this.fetchQueueBar.queueTocIndex.splice(aIndex,1);
+                            this.fetchQueueBar.itemIndexQueues.splice(aIndex,1);
                         }
                     }
                 }
@@ -158,22 +162,20 @@ export default defineComponent({
         },
         tgQueue(tocIndex:number){
             setTimeout(()=>{
-                // this.$refs.fetchBtns[tocIndex].isQueued =this.checkedQueues[tocIndex];
-                // console.log(this.$refs.fetchBtns);
+          
                 const toc = this.items[tocIndex];
                 if(this.checkedQueues[tocIndex] && toc.streamLocationIds.length == 0){
-                    if(!this.fetchQueueBar.queueTocIndex.includes(tocIndex)){
-                        this.fetchQueueBar.queueTocIndex.push(tocIndex);    
+                    if(!this.fetchQueueBar.itemIndexQueues.includes(tocIndex)){
+                        this.fetchQueueBar.itemIndexQueues.push(tocIndex);    
                     }
                 }else{
-                    const aIndex = this.fetchQueueBar.queueTocIndex.indexOf(tocIndex);
+                    const aIndex = this.fetchQueueBar.itemIndexQueues.indexOf(tocIndex);
                     if( aIndex != -1){
-                        this.fetchQueueBar.queueTocIndex.splice(aIndex,1);
+                        this.fetchQueueBar.itemIndexQueues.splice(aIndex,1);
                     }
                 }
                 
-                
-                console.log(this.checkedQueues[tocIndex]);
+                // console.log(this.checkedQueues[tocIndex]);
             },250);
         }
         

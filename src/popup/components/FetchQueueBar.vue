@@ -1,14 +1,14 @@
 <template>
     <div class="fetch-queue-bar">
         <div class="test-data" v-if="false">
-            <code>{{JSON.stringify(queueTocIndex,null,2)}}</code>
+            <code></code>
         </div>
         <div class="fetch-queue-pb">
-            <div class="progress" v-show="percentage > 0">
+            <div class="progress" v-show="!hideProgress">
                 <div class="progress-bar bg-info" role="progressbar" :style="{width:percentage+'%'}" :aria-valuenow="percentage" :aria-valuemin="0" :aria-valuemax="100"></div>
             </div>
         </div>
-        <div class="btn-fetch-cnt" v-if="queueTocIndex.length>0 || percentage==100">
+        <div class="btn-fetch-cnt" v-if="!hideBtn">
             <button :style="{color:btnState==3?'white':'inherit'}" :disabled="btnState!=1&&btnState!=4" @click="startQueue()" class="btn btn-sm btn-fetch"><i class="fa" :class="{'fa-play':btnState==1,'fa-spin fa-spinner':btnState==2,'fa-check':btnState==3,'fa-refresh':btnState==4}"></i></button>
         </div>
     </div>
@@ -25,26 +25,54 @@ export default defineComponent({
     }
   },
   setup(props){
-    let queueSlugs = ref([]);
-    let queueTocIndex = ref([]);
-    let excludeSlugs = ref([]);
+    // let queueSlugs = ref([]);
+    let itemIndexQueues = ref([]);
+    let itemIndexSuccessQueues = ref([]);
+    let itemIndexFailedQueues = ref([]);
+    // let excludeSlugs = ref([]);
     let percentage = ref(0);
     let btnState = ref(1);
-    let lastTocIndex = ref(0);
+    // let lastTocIndex = ref(0);
+    let lastItemIndex = ref(0);
+    const hideProgress = ref(false);
+    const hideBtn = ref(false);
     const sectionIndex = ref(props.sectionIndex);
-    return {queueTocIndex,queueSlugs,excludeSlugs,percentage,btnState,lastTocIndex,sectionIndex};
+    const itemQueuesLength = ref(0);
+
+    return {
+        // queueTocIndex,
+        // queueSlugs,
+        // excludeSlugs,
+        hideProgress,
+        hideBtn,
+        sectionIndex,
+        percentage,
+        btnState,
+        itemIndexQueues,
+        itemIndexSuccessQueues,
+        itemIndexFailedQueues,
+        itemQueuesLength,
+        lastItemIndex
+        // lastTocIndex
+    };
   },
   mounted(){
     setTimeout(()=>{
-        this.calculatePercentageInit();
-    },1000);
+        console.log('FetchQueueBar['+this.sectionIndex+'] : mounted');
+        this.populateItemIndexQueue();
+        // this.calculatePercentageInit();
+    },500);
   },
   methods:{
+    populateItemIndexQueue(){
+        this.itemIndexQueues = Object.keys(this.$parent.sections[this.sectionIndex].items);
+        this.itemQueuesLength = this.itemIndexQueues.length;
+    },
     calculatePercentageInit(){
         let maxPeak = 0;
         let peak = 0;
         let tocSlugs = Object.assign([],this.$parent.fetchSectionQueue.successTocSlugs);
-        console.log(tocSlugs);
+        // console.log(tocSlugs);
         this.$parent.tocItems[this.sectionIndex].items.forEach((toc:Toc_tableField)=>{
             maxPeak += 1;
             if(toc.streamLocationIds.length > 0){
@@ -65,19 +93,48 @@ export default defineComponent({
         
         this.$parent.fetchSectionQueue.calculatePercentageInit(tocSlugs);
     },
-    setProgress(lastTocIndex:number,percentage:number){
-        this.lastTocIndex = lastTocIndex;
-        this.percentage = percentage;
-        if(percentage==100){
-            this.btnState = 3;
+    setProgress(){
+        console.log(this.itemIndexSuccessQueues,this.itemIndexSuccessQueues);
+        const peak = this.itemIndexSuccessQueues.length;
+        const maxPeak = this.itemQueuesLength ;
+        const percentage = Math.round(peak / maxPeak * 100);
+        console.log(percentage);
+        setTimeout(()=>{
+            this.percentage = percentage;
+        },750);
+    },
+    afterProcessQueue(success:boolean,itemIndex:number){
+        console.log(`FetchQueueBar[${this.sectionIndex}].afterProcessQueue(${success},${itemIndex})`);
+        if(success){
+            this.itemIndexSuccessQueues.push(itemIndex);
+            this.setProgress();
+            this.processQueue(success);
+        }else{
+            this.itemIndexFailedQueues.push(itemIndex);
         }
-        this.$parent.fetchSectionQueue.report(this.sectionIndex,lastTocIndex,0);
-        console.log(percentage)
+    },
+    processQueue(success?:boolean){
+        console.log(`FetchQueueBar[${this.sectionIndex}].processQueue(${this.lastItemIndex})`);
+        if(this.itemIndexQueues.length > 0){
+            this.lastItemIndex = this.itemIndexQueues.shift();
+            
+            this.afterProcessQueue(true,this.lastItemIndex);
+        }else{
+            this.btnState = 3;
+            // this.setProgress();
+            this.$parent.fetchSectionQueue.afterProcessQueue(this.sectionIndex,this.lastItemIndex,success);
+        }
     },
     startQueue(){
-        this.percentage = this.percentage==0?1:this.percentage;
+        console.log(`FetchQueueBar[${this.sectionIndex}].startQueue()`);
+
+        // this.percentage = this.percentage==0?1:this.percentage;
         this.btnState = 2;
-        this.$parent.tocItems[this.sectionIndex].triggerFetchQueue(this.lastTocIndex==0?-1:this.lastTocIndex);
+        setTimeout(()=>{
+            this.processQueue();
+        },500);
+        
+        // this.$parent.tocItems[this.sectionIndex].triggerFetchQueue(this.lastTocIndex==0?-1:this.lastTocIndex);
     }
   }
 });

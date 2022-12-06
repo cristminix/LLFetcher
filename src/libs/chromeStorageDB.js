@@ -28,7 +28,7 @@ export default class chromeStorageDB{
             if(typeof tmpDb[this.db_id] !== 'undefined'){
                 this.db = tmpDb[this.db_id];
             }
-            console.log(this.db);
+            // console.log(this.db);
             if( !( this.db  && this.db.tables && this.db.data ) ) {
                 if(!this.validateName(db_name)) {
                     error("The name '" + db_name + "' contains invalid characters");

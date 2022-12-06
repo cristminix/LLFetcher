@@ -23,7 +23,7 @@ module.exports = {
 		// content:"./src/content_scripts/content.ts",
 		// inject:"./src/content_scripts/inject.ts",
 		// create_data_codes:"./src/content_scripts_inject/create_data_codes.js",
-        background: "./src/service_workers/background.js"
+        // background: "./src/service_workers/background.ts"
 	},
 	output : {
 		filename : "[name].js",

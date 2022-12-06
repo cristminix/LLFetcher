@@ -3,7 +3,7 @@
     <PageNavigation @update="onNavUpdate($event)" :nav="nav" ref="pageNavigation"/>
     <WelcomePage v-if="nav=='welcome'"/>
     <CoursePage @update="onCourseUpdate($event)" v-if="nav=='course'" :course="course"  ref="coursePage"/>
-    <BgFetcher @update="onCourseUpdate($event)" v-if="nav=='bg-fetcher'" :course="course"  ref="bgFetcher"/>
+    <BatchDownload @update="onCourseUpdate($event)" v-if="nav=='batch-download'" :course="course"  ref="batchDownload"/>
     <DownloadPage v-if="nav=='downloads'"/>
     <HelpPage v-if="nav=='help'"/>
     <AboutPage v-if="nav=='about'"/>
@@ -27,7 +27,7 @@ import WelcomePage from './views/WelcomePage.vue'
 import CoursePage from './views/CoursePage.vue'
 import DownloadPage from './views/DownloadPage.vue'
 import AboutPage from './views/AboutPage.vue'
-import BgFetcher from './views/BgFetcher.vue'
+import BatchDownload from './views/BatchDownload.vue'
 import HelpPage from './views/HelpPage.vue'
 import Store from '../libs/store';
 import { App_tableField,Course_tableField } from '../types/tableFields';
@@ -41,7 +41,7 @@ export default defineComponent({
     DownloadPage,
     AboutPage,
     HelpPage,
-    BgFetcher
+    BatchDownload
   },
   setup(){
     const nav = ref<NavTerm>('welcome');
@@ -57,21 +57,26 @@ export default defineComponent({
     };
     const message = ref<string>('');
     const app = ref<App_tableField>();
-
-    return {nav, course, onNavUpdate, onCourseUpdate, message,app};
+    const batchDownload = ref();
+    return {batchDownload,nav, course, onNavUpdate, onCourseUpdate, message,app};
   },
   mounted(){
-    console.log('App Entry Point Start here...');
+    // console.log('App Entry Point Start here...');
     // Store.prepareAppStorage();
-
+    // this.nav = 'welcome';
     setTimeout(()=>{ 
       const db = Store.db();
-      console.log(db);
+      // console.log(db);
+      this.app = Store.getAppState();
+      // console.log(this.app);
+      if(this.app.nav !== ''){
+        this.nav = this.$refs.pageNavigation.nav = this.app.nav;
+      }
       db.subscribe('app',(row:App_tableField)=>{
         this.app = row;
         this.log(`AppState:${row.state}`);
       });
-    },1000)
+    },50)
 
   },
   methods:{
@@ -83,6 +88,7 @@ export default defineComponent({
       
       setTimeout(()=>{
         this.nav = this.$refs.pageNavigation.nav = 'course';
+        Store.setAppNav(this.nav);
       },250);
     }
   }

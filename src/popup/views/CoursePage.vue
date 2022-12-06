@@ -60,13 +60,14 @@ export default defineComponent({
     const fetchQueueBar = ref([]);
     const fetchSectionQueue=ref({});
     const logBar=ref({});
-    const courseData=ref({});
+    // const courseData=ref({});
     return {course,authors,sections,exerciseFile,tocItems,
-    fetchQueueBar,fetchSectionQueue,logBar,courseData};
+    fetchQueueBar,fetchSectionQueue,logBar
+    // ,courseData
+    };
   },
   mounted(){
     this.loadCourseData();
-
     setTimeout(()=>{
       $('.course-page .btn-collapse').click((evt)=> {
         const el = $(evt.target).closest('button')[0];
@@ -74,8 +75,6 @@ export default defineComponent({
         $('.course-page .btn-collapse').not(el).find('i').removeClass('fa-minus').addClass('fa-plus ');
       });
     },50);
-    
-
   },
   methods:{
     isValidCourse(){
@@ -105,7 +104,6 @@ export default defineComponent({
         const author = Store.getAuthorById(ID);
         if(author){
           this.authors.push(author);
-
         }
       })
     },
@@ -131,16 +129,6 @@ export default defineComponent({
     getTotalTocs(){
         let totalTocs =0;
         this.sections.map((section:Section)=>{
-          // section.items.forEach((toc_)=>{
-          //   const toc = toc_ as unknown as Toc_tableField;
-          //   if(typeof toc.streamLocationIds === 'object'){
-          //     if(toc.streamLocationIds.length == 0){
-          //       totalTocs += 1;
-          //     }
-          //   }else{
-          //     totalTocs += 1;
-          //   }
-          // });
           totalTocs += section.items.length;
         });
         return totalTocs;

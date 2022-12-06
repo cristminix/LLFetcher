@@ -1,3 +1,3 @@
-type NavTerm = 'welcome' | 'course' | 'bg-fetcher' | 'downloads' | 'help' | 'about';
+type NavTerm = 'welcome' | 'course' | 'batch-download' | 'downloads' | 'help' | 'about';
 
 export default NavTerm;

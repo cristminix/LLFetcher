@@ -27,7 +27,8 @@ interface Section_tableField {
 	ID : number,
 	courseId : number,
 	slug : string,
-	title : string
+	title : string,
+	tocIds : number[]
 }
 interface Toc_tableField{
 	ID : number,

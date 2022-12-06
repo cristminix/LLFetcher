@@ -58,9 +58,5 @@ chrome.webNavigation.onHistoryStateUpdated.addListener(function(tab) {
 		    }
         }
 });
-setInterval(async ()=>{
-console.log('hello workers, iam here one two three four five six ')
 
-
-},2000)
 

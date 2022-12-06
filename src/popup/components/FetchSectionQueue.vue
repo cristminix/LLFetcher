@@ -3,11 +3,11 @@
         <div class="fsqbc">
             <div class="fetch-section-queue-bar">
                 <div class="fetch-section-queue-pb">
-                    <div class="progress" v-show="percentage > 0">
+                    <div class="progress" v-show="!hideProgress">
                         <div class="progress-bar bg-danger" role="progressbar" :style="{width:percentage+'%'}" :aria-valuenow="percentage" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                 </div>
-                <div class="btn-fetch-section-queue-cnt" v-if="sectionIndexQueues.length>0 || percentage==100">
+                <div class="btn-fetch-section-queue-cnt" v-if="!hideBtn">
                     <button :style="{color:btnState==3?'white':'inherit'}" :disabled="btnState!=1&&btnState!=4" @click="startQueue()" class="btn btn-sm btn-fetch-section-queue"><i class="fa" :class="{'fa-play':btnState==1,'fa-spin fa-spinner':btnState==2,'fa-check':btnState==3,'fa-refresh':btnState==4}"></i></button>
                 </div>
             </div>
@@ -23,23 +23,40 @@ export default defineComponent({
     setup() {
         const queueSlugs = ref([]);
         const excludeTocCount = ref(0);
+        const successTocSlugs = ref([]);
+
         const btnState = ref(1);
         const percentage = ref(0);
         const lastSectionIndex = ref(0);
         const sectionIndexQueues = ref([]);
-        const successTocSlugs = ref([]);
+        const sectionIndexSuccessQueues = ref([]);
+        const sectionIndexFailedQueues = ref([]);
+        const hideProgress = ref(false);
+        const hideBtn = ref(false);
+        const itemQueuesLength = ref(0);
+
         return {
-            queueSlugs,
             btnState,
             percentage,
             lastSectionIndex,
             sectionIndexQueues,
+            sectionIndexSuccessQueues,
+            sectionIndexFailedQueues,
+            itemQueuesLength,
+            hideProgress,
+            hideBtn,
+
+
+            queueSlugs,
             excludeTocCount,
             successTocSlugs
         };
     },
     mounted(){
+        
         setTimeout(()=> {
+            this.populateSectionIndexQueue();
+            /*
              Object.keys(this.$parent.sections).forEach((sectionIndex)=>{
                 const fetchQueueBar = this.$parent.fetchQueueBar[sectionIndex];
                 // const tocItem = this.$parent.tocItems[sectionIndex];
@@ -48,10 +65,16 @@ export default defineComponent({
                 }
 
              });
+             */
             //  this.calculatePercentageInit();
-        },250)
+            console.log('FetchSectionQueue : mounted');
+        },500)
     },
     methods:{
+        populateSectionIndexQueue(){
+            this.sectionIndexQueues = Object.keys(this.$parent.sections);
+            this.itemQueuesLength = this.sectionIndexQueues.length;
+        },
         calculatePercentageInit(tocSlugs?:string[]){
             //  = tocSlugs;
             if(typeof tocSlugs !== 'undefined'){
@@ -72,16 +95,33 @@ export default defineComponent({
         toJSONStr(obj:any){
             return JSON.stringify(obj);
         },
-        calculatePercentageQueue(callback:Function){
-            const peak = this.queueSlugs.length;
-            const maxPeak = this.$parent.getTotalTocs();
+        setProgress(){
+            const peak = this.sectionIndexSuccessQueues.length;
+            const maxPeak = this.itemQueuesLength ;
             const percentage = Math.round(peak / maxPeak * 100);
-
-            if('function' == typeof callback){
-                callback(percentage,peak,maxPeak);
-            }
+            setTimeout(()=>{
+                this.percentage = percentage;
+            },250);
         },
-        report(sectionIndex:number,tocIndex:number,status:number){
+        // calculatePercentageQueue(callback:Function){
+        //     const peak = this.queueSlugs.length;
+        //     const maxPeak = this.$parent.getTotalTocs();
+        //     const percentage = Math.round(peak / maxPeak * 100);
+
+        //     if('function' == typeof callback){
+        //         callback(percentage,peak,maxPeak);
+        //     }
+        // },
+        afterProcessQueue(sectionIndex:number,itemIndex:number,success:boolean){
+            console.log(`FetchSectionQueue.afterProcessQueue(${sectionIndex},${itemIndex},${success})`);
+            if(success){
+                this.sectionIndexSuccessQueues.push(sectionIndex);
+                this.setProgress();
+                this.processQueue(success);
+            }else{
+                this.sectionIndexFailedQueues.push(sectionIndex);
+            }
+            /*
             const section = this.$parent.sections[sectionIndex];
             const slug = section.items[tocIndex].slug;
             if(!this.queueSlugs.includes(slug)){
@@ -95,8 +135,11 @@ export default defineComponent({
             if(this.$parent.fetchQueueBar[sectionIndex].percentage==100){
                 this.processQueue();
             }
+            */
         },
-        processQueue(){
+        processQueue(success?:boolean){
+            console.log(`FetchSectionQueue.processQueue()`);
+
             if(this.sectionIndexQueues.length > 0){
                 this.lastSectionIndex = this.sectionIndexQueues.shift();
                 this.$parent.fetchQueueBar[this.lastSectionIndex].startQueue();
@@ -105,6 +148,8 @@ export default defineComponent({
             }
         },
         startQueue(){
+            console.log(`FetchSectionQueue.startQueue()`);
+            
             this.btnState = 2;
             this.processQueue();
         }

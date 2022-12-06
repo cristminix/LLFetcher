@@ -4,7 +4,6 @@
         <li @click="onNavClick('welcome')" class="btn btn-sm btn-primary" :class="{active : nav=='welcome'}">Welcome</li>
         <li @click="onNavClick('course')" class="btn btn-sm btn-primary" :class="{active : nav=='course'}">Course</li>
         <li @click="onNavClick('downloads')" class="btn btn-sm btn-primary" :class="{active : nav=='downloads'}">Downloads</li>
-        <li @click="onNavClick('batch-download')" class="btn btn-sm btn-primary" :class="{active : nav=='batch-download'}">Batch Download</li>
         <li v-if="0" @click="onNavClick('help')" class="btn btn-sm btn-primary" :class="{active : nav=='help'}">Help</li>
         <li v-if="0" @click="onNavClick('about')" class="btn btn-sm btn-primary" :class="{active : nav=='about'}">About</li>
     </ul>

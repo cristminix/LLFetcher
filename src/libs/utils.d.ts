@@ -6,3 +6,5 @@ export function makeTitle(slug:string) : string
 export function makeSlug(source:string) : string
 export function sendMessageSaveDataCodesToLS() : void
 export function contentConsoleLog(data : any) : void
+export function attachListener(fn:Function) : void
+export function sendMessageBg(data:Object):void

@@ -58,7 +58,7 @@ export default defineComponent({
   },
   mounted(){
     setTimeout(()=>{
-        console.log('FetchQueueBar['+this.sectionIndex+'] : mounted');
+        // console.log('FetchQueueBar['+this.sectionIndex+'] : mounted');
         this.populateItemIndexQueue();
     },500);
   },
@@ -156,6 +156,6 @@ export default defineComponent({
    width: 25px;
     position: absolute;
     right: -12px;
-    margin-top: 2.5px;
+    margin-top: 3.5px;
 }
 </style>

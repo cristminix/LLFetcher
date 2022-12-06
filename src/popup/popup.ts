@@ -14,10 +14,16 @@ import 'highlight.js/styles/androidstudio.css'
 import hljs from 'highlight.js/lib/core';
 import javascript from 'highlight.js/lib/languages/javascript';
 import hljsVuePlugin from "@highlightjs/vue-plugin";
+import { attachListener } from '../libs/utils';
 
 hljs.registerLanguage('javascript', javascript);
 const app = createApp(Popup);
 
 app.use(hljsVuePlugin);
-app.mount('#popup');
+const instance = app.mount('#popup');
 
+attachListener((a,b,c)=>{
+    if(typeof instance.$refs.downloadPage != 'undefined'){
+        instance.$refs.downloadPage.recv(a,b,c);
+    }
+  });

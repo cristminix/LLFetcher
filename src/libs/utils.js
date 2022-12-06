@@ -115,3 +115,14 @@ export function contentConsoleLog(data){
 
     });
 }
+
+export function attachListener(fn){
+  chrome.runtime.onMessage.addListener((request, sender, sendResponse) =>{
+    // console.log(request, sender, sendResponse);
+    fn(request, sender, sendResponse);  
+  });
+}
+
+export function sendMessageBg(data){
+  chrome.runtime.sendMessage(data,function(response){});
+}

@@ -16,6 +16,7 @@ interface Course{
     sections : Array<Section>
 };
 interface Section{
+    ID(ID: any): unknown;
     title : string,
     slug : string,
     items : Array<Toc>

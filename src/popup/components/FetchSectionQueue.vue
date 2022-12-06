@@ -56,7 +56,7 @@ export default defineComponent({
         
         setTimeout(()=> {
             this.populateSectionIndexQueue();
-            console.log('FetchSectionQueue : mounted');
+            // console.log('FetchSectionQueue : mounted');
         },500)
     },
     methods:{
@@ -142,7 +142,7 @@ export default defineComponent({
 .fetch-section-queue{
    position: absolute;
     right: 49px;
-    margin-top: 8px;
+    margin-top: 45px;
     opacity: .9;
 }
 .btn-fetch-section-queue-cnt{

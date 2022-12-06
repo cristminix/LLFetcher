@@ -60,6 +60,7 @@ class MyLS {
 
 }
 class Store{
+    
     static __db__:undefined | MyLS;
     static db() : undefined | MyLS{
         if(typeof Store.__db__ === 'undefined'){
@@ -80,6 +81,7 @@ class Store{
                     streamLocation : ["tocId","fmt","url"],
                     downloadConfig : ["courseId","fmtList","selectedFmtList"],
                     downloads : ["tocId","downloadId","filename","progress","status"],
+                    downloadState : ["courseId","state"],
                     app: ["version","state","lastCourseSlug","nav"]
                 };
                 Object.keys(schema).forEach((table)=>{
@@ -436,7 +438,7 @@ class Store{
         setTimeout(()=>{
             Store.initApp('');
 
-        },1000);
+        },650);
     }
     static initApp(courseSlug:string):App_tableField{
         const db = Store.db();
@@ -513,7 +515,46 @@ class Store{
 
         return null;
     }
-    
+    static getDownloadState(courseId: number): any {
+        const db = Store.db();
+        let downloadState = null;
+        const downloadStates = db.queryAll('downloadState',{courseId} as chromeStorageDB_queryParams);
+        if(downloadStates.length > 0){
+            downloadState = downloadStates[0];
+        }else{
+            const ID=0;
+            const state=0;
+            downloadState ={ID,courseId,state}
+            downloadState.ID = db.insert('downloadState',downloadState);
+            db.commit();
+        }
+        
+
+        
+        return downloadState;
+    }
+    static setDownloadState(courseId: number,state_:number): any {
+        const db = Store.db();
+        let downloadState = null;
+        const downloadStates = db.queryAll('downloadState',{courseId} as chromeStorageDB_queryParams);
+        if(downloadStates.length > 0){
+            downloadState = downloadStates[0];
+            db.update('downloadState',{courseId},(row)=>{
+                row.state = state_;
+                return row;
+            });
+            db.commit();
+            downloadState.state = state_;
+        }else{
+            const ID=0;
+            const state=state_;
+            downloadState ={ID,courseId,state}
+            downloadState.ID = db.insert('downloadState',downloadState);
+            db.commit();
+        }
+        
+        return downloadState;
+    }
 }
 Store.prepareAppStorage();
 export default Store;

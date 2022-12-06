@@ -67,7 +67,7 @@ export default defineComponent({
         this.fetchQueueBar = this.$parent.fetchQueueBar[this.sectionIndex];
 
         setTimeout(()=>{
-            console.log('TocItem['+this.sectionIndex+'] : mounted');
+            // console.log('TocItem['+this.sectionIndex+'] : mounted');
 
             this.checkAll = true;
             for(let tocIndex in this.items){

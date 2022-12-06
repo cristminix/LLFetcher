@@ -2,39 +2,49 @@
   <div class="download-page page">
     <div class="dl-cnt text-center" v-if="course">
       <div class="exercise-file-cnt" v-if="exerciseFile">
-        <div><label class="form-label">Exercise File: </label><a :href="exerciseFile.url" target="_blank">{{exerciseFile.name}}</a></div>
+        <div v-if="exerciseFile.url"><label class="form-label">Exercise File: </label><a @click="downloadFile('exercise_file')"  href="javascript:;">{{exerciseFile.name}}</a></div>
       </div>
       <div class="dl-config-cnt" v-if="downloadConfig">
-        <div><label class="form-label">Set video output format : </label> 
+        <div><label class="form-label">Set video quality : </label> 
           <select v-model="downloadConfig.selectedFmtList" class="form-control" @change="updateSelectedFmt()" style="width:120px;display:inline">
             <option value="">--Choose--</option>
             <option v-for="fmt in downloadConfig.fmtList" :value="fmt">{{fmt}}</option>
           </select>
         </div>
         <span class="form-helper">Available video format: {{downloadConfig.fmtList.join(', ')}}</span>
-
+        <div class="dl-batch-cnt" v-if="downloadConfig">
+            <button class="btn btn-danger" @click="startDownloadVideoResource()"><i class="fa" :class="{'fa-download':downloadState.state==0,'fa-spin fa-spinner':downloadState.state==1}"></i> Download All Video &amp; Caption</button>
+        </div>
       </div>
       <div class="dl-playlist-cnt" v-if="downloadConfig.selectedFmtList">
-        <label class="form-label">Playlist : </label><a href="javascript:;">{{course.slug}}-{{downloadConfig.selectedFmtList}}.m3u</a>
+        <label class="form-label">Playlist : </label><a @click="downloadFile('playlist')"  href="javascript:;">{{course.slug}}-{{downloadConfig.selectedFmtList}}.m3u</a>
       </div>
       <div class="dl-playlist-cnt" v-if="downloadConfig.selectedFmtList">
-        <label class="form-label">Helper Bash : </label><a href="javascript:;">{{course.slug}}-{{downloadConfig.selectedFmtList}}-helper.sh</a>
+        <label class="form-label">Helper Bash : </label><a @click="downloadFile('shell_script')"  href="javascript:;">{{course.slug}}-{{downloadConfig.selectedFmtList}}-helper.sh</a>
       </div>
-      <div class="dl-playlist-cnt" v-if="downloadConfig.selectedFmtList">
-        <label class="form-label">Helper Cmd : </label><a href="javascript:;">{{course.slug}}-{{downloadConfig.selectedFmtList}}-helper.bat</a>
+      <div class="dl-playlist-cnt" v-if="0">
+        <label class="form-label">Helper Cmd : </label><a @click="downloadFile('batch_script')" href="javascript:;">{{course.slug}}-{{downloadConfig.selectedFmtList}}-helper.bat</a>
       </div>
       <div class="exercise-file-cnt" v-if="course.sourceCodeRepository">
-        <div><label class="form-label">Source Repository : </label> {{course.sourceCodeRepository}}</div>
+        <div><label class="form-label">Source Repository : </label> <a target="_blank" :href="course.sourceCodeRepository">{{course.sourceCodeRepository}}</a></div>
       </div>
+      
     </div>
+    <LogBar ref="logBar"/>
   </div>
 </template>
 <script lang="ts">
-import { Course_tableField, DownloadConfig_tableField, ExerciseFile_tableField } from '../../types/tableFields';
+import { Section_tableField,Course_tableField, DownloadConfig_tableField, ExerciseFile_tableField } from '../../types/tableFields';
 import { defineComponent, PropType, ref } from 'vue';
 import Store from '../../libs/store';
-
+import { createDownloadFile } from '../../libs/ext';
+import { sendMessageBg } from '../../libs/utils';
+import { Section,Toc } from '../../types/lynda';
+import LogBar from '../components/LogBar.vue';
 export default defineComponent({
+  components:{
+    LogBar
+  },
   data() {
     return {
       nav: 'downloads'
@@ -50,14 +60,46 @@ export default defineComponent({
     const course = ref<Course_tableField>();
     const exerciseFile = ref<ExerciseFile_tableField>();
     const downloadConfig = ref<DownloadConfig_tableField>();
+    const downloadState = ref({ID:0,courseId:0,state:0});
+    const logBar=ref({});
     return{
-      course, exerciseFile, downloadConfig
+      course, exerciseFile, downloadConfig, downloadState,logBar
     };
   },
   mounted(){
     this.loadDownloadData();
+    setTimeout(()=>{
+      this.downloadState = Store.getDownloadState(this.course.ID);
+    },250);
   },
   methods:{
+    startDownloadVideoResource(){
+      sendMessageBg({cmd:'start_download'});
+      this.downloadState = Store.setDownloadState(this.course.ID,1);
+      
+    },
+    recv(a,b,c){
+    // console.log(a,b,c);
+    // this.downloadVideoState = a.downloadState;
+    this.logBar.log(JSON.stringify(a),1)
+    },
+    downloadFile(kind:string){
+      const config = {
+        slug : `${this.course.slug}`,
+        downloadConfig : this.downloadConfig,
+        exerciseFile : this.exerciseFile,
+        sections : []
+      };
+      if(kind == 'shell_script' || kind == 'batch_script' || kind == 'playlist'){
+        const sections = Store.getSectionsByCourseId(this.course.ID) as unknown as Section[];
+        sections.forEach((section)=>{
+          section.items = Store.getTocsBySectionId(section.ID) as unknown as Toc[];
+        });
+        config.sections = sections;
+      }
+      createDownloadFile(kind,config);
+      console.log(kind)
+    },
     updateSelectedFmt(){
       Store.updateDownloadConfig('selectedFmtList',this.downloadConfig.selectedFmtList,this.course.ID);
     },
@@ -90,6 +132,9 @@ export default defineComponent({
 </script>
 
 <style scoped>
+  .dl-batch-cnt{
+    padding:2em;
+  }
   .form-helper{
     font-size:12px;
     font-style: italic;

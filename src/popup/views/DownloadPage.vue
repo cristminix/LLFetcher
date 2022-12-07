@@ -8,12 +8,21 @@
         <div><label class="form-label">Set video quality : </label> 
           <select v-model="downloadConfig.selectedFmtList" class="form-control" @change="updateSelectedFmt()" style="width:120px;display:inline">
             <option value="">--Choose--</option>
-            <option v-for="fmt in downloadConfig.fmtList" :value="fmt">{{fmt}}</option>
+            <option v-for="fmt in downloadConfig.fmtList" :value="fmt" :key="fmt">{{fmt}}</option>
           </select>
         </div>
         <span class="form-helper">Available video format: {{downloadConfig.fmtList.join(', ')}}</span>
-        <div class="dl-batch-cnt" v-if="downloadConfig">
+        <div class="dl-batch-cnt" v-if="downloadConfig.selectedFmtList">
             <button class="btn btn-danger" @click="startDownloadVideoResource()"><i class="fa" :class="{'fa-download':downloadState.state==0,'fa-spin fa-spinner':downloadState.state==1}"></i> Download All Video &amp; Caption</button>
+          <div>
+            <table>
+              <tbody>
+                <tr v-for="dl in downloads" :key="dl.ID">
+                  <td>{{dl.filename}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
       <div class="dl-playlist-cnt" v-if="downloadConfig.selectedFmtList">
@@ -62,14 +71,22 @@ export default defineComponent({
     const downloadConfig = ref<DownloadConfig_tableField>();
     const downloadState = ref({ID:0,courseId:0,state:0});
     const logBar=ref({});
+    const downloads = ref([]);
     return{
-      course, exerciseFile, downloadConfig, downloadState,logBar
+      course, exerciseFile, downloadConfig, downloadState,logBar,downloads
     };
   },
   mounted(){
     this.loadDownloadData();
     setTimeout(()=>{
       this.downloadState = Store.getDownloadState(this.course.ID);
+      const db = Store.db();
+      db.subscribe('downloads',(row)=>{
+        console.log(row)
+        if(row.courseId == this.course.ID){
+          this.downloads[row.ID] = row;
+        }
+      });
     },250);
   },
   methods:{
@@ -78,10 +95,20 @@ export default defineComponent({
       this.downloadState = Store.setDownloadState(this.course.ID,1);
       
     },
-    recv(a,b,c){
-    // console.log(a,b,c);
-    // this.downloadVideoState = a.downloadState;
-    this.logBar.log(JSON.stringify(a),1)
+    recv(response,b,c){
+      // this.downloads = Store.getDownloadByCourseId(this.course.ID);
+      // console.log(a,b,c);
+      // this.downloadVideoState = a.downloadState;
+      if(response.cmd == 'download_state'){
+        if(response.success){
+          this.logBar.log(response.currentDownload.filename,0)
+          this.downloadState = Store.setDownloadState(this.course.ID,0);
+        }else{
+          this.logBar.log(response.currentDownload.filename,1)
+          this.downloadState = Store.setDownloadState(this.course.ID,0);
+        }
+      }
+      this.logBar.log(JSON.stringify(a),1)
     },
     downloadFile(kind:string){
       const config = {

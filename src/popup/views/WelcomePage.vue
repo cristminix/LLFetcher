@@ -48,7 +48,7 @@ export default defineComponent({
         });
       }
       
-    },750);
+    },1259);
 
   },
   methods:{

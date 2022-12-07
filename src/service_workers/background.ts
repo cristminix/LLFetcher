@@ -1,5 +1,5 @@
 import Store from "../libs/store";
-
+Store.prepareAppStorage();
 let ENV = 'development';
 
 if(ENV === 'production'){
@@ -60,10 +60,23 @@ chrome.webNavigation.onHistoryStateUpdated.addListener(function(tab) {
 		    }
         }
 });
+let downloadQueues = [];
+let downloadCounts = 0;
+let downloadSuccessQueues = [];
+let currentDownload = null;
+let downloadHandlerSet = false;
+let queueStarted = false;
 
 function populateDownloadQueues(){
     /*
     */
+    downloadQueues = [];
+    downloadCounts = 0;
+    downloadSuccessQueues = [];
+    currentDownload = null;
+    // Store.db().getStoreDB().truncate('downloads');
+    // Store.db().commit();
+    // return [];
     const app = Store.getAppState();
     const course = Store.getCourse(app.lastCourseSlug);
     const downloadState = Store.getDownloadState(course.ID);
@@ -72,29 +85,49 @@ function populateDownloadQueues(){
     const sections = Store.getSectionsByCourseId(course.ID);
     // const items = [];
     const fmt = downloadConfig.selectedFmtList;
-    const downloadQueues = [];
+
+    const downloadConfigs = [];
     sections.forEach((section)=>{
         const items = Store.getTocsBySectionId(section.ID);
         items.forEach((toc)=>{
-            const streamLocations = Store.getStreamLocations(toc.ID);
-            streamLocations.forEach((streamLocation)=>{
-                if(streamLocation.fmt == fmt){
-                    const videoUrl = streamLocation.url;
-                    const transcriptUrl = toc.captionUrl;
-                    const optVideo = {
-                        url : videoUrl,
-                        filename : `${toc.slug}-${fmt}.mp4`
-                    };
-                    const optTranscript = {
-                        url : transcriptUrl,
-                        filename : `${toc.slug}-${fmt}.vtt`
-                    };
-                    downloadQueues.push(optVideo);
-                    downloadQueues.push(optTranscript);
-                }
-            })
+            const streamLocations = Store.getStreamLocations(toc.ID).filter((r)=>{return r.fmt==fmt});
+            let streamLoc;
+            if(streamLocations.length>0){
+                streamLoc = streamLocations[0];
+                const videoUrl = streamLoc.url;
+                const transcriptUrl = toc.captionUrl;
+                const optVideo = {
+                    url : videoUrl,
+                    filename : `${toc.slug}-${fmt}.mp4`,
+                    tocId : toc.ID,
+                    courseId : course.ID
+                };
+                const optTranscript = {
+                    url : transcriptUrl,
+                    filename : `${toc.slug}-${fmt}.vtt`,
+                    tocId : toc.ID,
+                    courseId : course.ID
+                };
+                downloadConfigs.push(optVideo);
+                downloadConfigs.push(optTranscript);
+            }
         })
     })
+    for(let idx in downloadConfigs){
+        const dl = downloadConfigs[idx];
+        let download = Store.getDownload(dl.tocId,dl.filename);
+        if(download){
+            console.log('updateDownload');
+            download.url = dl.url;
+            download.filename = dl.filename;
+            download = Store.updateDownload(download.ID,download);
+        }else{
+            console.log('createDownload');
+            download = Store.createDownload(dl.url,dl.filename,dl.tocId,dl.courseId);
+        } 
+        downloadQueues.push(download);
+    }
+    Store.db().commit();
     return downloadQueues;
 }
 function wakeUpDownloadPage(){
@@ -103,10 +136,7 @@ function wakeUpDownloadPage(){
     // const downloadState = Store.getDownloadState(course.ID);
     chrome.runtime.sendMessage({cmd: "wake_up"});
 }
-let downloadQueues = [];
-let downloadCounts = 0;
-let downloadSuccessQueues = [];
-let currentDownload = null;
+
 
 function startDownloadQueues(){
     processDownloadQueues();
@@ -114,14 +144,25 @@ function startDownloadQueues(){
 function processDownloadQueues(){
     if(downloadQueues.length > 0){
         currentDownload = downloadQueues.shift();
-        chromeDownload();
+        if(currentDownload.status !== true){
+            chromeDownload();
+        }else{
+            const cmd = 'download_state';
+            const skip = true;
+            chrome.runtime.sendMessage({cmd,skip,currentDownload},(response)=>{});
+            processDownloadQueues();
+            return;
+        }
+        
     }else{
         // finished
         downloadCounts = 0;
         downloadQueues = [];
         downloadSuccessQueues = [];
         currentDownload = null;
-        downloadHandlerSet = false;
+        queueStarted = false;
+        Store.db().getStoreDB().truncate('downloads');
+        Store.db().commit();
     }
 }
 function setProgress(){
@@ -133,15 +174,17 @@ function setProgress(){
 function afterProcessDownloadQueues(success?:boolean){
     if(success){
         downloadSuccessQueues.push(currentDownload);
+        Store.updateDownload(currentDownload.ID,{status:success});
+        Store.db().commit();
         setProgress();
         startDownloadQueues();
     }else{
         downloadQueues.push(currentDownload); 
     }
 }
-let downloadHandlerSet = false;
+
 function chromeDownload(){
-    
+    // return;
     if(!downloadHandlerSet){
         chrome.downloads.onCreated.addListener((item)=>{
             console.log(item)
@@ -153,31 +196,57 @@ function chromeDownload(){
             console.log(delta)
             if(typeof delta.state == 'object'){
                 if(delta.state.current == 'complete'){
+                    const cmd = 'download_state';
+                    const success = true;
+                    chrome.runtime.sendMessage({cmd,success,delta,currentDownload},(response)=>{});
                     afterProcessDownloadQueues(true);
                 }
+            }
+            if(typeof delta.error == 'object'){
+                onDownloadError(delta);
             }
         });
 
         downloadHandlerSet = true;
     }
-    setTimeout(()=>{
-        chrome.downloads.download(currentDownload,(downloadId)=>{
+    // setTimeout(()=>{
+        const opt ={
+            filename : currentDownload.filename,
+            url : currentDownload.url
+        };
+        chrome.downloads.download(opt,(downloadId)=>{
             console.log(downloadId);
         });
-    },1000);
+        // afterProcessDownloadQueues(true);
+    // },1000);
     
+}
+function onDownloadError(delta){
+    
+
+    const cmd = 'download_state';
+    const success = false;
+    chrome.runtime.sendMessage({cmd,delta,success,currentDownload},(response)=>{});
+    queueStarted = false;
+    downloadCounts = 0;
+    downloadQueues = [];
+    downloadSuccessQueues = [];
+    currentDownload = null;
+    queueStarted = false;
 }
 chrome.runtime.onMessage.addListener((msg,sender,sendResponse)=>{
     if(msg.cmd == 'start_download'){
+        if(queueStarted){
+            console.log('queue is running:skipped');
+            return;
+        }
         console.log(msg)
         if(downloadQueues.length == 0){
             downloadQueues = populateDownloadQueues();
             downloadCounts = downloadQueues.length;
-        }else{
-            if(currentDownload == null){
-                startDownloadQueues();
-            }
-            
-        }  
+        }
+        queueStarted = true;
+        startDownloadQueues();
+        
     }
 });

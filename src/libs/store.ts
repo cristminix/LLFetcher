@@ -48,6 +48,9 @@ class MyLS {
         }
         return ret;
     }
+    getStoreDB(){
+        return this.db;
+    }
     isNew(fn){
         return this.db.isNew(fn);
     }
@@ -80,8 +83,8 @@ class Store{
                     toc : ["sectionId","title","slug","url","duration","captionUrl","captionFmt","streamLocationIds"],
                     streamLocation : ["tocId","fmt","url"],
                     downloadConfig : ["courseId","fmtList","selectedFmtList"],
-                    downloads : ["tocId","downloadId","filename","progress","status"],
-                    downloadState : ["courseId","state"],
+                    downloads : ["tocId","courseId","downloadId","filename","url","status"],
+                    downloadState : ["courseId","state","total","success","fails"],
                     app: ["version","state","lastCourseSlug","nav"]
                 };
                 Object.keys(schema).forEach((table)=>{
@@ -438,12 +441,13 @@ class Store{
         setTimeout(()=>{
             Store.initApp('');
 
-        },650);
+        },1250);
     }
     static initApp(courseSlug:string):App_tableField{
         const db = Store.db();
         const version = '1.0';
-        const apps = db.queryAll('app',{version} as chromeStorageDB_queryParams);
+     
+        const apps = db.queryAll('app',{query:{version}});
         let app = null;
         if(apps.length === 0){
             const state = 0;
@@ -471,7 +475,7 @@ class Store{
     static getAppState():App_tableField{
         const db = Store.db();
         const version = '1.0';
-        const apps = db.queryAll('app',{version} as chromeStorageDB_queryParams);
+        const apps = db.queryAll('app',{query:{version}});
         let app = null;
         if(apps.length > 0){
             app = apps[0];
@@ -481,7 +485,7 @@ class Store{
     static setAppState(state : number,courseSlug?:string){
         const db = Store.db();
         const version = '1.0';
-        const apps = db.queryAll('app',{version} as chromeStorageDB_queryParams);
+        const apps = db.queryAll('app',{query:{version}} );
         if(apps.length > 0){
             db.update('app',{version},(row)=>{
                 row.state = state;
@@ -496,7 +500,7 @@ class Store{
     static setAppNav(nav : string){
         const db = Store.db();
         const version = '1.0';
-        const apps = db.queryAll('app',{version} as chromeStorageDB_queryParams);
+        const apps = db.queryAll('app',{query:{version}});
         if(apps.length > 0){
             db.update('app',{version},(row)=>{
                 row.nav = nav;
@@ -508,7 +512,7 @@ class Store{
     static getAppInfo():App_tableField{
         const db = Store.db();
         const version = '1.0';
-        const apps = db.queryAll('app',{version} as chromeStorageDB_queryParams);
+        const apps = db.queryAll('app',{query:{version}});
         if(apps.length > 0){
             return apps[0] as App_tableField;
         }
@@ -518,7 +522,7 @@ class Store{
     static getDownloadState(courseId: number): any {
         const db = Store.db();
         let downloadState = null;
-        const downloadStates = db.queryAll('downloadState',{courseId} as chromeStorageDB_queryParams);
+        const downloadStates = db.queryAll('downloadState',{query:{courseId}});
         if(downloadStates.length > 0){
             downloadState = downloadStates[0];
         }else{
@@ -536,7 +540,7 @@ class Store{
     static setDownloadState(courseId: number,state_:number): any {
         const db = Store.db();
         let downloadState = null;
-        const downloadStates = db.queryAll('downloadState',{courseId} as chromeStorageDB_queryParams);
+        const downloadStates = db.queryAll('downloadState',{query:{courseId}} );
         if(downloadStates.length > 0){
             downloadState = downloadStates[0];
             db.update('downloadState',{courseId},(row)=>{
@@ -555,6 +559,71 @@ class Store{
         
         return downloadState;
     }
+    static getDownloads(tocId:number,courseId?:number){
+        const db = Store.db();
+        const downloads = db.queryAll('downloads',{query:{tocId,courseId}});
+        return downloads;
+    }
+    static getDownloadById(ID:number){
+        const db = Store.db();
+        const downloads = db.queryAll('downloads',{query:{ID} });
+        if( downloads.length > 0){
+            return downloads[0];
+        }
+        return null;
+    }
+    // downloads : ["tocId","courseId","downloadId","filename","progress","status"],
+    // downloadState : ["courseId","state","total","success","fails","currentdownloadId"],
+    // downloads : ["tocId","courseId","downloadId","filename","url","status"]
+    static createDownload(url:string,filename:string,tocId:number,courseId:number){
+        const db = Store.db();
+        let download = Store.getDownload(tocId,filename);
+        if(!download){
+            const ID = 0;
+            const downloadId = 0;
+            const status = false;
+            download = {ID,tocId,courseId,downloadId,filename,url,status};
+            download.ID = db.insert('downloads', download);
+            // db.commit();
+        }
+        
+        return download;
+    }
+    static updateDownload(ID:number,row_:any){
+        const db = Store.db();
+        let download = Store.getDownloadById(ID);
+        if(download){
+            db.update('downloads',{ID},(row)=>{
+                for(let k in row_){
+                    row[k] = row_[k];
+                    download[k] = row_[k];
+                }
+                return row;
+            })
+            // db.commit();
+        }
+        
+        return download;
+    }
+    static getDownload(tocId:number,filename: string): any {
+        const db = Store.db();
+        let download = null;
+        const downloads = db.queryAll('downloads',{query:{tocId,filename}} );
+        if(downloads.length > 0){
+            download = downloads[0];
+        }
+        return download;
+    }
+   
+    static getDownloadByCourseId(courseId:number): any {
+        const db = Store.db();
+        const downloads = db.queryAll('downloads',{query:{courseId}});
+       
+        return downloads;
+    }
 }
+
 Store.prepareAppStorage();
+
+
 export default Store;

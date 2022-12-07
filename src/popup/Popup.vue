@@ -73,7 +73,7 @@ export default defineComponent({
       //   this.log(`AppState:${row.state}`);
       // });
      
-    },750)
+    },1200)
 
   },
   methods:{

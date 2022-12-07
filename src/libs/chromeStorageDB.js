@@ -22,13 +22,7 @@ export default class chromeStorageDB{
             this.storage = engine;
         }
 
-        
-        (async () => {
-            const tmpDb = await this.storage.get([ this.db_id ]);
-            if(typeof tmpDb[this.db_id] !== 'undefined'){
-                this.db = tmpDb[this.db_id];
-            }
-            // console.log(this.db);
+        this.sync(()=>{
             if( !( this.db  && this.db.tables && this.db.data ) ) {
                 if(!this.validateName(db_name)) {
                     error("The name '" + db_name + "' contains invalid characters");
@@ -38,11 +32,23 @@ export default class chromeStorageDB{
                     this.db_new = true;
                 }
             }
-        })();
+        });
+        
         
     }
 
-
+    sync(fn){
+        (async () => {
+            const tmpDb = await this.storage.get([ this.db_id ]);
+            if(typeof tmpDb[this.db_id] !== 'undefined'){
+                this.db = tmpDb[this.db_id];
+            }
+            if(typeof fn == 'function'){
+                fn();
+            }
+            
+        })();
+    }
 
     // ______________________ private methods
 

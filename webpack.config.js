@@ -25,9 +25,9 @@ module.exports = {
 	devtool: 'inline-source-map',
 	entry : {
 		popup:"./src/popup/popup.ts",
-		content:"./src/content_scripts/content.ts",
-		inject:"./src/content_scripts/inject.ts",
-		create_data_codes:"./src/content_scripts_inject/create_data_codes.js",
+		// content:"./src/content_scripts/content.ts",
+		// inject:"./src/content_scripts/inject.ts",
+		// create_data_codes:"./src/content_scripts_inject/create_data_codes.js",
         background: "./src/service_workers/background.ts"
 	},
 	output : {

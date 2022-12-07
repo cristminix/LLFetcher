@@ -67,68 +67,74 @@ let currentDownload = null;
 let downloadHandlerSet = false;
 let queueStarted = false;
 
-function populateDownloadQueues(){
-    /*
-    */
-    downloadQueues = [];
-    downloadCounts = 0;
-    downloadSuccessQueues = [];
-    currentDownload = null;
-    // Store.db().getStoreDB().truncate('downloads');
-    // Store.db().commit();
-    // return [];
-    const app = Store.getAppState();
-    const course = Store.getCourse(app.lastCourseSlug);
-    const downloadState = Store.getDownloadState(course.ID);
-    const downloadConfig = Store.getDownloadConfig(course.ID);
-    // const download = Store.getDownloads();
-    const sections = Store.getSectionsByCourseId(course.ID);
-    // const items = [];
-    const fmt = downloadConfig.selectedFmtList;
+function populateDownloadQueues(fn){
+    Store.db().getStoreDB().sync(()=>{
+        downloadQueues = [];
+        downloadCounts = 0;
+        downloadSuccessQueues = [];
+        currentDownload = null;
+        // Store.db().getStoreDB().truncate('downloads');
+        // Store.db().commit();
+        // return [];
+        const app = Store.getAppState();
+        const course = Store.getCourse(app.lastCourseSlug);
+        const downloadState = Store.getDownloadState(course.ID);
+        const downloadConfig = Store.getDownloadConfig(course.ID);
+        // const download = Store.getDownloads();
+        const sections = Store.getSectionsByCourseId(course.ID);
+        // const items = [];
+        const fmt = downloadConfig.selectedFmtList;
 
-    const downloadConfigs = [];
-    sections.forEach((section)=>{
-        const items = Store.getTocsBySectionId(section.ID);
-        items.forEach((toc)=>{
-            const streamLocations = Store.getStreamLocations(toc.ID).filter((r)=>{return r.fmt==fmt});
-            let streamLoc;
-            if(streamLocations.length>0){
-                streamLoc = streamLocations[0];
-                const videoUrl = streamLoc.url;
-                const transcriptUrl = toc.captionUrl;
-                const optVideo = {
-                    url : videoUrl,
-                    filename : `${toc.slug}-${fmt}.mp4`,
-                    tocId : toc.ID,
-                    courseId : course.ID
-                };
-                const optTranscript = {
-                    url : transcriptUrl,
-                    filename : `${toc.slug}-${fmt}.vtt`,
-                    tocId : toc.ID,
-                    courseId : course.ID
-                };
-                downloadConfigs.push(optVideo);
-                downloadConfigs.push(optTranscript);
-            }
+        const downloadConfigs = [];
+        sections.forEach((section)=>{
+            const items = Store.getTocsBySectionId(section.ID);
+            items.forEach((toc)=>{
+                const streamLocations = Store.getStreamLocations(toc.ID).filter((r)=>{return r.fmt==fmt});
+                let streamLoc;
+                if(streamLocations.length>0){
+                    streamLoc = streamLocations[0];
+                    const videoUrl = streamLoc.url;
+                    const transcriptUrl = toc.captionUrl;
+                    const optVideo = {
+                        url : videoUrl,
+                        filename : `${toc.slug}-${fmt}.mp4`,
+                        tocId : toc.ID,
+                        courseId : course.ID
+                    };
+                    const optTranscript = {
+                        url : transcriptUrl,
+                        filename : `${toc.slug}-${fmt}.vtt`,
+                        tocId : toc.ID,
+                        courseId : course.ID
+                    };
+                    downloadConfigs.push(optVideo);
+                    downloadConfigs.push(optTranscript);
+                }
+            })
         })
+        for(let idx in downloadConfigs){
+            const dl = downloadConfigs[idx];
+            let download = Store.getDownload(dl.tocId,dl.filename);
+            if(download){
+                console.log('updateDownload');
+                download.url = dl.url;
+                download.filename = dl.filename;
+                download = Store.updateDownload(download.ID,download);
+            }else{
+                console.log('createDownload');
+                download = Store.createDownload(dl.url,dl.filename,dl.tocId,dl.courseId);
+            } 
+            downloadQueues.push(download);
+        }
+        Store.db().commit();
+
+        if(typeof fn == 'function'){
+            fn(downloadQueues);
+        }
     })
-    for(let idx in downloadConfigs){
-        const dl = downloadConfigs[idx];
-        let download = Store.getDownload(dl.tocId,dl.filename);
-        if(download){
-            console.log('updateDownload');
-            download.url = dl.url;
-            download.filename = dl.filename;
-            download = Store.updateDownload(download.ID,download);
-        }else{
-            console.log('createDownload');
-            download = Store.createDownload(dl.url,dl.filename,dl.tocId,dl.courseId);
-        } 
-        downloadQueues.push(download);
-    }
-    Store.db().commit();
-    return downloadQueues;
+    
+    
+    
 }
 function wakeUpDownloadPage(){
     // const app = Store.getAppState();
@@ -242,11 +248,14 @@ chrome.runtime.onMessage.addListener((msg,sender,sendResponse)=>{
         }
         console.log(msg)
         if(downloadQueues.length == 0){
-            downloadQueues = populateDownloadQueues();
-            downloadCounts = downloadQueues.length;
+            populateDownloadQueues((queues)=>{
+                downloadCounts = queues.length;
+                queueStarted = true;
+                startDownloadQueues();
+            });
+            
         }
-        queueStarted = true;
-        startDownloadQueues();
+        
         
     }
 });

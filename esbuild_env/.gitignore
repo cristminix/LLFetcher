@@ -1,4 +1,13 @@
-package-lock.json
-examples
+lib
+node_modules
+coverage
+
+.vscode
+.DS_Store
+.idea
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 packages
-LLFetcher/node_modules
+examples

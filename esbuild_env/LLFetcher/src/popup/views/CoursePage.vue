@@ -37,7 +37,7 @@ import FetchQueueBar from 'LLFetcher/src/popup/components/FetchQueueBar.vue';
 import FetchSectionQueue from 'LLFetcher/src/popup/components/FetchSectionQueue.vue';
 import LogBar from 'LLFetcher/src/popup/components/LogBar.vue';
 import {makeTitle} from 'LLFetcher/src/libs/utils';
-// import $ from 'jquery';
+import $ from 'jquery';
 import Store from "LLFetcher/src/libs/store";
 import { Course_tableField,Author_tableField,Section_tableField,ExerciseFile_tableField,Toc_tableField } from 'LLFetcher/src/types/tableFields';
 
@@ -69,11 +69,11 @@ export default defineComponent({
   mounted(){
     this.loadCourseData();
     setTimeout(()=>{
-      // $('.course-page .btn-collapse').click((evt)=> {
-      //   const el = $(evt.target).closest('button')[0];
-      //   $(el).find('i').toggleClass('fa fa-plus fa fa-minus');
-      //   $('.course-page .btn-collapse').not(el).find('i').removeClass('fa-minus').addClass('fa-plus ');
-      // });
+      $('.course-page .btn-collapse').click((evt)=> {
+        const el = $(evt.target).closest('button')[0];
+        $(el).find('i').toggleClass('fa fa-plus fa fa-minus');
+        $('.course-page .btn-collapse').not(el).find('i').removeClass('fa-minus').addClass('fa-plus ');
+      });
     },50);
   },
   methods:{

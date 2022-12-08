@@ -1,11 +1,8 @@
 import { createApp } from 'vue';
 import Popup from 'LLFetcher/src/popup/Popup.vue';
 
-// import 'bootstrap/scss/bootstrap.scss';
-// import 'bootstrap/dist/js/bootstrap.esm';
-
-
-// import 'fontawesome-4.7/css/font-awesome.min.css';
+import 'bootstrap/scss/bootstrap.scss';
+import 'fontawesome-4.7/css/font-awesome.min.css';
 import 'LLFetcher/src/styles/popup.css';
 
 // import 'highlight.js/styles/default.css'
@@ -14,6 +11,8 @@ import 'LLFetcher/src/styles/popup.css';
 // import hljs from 'highlight.js/lib/core';
 // import javascript from 'highlight.js/lib/languages/javascript';
 // import hljsVuePlugin from "@highlightjs/vue-plugin";
+import 'bootstrap/dist/js/bootstrap'
+
 import { attachListener } from 'LLFetcher/src/libs/utils';
 
 // hljs.registerLanguage('javascript', javascript);

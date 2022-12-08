@@ -10,7 +10,7 @@
 import { defineComponent, ref, PropType } from 'vue';
 import {ExerciseFile,Toc} from 'LLFetcher/src/types/lynda';
 import Proxy from 'LLFetcher/src/libs/proxy';
-// import jQuery from 'jquery';
+import jQuery from 'jquery';
 import {findItems,findDS,getFmt} from 'LLFetcher/src/libs/utils';
 import {Toc_tableField} from 'LLFetcher/src/types/tableFields';
 

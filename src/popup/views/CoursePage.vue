@@ -5,7 +5,7 @@
     </div>
     <div class="course" v-if="course">
       <h2><i class="fa fa-bookmark"></i> <span>{{course.title}}</span></h2>
-      <div style="font-style:italic"><h4> <span v-if="authors.length>0">By</span> <span v-for="author in authors">{{makeTitle(author.slug)}}</span></h4></div>
+      <div style="font-style:italic"><h4> <span v-if="authors.length>0">By</span> <span :key="author.ID" v-for="author in authors">{{makeTitle(author.slug)}}</span></h4></div>
     </div>
     <div class="accordion accordion-flush" id="accordionCourse">
     <div v-for="(section,sectionIndex ) in sections" :key="sectionIndex" class="accordion-item">
@@ -31,15 +31,15 @@
 </template>
 <script lang="ts">
 import { defineComponent,ref,PropType } from 'vue';
-import {Course,Section,ExerciseFile,Toc,StreamLocation} from '../../types/lynda';
-import TocItem from '../components/TocItem.vue';
-import FetchQueueBar from '../components/FetchQueueBar.vue';
-import FetchSectionQueue from '../components/FetchSectionQueue.vue';
-import LogBar from '../components/LogBar.vue';
-import {makeTitle} from '../../libs/utils';
+import {Course,Section,ExerciseFile,Toc,StreamLocation} from 'src/types/lynda';
+import TocItem from 'src/popup/components/TocItem.vue';
+import FetchQueueBar from 'src/popup/components/FetchQueueBar.vue';
+import FetchSectionQueue from 'src/popup/components/FetchSectionQueue.vue';
+import LogBar from 'src/popup/components/LogBar.vue';
+import {makeTitle} from 'src/libs/utils';
 import $ from 'jquery';
-import Store from "../../libs/store";
-import { Course_tableField,Author_tableField,Section_tableField,ExerciseFile_tableField,Toc_tableField } from '../../types/tableFields';
+import Store from "src/libs/store";
+import { Course_tableField,Author_tableField,Section_tableField,ExerciseFile_tableField,Toc_tableField } from 'src/types/tableFields';
 
 export default defineComponent({
   components:{

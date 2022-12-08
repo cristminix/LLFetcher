@@ -5,9 +5,9 @@
 </template>
 
 <script lang="ts">
-import { Course_tableField, DownloadConfig_tableField, ExerciseFile_tableField } from '../../types/tableFields';
+import { Course_tableField, DownloadConfig_tableField, ExerciseFile_tableField } from 'src/types/tableFields';
 import { defineComponent, PropType, ref } from 'vue';
-import Store from '../../libs/store';
+import Store from 'src/libs/store';
 
 export default defineComponent({
   data() {

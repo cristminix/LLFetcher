@@ -7,13 +7,13 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref, PropType } from 'vue';
-import {ExerciseFile,Toc} from '../../types/lynda';
-import Proxy from '../../libs/proxy';
+import { defineComponent, ref, PropType, ComponentPublicInstance } from 'vue';
+import {ExerciseFile,Toc} from 'src/types/lynda';
+import Proxy from 'src/libs/proxy';
 import jQuery from 'jquery';
-import {findItems,findDS,getFmt} from '../../libs/utils';
-import {Toc_tableField} from '../../types/tableFields';
-
+import {findItems,findDS,getFmt} from 'src/libs/utils';
+import {Toc_tableField} from 'src/types/tableFields';
+import CoursePage from 'src/popup/views/CoursePage.vue';
 export default defineComponent({
   props:{
         toc: {
@@ -62,7 +62,8 @@ export default defineComponent({
             if(this.fetchQueueEnabled){
                 this.btnState = 3;
                 console.log('Queue Complete: triggering next fetchToc from parent, lastTocIndex:',this.tocIndex);
-                this.$parent.fetchQueueBar.afterProcessQueue(true);
+                const parent = this.$parent as ComponentPublicInstance<typeof CoursePage>;
+                parent.fetchQueueBar.afterProcessQueue(true);
             }
             return;
           }
@@ -73,22 +74,27 @@ export default defineComponent({
               // 3. set btn state to [checked]
               this.btnState = 3;
               this.$emit('update',{src: 'Popup.CoursePage.TocItem.FetchButton',toc : this.toc, exerciseFile: this.exerciseFile, sectionId:this.toc.sectionId});
+                const parent = this.$parent as ComponentPublicInstance<typeof CoursePage>;
 
                 console.log('Queue Complete: triggering next fetchToc from parent, lastTocIndex:',this.tocIndex);
-                this.$parent.fetchQueueBar.afterProcessQueue(true);
+                parent.fetchQueueBar.afterProcessQueue(true);
               
             }else{
               // 3. set btn state to icon [retry]
               this.btnState = 4;
               if(this.fetchQueueEnabled){
-                this.$parent.fetchQueueBar.afterProcessQueue(false);
+                const parent = this.$parent as ComponentPublicInstance<typeof CoursePage>;
+
+                parent.fetchQueueBar.afterProcessQueue(false);
                 console.log('Queue Failed: triggering fetchToc from FetchButton, lastTocIndex:',this.tocIndex);
               }
             }
           },(r:any)=>{
             // 3. set btn state to icon [retry]
             this.btnState = 4;
-              this.$parent.fetchQueueBar.afterProcessQueue(false);
+              const parent = this.$parent as ComponentPublicInstance<typeof CoursePage>;
+
+              parent.fetchQueueBar.afterProcessQueue(false);
               console.log('Queue Failed: triggering fetchToc from FetchButton, lastTocIndex:',this.tocIndex);
           });
           
@@ -103,7 +109,7 @@ export default defineComponent({
         const elCodes = elDiv.find('code');
         let dataCodes = [];
         
-        let toc = Object.assign({},this.toc);
+        let toc = Object.assign({}, this.toc) as unknown as Toc;
         toc.streamLocations = [];
         for(let codeIndex in elCodes){
             let elCode = elCodes[codeIndex];
@@ -157,7 +163,7 @@ export default defineComponent({
         }
         if(toc.captionUrl.length > 0 && toc.streamLocations.length > 0){
           validResource = true; 
-          this.toc = toc;
+          this.toc = toc as unknown as Toc_tableField;
         }
         
         return validResource;

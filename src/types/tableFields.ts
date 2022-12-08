@@ -65,7 +65,8 @@ interface App_tableField{
 	ID : number,
 	version : string,
 	state : number,
-	lastCourseSlug : string
+	lastCourseSlug : string,
+	nav : string
 }
 
 export {

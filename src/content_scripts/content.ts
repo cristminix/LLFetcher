@@ -21,8 +21,10 @@ chrome.runtime.onMessage.addListener(function (response, sendResponse) {
             let node : HTMLElement | null = document.getElementById('dataCodes');
             if(node !== null) {
                 let dataStr = node.getAttribute('data');
-                localStorage["dataCodes"] = dataStr;
+                // localStorage["dataCodes"] = dataStr;
                 chrome.storage.sync.set({dataCodes: dataStr});
+                chrome.runtime.sendMessage({cmd:'retrieve_data_codes', dataCodes: dataStr});
+
             }
 		}
         else if(response.event == 'ContentConsoleLog'){

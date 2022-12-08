@@ -30,10 +30,11 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref, PropType } from 'vue';
-import FetchButton from '../components/FetchButton.vue';
-// import {Toc} from '../../types/lynda';
-import {Toc_tableField} from '../../types/tableFields';
+import { defineComponent, ref, PropType, ComponentPublicInstance } from 'vue';
+import FetchButton from 'src/popup/components/FetchButton.vue';
+import CoursePage from 'src/popup/views/CoursePage.vue';
+// import {Toc} from 'src/types/lynda';
+import {Toc_tableField} from 'src/types/tableFields';
 
 export default defineComponent({
     components:{
@@ -64,7 +65,9 @@ export default defineComponent({
         fetchBtns,checkAll,enableQueue};
     },
     mounted(){
-        this.fetchQueueBar = this.$parent.fetchQueueBar[this.sectionIndex];
+        const parent = this.$parent as ComponentPublicInstance<typeof CoursePage>;
+
+        this.fetchQueueBar = parent.fetchQueueBar[this.sectionIndex];
 
         setTimeout(()=>{
             // console.log('TocItem['+this.sectionIndex+'] : mounted');

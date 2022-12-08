@@ -4,6 +4,8 @@
     "module": "esnext",
     "strict": true,
     "jsx": "preserve",
+    "noImplicitAny": false,
+    "strictNullChecks": false,
     "importHelpers": true,
     "moduleResolution": "node",
     "experimentalDecorators": true,
@@ -18,10 +20,9 @@
     "outDir": "lib",
     "typeRoots": [
       "./node_modules/@types",
-      "./types"
+      "./src/types"
     ],
     "paths": {
-      "src/*": ["src/*"]
     },
     "lib": [
       "esnext",
@@ -29,8 +30,13 @@
       "dom.iterable",
       "scripthost"
     ]
-    
   },
-  "include": ["src/**/*"],
-  "exclude": ["chrome_extension/*","node_modules/*"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

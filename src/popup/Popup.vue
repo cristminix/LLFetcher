@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, ref} from 'vue';
+import {ComponentPublicInstance, defineComponent, PropType, ref} from 'vue';
 import NavTerm from '../types/navterm'; 
 import {Course} from '../types/lynda';
 
@@ -24,7 +24,6 @@ import AboutPage from './views/AboutPage.vue'
 import HelpPage from './views/HelpPage.vue'
 import Store from '../libs/store';
 import { App_tableField,Course_tableField } from '../types/tableFields';
-import { attachListener } from '../libs/utils';
 
 export default defineComponent({
   name: 'Popup',
@@ -50,23 +49,20 @@ export default defineComponent({
     };
     const message = ref<string>('');
     const app = ref<App_tableField>();
-    // const batchDownload = ref();
-    const downloadPage = ref();
-    return {nav, course, onNavUpdate, onCourseUpdate, message,app,downloadPage};
+    const downloadPage = ref<ComponentPublicInstance<typeof DownloadPage>>();
+    const pageNavigation = ref<ComponentPublicInstance<typeof PageNavigation>>();
+    return {nav, course,pageNavigation, onNavUpdate, onCourseUpdate, message,app,downloadPage};
   },
   mounted(){
     // console.log('App Entry Point Start here...');
-    // Store.prepareAppStorage();
-    // this.nav = 'welcome';
-    
-    
+
     setTimeout(()=>{ 
       const db = Store.db();
       // console.log(db);
       this.app = Store.getAppState();
       // console.log(this.app);
       if(this.app.nav !== ''){
-        this.nav = this.$refs.pageNavigation.nav = this.app.nav;
+        this.nav = this.pageNavigation.nav = this.app.nav as NavTerm;
       }
       // db.subscribe('app',(row:App_tableField)=>{
       //   this.app = row;
@@ -80,11 +76,11 @@ export default defineComponent({
     log(message:string){
       // this.message = message;
     },
-    setCourse(course:Course){
+    setCourse(course:Course_tableField){
       this.course = course;
       
       setTimeout(()=>{
-        this.nav = this.$refs.pageNavigation.nav = 'course';
+        this.nav = this.pageNavigation.nav = 'course';
         Store.setAppNav(this.nav);
       },250);
     }

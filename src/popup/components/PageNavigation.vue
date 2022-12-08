@@ -11,8 +11,8 @@
 </template>
 <script lang="ts">
 import { defineComponent, ref, PropType } from 'vue'
-import NavTerm from '../../types/navterm';
-import Store from '../../libs/store';
+import NavTerm from 'src/types/navterm';
+import Store from 'src/libs/store';
 export default defineComponent({
   props:{
     nav :{

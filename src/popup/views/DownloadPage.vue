@@ -43,13 +43,13 @@
   </div>
 </template>
 <script lang="ts">
-import { Section_tableField,Course_tableField, DownloadConfig_tableField, ExerciseFile_tableField } from '../../types/tableFields';
-import { defineComponent, PropType, ref } from 'vue';
-import Store from '../../libs/store';
-import { createDownloadFile } from '../../libs/ext';
-import { sendMessageBg } from '../../libs/utils';
-import { Section,Toc } from '../../types/lynda';
-import LogBar from '../components/LogBar.vue';
+import { Section_tableField,Course_tableField, DownloadConfig_tableField, ExerciseFile_tableField } from 'src/types/tableFields';
+import { ComponentPublicInstance, defineComponent, PropType, ref } from 'vue';
+import Store from 'src/libs/store';
+import { createDownloadFile } from 'src/libs/ext';
+import { sendMessageBg } from 'src/libs/utils';
+import { Section,Toc } from 'src/types/lynda';
+import LogBar from 'src/popup/components/LogBar.vue';
 export default defineComponent({
   components:{
     LogBar
@@ -70,7 +70,7 @@ export default defineComponent({
     const exerciseFile = ref<ExerciseFile_tableField>();
     const downloadConfig = ref<DownloadConfig_tableField>();
     const downloadState = ref({ID:0,courseId:0,state:0});
-    const logBar=ref({});
+    const logBar=ref<ComponentPublicInstance<typeof LogBar>>();
     const downloads = ref([]);
     return{
       course, exerciseFile, downloadConfig, downloadState,logBar,downloads
@@ -105,10 +105,9 @@ export default defineComponent({
           this.downloadState = Store.setDownloadState(this.course.ID,0);
         }else{
           this.logBar.log(response.currentDownload.filename,1)
-          this.downloadState = Store.setDownloadState(this.course.ID,0);
+          this.downloadState = Store.setDownloadState(this.course.ID,1);
         }
       }
-      this.logBar.log(JSON.stringify(a),1)
     },
     downloadFile(kind:string){
       const config = {
@@ -120,7 +119,8 @@ export default defineComponent({
       if(kind == 'shell_script' || kind == 'batch_script' || kind == 'playlist'){
         const sections = Store.getSectionsByCourseId(this.course.ID) as unknown as Section[];
         sections.forEach((section)=>{
-          section.items = Store.getTocsBySectionId(section.ID) as unknown as Toc[];
+          const sectionTmp = section as unknown as Section_tableField;
+          section.items = Store.getTocsBySectionId(sectionTmp.ID) as unknown as Toc[];
         });
         config.sections = sections;
       }

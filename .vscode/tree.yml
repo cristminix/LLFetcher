@@ -1,0 +1,58 @@
+- Popup :
+    - coursePage : CoursePage
+        - fetchSectionQueue : FetchSectionQueue
+            - queueSlugs : string[]
+            - excludeTocCount : number
+            - btnState : number
+            - percentage : number
+            - lastSectionIndex : number
+            - sectionIndexQueues : number[]
+            - successTocSlugs : string []
+            + mounted()
+            + calculatePercentageInit(tocSlugs: string[])
+            + calculatePercentageQueue(callback: Function)
+            + report(sectionIndex:number,tocIndex:number,status:number)
+            + processQueue()
+            + startQueue()
+        - fetchQueueBar : FetchQueueBar[]
+            - queueSlugs : string[]
+            - queueTocIndex : number[]
+            - excludeSlugs : string[]
+            - percentage : number
+            - btnState : number
+            - lastTocIndex : number
+            - sectionIndex : number
+            + mounted()
+            + calculatePercentageInit()
+            + setProgress(lastTocIndex:number,percentage:number)
+            + startQueue()
+        - tocItems : TocItem[]
+            - enableQueue : boolean
+            - items : Toc_tableField[]
+            - sectionIndex : number
+            - checkAll : boolean
+            - checkedQueues : {slug: boolean}[]
+            - excludeQueues : []
+            - fetchQueueBar : FetchQueueBar
+            + mounted()
+            + triggerFailedFetchQueue(tocIndex:number)
+            + calculatePercentageQueue(callback:Function)
+            + triggerExcludeFetchQueue(tocIndex:number, fetchQueueEnabled:boolean)
+            + triggerFetchQueue(tocIndex:number)
+            + onFetchUpdate(target:any)
+            + onCheckAll()
+            + tgQueue(tocIndex:number)
+            - fetchBtns : FetchButton[]
+                - fetchQueueEnabled : boolean
+                - exclude : boolean
+                - toc : Toc_tableField
+                - sectionIndex : number
+                - tocIndex : number
+                - exerciseFile : ExerciseFile
+                - btnState : number
+                + isQueued() : boolean
+                + fetchToc()
+                + parseToc(responseText : string)
+
+                
+        

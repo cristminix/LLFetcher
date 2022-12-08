@@ -368,7 +368,8 @@ class Store{
 
         if(!section){
             const ID = 0;
-            section = {ID,courseId,title,slug};
+            const tocIds=[];
+            section = {ID,courseId,title,slug,tocIds};
             section.ID = db.insert('section',section);
             db.commit();
 

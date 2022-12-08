@@ -16,8 +16,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
-
+import { ComponentPublicInstance, defineComponent, ref } from 'vue';
+import CoursePage from 'src/popup/views/CoursePage.vue';
 export default defineComponent({
 
     setup() {
@@ -74,7 +74,9 @@ export default defineComponent({
             }
         },
         populateSectionIndexQueue(){
-            this.sectionIndexQueues = Object.keys(this.$parent.sections);
+            const parent = this.$parent as ComponentPublicInstance<typeof CoursePage>;
+
+            this.sectionIndexQueues = Object.keys(parent.sections);
             this.itemQueuesLength = this.sectionIndexQueues.length;
         },
         toJSONStr(obj:any){
@@ -104,10 +106,11 @@ export default defineComponent({
         },
         processQueue(success?:boolean){
             console.log(`FetchSectionQueue.processQueue()`);
+            const parent = this.$parent as ComponentPublicInstance<typeof CoursePage>;
 
             if(this.sectionIndexQueues.length > 0){
                 this.lastSectionIndex = this.sectionIndexQueues.shift();
-                this.$parent.fetchQueueBar[this.lastSectionIndex].startQueue();
+                parent.fetchQueueBar[this.lastSectionIndex].startQueue();
             }else{
                 this.btnState = 3;
             }

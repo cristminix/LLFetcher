@@ -15,8 +15,9 @@
 </template>
 
 <script lang="ts">
-import { Toc_tableField } from '../../types/tableFields';
-import {defineComponent,ref} from 'vue'
+import { Toc_tableField } from 'src/types/tableFields';
+import CoursePage from 'src/popup/views/CoursePage.vue';
+import {ComponentPublicInstance, defineComponent,ref} from 'vue'
 export default defineComponent({
   props:{
     sectionIndex:{
@@ -64,7 +65,8 @@ export default defineComponent({
   },
   methods:{
     populateItemIndexQueue(){
-        const items = this.$parent.sections[this.sectionIndex].items;
+        const parent = this.$parent as ComponentPublicInstance<typeof CoursePage>;
+        const items = parent.sections[this.sectionIndex].items;
         this.itemIndexQueues = Object.keys(items);
         this.itemQueuesLength = this.itemIndexQueues.length;
 
@@ -73,7 +75,7 @@ export default defineComponent({
             if(item.streamLocationIds.length>0){
                 this.itemIndexSuccessQueues.push(itemIndex);
                 this.setProgress((percentage,sectionIndex)=>{
-                    this.$parent.fetchSectionQueue.populateProgress(percentage,sectionIndex);
+                    parent.fetchSectionQueue.populateProgress(percentage,sectionIndex);
                 });
                 
             }
@@ -110,14 +112,17 @@ export default defineComponent({
     },
     processQueue(success?:boolean){
         console.log(`FetchQueueBar[${this.sectionIndex}].processQueue(${this.lastItemIndex})`);
+        const parent = this.$parent as ComponentPublicInstance<typeof CoursePage>;
+
         if(this.itemIndexQueues.length > 0){
             this.lastItemIndex = this.itemIndexQueues.shift();
-            this.$parent.tocItems[this.sectionIndex].fetchBtns[this.lastItemIndex].fetchToc();
+
+            parent.tocItems[this.sectionIndex].fetchBtns[this.lastItemIndex].fetchToc();
             
         }else{
             this.btnState = 3;
             // this.setProgress();
-            this.$parent.fetchSectionQueue.afterProcessQueue(this.sectionIndex,this.lastItemIndex,success);
+            parent.fetchSectionQueue.afterProcessQueue(this.sectionIndex,this.lastItemIndex,success);
         }
     },
     startQueue(){

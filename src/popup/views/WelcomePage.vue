@@ -7,7 +7,7 @@
           <i class="fa fa-history"></i> Load Recent Course
         </button>
         <ul class="dropdown-menu" aria-labelledby="recentCourseButton">
-          <li v-for="course in lastCourseList"><a class="dropdown-item" href="javascript:;" @click="loadRecentCourse(course)">{{ course.title }}</a></li>
+          <li :key="course.ID" v-for="course in lastCourseList"><a class="dropdown-item" href="javascript:;" @click="loadRecentCourse(course)">{{ course.title }}</a></li>
         </ul>
       </div>
 
@@ -19,11 +19,11 @@
   </div>
 </template>
 <script lang="ts">
-import { sendMessageSaveDataCodesToLS } from '../../libs/utils';
-import { defineComponent,ref } from 'vue';
-import Store from '../../libs/store';
-import { Course_tableField } from '../../types/tableFields';
-import { Course } from '../../types/lynda';
+import { sendMessageSaveDataCodesToLS } from 'src/libs/utils';
+import { ComponentPublicInstance, defineComponent,ref } from 'vue';
+import Store from 'src/libs/store';
+import { Course_tableField } from 'src/types/tableFields';
+import CoursePage from 'src/popup/views/CoursePage.vue';
 
 export default defineComponent({
   setup() {
@@ -38,7 +38,7 @@ export default defineComponent({
   mounted(){
     setTimeout(()=>{
       const appInfo = Store.getAppInfo();
-      this.$parent.log(`AppState:${appInfo.state}`);
+      // this.$parent.log(`AppState:${appInfo.state}`);
       
       const lastCourses = Store.getLastCourses();
       if(lastCourses.length > 0){
@@ -53,7 +53,8 @@ export default defineComponent({
   },
   methods:{
     loadRecentCourse(course:Course_tableField){
-      this.$parent.setCourse(course);
+      const parent = this.$parent as ComponentPublicInstance<typeof CoursePage>;
+      parent.setCourse(course);
     },
     retrieveDataCodesFromContent(){
       this.fetchBtnState = 1;
@@ -65,7 +66,8 @@ export default defineComponent({
         this.fetchBtnState = 2;
         console.log(dataCodes)
         Store.saveDataCodes(dataCodes);
-        this.$parent.setCourse(dataCodes.course);
+        const parent = this.$parent as ComponentPublicInstance<typeof CoursePage>;
+        parent.setCourse(dataCodes.course);
         // contentConsoleLog(dataCodes);
       })
 

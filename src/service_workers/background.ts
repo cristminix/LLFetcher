@@ -1,5 +1,7 @@
 import Store from "../libs/store";
+
 Store.prepareAppStorage();
+
 let ENV = 'development';
 
 if(ENV === 'production'){

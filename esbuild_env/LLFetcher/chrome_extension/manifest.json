@@ -1,0 +1,41 @@
+{
+	"name" : "LLFetcher",
+	"version" : "1.0",
+	"manifest_version" : 3,
+	"permissions":[
+		"scripting","storage",
+        "webNavigation","tabs","cookies",
+    	"downloads"
+	],
+	"content_scripts" : [
+		{
+			"matches":["https://www.linkedin.com/*","http://localhost:9000/*"],
+			"js":["inject.js","content.js"]
+		}
+	],
+	"background" : {
+		"service_worker" : "background.js"
+	},
+	"web_accessible_resources": [
+	   {
+	     "resources": ["create_data_codes.js"],
+	     "matches": ["http://*/*", "https://*/*"]
+	   }
+	 ],
+	"host_permissions":[
+		"https://www.linkedin.com/learning/*",
+		"http://localhost:9000/*",
+		"chrome://extensions/"
+	],
+	"description" : "LLFetcher is stand for Linked Learning Fetcher, which just simple chrome extension that can help you download all resource in Linked learning Course",
+	"action" : {
+		"default_title" : "LinkedIn Learning Fetcher",
+		"default_popup" : "popup.html",
+		"default_icon": {
+	      "32": "ll_icon_32.png",
+	      "48": "ll_icon_32.png",
+	      "128": "ll_icon_32.png"
+	    }
+	}
+	
+}

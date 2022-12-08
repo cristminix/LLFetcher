@@ -1,0 +1,180 @@
+/* vue:LLFetcher/src/popup/components/TocItem.vue?vue&type=style */
+td.fcc[data-v-0cc89746] {
+  text-align: right;
+  width: 10px;
+}
+ul.toc-item-list[data-v-0cc89746] {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+table.toc-item-list[data-v-0cc89746] {
+  width: 100%;
+}
+.toc-item-view[data-v-0cc89746] {
+  padding: 0 2em;
+  font-size: 80%;
+  padding-bottom: 1em;
+  padding-right: 0;
+}
+
+/* vue:LLFetcher/src/popup/components/FetchQueueBar.vue?vue&type=style */
+.fetch-queue-bar[data-v-02c4d627] {
+  position: absolute;
+  right: 49px;
+  margin-top: -22px;
+}
+.fetch-queue-pb[data-v-02c4d627] {
+  width: 102px;
+  height: 24px;
+  padding: 4px 0;
+  float: right;
+  clear: both;
+}
+.btn-fetch[data-v-02c4d627] {
+  margin-top: -8px;
+  padding: 0;
+  border: none !important;
+  font-size: 10px;
+}
+.fetch-queue[data-v-02c4d627] {
+  margin-bottom: 1em;
+}
+.btn-fetch-cnt[data-v-02c4d627] {
+  width: 25px;
+  position: absolute;
+  right: -12px;
+  margin-top: 3.5px;
+}
+
+/* vue:LLFetcher/src/popup/components/FetchSectionQueue.vue?vue&type=style */
+.data-codes[data-v-1fe08e91] {
+  background: yellow;
+}
+.fetch-section-queue-pb[data-v-1fe08e91] {
+  width: 102px;
+  height: 24px;
+  padding: 4px 0;
+  float: right;
+  clear: both;
+}
+.btn-fetch-section-queue[data-v-1fe08e91] {
+  margin-top: -8px;
+  padding: 0;
+  border: none !important;
+  font-size: 10px;
+}
+.fetch-section-queue[data-v-1fe08e91] {
+  position: absolute;
+  right: 49px;
+  margin-top: 45px;
+  opacity: .9;
+}
+.btn-fetch-section-queue-cnt[data-v-1fe08e91] {
+  width: 25px;
+  position: absolute;
+  right: -12px;
+  margin-top: 2.5px;
+}
+
+/* vue:LLFetcher/src/popup/components/LogBar.vue?vue&type=style */
+.log-message[data-v-3134c598] {
+  font-family: monospace;
+  padding: .25em .5em;
+  border-radius: 5px;
+  text-align: center;
+  font-size: 10px;
+}
+.log-message.error[data-v-3134c598] {
+  color: #fff;
+  background: red;
+}
+.log-message.success[data-v-3134c598] {
+  color: #fff;
+  background: green;
+}
+.log-message.warning[data-v-3134c598] {
+  color: maroon;
+  background: yellow;
+}
+
+/* vue:./views/DownloadPage.vue?vue&type=style */
+.dl-batch-cnt[data-v-36213f66] {
+  padding: 2em;
+}
+.form-helper[data-v-36213f66] {
+  font-size: 12px;
+  font-style: italic;
+}
+.form-label[data-v-36213f66] {
+  margin-right: .25em;
+}
+
+/* LLFetcher/src/styles/popup.css */
+#popup {
+  width: 680px;
+  padding: 1em 0;
+  border: solid 1px #ddd;
+}
+.page {
+  margin: 0 1em;
+  padding: 1em;
+  border-radius: 4px;
+  margin-bottom: 0;
+}
+.course-page .course {
+  margin-bottom: 1em;
+}
+.course-page .course-section {
+  padding: .5em 0;
+}
+.course-page .accordion-button:focus {
+  z-index: 3;
+  border-color: transparent;
+  outline: 0;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+.course-page .accordion-button:not(.collapsed) {
+  color: inherit;
+  background-color: transparent;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+.course-page .accordion-button:not(.collapsed),
+.course-page .accordion-button.collapsed,
+.course-page .accordion-button:not(.collapsed)::after,
+.course-page .accordion-button.collapsed::after {
+  background: none;
+}
+.course-page .accordion-button.custom {
+  position: absolute;
+  width: 24px;
+  padding: 0px 6px;
+  left: 42px;
+  margin-top: 3px;
+  background: none;
+  font-size: 10px;
+}
+.course-page .accordion-body {
+  padding: 0;
+}
+.welcome-page .action-cnt {
+  text-align: center;
+  padding: .5em;
+}
+.welcome-page .btn-cnt {
+  margin: 1em;
+}
+.welcome-page {
+  color: red;
+}
+#popup > .app-container > .console {
+  margin-bottom: -33px;
+  width: 100%;
+}
+.page-navigation ul.btn-group {
+  margin: 0;
+  padding: 0;
+}
+/*# sourceMappingURL=popup.css.map */

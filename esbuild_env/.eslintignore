@@ -1,0 +1,7 @@
+lib
+dist
+node_modules
+tests
+types
+examples/static
+coverage

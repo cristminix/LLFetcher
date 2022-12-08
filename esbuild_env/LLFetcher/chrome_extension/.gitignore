@@ -1,0 +1,12 @@
+*.DS_Store
+*.js
+*.ttf
+*.svg
+*.eot
+*.woff
+*.woff2
+*.txt
+*.hot-update.json
+/popup.html.tmp
+/popup.js
+/background.js

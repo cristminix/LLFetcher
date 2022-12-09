@@ -21,9 +21,9 @@ const logServer = {
  
 Store.prepareAppStorage();
 
-let ENV = 'dev';
+let ENV = 'production';
 
-if(ENV === 'prod'){
+if(ENV === 'production'){
     chrome.action.disable();
 }
 
@@ -41,14 +41,14 @@ function _isValidCoursePage  (url : string) : boolean {
     return validCoursePage;
 }
 function _sendCoookieMessage() : void {
-    chrome.cookies.getAll({domain: "linkedin.com"}, function(_cookie) {
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs ) {
-            try{
-                const tab = tabs[0];
-                chrome.tabs.sendMessage(tab.id as number, {event: 'sendCoookie',cookie: _cookie}, (r) => {});
-            }catch(e){}
-        });
-    });
+    // chrome.cookies.getAll({domain: "linkedin.com"}, function(_cookie) {
+    //     chrome.tabs.query({active: true, currentWindow: true}, function(tabs ) {
+    //         try{
+    //             const tab = tabs[0];
+    //             chrome.tabs.sendMessage(tab.id as number, {event: 'sendCoookie',cookie: _cookie}, (r) => {});
+    //         }catch(e){}
+    //     });
+    // });
 };
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) =>{

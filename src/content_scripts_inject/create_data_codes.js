@@ -127,6 +127,7 @@ function createDataCodes(){
 
 
 window.onload = ()=>{
+    console.log("fuck you")
     try{
         createDataCodes();
     }catch(e){

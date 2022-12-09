@@ -16,14 +16,19 @@
   "description": "",
   "scripts": {
     "serve": "npm run clean:all && node esbuild.config.js all serve",
+    
+    
+    "clean:popup": "rimraf ./chrome_extension/popup.{js,map,css} ./chrome_extension/{*.ttf,*.woff,*.woff2,*.otf,*.svg,*.eot}",
+    "clean:background": "rimraf ./chrome_extension/background.*",
+    "clean:content": "rimraf ./chrome_extension/{content.js,content.js.map,inject.*,create_data_codes.*}",
     "clean:all" : "npm run clean:background && npm run clean:content && npm run clean:popup",
-    "build:popup": "npm run clean:popup && node esbuild.config.js popup",
-    "build:all": "npm run build:popup && npm run build:background && npm run build:content",
-    "clean:popup": "rimraf ./chrome_extension/{popup.js,popup.js.map,popup.css,popup.css.map} ./chrome_extension/{*.ttf,*.woff,*.woff2,*.otf,*.svg,*.eot}",
-    "clean:background": "rimraf ./chrome_extension/{background.js,background.js.map}",
-    "clean:content": "rimraf ./chrome_extension/{content_scripts,content_scripts_inject}",
-    "build:background": "npm run clean:background && node esbuild.config.js background",
-    "build:content": "npm run clean:content && node esbuild.config.js content"
+    
+    "build:popup": "npm run build popup",
+    "build" : "node esbuild.config.js",
+    "build:background": "npm run build background",
+    "build:content": "npm run build content",
+    "build:all": "npm run build all"
+    
   },
   "devDependencies": {
     "@types/chrome": "^0.0.202",

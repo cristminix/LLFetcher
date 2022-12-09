@@ -4660,8 +4660,8 @@ var store_default = Store;
 
 // src/service_workers/background.ts
 store_default.prepareAppStorage();
-var ENV = "development";
-if (ENV === "production") {
+var ENV = "dev";
+if (ENV === "prod") {
   chrome.action.disable();
 }
 function _isValidCoursePage(url) {
@@ -4887,3 +4887,4 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     }
   }
 });
+//# sourceMappingURL=background.js.map

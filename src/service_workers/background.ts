@@ -2,9 +2,9 @@ import Store from "../libs/store";
 
 Store.prepareAppStorage();
 
-let ENV = 'development';
+let ENV = 'dev';
 
-if(ENV === 'production'){
+if(ENV === 'prod'){
     chrome.action.disable();
 }
 

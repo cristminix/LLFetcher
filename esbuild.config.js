@@ -1,3 +1,5 @@
+import * as child from 'child_process';
+
 import { build } from 'esbuild';
 import esbuildPluginBowserSync from 'esbuild-plugin-browser-sync';
 
@@ -33,7 +35,7 @@ if(isAll){
 
   buildOptions.entryPoints = entryPoints;
 }
-
+buildOptions.outbase = 'src';
 if(isServe){
   buildOptions.watch = {
     onRebuild(error, result) {
@@ -42,6 +44,7 @@ if(isServe){
       }
       else {
         console.log('watch build succeeded:', result);
+        onRebuild(error);
       }
     },
   };
@@ -49,7 +52,17 @@ if(isServe){
     server: 'chrome_extension'
   }))
 }
+function onRebuild(r){
+  const proc = child.exec('./tools/shell_scripts/play_and_reload.sh');
+  proc.on('exit', function (code, signal) {
+    console.log('child process exited with ' +
+                `code ${code} and signal ${signal}`);
+  });
+}
+build(buildOptions).then((r)=>{
+  console.log(r);
+  onRebuild(r);
+});
 
-build(buildOptions);
 // console.log(buildOptions);
 // console.log(all.getEntryPoints());

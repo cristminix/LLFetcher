@@ -13,7 +13,7 @@
         </div>
         <span class="form-helper">Available video format: {{downloadConfig.fmtList.join(', ')}}</span>
         <div class="dl-batch-cnt" v-if="downloadConfig.selectedFmtList">
-            <button class="btn btn-danger" @click="startDownloadVideoResource()"><i class="fa" :class="{'fa-download':downloadState.state==0,'fa-spin fa-spinner':downloadState.state==1}"></i> Download All Video &amp; Caption</button>
+            <button :disabled="downloadState.state==1" class="btn btn-danger" @click="startDownloadVideoResource()"><i class="fa" :class="{'fa-download':downloadState.state==0,'fa-spin fa-spinner':downloadState.state==1,'fa-check':downloadState.state==2}"></i> Download All Video &amp; Caption <span v-if="percentage">({{percentage}}%)</span></button>
           <div>
             <table>
               <tbody>
@@ -71,17 +71,19 @@ export default defineComponent({
     const downloadConfig = ref<DownloadConfig_tableField>();
     const downloadState = ref({ID:0,courseId:0,state:0});
     const logBar=ref<ComponentPublicInstance<typeof LogBar>>();
-    const logServer = ref<typeof LogServer>();
+    const logServer = ref<LogServer>();
     const downloads = ref([]);
+    const percentage = ref(0);
     return{
-      course, exerciseFile, downloadConfig, downloadState,logBar,downloads,logServer
+      course, exerciseFile, downloadConfig, downloadState,logBar,downloads,logServer,percentage
     };
   },
   mounted(){
     this.logServer = new LogServer('DownloadPage');
     this.loadDownloadData();
     setTimeout(()=>{
-      this.downloadState = Store.getDownloadState(this.course.ID);
+      this.downloadState = Store.setDownloadState(this.course.ID,0);
+      // this.downloadState = Store.getDownloadState(this.course.ID);
       const db = Store.db();
       db.subscribe('downloads',(row)=>{
         console.log(row)
@@ -102,13 +104,20 @@ export default defineComponent({
       // console.log(a,b,c);
       // this.downloadVideoState = a.downloadState;
       if(response.cmd == 'download_state'){
+        let state = 1;
+        if(typeof response.percentage != 'undefined'){
+          this.percentage = response.percentage;
+          if(this.percentage == 100){
+            state = 2;
+          }
+          this.downloadState = Store.setDownloadState(this.course.ID,state);
+
+        }
         this.logServer.log(response);
         if(response.success){
           this.logBar.log(response.currentDownload.filename,0)
-          this.downloadState = Store.setDownloadState(this.course.ID,0);
         }else{
-          this.logBar.log(response.currentDownload.filename,1)
-          this.downloadState = Store.setDownloadState(this.course.ID,1);
+          this.logBar.log(response.currentDownload.filename,2)
         }
       }
     },

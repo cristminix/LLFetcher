@@ -25,9 +25,9 @@ const instance  : ComponentPublicInstance<typeof Popup> = app.mount('#popup');
 logServer.log({ component: "Popup.ts" });
 
 attachListener((a:any,b:any,c:any)=>{
-    // if(a.cmd == 'logServer'){
-    //     logServer.log(a.data);
-    // }
+    if(a.cmd == 'logServer'){
+        logServer.log(a.data);
+    }
 
     if(typeof instance.$refs.downloadPage != 'undefined'){
         instance.$refs.downloadPage.recv(a,b,c);

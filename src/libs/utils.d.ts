@@ -9,3 +9,4 @@ export function contentConsoleLog(data : any) : void
 export function attachListener(fn:Function) : void
 export function sendMessageBg(data:Object):void
 export function LogServer(clientName:string) : void;
+

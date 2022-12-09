@@ -5,6 +5,7 @@ function getBuildOptions(isServe){
     bundle: true,
     tsconfig: 'tsconfig.json',
     format: 'esm',
+    sourcemap: true
   }
 
   return buildOptions;

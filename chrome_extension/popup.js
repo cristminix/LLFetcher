@@ -19081,8 +19081,8 @@ Object.assign(lookup2, {
 });
 
 // src/libs/utils.js
-function LogServer(clientName) {
-  this.init = () => {
+var LogServer = class {
+  constructor(clientName) {
     this.clientName = clientName;
     const socket = lookup2("ws://localhost:2002");
     socket.on("connection", (r) => {
@@ -19097,28 +19097,26 @@ function LogServer(clientName) {
       }
     });
     this.socket = socket;
-    return socket;
-  };
-  this.log = (data) => {
+  }
+  log(data) {
     if (typeof data == "object") {
-      data.src = clientName;
+      data.src = this.clientName;
     }
     try {
       this.socket.emit("log", data);
     } catch (e) {
       console.log(e);
     }
-  };
-  this.logWeb = (data) => {
-    data.src = clientName;
+  }
+  logWeb(data) {
+    data.src = this.clientName;
     const data64 = btoa(JSON.stringify(data));
     const url2 = "http://localhost:2002/log?data=" + data64;
     setTimeout(() => {
       fetch(url2);
     }, 100);
-  };
-  this.init();
-}
+  }
+};
 function findItems(searchTerm, source) {
   let __searchTerm__ = searchTerm;
   let __results__ = [];
@@ -20883,22 +20881,24 @@ var _hoisted_113 = {
   key: 0,
   class: "dl-batch-cnt"
 };
-var _hoisted_123 = {
+var _hoisted_123 = ["disabled"];
+var _hoisted_133 = { key: 0 };
+var _hoisted_143 = {
   key: 2,
   class: "dl-playlist-cnt"
 };
-var _hoisted_133 = /* @__PURE__ */ _withScopeId2(() => /* @__PURE__ */ createBaseVNode("label", { class: "form-label" }, "Playlist : ", -1));
-var _hoisted_143 = {
+var _hoisted_153 = /* @__PURE__ */ _withScopeId2(() => /* @__PURE__ */ createBaseVNode("label", { class: "form-label" }, "Playlist : ", -1));
+var _hoisted_163 = {
   key: 3,
   class: "dl-playlist-cnt"
 };
-var _hoisted_153 = /* @__PURE__ */ _withScopeId2(() => /* @__PURE__ */ createBaseVNode("label", { class: "form-label" }, "Helper Bash : ", -1));
-var _hoisted_182 = {
+var _hoisted_173 = /* @__PURE__ */ _withScopeId2(() => /* @__PURE__ */ createBaseVNode("label", { class: "form-label" }, "Helper Bash : ", -1));
+var _hoisted_20 = {
   key: 5,
   class: "exercise-file-cnt"
 };
-var _hoisted_192 = /* @__PURE__ */ _withScopeId2(() => /* @__PURE__ */ createBaseVNode("label", { class: "form-label" }, "Source Repository : ", -1));
-var _hoisted_20 = ["href"];
+var _hoisted_21 = /* @__PURE__ */ _withScopeId2(() => /* @__PURE__ */ createBaseVNode("label", { class: "form-label" }, "Source Repository : ", -1));
+var _hoisted_222 = ["href"];
 function render9(_ctx, _cache) {
   const _component_LogBar = resolveComponent("LogBar");
   return openBlock(), createElementBlock("div", _hoisted_19, [
@@ -20935,14 +20935,16 @@ function render9(_ctx, _cache) {
         createBaseVNode("span", _hoisted_103, "Available video format: " + toDisplayString(_ctx.downloadConfig.fmtList.join(", ")), 1),
         _ctx.downloadConfig.selectedFmtList ? (openBlock(), createElementBlock("div", _hoisted_113, [
           createBaseVNode("button", {
+            disabled: _ctx.downloadState.state == 1,
             class: "btn btn-danger",
             onClick: _cache[3] || (_cache[3] = ($event) => _ctx.startDownloadVideoResource())
           }, [
             createBaseVNode("i", {
-              class: normalizeClass(["fa", { "fa-download": _ctx.downloadState.state == 0, "fa-spin fa-spinner": _ctx.downloadState.state == 1 }])
+              class: normalizeClass(["fa", { "fa-download": _ctx.downloadState.state == 0, "fa-spin fa-spinner": _ctx.downloadState.state == 1, "fa-check": _ctx.downloadState.state == 2 }])
             }, null, 2),
-            createTextVNode(" Download All Video & Caption")
-          ]),
+            createTextVNode(" Download All Video & Caption "),
+            _ctx.percentage ? (openBlock(), createElementBlock("span", _hoisted_133, "(" + toDisplayString(_ctx.percentage) + "%)", 1)) : createCommentVNode("v-if", true)
+          ], 8, _hoisted_123),
           createBaseVNode("div", null, [
             createBaseVNode("table", null, [
               createBaseVNode("tbody", null, [
@@ -20958,35 +20960,35 @@ function render9(_ctx, _cache) {
           ])
         ])) : createCommentVNode("v-if", true)
       ])) : createCommentVNode("v-if", true),
-      _ctx.downloadConfig.selectedFmtList ? (openBlock(), createElementBlock("div", _hoisted_123, [
-        _hoisted_133,
+      _ctx.downloadConfig.selectedFmtList ? (openBlock(), createElementBlock("div", _hoisted_143, [
+        _hoisted_153,
         createBaseVNode("a", {
           onClick: _cache[4] || (_cache[4] = ($event) => _ctx.downloadFile("playlist")),
           href: "javascript:;"
         }, toDisplayString(_ctx.course.slug) + "-" + toDisplayString(_ctx.downloadConfig.selectedFmtList) + ".m3u", 1)
       ])) : createCommentVNode("v-if", true),
-      _ctx.downloadConfig.selectedFmtList ? (openBlock(), createElementBlock("div", _hoisted_143, [
-        _hoisted_153,
+      _ctx.downloadConfig.selectedFmtList ? (openBlock(), createElementBlock("div", _hoisted_163, [
+        _hoisted_173,
         createBaseVNode("a", {
           onClick: _cache[5] || (_cache[5] = ($event) => _ctx.downloadFile("shell_script")),
           href: "javascript:;"
         }, toDisplayString(_ctx.course.slug) + "-" + toDisplayString(_ctx.downloadConfig.selectedFmtList) + "-helper.sh", 1)
       ])) : createCommentVNode("v-if", true),
-      0 ? (openBlock(), createElementBlock("div", _hoisted_16, [
-        _hoisted_17,
+      0 ? (openBlock(), createElementBlock("div", _hoisted_18, [
+        _hoisted_19,
         createBaseVNode("a", {
           onClick: _cache[6] || (_cache[6] = ($event) => _ctx.downloadFile("batch_script")),
           href: "javascript:;"
         }, toDisplayString(_ctx.course.slug) + "-" + toDisplayString(_ctx.downloadConfig.selectedFmtList) + "-helper.bat", 1)
       ])) : createCommentVNode("v-if", true),
-      _ctx.course.sourceCodeRepository ? (openBlock(), createElementBlock("div", _hoisted_182, [
+      _ctx.course.sourceCodeRepository ? (openBlock(), createElementBlock("div", _hoisted_20, [
         createBaseVNode("div", null, [
-          _hoisted_192,
+          _hoisted_21,
           createTextVNode(),
           createBaseVNode("a", {
             target: "_blank",
             href: _ctx.course.sourceCodeRepository
-          }, toDisplayString(_ctx.course.sourceCodeRepository), 9, _hoisted_20)
+          }, toDisplayString(_ctx.course.sourceCodeRepository), 9, _hoisted_222)
         ])
       ])) : createCommentVNode("v-if", true)
     ])) : createCommentVNode("v-if", true),
@@ -21018,6 +21020,7 @@ var __sfc_main9 = defineComponent({
     const logBar = ref();
     const logServer2 = ref();
     const downloads = ref([]);
+    const percentage = ref(0);
     return {
       course,
       exerciseFile,
@@ -21025,14 +21028,15 @@ var __sfc_main9 = defineComponent({
       downloadState,
       logBar,
       downloads,
-      logServer: logServer2
+      logServer: logServer2,
+      percentage
     };
   },
   mounted() {
     this.logServer = new LogServer("DownloadPage");
     this.loadDownloadData();
     setTimeout(() => {
-      this.downloadState = store_default.getDownloadState(this.course.ID);
+      this.downloadState = store_default.setDownloadState(this.course.ID, 0);
       const db2 = store_default.db();
       db2.subscribe("downloads", (row) => {
         console.log(row);
@@ -21049,13 +21053,19 @@ var __sfc_main9 = defineComponent({
     },
     recv(response, b, c) {
       if (response.cmd == "download_state") {
+        let state = 1;
+        if (typeof response.percentage != "undefined") {
+          this.percentage = response.percentage;
+          if (this.percentage == 100) {
+            state = 2;
+          }
+          this.downloadState = store_default.setDownloadState(this.course.ID, state);
+        }
         this.logServer.log(response);
         if (response.success) {
           this.logBar.log(response.currentDownload.filename, 0);
-          this.downloadState = store_default.setDownloadState(this.course.ID, 0);
         } else {
-          this.logBar.log(response.currentDownload.filename, 1);
-          this.downloadState = store_default.setDownloadState(this.course.ID, 1);
+          this.logBar.log(response.currentDownload.filename, 2);
         }
       }
     },
@@ -26436,6 +26446,9 @@ var logServer = new LogServer("popup");
 var instance = app.mount("#popup");
 logServer.log({ component: "Popup.ts" });
 attachListener((a, b, c) => {
+  if (a.cmd == "logServer") {
+    logServer.log(a.data);
+  }
   if (typeof instance.$refs.downloadPage != "undefined") {
     instance.$refs.downloadPage.recv(a, b, c);
   }

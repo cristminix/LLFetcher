@@ -7036,11 +7036,8 @@ function processDownloadQueues() {
     if (currentDownload.status !== true) {
       chromeDownload();
     } else {
-      const cmd = "download_state";
-      const skip = true;
-      chrome.runtime.sendMessage({ cmd, skip, currentDownload }, (response) => {
-      });
-      processDownloadQueues();
+      const success = true;
+      afterProcessDownloadQueues(success);
       return;
     }
   } else {
@@ -7057,14 +7054,17 @@ function setProgress() {
   const peak = downloadSuccessQueues.length;
   const maxPeak = downloadCounts;
   const percentage = Math.ceil(peak / maxPeak * 100);
-  logServer.logWeb(percentage);
+  return percentage;
 }
-function afterProcessDownloadQueues(success) {
+function afterProcessDownloadQueues(success, delta) {
   if (success) {
     downloadSuccessQueues.push(currentDownload);
     store_default.updateDownload(currentDownload.ID, { status: success });
     store_default.db().commit();
-    setProgress();
+    const cmd = "download_state";
+    const percentage = setProgress();
+    chrome.runtime.sendMessage({ cmd, success, delta, currentDownload, percentage }, (response) => {
+    });
     startDownloadQueues();
   } else {
     downloadQueues.push(currentDownload);
@@ -7082,11 +7082,7 @@ function chromeDownload() {
       logServer.logWeb(delta);
       if (typeof delta.state == "object") {
         if (delta.state.current == "complete") {
-          const cmd = "download_state";
-          const success = true;
-          chrome.runtime.sendMessage({ cmd, success, delta, currentDownload }, (response) => {
-          });
-          afterProcessDownloadQueues(true);
+          afterProcessDownloadQueues(true, delta);
         }
       }
       if (typeof delta.error == "object") {
@@ -7137,5 +7133,5 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 });
 setInterval(() => {
   logServer.logWeb("WAKE_UP");
-}, 1e3);
+}, 5e3);
 //# sourceMappingURL=background.js.map

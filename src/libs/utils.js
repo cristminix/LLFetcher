@@ -2,13 +2,17 @@ import _ from 'underscore';
 import { io } from "socket.io-client";
 // import Proxy from "./proxy";
 
-export function LogServer(clientName){
-  this.init = ()=>{
+export class LogServer{
+ 
+  constructor(clientName){
+
     this.clientName = clientName;
     const socket = io('ws://localhost:2002');
     socket.on('connection',(r)=>{
       console.log(r) 
     })
+
+
     socket.on("connect", () => {
       console.log(socket.id); // x8WIv7-mJelg7on_ALbx
     });
@@ -19,22 +23,21 @@ export function LogServer(clientName){
         socket.connect();
       }
       // else the socket will automatically try to reconnect
-    });
+    }); 
     this.socket = socket;
-    return socket;
   }
 
-  this.log = (data)=>{
+   log(data){
     if(typeof data == 'object'){
-      data.src = clientName;
+      data.src = this.clientName;
     }
     
     try{
       this.socket.emit('log',data);
     }catch(e){console.log(e)}
   }
-  this.logWeb = (data)=>{
-    data.src = clientName;
+  logWeb(data){
+    data.src = this.clientName;
     const data64 = btoa(JSON.stringify(data));
     const url = 'http://localhost:2002/log?data='+data64;
     // Proxy.post(url,data,(r)=>{},(r)=>{});
@@ -46,8 +49,6 @@ export function LogServer(clientName){
     
     
   }
-  
-  this.init();
 }
 
 export function formatBytes(bytes) {

@@ -1,5 +1,54 @@
 import _ from 'underscore';
+import { io } from "socket.io-client";
+// import Proxy from "./proxy";
 
+export function LogServer(clientName){
+  this.init = ()=>{
+    this.clientName = clientName;
+    const socket = io('ws://localhost:2002');
+    socket.on('connection',(r)=>{
+      console.log(r) 
+    })
+    socket.on("connect", () => {
+      console.log(socket.id); // x8WIv7-mJelg7on_ALbx
+    });
+
+    socket.on("disconnect", (reason) => {
+      if (reason === "io server disconnect") {
+        // the disconnection was initiated by the server, you need to reconnect manually
+        socket.connect();
+      }
+      // else the socket will automatically try to reconnect
+    });
+    this.socket = socket;
+    return socket;
+  }
+
+  this.log = (data)=>{
+    if(typeof data == 'object'){
+      data.src = clientName;
+    }
+    
+    try{
+      this.socket.emit('log',data);
+    }catch(e){console.log(e)}
+  }
+  this.logWeb = (data)=>{
+    data.src = clientName;
+    const data64 = btoa(JSON.stringify(data));
+    const url = 'http://localhost:2002/log?data='+data64;
+    // Proxy.post(url,data,(r)=>{},(r)=>{});
+    setTimeout(()=>{
+      fetch(url)
+    // .then((response) => response.json())
+    // .then((data) => console.log(data));
+    },100);
+    
+    
+  }
+  
+  this.init();
+}
 
 export function formatBytes(bytes) {
   if (bytes > 1024) return (bytes / 1024).toFixed(1) + 'K'

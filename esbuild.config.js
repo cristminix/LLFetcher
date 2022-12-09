@@ -54,10 +54,16 @@ if(isServe){
 }
 function onRebuild(r){
   const proc = child.exec('./tools/shell_scripts/play_and_reload.sh');
-  proc.on('exit', function (code, signal) {
-    console.log('child process exited with ' +
-                `code ${code} and signal ${signal}`);
+  // proc.on('exit', function (code, signal) {
+  //   console.log('child process exited with ' + `code ${code} and signal ${signal}`);
+  // });
+  proc.stdout.on('data', (data) => {
+    console.log(`\n${data}`);
   });
+  
+  // proc.stderr.on('data', (data) => {
+  //   console.error(`child stderr:\n${data}`);
+  // });
 }
 build(buildOptions).then((r)=>{
   console.log(r);

@@ -47,7 +47,7 @@ import { Section_tableField,Course_tableField, DownloadConfig_tableField, Exerci
 import { ComponentPublicInstance, defineComponent, PropType, ref } from 'vue';
 import Store from 'src/libs/store';
 import { createDownloadFile } from 'src/libs/ext';
-import { sendMessageBg } from 'src/libs/utils';
+import { sendMessageBg,LogServer } from 'src/libs/utils';
 import { Section,Toc } from 'src/types/lynda';
 import LogBar from 'src/popup/components/LogBar.vue';
 export default defineComponent({
@@ -71,12 +71,14 @@ export default defineComponent({
     const downloadConfig = ref<DownloadConfig_tableField>();
     const downloadState = ref({ID:0,courseId:0,state:0});
     const logBar=ref<ComponentPublicInstance<typeof LogBar>>();
+    const logServer = ref<typeof LogServer>();
     const downloads = ref([]);
     return{
-      course, exerciseFile, downloadConfig, downloadState,logBar,downloads
+      course, exerciseFile, downloadConfig, downloadState,logBar,downloads,logServer
     };
   },
   mounted(){
+    this.logServer = new LogServer('DownloadPage');
     this.loadDownloadData();
     setTimeout(()=>{
       this.downloadState = Store.getDownloadState(this.course.ID);
@@ -100,6 +102,7 @@ export default defineComponent({
       // console.log(a,b,c);
       // this.downloadVideoState = a.downloadState;
       if(response.cmd == 'download_state'){
+        this.logServer.log(response);
         if(response.success){
           this.logBar.log(response.currentDownload.filename,0)
           this.downloadState = Store.setDownloadState(this.course.ID,0);

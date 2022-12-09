@@ -1,7 +1,9 @@
 import {isCoursePage,redirectNoAutoPlay} from './function';
 
+// const logServer = new LogServer('content');
+
 chrome.runtime.onMessage.addListener(function (response, sendResponse) {
-	console.log(response);
+	// console.log(response);
 	if(typeof response.event != 'undefined'){
 		if(response.event == 'onHistoryStateUpdated' || response.event == 'onTabUpdated'){
             if(isCoursePage()){
@@ -29,6 +31,10 @@ chrome.runtime.onMessage.addListener(function (response, sendResponse) {
 		}
         else if(response.event == 'ContentConsoleLog'){
             console.log('Popup.log:',response.param);
+        }
+        else if(response.event == 'LogServer'){
+            // logServer.log(response.data);
+            console.log(response.data);
         }
 	}
 });

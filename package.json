@@ -15,20 +15,17 @@
   "author": "cristminix",
   "description": "",
   "scripts": {
+    "log:server" : "bash tools/shell_scripts/start_log_server.sh",
     "serve": "npm run clean:all && node esbuild.config.js all serve",
-    
-    
     "clean:popup": "rimraf ./chrome_extension/popup.{js,map,css} ./chrome_extension/{*.ttf,*.woff,*.woff2,*.otf,*.svg,*.eot}",
     "clean:background": "rimraf ./chrome_extension/background.*",
     "clean:content": "rimraf ./chrome_extension/{content.js,content.js.map,inject.*,create_data_codes.*}",
-    "clean:all" : "npm run clean:background && npm run clean:content && npm run clean:popup",
-    
+    "clean:all": "npm run clean:background && npm run clean:content && npm run clean:popup",
     "build:popup": "npm run build popup",
-    "build" : "node esbuild.config.js",
+    "build": "node esbuild.config.js",
     "build:background": "npm run build background",
     "build:content": "npm run build content",
     "build:all": "npm run build all"
-    
   },
   "devDependencies": {
     "@types/chrome": "^0.0.202",
@@ -66,5 +63,8 @@
   },
   "pre-commit": [
     "lint"
-  ]
+  ],
+  "dependencies": {
+    "socket.io-client": "^4.5.4"
+  }
 }

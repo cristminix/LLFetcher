@@ -1,5 +1,24 @@
+// import { LogServer } from "../libs/utils";
 import Store from "../libs/store";
+const logServer = {
+    logContent:(data)=>{
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs ) {
+            try{
+                const tab = tabs[0];
+                chrome.tabs.sendMessage(tab.id as number, {event: 'LogServer',data}, (r) => {});
+            }catch(e){}
+        });
+    },
+    logWeb:(data)=>{
+        // if(typeof data !== 'object'){
+        //     data = {data};
+        // }
+        logServer.logContent(data);
+        // chrome.runtime.sendMessage({cmd: "logServer",data});
+    }
+};
 
+ 
 Store.prepareAppStorage();
 
 let ENV = 'dev';
@@ -7,6 +26,9 @@ let ENV = 'dev';
 if(ENV === 'prod'){
     chrome.action.disable();
 }
+
+logServer.logWeb('LogServer initialize');
+
 
 function _isValidCoursePage  (url : string) : boolean {
     const urlPathArray = url.split('?')[0].split("/").filter(item => item);
@@ -118,12 +140,12 @@ function populateDownloadQueues(fn){
             const dl = downloadConfigs[idx];
             let download = Store.getDownload(dl.tocId,dl.filename);
             if(download){
-                console.log('updateDownload');
+                logServer.logWeb('updateDownload');
                 download.url = dl.url;
                 download.filename = dl.filename;
                 download = Store.updateDownload(download.ID,download);
             }else{
-                console.log('createDownload');
+                logServer.logWeb('createDownload');
                 download = Store.createDownload(dl.url,dl.filename,dl.tocId,dl.courseId);
             } 
             downloadQueues.push(download);
@@ -177,9 +199,10 @@ function setProgress(){
     const peak = downloadSuccessQueues.length;
     const maxPeak = downloadCounts;
     const percentage = Math.ceil(peak / maxPeak * 100);
-    console.log(percentage);
+    logServer.logWeb(percentage);
 }
 function afterProcessDownloadQueues(success?:boolean){
+    // logServer.logWeb(currentDownload);
     if(success){
         downloadSuccessQueues.push(currentDownload);
         Store.updateDownload(currentDownload.ID,{status:success});
@@ -195,13 +218,13 @@ function chromeDownload(){
     // return;
     if(!downloadHandlerSet){
         chrome.downloads.onCreated.addListener((item)=>{
-            console.log(item)
+            logServer.logWeb(item)
         });
         chrome.downloads.onErased.addListener((downloadId)=>{
-            console.log(downloadId)
+            logServer.logWeb(downloadId)
         });
         chrome.downloads.onChanged.addListener((delta)=>{
-            console.log(delta)
+            logServer.logWeb(delta)
             if(typeof delta.state == 'object'){
                 if(delta.state.current == 'complete'){
                     const cmd = 'download_state';
@@ -223,7 +246,9 @@ function chromeDownload(){
             url : currentDownload.url
         };
         chrome.downloads.download(opt,(downloadId)=>{
-            console.log(downloadId);
+            const cmd = 'download_state';
+            chrome.runtime.sendMessage({cmd,currentDownload},(response)=>{});
+            logServer.logWeb(downloadId);
         });
         // afterProcessDownloadQueues(true);
     // },1000);
@@ -231,7 +256,8 @@ function chromeDownload(){
 }
 function onDownloadError(delta){
     
-
+    
+    
     const cmd = 'download_state';
     const success = false;
     chrome.runtime.sendMessage({cmd,delta,success,currentDownload},(response)=>{});
@@ -244,11 +270,13 @@ function onDownloadError(delta){
 }
 chrome.runtime.onMessage.addListener((msg,sender,sendResponse)=>{
     if(msg.cmd == 'start_download'){
+        
+        logServer.logWeb(msg);
         if(queueStarted){
-            console.log('queue is running:skipped');
+            logServer.logWeb('queue is running:skipped');
             return;
         }
-        console.log(msg)
+        logServer.logWeb(msg)
         if(downloadQueues.length == 0){
             populateDownloadQueues((queues)=>{
                 downloadCounts = queues.length;
@@ -261,3 +289,5 @@ chrome.runtime.onMessage.addListener((msg,sender,sendResponse)=>{
         
     }
 });
+
+setInterval(()=>{logServer.logWeb('WAKE_UP');},1000)

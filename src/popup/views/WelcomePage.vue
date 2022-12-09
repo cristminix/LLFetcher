@@ -28,7 +28,7 @@ import CoursePage from 'src/popup/views/CoursePage.vue';
 export default defineComponent({
   setup() {
     const nav = ref('welcome');
-    const greeting = ref('Welcome to LLFetcher, what do you want to do ?');
+    const greeting = ref('Welcome to LLFetcher 1.0.1, what do you want to do ?');
     const lastCourseList = ref<Course_tableField[]>([]);
     const fetchBtnState = ref(0);
     return {

@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["../../src/content_scripts/inject.ts"],
-  "sourcesContent": ["function injectScript(file_path : string, tag : string) {\r\n    let node = document.getElementsByTagName(tag)[0];\r\n    let script = document.createElement('script');\r\n    script.setAttribute('type', 'text/javascript');\r\n    script.setAttribute('src', file_path);\r\n    node.appendChild(script);\r\n}\r\n\r\ninjectScript(chrome.runtime.getURL('create_data_codes.js'), 'body');"],
-  "mappings": ";AAAA,SAAS,aAAa,WAAoB,KAAc;AACpD,MAAI,OAAO,SAAS,qBAAqB,GAAG,EAAE;AAC9C,MAAI,SAAS,SAAS,cAAc,QAAQ;AAC5C,SAAO,aAAa,QAAQ,iBAAiB;AAC7C,SAAO,aAAa,OAAO,SAAS;AACpC,OAAK,YAAY,MAAM;AAC3B;AAEA,aAAa,OAAO,QAAQ,OAAO,sBAAsB,GAAG,MAAM;",
-  "names": []
-}

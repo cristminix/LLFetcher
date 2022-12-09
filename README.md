@@ -5,7 +5,7 @@
 To install this chrome extension manually we recommend you download zip file in from the release page, since this page created.
 
 # **Downloading and installing this extension**
-1. Grab in this release file [LLFetcher-1.0.0.zip](https://github.com/cristminix/LLFetcher/releases/download/v1.0.0/LLFetcher-1.0.0.zip) then download to whatever directory you wants.
+1. Grab in this release file [LLFetcher-1.0.1.zip](https://github.com/cristminix/LLFetcher/releases/download/v1.0.1/LLFetcher-1.0.1.zip) then download to whatever directory you wants.
 2. Extract / Unzip this file 
 3. Open google chrome
 4. Go to settings -->  extensions

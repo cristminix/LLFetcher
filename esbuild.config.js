@@ -51,6 +51,9 @@ if(isServe){
   buildOptions.plugins.push(esbuildPluginBowserSync({
     server: 'chrome_extension'
   }))
+}else{
+  buildOptions.sourcemap = false;
+  buildOptions.minify = true;
 }
 function onRebuild(r){
   const proc = child.exec('./tools/shell_scripts/play_and_reload.sh');

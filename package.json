@@ -15,14 +15,15 @@
   "author": "cristminix",
   "description": "",
   "scripts": {
-    "serve": "npm run clean && node esbuild.config.js serve",
-    "build:popup": "node esbuild.config.popup.js",
+    "serve": "npm run clean:all && node esbuild.config.js all serve",
+    "clean:all" : "npm run clean:background && npm run clean:content && npm run clean:popup",
+    "build:popup": "npm run clean:popup && node esbuild.config.js popup",
     "build:all": "npm run build:popup && npm run build:background && npm run build:content",
-    "clean:popup": "rimraf ./chrome_extension/popup.js",
-    "clean:background": "rimraf ./chrome_extension/background.js",
-    "clean:content": "rimraf ./chrome_extension/content.js ./chrome_extension/function.js ./chrome_extension/inject.js",
-    "build:background": "esbuild --bundle ./src/service_workers/background.ts --outdir=./chrome_extension --sourcemap --minify",
-    "build:content": "esbuild --bundle ./src/content_scripts/content.ts --outdir=./chrome_extension --sourcemap --minify&&esbuild --bundle ./src/content_scripts/function.ts --outdir=./chrome_extension --sourcemap --minify&&esbuild --bundle ./src/content_scripts/inject.ts --outdir=./chrome_extension --sourcemap --minify && esbuild --bundle ./src/content_scripts_inject/create_data_codes.js --outdir=./chrome_extension --sourcemap --minify"
+    "clean:popup": "rimraf ./chrome_extension/{popup.js,popup.js.map,popup.css,popup.css.map} ./chrome_extension/{*.ttf,*.woff,*.woff2,*.otf,*.svg,*.eot}",
+    "clean:background": "rimraf ./chrome_extension/{background.js,background.js.map}",
+    "clean:content": "rimraf ./chrome_extension/{content_scripts,content_scripts_inject}",
+    "build:background": "npm run clean:background && node esbuild.config.js background",
+    "build:content": "npm run clean:content && node esbuild.config.js content"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.202",

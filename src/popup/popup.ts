@@ -11,7 +11,7 @@ import 'src/styles/popup.css';
 // import hljs from 'highlight.js/lib/core';
 // import javascript from 'highlight.js/lib/languages/javascript';
 // import hljsVuePlugin from "@highlightjs/vue-plugin";
-import 'bootstrap/dist/js/bootstrap'
+import 'bootstrap/dist/js/bootstrap.esm'
 
 import { attachListener } from '../libs/utils';
 

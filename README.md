@@ -41,7 +41,7 @@ Currently this extension development requirement are :
 4. `ffplay` for playing sound on script update
 5. `curl` used for reloading extension
 6. modified version from original [`chrome-stay-fresh`](https://github.com/ahw/chrome-stay-fresh) for auto reloading extension
-7. `LogServer` build with `nodejs express` with intergrated `socket.io` and great project named [`eruda`](https://github.com/liriliri/eruda)
+7. `LogServer` built with `nodejs express` with intergrated `socket.io` and great project [`eruda`](https://github.com/liriliri/eruda)
 8. time and patient
 
 

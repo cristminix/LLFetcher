@@ -3802,7 +3802,7 @@ Object.assign(lookup2, {
 var LogServer = class {
   constructor(clientName) {
     this.clientName = clientName;
-    const socket = lookup2("ws://localhost:2002");
+    const socket = lookup2("ws://localhost:2022");
     socket.on("connection", (r) => {
       console.log(r);
     });

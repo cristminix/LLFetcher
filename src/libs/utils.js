@@ -7,7 +7,7 @@ export class LogServer{
   constructor(clientName){
 
     this.clientName = clientName;
-    const socket = io('ws://localhost:2002');
+    const socket = io('ws://localhost:2022');
     socket.on('connection',(r)=>{
       console.log(r) 
     })

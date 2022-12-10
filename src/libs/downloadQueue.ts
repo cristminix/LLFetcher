@@ -1,5 +1,4 @@
 import { App_tableField, Course_tableField, DownloadConfig_tableField, Downloads_tableField, Section_tableField,DownloadState_tableField } from "src/types/tableFields";
-import { max } from "underscore";
 import Store from "../libs/store";
 import { myLogServer } from "../libs/utils";
 

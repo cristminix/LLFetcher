@@ -19084,7 +19084,7 @@ Object.assign(lookup2, {
 var LogServer = class {
   constructor(clientName) {
     this.clientName = clientName;
-    const socket = lookup2("ws://localhost:2002");
+    const socket = lookup2("ws://localhost:2022");
     socket.on("connection", (r) => {
       console.log(r);
     });
@@ -19878,7 +19878,7 @@ var __sfc_main = defineComponent({
   },
   setup(props) {
     const nav = ref(props.nav);
-    const enableOption = ref(true);
+    const enableOption = ref(false);
     return { nav, enableOption };
   },
   methods: {
@@ -20798,28 +20798,30 @@ var __sfc_main8 = defineComponent({
       return true;
     },
     loadCourseData() {
-      if (!this.isValidCourse()) {
-        const appInfo = store_default.getAppInfo();
-        if (!appInfo) {
-          return;
+      store_default.onReady(() => {
+        if (!this.isValidCourse()) {
+          const appInfo = store_default.getAppInfo();
+          if (!appInfo) {
+            return;
+          }
+          this.course = store_default.getCourse(appInfo.lastCourseSlug);
+          if (!this.course) {
+            return;
+          }
         }
-        this.course = store_default.getCourse(appInfo.lastCourseSlug);
-        if (!this.course) {
-          return;
-        }
-      }
-      store_default.setAppState(1, this.course.slug);
-      const sections = store_default.getSectionsByCourseId(this.course.ID);
-      sections.map((sectionTmp) => {
-        let section = sectionTmp;
-        section.items = store_default.getTocsBySectionId(sectionTmp.ID);
-        this.sections.push(section);
-      });
-      this.course.authorIds.map((ID) => {
-        const author = store_default.getAuthorById(ID);
-        if (author) {
-          this.authors.push(author);
-        }
+        store_default.setAppState(1, this.course.slug);
+        const sections = store_default.getSectionsByCourseId(this.course.ID);
+        sections.map((sectionTmp) => {
+          let section = sectionTmp;
+          section.items = store_default.getTocsBySectionId(sectionTmp.ID);
+          this.sections.push(section);
+        });
+        this.course.authorIds.map((ID) => {
+          const author = store_default.getAuthorById(ID);
+          if (author) {
+            this.authors.push(author);
+          }
+        });
       });
     },
     updateTocItems(exerciseFile, toc, sectionId) {

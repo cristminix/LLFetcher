@@ -41,11 +41,13 @@ export default defineComponent({
       // this.$parent.log(`AppState:${appInfo.state}`);
       
       const lastCourses = Store.getLastCourses();
-      if(lastCourses.length > 0){
-        this.lastCourseList = [];
-        lastCourses.map((course:Course_tableField)=>{
-            this.lastCourseList.push(course);
-        });
+      if(lastCourses){
+        if(lastCourses.length > 0){
+          this.lastCourseList = [];
+          lastCourses.map((course:Course_tableField)=>{
+              this.lastCourseList.push(course);
+          });
+        }
       }
       
     },1259);

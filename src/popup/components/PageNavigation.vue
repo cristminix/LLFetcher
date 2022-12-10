@@ -4,8 +4,7 @@
         <li @click="onNavClick('welcome')" class="btn btn-sm btn-primary" :class="{active : nav=='welcome'}">Welcome</li>
         <li @click="onNavClick('course')" class="btn btn-sm btn-primary" :class="{active : nav=='course'}">Course</li>
         <li @click="onNavClick('downloads')" class="btn btn-sm btn-primary" :class="{active : nav=='downloads'}">Downloads</li>
-        <li v-if="0" @click="onNavClick('help')" class="btn btn-sm btn-primary" :class="{active : nav=='help'}">Help</li>
-        <li v-if="0" @click="onNavClick('about')" class="btn btn-sm btn-primary" :class="{active : nav=='about'}">About</li>
+        <li v-if="enableOption" @click="onNavClick('option')" class="btn btn-sm btn-primary" :class="{active : nav=='option'}">Option</li>
     </ul>
   </div>
 </template>
@@ -22,8 +21,8 @@ export default defineComponent({
   },  
   setup(props) {
     const nav = ref(props.nav);
-
-    return {nav};
+    const enableOption = ref(true);
+    return {nav,enableOption};
   },
   methods:{
     onNavClick(target : NavTerm){

@@ -1,6 +1,6 @@
 <template>
   <div class="course-page page">
-    <div class="fsqc">
+    <div class="fsqc" v-if="course">
       <FetchSectionQueue ref="fetchSectionQueue"/>
     </div>
     <div class="course" v-if="course">
@@ -40,6 +40,9 @@ import {makeTitle} from 'src/libs/utils';
 import $ from 'jquery';
 import Store from "src/libs/store";
 import { Course_tableField,Author_tableField,Section_tableField,ExerciseFile_tableField,Toc_tableField } from 'src/types/tableFields';
+import {LogServer} from 'src/libs/utils';
+
+const logServer = new LogServer('src/popup/CoursePage.vue');
 
 export default defineComponent({
   components:{
@@ -90,8 +93,14 @@ export default defineComponent({
       // console.log(this.course)
       if(!this.isValidCourse()){
         const appInfo = Store.getAppInfo();
+        if(!appInfo){
+          return;
+        }
         // console.log(appInfo)
         this.course = Store.getCourse(appInfo.lastCourseSlug);
+        if(!this.course){
+          return;
+        }
       }
       Store.setAppState(1,this.course.slug);
       const sections = Store.getSectionsByCourseId(this.course.ID);

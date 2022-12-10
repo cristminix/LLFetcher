@@ -8,5 +8,13 @@ export function sendMessageSaveDataCodesToLS() : void
 export function contentConsoleLog(data : any) : void
 export function attachListener(fn:Function) : void
 export function sendMessageBg(data:Object):void
-export function LogServer(clientName:string) : void;
-
+declare class LogServer{
+	constructor(clientName:string)
+	log(data:any,lineNumber?:number)
+	logWeb(data:any,lineNumber?:number)
+}
+export interface MyLogServer{
+	logContent(data:any,lineNumber?:number)
+	logWeb(data:any,lineNumber?:number)
+}
+export function myLogServer() : MyLogServer

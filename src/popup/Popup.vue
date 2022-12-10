@@ -4,8 +4,7 @@
     <CoursePage @update="onCourseUpdate($event)" v-if="nav=='course'" :course="course"  ref="coursePage"/>
     <DownloadPage v-if="nav=='downloads'" ref="downloadPage"/>
     <HelpPage v-if="nav=='help'"/>
-    <AboutPage v-if="nav=='about'"/>
-    <AboutPage v-if="nav=='about'"/>
+    <OptionPage v-if="nav=='option'"/>
     <PageNavigation @update="onNavUpdate($event)" :nav="nav" ref="pageNavigation"/>
 
   </div>
@@ -22,8 +21,12 @@ import CoursePage from './views/CoursePage.vue'
 import DownloadPage from './views/DownloadPage.vue'
 import AboutPage from './views/AboutPage.vue'
 import HelpPage from './views/HelpPage.vue'
+import OptionPage from './views/OptionPage.vue'
 import Store from '../libs/store';
 import { App_tableField,Course_tableField } from '../types/tableFields';
+import {LogServer} from '../libs/utils';
+
+const logServer = new LogServer('src/popup/Popup.vue');
 
 export default defineComponent({
   name: 'Popup',
@@ -33,7 +36,8 @@ export default defineComponent({
     CoursePage,
     DownloadPage,
     AboutPage,
-    HelpPage
+    HelpPage,
+    OptionPage
   },
   setup(){
     const nav = ref<NavTerm>('welcome');
@@ -57,17 +61,28 @@ export default defineComponent({
     // console.log('App Entry Point Start here...');
 
     setTimeout(()=>{ 
-      const db = Store.db();
-      // console.log(db);
-      this.app = Store.getAppState();
-      // console.log(this.app);
-      if(this.app.nav !== ''){
-        this.nav = this.pageNavigation.nav = this.app.nav as NavTerm;
-      }
-      // db.subscribe('app',(row:App_tableField)=>{
-      //   this.app = row;
-      //   this.log(`AppState:${row.state}`);
-      // });
+      Store.checkFreshInstall((freshInstall:boolean)=>{
+        logServer.log(`check fresh install : ${freshInstall}`,65);
+        if(freshInstall){
+          
+          Store.prepareAppStorage();
+        }else{
+          const db = Store.db();
+          // console.log(db);
+          this.app = Store.getAppState();
+          // console.log(this.app);
+          if(this.app){
+            if(this.app.nav !== ''){
+              this.nav = this.pageNavigation.nav = this.app.nav as NavTerm;
+            }
+          }
+          // db.subscribe('app',(row:App_tableField)=>{
+          //   this.app = row;
+          //   this.log(`AppState:${row.state}`);
+          // });
+        }
+      })
+      
      
     },1200)
 

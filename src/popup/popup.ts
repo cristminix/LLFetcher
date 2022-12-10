@@ -17,12 +17,12 @@ import { attachListener,LogServer } from '../libs/utils';
 
 // hljs.registerLanguage('javascript', javascript);
 const app = createApp(Popup);
-const logServer = new LogServer('popup');
+const logServer = new LogServer('src/popup/popup.ts');
 // logServer.init();
 // app.use(hljsVuePlugin);
 const instance  : ComponentPublicInstance<typeof Popup> = app.mount('#popup');
 
-logServer.log({ component: "Popup.ts" });
+logServer.log({ component: "Popup.ts" },25);
 
 attachListener((a:any,b:any,c:any)=>{
     if(a.cmd == 'logServer'){

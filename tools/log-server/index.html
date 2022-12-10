@@ -33,8 +33,12 @@
     let debuggerConsole = eruda.get('console');
 
     const socket = io('ws://localhost:2002');
-    socket.on('_message_to_debugger_',(data)=>{
-      debuggerConsole.log(data)
+    socket.on('_message_to_debugger_',(consoleArgs)=>{
+      if(typeof consoleArgs.src == 'string'){
+        debuggerConsole.log(`${consoleArgs.src}:${consoleArgs.lineNumber}:`,consoleArgs.data)
+      }else{
+        debuggerConsole.log(consoleArgs);
+      }
     })
     
 </script>

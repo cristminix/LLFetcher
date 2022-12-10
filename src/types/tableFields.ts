@@ -54,22 +54,37 @@ interface DownloadConfig_tableField{
 	selectedFmtList : string
 }
 interface Downloads_tableField{
+   
 	ID : number,
 	tocId : number,
 	downloadId : number,
-	filename : number,
+	filename : string,
+	url: string,
 	progress : number,
-	status : string
+	status : boolean,
+	exclude : boolean
+
 }
 interface App_tableField{
 	ID : number,
 	version : string,
 	state : number,
 	lastCourseSlug : string,
-	nav : string
+	nav : string,
+	freshInstall : boolean
+}
+interface DownloadState_tableField{
+	ID : number,
+	courseId : number,
+	state : number,
+	total : number,
+	successIds : number[],
+	failsIds : number[],
+	lastTocId : number
 }
 
 export {
 	Course_tableField,ExerciseFile_tableField,Author_tableField,Section_tableField,
-	Toc_tableField,StreamLocation_tableField,Downloads_tableField,DownloadConfig_tableField,App_tableField 
+	Toc_tableField,StreamLocation_tableField,Downloads_tableField,DownloadConfig_tableField,App_tableField,
+	DownloadState_tableField 
 }

@@ -9,16 +9,19 @@ class MyLS {
     subscribers = {};
     lastTable:string = '';
     lastTablePk:number;
-
+    fresh : boolean;
     constructor(db:string,engine:string){
         this.db = new chromeStorageDB(db,engine);
+        this.fresh = true;
     }
     subscribe(table:string,fn:Function){
         this.subscribers[table] = fn;
     }
 
     update(table: string, query: chromeStorageDB_dynamicFields | chromeStorageDB_callbackFilter, update?: chromeStorageDB_callback):number{
-
+        if(this.fresh){
+            return null;
+        }
         const ret = this.db.update(table,query,update);
         this.lastTable = table;
         this.lastTablePk = ret;
@@ -27,15 +30,27 @@ class MyLS {
     }
     
     insert(a:string,b){
+        if(this.fresh){
+            return null;
+        }
         return this.db.insert(a,b);
     }
     queryAll(a:string,b:chromeStorageDB_queryParams){
+        if(this.fresh){
+            return [];
+        }
         return this.db.queryAll(a,b);
     }
     getRow(table:string,ID:number){
+        if(this.fresh){
+            return null;
+        }
         return this.db.queryAll(table,{ID} as chromeStorageDB_queryParams)[0];
     }
     commit():boolean{
+        if(this.fresh){
+            return null;
+        }
         const ret = this.db.commit();
 
         if(this.lastTable !== ''){
@@ -55,10 +70,19 @@ class MyLS {
         return this.db.isNew(fn);
     }
     createTable(a:string,b:string[]){
+        if(this.fresh){
+            return null;
+        }
         return this.db.createTable(a,b);
     }
     tableExists(table:string){
+        if(this.fresh){
+            return null;
+        }
         return this.db.tableExists(table);
+    }
+    setFresh(fresh:boolean){
+        this.fresh = fresh
     }
 
 }
@@ -71,29 +95,38 @@ class Store{
         }
         return Store.__db__;
     }
+    static getSchema(){
+        const schema = {
+            course : ["title", "slug", "duration", "sourceCodeRepository", "description",'authorIds'],
+            author : ["name","slug","biography", "shortBiography","courseIds"],
+            exerciseFile : ["courseId","name","url","size"],
+            section : ["courseId","slug","title"],
+            toc : ["sectionId","title","slug","url","duration","captionUrl","captionFmt","streamLocationIds"],
+            streamLocation : ["tocId","fmt","url"],
+            downloadConfig : ["courseId","fmtList","selectedFmtList"],
+            downloads : ["tocId","courseId","downloadId","filename","url","status","exclude"],
+            downloadState : ["courseId","state","total","success","fails","lastTocId"],
+            app: ["version","state","lastCourseSlug","nav","freshInstall"]
+        };
+        return this.getSchema;
+    }
+    static initTables(){
+        const db = Store.db();
+        const schema = Store.getSchema();
+        Object.keys(schema).forEach((table)=>{
+            if(!db.tableExists(table)){
+                db.createTable(table, schema[table]);
+
+            }
+        });
+        db.commit();
+        Store.db().setFresh(false);
+    }
     static init(){
         const db = Store.db();
         db.isNew((isNew:boolean)=>{
             if(isNew){
-                const schema = {
-                    course : ["title", "slug", "duration", "sourceCodeRepository", "description",'authorIds'],
-                    author : ["name","slug","biography", "shortBiography","courseIds"],
-                    exerciseFile : ["courseId","name","url","size"],
-                    section : ["courseId","slug","title"],
-                    toc : ["sectionId","title","slug","url","duration","captionUrl","captionFmt","streamLocationIds"],
-                    streamLocation : ["tocId","fmt","url"],
-                    downloadConfig : ["courseId","fmtList","selectedFmtList"],
-                    downloads : ["tocId","courseId","downloadId","filename","url","status"],
-                    downloadState : ["courseId","state","total","success","fails"],
-                    app: ["version","state","lastCourseSlug","nav"]
-                };
-                Object.keys(schema).forEach((table)=>{
-                    if(!db.tableExists(table)){
-                        db.createTable(table, schema[table]);
-
-                    }
-                });
-                db.commit();
+                Store.initTables();
             }
         });
     }
@@ -117,6 +150,9 @@ class Store{
         const db = Store.db();
         if(typeof slug === 'undefined'){
             const appState = Store.getAppState();
+            if(!appState){
+                return [];
+            }
             slug = appState.lastCourseSlug;
 
         }
@@ -622,9 +658,23 @@ class Store{
        
         return downloads;
     }
+    static clearStorage(){
+        chrome.storage.local.remove('db_learning');
+        Store.db().setFresh(true);
+
+    }
+    static checkFreshInstall(fn:Function){
+        chrome.storage.local.get('db_learning',(db)=>{
+            console.log(db);
+            let isFreshInstall = false;
+            if(typeof db.db_learning == 'object'){
+                if(typeof db.db_learning.app != 'object'){
+                    isFreshInstall = false;
+                }
+            }
+            fn(isFreshInstall,db);
+        });
+    }
 }
-
-Store.prepareAppStorage();
-
 
 export default Store;

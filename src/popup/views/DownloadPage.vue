@@ -82,6 +82,9 @@ export default defineComponent({
     this.logServer = new LogServer('DownloadPage');
     this.loadDownloadData();
     setTimeout(()=>{
+      if(!this.course){
+          return;
+        }
       this.downloadState = Store.setDownloadState(this.course.ID,0);
       // this.downloadState = Store.getDownloadState(this.course.ID);
       const db = Store.db();
@@ -95,7 +98,10 @@ export default defineComponent({
   },
   methods:{
     startDownloadVideoResource(){
-      sendMessageBg({cmd:'start_download'});
+      sendMessageBg({
+        cmd:'start_download',
+        course : this.course
+      });
       this.downloadState = Store.setDownloadState(this.course.ID,1);
       
     },
@@ -154,6 +160,9 @@ export default defineComponent({
     loadDownloadData(){
       if(!this.isValidCourse()){
         const appInfo = Store.getAppInfo();
+        if(!appInfo){
+          return;
+        }
         // console.log(appInfo)
         this.course = Store.getCourse(appInfo.lastCourseSlug);
       }

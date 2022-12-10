@@ -27,13 +27,13 @@ export class LogServer{
     this.socket = socket;
   }
 
-   log(data){
-    if(typeof data == 'object'){
-      data.src = this.clientName;
-    }
+   log(data,lineNumber){
+    const src = this.clientName;
+    let consoleArgs = {data,src,lineNumber};
+    
     
     try{
-      this.socket.emit('log',data);
+      this.socket.emit('log',consoleArgs);
     }catch(e){console.log(e)}
   }
   logWeb(data){
@@ -175,4 +175,25 @@ export function attachListener(fn){
 
 export function sendMessageBg(data){
   chrome.runtime.sendMessage(data,function(response){});
+}
+
+export function myLogServer(){
+  const logServer = {
+      logContent:(data)=>{
+          chrome.tabs.query({active: true, currentWindow: true}, function(tabs ) {
+              try{
+                  const tab = tabs[0];
+                  chrome.tabs.sendMessage(tab.id, {event: 'LogServer',data}, (r) => {});
+              }catch(e){}
+          });
+      },
+      logWeb:(data)=>{
+          // if(typeof data !== 'object'){
+          //     data = {data};
+          // }
+          logServer.logContent(data);
+          // chrome.runtime.sendMessage({cmd: "logServer",data});
+      }
+  };
+  return logServer;
 }

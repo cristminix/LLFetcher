@@ -43,3 +43,5 @@ Currently this extension development requirement are :
 5. advance knowledge about `shell`, `javascript`, `typescript`, `nodejs`, `vuejs`, `esbuild`, `chrome extension`
 
 
+# Donate
+If you found this stuff usefull, and you have some money to buy me some coffe or to make my daughter happy please give me some dollar on my paypal account `cristminix@gmail.com` cheers.

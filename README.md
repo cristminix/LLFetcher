@@ -34,6 +34,7 @@ To be able to successfully using this stuff you might prepare for high and stabl
 # Extensions development
 
 Currently this extension development requirement are :
+
 0. `nodejs >= v15` `Vue >= 3.0` , `esbuild`, a little `typescript`
 1. `bash` shell
 2. `ffplay` for playing sound on webpack

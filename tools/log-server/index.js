@@ -24,7 +24,7 @@ io.on("connection", (socket) => {
   socket.on("log", (data, callback) => {
     io.sockets.emit('_message_to_debugger_',data);
   });
-  io.sockets.emit('_message_to_debugger_',`Welcome to log-server ${socket.id}`);
+  // io.sockets.emit('_message_to_debugger_',`Welcome to log-server ${socket.id}`);
 });
 
 server.listen(2002, () => {

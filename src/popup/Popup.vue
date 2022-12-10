@@ -60,34 +60,54 @@ export default defineComponent({
   mounted(){
     // console.log('App Entry Point Start here...');
 
-    setTimeout(()=>{ 
+    chrome.storage.local.get('db_learning',(storage)=>{
+      logServer.log(storage,65);
+    });
+    const self = this;
+    // setTimeout(()=>{
       Store.checkFreshInstall((freshInstall:boolean)=>{
-        logServer.log(`check fresh install : ${freshInstall}`,65);
-        if(freshInstall){
-          
-          Store.prepareAppStorage();
-        }else{
-          const db = Store.db();
-          // console.log(db);
-          this.app = Store.getAppState();
-          // console.log(this.app);
-          if(this.app){
-            if(this.app.nav !== ''){
-              this.nav = this.pageNavigation.nav = this.app.nav as NavTerm;
-            }
-          }
-          // db.subscribe('app',(row:App_tableField)=>{
-          //   this.app = row;
-          //   this.log(`AppState:${row.state}`);
-          // });
-        }
-      })
       
-     
-    },1200)
-
+      if(freshInstall){
+        
+        Store.prepareAppStorage((app)=>{
+          // logServer.log(app,73);
+          this.init();
+        });
+      }else{
+        
+        this.init();
+      }
+      // logServer.log(`check fresh install : ${freshInstall}`,80);
+    })
+    
+    // },1000);
+    
+    
   },
   methods:{
+    init(){
+      Store.onReady(()=>{
+        this.app = Store.getAppState();
+        if(this.app){
+          if(this.app.nav !== ''){
+            this.nav = this.pageNavigation.nav = this.app.nav as NavTerm;
+          }
+        }
+        logServer.log(this.app,96);
+      });
+
+    
+ 
+     
+      
+      // logServer.log(this.app,97);
+      
+      
+      // db.subscribe('app',(row:App_tableField)=>{
+      //   this.app = row;
+      //   this.log(`AppState:${row.state}`);
+      // });
+    },
     log(message:string){
       // this.message = message;
     },

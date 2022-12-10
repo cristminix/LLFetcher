@@ -28,6 +28,20 @@ export class LogServer{
   }
 
    log(data,lineNumber){
+    // const e = new Error();
+    // const regex = /\((.*):(\d+):(\d+)\)$/
+    // const match = regex.exec(e.stack.split("\n"));
+    // // console.log(e);
+    // console.log(e.stack);
+    // console.log(match);
+
+    // return;
+    // consoleArgs = {
+    //   filepath: match[1],
+    //   line: match[2],
+    //   column: match[3],
+    //   data
+    // };
     const src = this.clientName;
     let consoleArgs = {data,src,lineNumber};
     

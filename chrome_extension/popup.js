@@ -12826,7 +12826,7 @@ var chromeStorageDB = class {
     this.sync(() => {
       if (!(this.db && this.db.tables && this.db.data)) {
         if (!this.validateName(db_name)) {
-          error("The name '" + db_name + "' contains invalid characters");
+          this.error("The name '" + db_name + "' contains invalid characters");
         } else {
           this.db = { tables: {}, data: {} };
           this.commit();
@@ -13102,7 +13102,7 @@ var chromeStorageDB = class {
     return JSON.stringify(this.db);
   }
   error(msg) {
-    throw new Error(msg);
+    console.error(msg);
   }
   clone(obj) {
     var new_obj = {};
@@ -19214,6 +19214,7 @@ function sendMessageBg(data) {
 }
 
 // src/libs/store.ts
+var logServer = new LogServer("src/libs/store.ts");
 var MyLS = class {
   db;
   subscribers = {};
@@ -19222,24 +19223,29 @@ var MyLS = class {
   fresh;
   constructor(db2, engine) {
     this.db = new chromeStorageDB(db2, engine);
-    this.fresh = true;
+    chrome.storage.local.get("db_learning", (db3) => {
+      let isFreshInstall = true;
+      if (typeof db3.db_learning == "object") {
+        if (typeof db3.db_learning.tables == "object") {
+          if (typeof db3.db_learning.tables.app == "object") {
+            isFreshInstall = false;
+          }
+        }
+      }
+      logServer.log(`fresh install MyLS():${isFreshInstall}`, 25);
+      this.fresh = isFreshInstall;
+    });
   }
   subscribe(table, fn2) {
     this.subscribers[table] = fn2;
   }
   update(table, query, update) {
-    if (this.fresh) {
-      return null;
-    }
     const ret = this.db.update(table, query, update);
     this.lastTable = table;
     this.lastTablePk = ret;
     return ret;
   }
   insert(a, b) {
-    if (this.fresh) {
-      return null;
-    }
     return this.db.insert(a, b);
   }
   queryAll(a, b) {
@@ -19254,11 +19260,8 @@ var MyLS = class {
     }
     return this.db.queryAll(table, { ID })[0];
   }
-  commit() {
-    if (this.fresh) {
-      return null;
-    }
-    const ret = this.db.commit();
+  commit(fn2) {
+    const ret = this.db.commit(fn2);
     if (this.lastTable !== "") {
       if (typeof this.subscribers[this.lastTable] === "function") {
         const row = this.getRow(this.lastTable, this.lastTablePk);
@@ -19276,16 +19279,12 @@ var MyLS = class {
     return this.db.isNew(fn2);
   }
   createTable(a, b) {
-    if (this.fresh) {
-      return null;
-    }
     return this.db.createTable(a, b);
   }
   tableExists(table) {
-    if (this.fresh) {
-      return null;
-    }
-    return this.db.tableExists(table);
+    const tableExists = this.db.tableExists(table);
+    logServer.log(`MyLS.tableExits:${tableExists}`, 96);
+    return tableExists;
   }
   setFresh(fresh) {
     this.fresh = fresh;
@@ -19297,6 +19296,9 @@ var _Store = class {
       _Store.__db__ = new MyLS("learning", "local");
     }
     return _Store.__db__;
+  }
+  static onReady(fn2) {
+    _Store.db().getStoreDB().sync(fn2);
   }
   static getSchema() {
     const schema = {
@@ -19311,25 +19313,27 @@ var _Store = class {
       downloadState: ["courseId", "state", "total", "success", "fails", "lastTocId"],
       app: ["version", "state", "lastCourseSlug", "nav", "freshInstall"]
     };
-    return this.getSchema;
+    return schema;
   }
-  static initTables() {
+  static initTables(fn2) {
+    logServer.log(`Store.initTables()`, 129);
     const db2 = _Store.db();
     const schema = _Store.getSchema();
+    logServer.log(schema, 129);
     Object.keys(schema).forEach((table) => {
       if (!db2.tableExists(table)) {
+        logServer.log(`createTable:${table}`, 25);
         db2.createTable(table, schema[table]);
       }
     });
-    db2.commit();
+    db2.commit(fn2);
     _Store.db().setFresh(false);
   }
-  static init() {
+  static init(fn2) {
     const db2 = _Store.db();
     db2.isNew((isNew) => {
-      if (isNew) {
-        _Store.initTables();
-      }
+      logServer.log(`Store.init():isNew:${isNew}`, 144);
+      _Store.initTables(fn2);
     });
   }
   static getExerciseFile(courseId) {
@@ -19643,13 +19647,14 @@ var _Store = class {
     _Store.setAppState(1, course.slug);
     return course;
   }
-  static prepareAppStorage() {
-    _Store.init();
-    setTimeout(() => {
-      _Store.initApp("");
-    }, 1250);
+  static prepareAppStorage(fn2) {
+    logServer.log(`Store.prepareAppStorage()`, 494);
+    _Store.init(() => {
+      logServer.log(`After Store.init()`, 498);
+      _Store.initApp("", fn2);
+    });
   }
-  static initApp(courseSlug) {
+  static initApp(courseSlug, fn2) {
     const db2 = _Store.db();
     const version2 = "1.0";
     const apps = db2.queryAll("app", { query: { version: version2 } });
@@ -19672,6 +19677,9 @@ var _Store = class {
         });
         db2.commit();
       }
+    }
+    if (typeof fn2 == "function") {
+      fn2(app2);
     }
     return app2;
   }
@@ -19817,10 +19825,12 @@ var _Store = class {
   static checkFreshInstall(fn2) {
     chrome.storage.local.get("db_learning", (db2) => {
       console.log(db2);
-      let isFreshInstall = false;
+      let isFreshInstall = true;
       if (typeof db2.db_learning == "object") {
-        if (typeof db2.db_learning.app != "object") {
-          isFreshInstall = false;
+        if (typeof db2.db_learning.tables == "object") {
+          if (typeof db2.db_learning.tables.app == "object") {
+            isFreshInstall = false;
+          }
         }
       }
       fn2(isFreshInstall, db2);
@@ -20733,7 +20743,7 @@ function render8(_ctx, _cache) {
 }
 
 // vue:./views/CoursePage.vue
-var logServer = new LogServer("src/popup/CoursePage.vue");
+var logServer2 = new LogServer("src/popup/CoursePage.vue");
 var __sfc_main8 = defineComponent({
   components: {
     TocItem: TocItem_default,
@@ -21078,7 +21088,7 @@ var __sfc_main9 = defineComponent({
     const downloadConfig = ref();
     const downloadState = ref({ ID: 0, courseId: 0, state: 0 });
     const logBar = ref();
-    const logServer5 = ref();
+    const logServer6 = ref();
     const downloads = ref([]);
     const percentage = ref(0);
     return {
@@ -21088,7 +21098,7 @@ var __sfc_main9 = defineComponent({
       downloadState,
       logBar,
       downloads,
-      logServer: logServer5,
+      logServer: logServer6,
       percentage
     };
   },
@@ -21276,7 +21286,7 @@ function render12(_ctx, _cache) {
 }
 
 // vue:./views/OptionPage.vue
-var logServer2 = new LogServer("OptionPage.vue");
+var logServer3 = new LogServer("OptionPage.vue");
 var __sfc_main12 = defineComponent({
   data() {
     return {
@@ -21304,10 +21314,10 @@ var __sfc_main12 = defineComponent({
   methods: {
     clearDB() {
       store_default.clearStorage();
-      logServer2.log("clearing db_learning in chrome.storage.local");
+      logServer3.log("clearing db_learning in chrome.storage.local");
     },
     initDB() {
-      logServer2.log("Store.prepareAppStorage()");
+      logServer3.log("Store.prepareAppStorage()");
       store_default.prepareAppStorage();
     }
   }
@@ -21347,7 +21357,7 @@ function render13(_ctx, _cache) {
 }
 
 // vue:./Popup.vue
-var logServer3 = new LogServer("src/popup/Popup.vue");
+var logServer4 = new LogServer("src/popup/Popup.vue");
 var __sfc_main13 = defineComponent({
   name: "Popup",
   components: {
@@ -21375,24 +21385,32 @@ var __sfc_main13 = defineComponent({
     return { nav, course, pageNavigation, onNavUpdate, onCourseUpdate, message, app: app2, downloadPage };
   },
   mounted() {
-    setTimeout(() => {
-      store_default.checkFreshInstall((freshInstall) => {
-        logServer3.log(`check fresh install : ${freshInstall}`, 65);
-        if (freshInstall) {
-          store_default.prepareAppStorage();
-        } else {
-          const db2 = store_default.db();
-          this.app = store_default.getAppState();
-          if (this.app) {
-            if (this.app.nav !== "") {
-              this.nav = this.pageNavigation.nav = this.app.nav;
-            }
-          }
-        }
-      });
-    }, 1200);
+    chrome.storage.local.get("db_learning", (storage) => {
+      logServer4.log(storage, 65);
+    });
+    const self2 = this;
+    store_default.checkFreshInstall((freshInstall) => {
+      if (freshInstall) {
+        store_default.prepareAppStorage((app2) => {
+          this.init();
+        });
+      } else {
+        this.init();
+      }
+    });
   },
   methods: {
+    init() {
+      store_default.onReady(() => {
+        this.app = store_default.getAppState();
+        if (this.app) {
+          if (this.app.nav !== "") {
+            this.nav = this.pageNavigation.nav = this.app.nav;
+          }
+        }
+        logServer4.log(this.app, 96);
+      });
+    },
     log(message) {
     },
     setCourse(course) {
@@ -26588,12 +26606,12 @@ defineJQueryPlugin(Toast);
 
 // src/popup/popup.ts
 var app = createApp(Popup_default);
-var logServer4 = new LogServer("src/popup/popup.ts");
+var logServer5 = new LogServer("src/popup/popup.ts");
 var instance = app.mount("#popup");
-logServer4.log({ component: "Popup.ts" }, 25);
+logServer5.log({ component: "Popup.ts" }, 25);
 attachListener((a, b, c) => {
   if (a.cmd == "logServer") {
-    logServer4.log(a.data);
+    logServer5.log(a.data);
   }
   if (typeof instance.$refs.downloadPage != "undefined") {
     instance.$refs.downloadPage.recv(a, b, c);

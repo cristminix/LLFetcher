@@ -25,7 +25,7 @@ export default class chromeStorageDB{
         this.sync(()=>{
             if( !( this.db  && this.db.tables && this.db.data ) ) {
                 if(!this.validateName(db_name)) {
-                    error("The name '" + db_name + "' contains invalid characters");
+                    this.error("The name '" + db_name + "' contains invalid characters");
                 } else {
                     this.db = {tables: {}, data: {}};
                     this.commit();
@@ -401,7 +401,7 @@ export default class chromeStorageDB{
 
     // throw an error
     error(msg) {
-        throw new Error(msg);
+        console.error(msg);
     }
 
     // clone an object

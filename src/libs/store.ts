@@ -1,8 +1,9 @@
 import chromeStorageDB from "./chromeStorageDB";
 import Proxy  from "./proxy";
-import {makeSlug, makeTitle} from "./utils";
+import {makeSlug, makeTitle,LogServer} from "./utils";
 import {Course_tableField,ExerciseFile_tableField,Author_tableField,Section_tableField,Toc_tableField,StreamLocation_tableField,Downloads_tableField,DownloadConfig_tableField,App_tableField } from "../types/tableFields";
 import { Author, CourseInfo, StreamLocation } from "../types/lynda";
+const logServer = new LogServer('src/libs/store.ts');
 
 class MyLS {
     db : chromeStorageDB; 
@@ -12,16 +13,29 @@ class MyLS {
     fresh : boolean;
     constructor(db:string,engine:string){
         this.db = new chromeStorageDB(db,engine);
-        this.fresh = true;
+        chrome.storage.local.get('db_learning',(db)=>{
+            // console.log(db);
+            let isFreshInstall = true;
+            if(typeof db.db_learning == 'object'){
+                if(typeof db.db_learning.tables == 'object'){
+                    if(typeof db.db_learning.tables.app == 'object'){
+                        isFreshInstall = false;
+                    }
+                }
+            }
+            logServer.log(`fresh install MyLS():${isFreshInstall}`,25)
+            this.fresh = isFreshInstall;
+        });
+        
     }
     subscribe(table:string,fn:Function){
         this.subscribers[table] = fn;
     }
 
     update(table: string, query: chromeStorageDB_dynamicFields | chromeStorageDB_callbackFilter, update?: chromeStorageDB_callback):number{
-        if(this.fresh){
-            return null;
-        }
+        // if(this.fresh){
+        //     return null;
+        // }
         const ret = this.db.update(table,query,update);
         this.lastTable = table;
         this.lastTablePk = ret;
@@ -30,9 +44,9 @@ class MyLS {
     }
     
     insert(a:string,b){
-        if(this.fresh){
-            return null;
-        }
+        // if(this.fresh){
+        //     return null;
+        // }
         return this.db.insert(a,b);
     }
     queryAll(a:string,b:chromeStorageDB_queryParams){
@@ -47,11 +61,11 @@ class MyLS {
         }
         return this.db.queryAll(table,{ID} as chromeStorageDB_queryParams)[0];
     }
-    commit():boolean{
-        if(this.fresh){
-            return null;
-        }
-        const ret = this.db.commit();
+    commit(fn?:Function):boolean{
+        // if(this.fresh){
+        //     return null;
+        // }
+        const ret = this.db.commit(fn);
 
         if(this.lastTable !== ''){
             if(typeof this.subscribers[this.lastTable] === 'function'){
@@ -70,16 +84,18 @@ class MyLS {
         return this.db.isNew(fn);
     }
     createTable(a:string,b:string[]){
-        if(this.fresh){
-            return null;
-        }
+        // if(this.fresh){
+        //     return null;
+        // }
         return this.db.createTable(a,b);
     }
     tableExists(table:string){
-        if(this.fresh){
-            return null;
-        }
-        return this.db.tableExists(table);
+        // if(this.fresh){
+        //     return null;
+        // }
+        const tableExists = this.db.tableExists(table);
+        logServer.log(`MyLS.tableExits:${tableExists}`,96);
+        return tableExists;
     }
     setFresh(fresh:boolean){
         this.fresh = fresh
@@ -95,6 +111,9 @@ class Store{
         }
         return Store.__db__;
     }
+    static onReady(fn:Function){
+        Store.db().getStoreDB().sync(fn);
+    }
     static getSchema(){
         const schema = {
             course : ["title", "slug", "duration", "sourceCodeRepository", "description",'authorIds'],
@@ -108,27 +127,36 @@ class Store{
             downloadState : ["courseId","state","total","success","fails","lastTocId"],
             app: ["version","state","lastCourseSlug","nav","freshInstall"]
         };
-        return this.getSchema;
+        return schema;
     }
-    static initTables(){
+    static initTables(fn:Function){
+        logServer.log(`Store.initTables()`,129);
         const db = Store.db();
         const schema = Store.getSchema();
+        logServer.log(schema,129);
+
         Object.keys(schema).forEach((table)=>{
             if(!db.tableExists(table)){
+                logServer.log(`createTable:${table}`,25)
+
                 db.createTable(table, schema[table]);
 
             }
         });
-        db.commit();
+
+        db.commit(fn);
         Store.db().setFresh(false);
     }
-    static init(){
+    static init(fn:Function){
         const db = Store.db();
         db.isNew((isNew:boolean)=>{
-            if(isNew){
-                Store.initTables();
-            }
+            logServer.log(`Store.init():isNew:${isNew}`,144);
+            
+            // if(isNew){
+            Store.initTables(fn);
+            // }
         });
+        // Store.db().setFresh(false);
     }
     static getExerciseFile(courseId:number) : ExerciseFile_tableField{
         const db = Store.db();
@@ -473,14 +501,15 @@ class Store{
         Store.setAppState(1,course.slug);
         return course;
     }
-    static prepareAppStorage(){
-        Store.init();
-        setTimeout(()=>{
-            Store.initApp('');
+    static prepareAppStorage(fn?:Function){
+        logServer.log(`Store.prepareAppStorage()`,494);
+        Store.init(()=>{
+            logServer.log(`After Store.init()`,498);
 
-        },1250);
+            Store.initApp('',fn);
+        });
     }
-    static initApp(courseSlug:string):App_tableField{
+    static initApp(courseSlug:string,fn?:Function):App_tableField{
         const db = Store.db();
         const version = '1.0';
      
@@ -494,6 +523,8 @@ class Store{
             app = {ID,state,version,lastCourseSlug,nav};
             app.ID = db.insert('app',app);
             db.commit();
+            
+            
         }else{
             app = apps[0];
             if(app.lastCourseSlug !== courseSlug && courseSlug !==''){
@@ -505,7 +536,9 @@ class Store{
                 db.commit();
             } 
         }
-
+        if(typeof fn == 'function'){
+            fn(app);
+        }
         return app;
     }
 
@@ -516,6 +549,7 @@ class Store{
         let app = null;
         if(apps.length > 0){
             app = apps[0];
+            
         }
         return app;
     }
@@ -666,10 +700,12 @@ class Store{
     static checkFreshInstall(fn:Function){
         chrome.storage.local.get('db_learning',(db)=>{
             console.log(db);
-            let isFreshInstall = false;
+            let isFreshInstall = true;
             if(typeof db.db_learning == 'object'){
-                if(typeof db.db_learning.app != 'object'){
-                    isFreshInstall = false;
+                if(typeof db.db_learning.tables == 'object'){
+                    if(typeof db.db_learning.tables.app == 'object'){
+                        isFreshInstall = false;
+                    }
                 }
             }
             fn(isFreshInstall,db);

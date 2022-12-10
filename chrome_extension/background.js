@@ -3799,6 +3799,41 @@ Object.assign(lookup2, {
 });
 
 // src/libs/utils.js
+var LogServer = class {
+  constructor(clientName) {
+    this.clientName = clientName;
+    const socket = lookup2("ws://localhost:2002");
+    socket.on("connection", (r) => {
+      console.log(r);
+    });
+    socket.on("connect", () => {
+      console.log(socket.id);
+    });
+    socket.on("disconnect", (reason) => {
+      if (reason === "io server disconnect") {
+        socket.connect();
+      }
+    });
+    this.socket = socket;
+  }
+  log(data, lineNumber) {
+    const src = this.clientName;
+    let consoleArgs = { data, src, lineNumber };
+    try {
+      this.socket.emit("log", consoleArgs);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+  logWeb(data) {
+    data.src = this.clientName;
+    const data64 = btoa(JSON.stringify(data));
+    const url2 = "http://localhost:2002/log?data=" + data64;
+    setTimeout(() => {
+      fetch(url2);
+    }, 100);
+  }
+};
 function makeTitle(slug) {
   const words = slug.split("-");
   for (let i2 = 0; i2 < words.length; i2++) {
@@ -3812,7 +3847,7 @@ function makeSlug(str) {
   return words.join("-").toLowerCase();
 }
 function myLogServer() {
-  const logServer3 = {
+  const logServer4 = {
     logContent: (data) => {
       chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
         try {
@@ -3824,10 +3859,10 @@ function myLogServer() {
       });
     },
     logWeb: (data) => {
-      logServer3.logContent(data);
+      logServer4.logContent(data);
     }
   };
-  return logServer3;
+  return logServer4;
 }
 
 // src/libs/chromeStorageDB.js
@@ -3848,7 +3883,7 @@ var chromeStorageDB = class {
     this.sync(() => {
       if (!(this.db && this.db.tables && this.db.data)) {
         if (!this.validateName(db_name)) {
-          error("The name '" + db_name + "' contains invalid characters");
+          this.error("The name '" + db_name + "' contains invalid characters");
         } else {
           this.db = { tables: {}, data: {} };
           this.commit();
@@ -4124,7 +4159,7 @@ var chromeStorageDB = class {
     return JSON.stringify(this.db);
   }
   error(msg) {
-    throw new Error(msg);
+    console.error(msg);
   }
   clone(obj) {
     var new_obj = {};
@@ -6340,6 +6375,7 @@ var Proxy2 = class {
 var proxy_default = Proxy2;
 
 // src/libs/store.ts
+var logServer = new LogServer("src/libs/store.ts");
 var MyLS = class {
   db;
   subscribers = {};
@@ -6348,24 +6384,29 @@ var MyLS = class {
   fresh;
   constructor(db2, engine) {
     this.db = new chromeStorageDB(db2, engine);
-    this.fresh = true;
+    chrome.storage.local.get("db_learning", (db3) => {
+      let isFreshInstall = true;
+      if (typeof db3.db_learning == "object") {
+        if (typeof db3.db_learning.tables == "object") {
+          if (typeof db3.db_learning.tables.app == "object") {
+            isFreshInstall = false;
+          }
+        }
+      }
+      logServer.log(`fresh install MyLS():${isFreshInstall}`, 25);
+      this.fresh = isFreshInstall;
+    });
   }
   subscribe(table, fn) {
     this.subscribers[table] = fn;
   }
   update(table, query, update) {
-    if (this.fresh) {
-      return null;
-    }
     const ret = this.db.update(table, query, update);
     this.lastTable = table;
     this.lastTablePk = ret;
     return ret;
   }
   insert(a, b) {
-    if (this.fresh) {
-      return null;
-    }
     return this.db.insert(a, b);
   }
   queryAll(a, b) {
@@ -6380,11 +6421,8 @@ var MyLS = class {
     }
     return this.db.queryAll(table, { ID })[0];
   }
-  commit() {
-    if (this.fresh) {
-      return null;
-    }
-    const ret = this.db.commit();
+  commit(fn) {
+    const ret = this.db.commit(fn);
     if (this.lastTable !== "") {
       if (typeof this.subscribers[this.lastTable] === "function") {
         const row = this.getRow(this.lastTable, this.lastTablePk);
@@ -6402,16 +6440,12 @@ var MyLS = class {
     return this.db.isNew(fn);
   }
   createTable(a, b) {
-    if (this.fresh) {
-      return null;
-    }
     return this.db.createTable(a, b);
   }
   tableExists(table) {
-    if (this.fresh) {
-      return null;
-    }
-    return this.db.tableExists(table);
+    const tableExists = this.db.tableExists(table);
+    logServer.log(`MyLS.tableExits:${tableExists}`, 96);
+    return tableExists;
   }
   setFresh(fresh) {
     this.fresh = fresh;
@@ -6423,6 +6457,9 @@ var _Store = class {
       _Store.__db__ = new MyLS("learning", "local");
     }
     return _Store.__db__;
+  }
+  static onReady(fn) {
+    _Store.db().getStoreDB().sync(fn);
   }
   static getSchema() {
     const schema = {
@@ -6437,25 +6474,27 @@ var _Store = class {
       downloadState: ["courseId", "state", "total", "success", "fails", "lastTocId"],
       app: ["version", "state", "lastCourseSlug", "nav", "freshInstall"]
     };
-    return this.getSchema;
+    return schema;
   }
-  static initTables() {
+  static initTables(fn) {
+    logServer.log(`Store.initTables()`, 129);
     const db2 = _Store.db();
     const schema = _Store.getSchema();
+    logServer.log(schema, 129);
     Object.keys(schema).forEach((table) => {
       if (!db2.tableExists(table)) {
+        logServer.log(`createTable:${table}`, 25);
         db2.createTable(table, schema[table]);
       }
     });
-    db2.commit();
+    db2.commit(fn);
     _Store.db().setFresh(false);
   }
-  static init() {
+  static init(fn) {
     const db2 = _Store.db();
     db2.isNew((isNew) => {
-      if (isNew) {
-        _Store.initTables();
-      }
+      logServer.log(`Store.init():isNew:${isNew}`, 144);
+      _Store.initTables(fn);
     });
   }
   static getExerciseFile(courseId) {
@@ -6769,13 +6808,14 @@ var _Store = class {
     _Store.setAppState(1, course.slug);
     return course;
   }
-  static prepareAppStorage() {
-    _Store.init();
-    setTimeout(() => {
-      _Store.initApp("");
-    }, 1250);
+  static prepareAppStorage(fn) {
+    logServer.log(`Store.prepareAppStorage()`, 494);
+    _Store.init(() => {
+      logServer.log(`After Store.init()`, 498);
+      _Store.initApp("", fn);
+    });
   }
-  static initApp(courseSlug) {
+  static initApp(courseSlug, fn) {
     const db2 = _Store.db();
     const version = "1.0";
     const apps = db2.queryAll("app", { query: { version } });
@@ -6798,6 +6838,9 @@ var _Store = class {
         });
         db2.commit();
       }
+    }
+    if (typeof fn == "function") {
+      fn(app);
     }
     return app;
   }
@@ -6943,10 +6986,12 @@ var _Store = class {
   static checkFreshInstall(fn) {
     chrome.storage.local.get("db_learning", (db2) => {
       console.log(db2);
-      let isFreshInstall = false;
+      let isFreshInstall = true;
       if (typeof db2.db_learning == "object") {
-        if (typeof db2.db_learning.app != "object") {
-          isFreshInstall = false;
+        if (typeof db2.db_learning.tables == "object") {
+          if (typeof db2.db_learning.tables.app == "object") {
+            isFreshInstall = false;
+          }
         }
       }
       fn(isFreshInstall, db2);
@@ -6958,7 +7003,7 @@ __publicField(Store, "__db__");
 var store_default = Store;
 
 // src/libs/downloadQueue.ts
-var logServer = myLogServer();
+var logServer2 = myLogServer();
 var DownloadQueue = class {
   queues;
   counts = 0;
@@ -7042,12 +7087,12 @@ var DownloadQueue = class {
         const dl = this.downloadOptions[idx];
         let download = store_default.getDownload(dl.tocId, dl.filename);
         if (download) {
-          logServer.logWeb("updateDownload");
+          logServer2.logWeb("updateDownload");
           download.url = dl.url;
           download.filename = dl.filename;
           download = store_default.updateDownload(download.ID, download);
         } else {
-          logServer.logWeb("createDownload");
+          logServer2.logWeb("createDownload");
           download = store_default.createDownload(dl.url, dl.filename, dl.tocId, dl.courseId);
         }
         this.queues.push(download);
@@ -7102,13 +7147,13 @@ var DownloadQueue = class {
   chromeDownload() {
     if (!this.downloadHandlerSet) {
       chrome.downloads.onCreated.addListener((item) => {
-        logServer.logWeb(item);
+        logServer2.logWeb(item);
       });
       chrome.downloads.onErased.addListener((downloadId) => {
-        logServer.logWeb(downloadId);
+        logServer2.logWeb(downloadId);
       });
       chrome.downloads.onChanged.addListener((delta) => {
-        logServer.logWeb(delta);
+        logServer2.logWeb(delta);
         if (typeof delta.state == "object") {
           if (delta.state.current == "complete") {
             this.afterProcessQueue(true, delta);
@@ -7129,7 +7174,7 @@ var DownloadQueue = class {
       const currentDownload = this.currentDownload;
       chrome.runtime.sendMessage({ cmd, currentDownload }, (response) => {
       });
-      logServer.logWeb(downloadId);
+      logServer2.logWeb(downloadId);
     });
   }
   onDownloadError(delta) {
@@ -7145,14 +7190,14 @@ var DownloadQueue = class {
 };
 
 // src/service_workers/background.ts
-var logServer2 = myLogServer();
+var logServer3 = myLogServer();
 var downloadQueue = new DownloadQueue();
 store_default.prepareAppStorage();
 var ENV = "development";
 if (ENV === "production") {
   chrome.action.disable();
 }
-logServer2.logWeb("LogServer initialize");
+logServer3.logWeb("LogServer initialize");
 function _isValidCoursePage(url2) {
   const urlPathArray = url2.split("?")[0].split("/").filter((item) => item);
   let validCoursePage = false;
@@ -7198,18 +7243,18 @@ chrome.webNavigation.onHistoryStateUpdated.addListener(function(tab) {
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   store_default.checkFreshInstall((freshInstall) => {
     if (freshInstall) {
-      logServer2.logWeb("freshInstall detected");
+      logServer3.logWeb("freshInstall detected");
       return;
     }
     setTimeout(() => {
       if (msg.cmd == "start_download") {
         downloadQueue.setCourse(msg.course);
-        logServer2.logWeb(msg);
+        logServer3.logWeb(msg);
         if (downloadQueue.queueStarted) {
-          logServer2.logWeb("queue is running:skipped");
+          logServer3.logWeb("queue is running:skipped");
           return;
         }
-        logServer2.logWeb(msg);
+        logServer3.logWeb(msg);
         if (downloadQueue.queues.length == 0) {
           downloadQueue.populate((queues) => {
             downloadQueue.queueStarted = true;
@@ -7221,6 +7266,6 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   });
 });
 setInterval(() => {
-  logServer2.logWeb("WAKE_UP");
+  logServer3.logWeb("WAKE_UP");
 }, 3e3);
 //# sourceMappingURL=background.js.map

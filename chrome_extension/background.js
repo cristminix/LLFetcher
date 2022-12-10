@@ -7021,13 +7021,8 @@ var DownloadQueue = class {
   resetQueueAfterFinish = true;
   resetQueueOnError = false;
   constructor() {
-    this.init();
   }
   init() {
-    this.downloadState = store_default.getDownloadState(this.course.ID);
-    this.downloadConfig = store_default.getDownloadConfig(this.course.ID);
-    this.sections = store_default.getSectionsByCourseId(this.course.ID);
-    this.fmt = this.downloadConfig.selectedFmtList;
   }
   setCourse(course) {
     let reInit = false;
@@ -7040,7 +7035,6 @@ var DownloadQueue = class {
     }
     if (reInit) {
       this.resetQueue();
-      this.init();
     }
   }
   truncateTables() {
@@ -7054,7 +7048,11 @@ var DownloadQueue = class {
     this.queueStarted = false;
   }
   populate(fn) {
-    store_default.db().getStoreDB().sync(() => {
+    store_default.onReady(() => {
+      this.downloadState = store_default.getDownloadState(this.course.ID);
+      this.downloadConfig = store_default.getDownloadConfig(this.course.ID);
+      this.sections = store_default.getSectionsByCourseId(this.course.ID);
+      this.fmt = this.downloadConfig.selectedFmtList;
       this.sections.forEach((section) => {
         const items = store_default.getTocsBySectionId(section.ID);
         items.forEach((toc) => {
@@ -7097,12 +7095,12 @@ var DownloadQueue = class {
         }
         this.queues.push(download);
       }
+      this.counts = this.queues.length;
       store_default.db().commit();
       if (typeof fn == "function") {
         fn(this.queues);
       }
     });
-    this.counts = this.queues.length;
   }
   startQueue() {
     this.processQueue();
@@ -7124,9 +7122,10 @@ var DownloadQueue = class {
     }
   }
   setProgress() {
-    const peak = this.queues.length;
+    const peak = this.successQueues.length;
     const maxPeak = this.counts;
     const percentage = Math.ceil(peak / maxPeak * 100);
+    console.log(peak, maxPeak, percentage);
     return percentage;
   }
   afterProcessQueue(success, delta) {

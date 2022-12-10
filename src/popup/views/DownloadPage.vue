@@ -79,7 +79,7 @@ export default defineComponent({
     };
   },
   mounted(){
-    this.logServer = new LogServer('DownloadPage');
+    this.logServer = new LogServer('src/popup/views/DownloadPage.vue');
     this.loadDownloadData();
     setTimeout(()=>{
       if(!this.course){

@@ -1,4 +1,5 @@
 import { App_tableField, Course_tableField, DownloadConfig_tableField, Downloads_tableField, Section_tableField,DownloadState_tableField } from "src/types/tableFields";
+import { max } from "underscore";
 import Store from "../libs/store";
 import { myLogServer } from "../libs/utils";
 
@@ -33,17 +34,20 @@ export default class DownloadQueue{
     resetQueueOnError: boolean = false;
 
     constructor(){
-        this.init();
+        // this.init();
     }
 
     init(){
         // this.app = Store.getAppState();
         // this.course = Store.getCourse(this.app.lastCourseSlug);
-        this.downloadState = Store.getDownloadState(this.course.ID);
-        this.downloadConfig = Store.getDownloadConfig(this.course.ID);
-        this.sections = Store.getSectionsByCourseId(this.course.ID);
+        // Store.onReady(()=>{
+            // this.downloadState = Store.getDownloadState(this.course.ID);
+            // this.downloadConfig = Store.getDownloadConfig(this.course.ID);
+            // this.sections = Store.getSectionsByCourseId(this.course.ID);
 
-        this.fmt = this.downloadConfig.selectedFmtList;
+            // this.fmt = this.downloadConfig.selectedFmtList;
+        // });
+        
     }
     setCourse(course: Course_tableField) {
         let reInit = false;
@@ -58,7 +62,7 @@ export default class DownloadQueue{
 
         if(reInit){
             this.resetQueue();
-            this.init();
+            // this.init();
         }
 
     }
@@ -84,8 +88,12 @@ export default class DownloadQueue{
         */
     }
     populate(fn){
-        Store.db().getStoreDB().sync(()=>{
-            
+        Store.onReady(()=>{
+            this.downloadState = Store.getDownloadState(this.course.ID);
+            this.downloadConfig = Store.getDownloadConfig(this.course.ID);
+            this.sections = Store.getSectionsByCourseId(this.course.ID);
+
+            this.fmt = this.downloadConfig.selectedFmtList;
             this.sections.forEach((section)=>{
                 const items = Store.getTocsBySectionId(section.ID);
                 items.forEach((toc)=>{
@@ -126,13 +134,15 @@ export default class DownloadQueue{
                 } 
                 this.queues.push(download);
             }
+            this.counts = this.queues.length;
             Store.db().commit();
     
             if(typeof fn == 'function'){
                 fn(this.queues);
             }
+            
         }) 
-        this.counts = this.queues.length;
+        
     }
     startQueue(){
         this.processQueue();
@@ -157,9 +167,10 @@ export default class DownloadQueue{
         }
     }
     setProgress(){
-        const peak = this.queues.length;
+        const peak = this.successQueues.length;
         const maxPeak = this.counts;
         const percentage = Math.ceil(peak / maxPeak * 100);
+        console.log(peak,maxPeak,percentage);
         return percentage;
     }
     afterProcessQueue(success?:boolean,delta?:object){

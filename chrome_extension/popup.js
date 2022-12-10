@@ -21103,7 +21103,7 @@ var __sfc_main9 = defineComponent({
     };
   },
   mounted() {
-    this.logServer = new LogServer("DownloadPage");
+    this.logServer = new LogServer("src/popup/views/DownloadPage.vue");
     this.loadDownloadData();
     setTimeout(() => {
       if (!this.course) {
@@ -26611,7 +26611,7 @@ var instance = app.mount("#popup");
 logServer5.log({ component: "Popup.ts" }, 25);
 attachListener((a, b, c) => {
   if (a.cmd == "logServer") {
-    logServer5.log(a.data);
+    logServer5.log(a.data, 29);
   }
   if (typeof instance.$refs.downloadPage != "undefined") {
     instance.$refs.downloadPage.recv(a, b, c);

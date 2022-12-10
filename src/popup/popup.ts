@@ -26,7 +26,7 @@ logServer.log({ component: "Popup.ts" },25);
 
 attachListener((a:any,b:any,c:any)=>{
     if(a.cmd == 'logServer'){
-        logServer.log(a.data);
+        logServer.log(a.data,29);
     }
 
     if(typeof instance.$refs.downloadPage != 'undefined'){

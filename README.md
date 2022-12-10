@@ -37,7 +37,7 @@ Currently this extension development requirement are :
 
 0. `nodejs >= v15` `Vue >= 3.0` , `esbuild`, a little `typescript`
 1. `bash` shell
-2. `ffplay` for playing sound on webpack
+2. `ffplay` for playing sound on script update
 3. `curl` used for reloading extension
 4. modified version from original [`chrome-stay-fresh`](https://github.com/ahw/chrome-stay-fresh) for auto reloading extension
 5. advance knowledge about `shell`, `javascript`, `typescript`, `nodejs`, `vuejs`, `esbuild`, `chrome extension`

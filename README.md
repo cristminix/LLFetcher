@@ -24,8 +24,9 @@ To be able to successfully using this stuff you might prepare for high and stabl
 5. Once you had clicked button popup would shown
 6. Try to explore and get experiance from clicking the buttons from the popup from left to right, so you should know whats going on?
 7. Remember to set config before clicking button that contains download or direct link
+8. if button seems not work, you must notice about the extension always redirect the course page with query string `https://<COURSE_URL>/?autoplay=false&resume=false` , sometimes chrome service workers gonna sleep and you need to waking up those by refreshing current page manually until you see thats query string.
 
-`Note:` Since this extension is still in development, if you are in the download stage please dont close the extension popup or the download process will be interupted.
+`Note:` ~~Since this extension is still in development, if you are in the download stage please dont close the extension popup or the download process will be interupted.~~ fixed in v1.0.1
 
 `Disclaimer:` This purpose of this project is just for educational process as part of the journey of the creator in the programming world, please use at your own responsibiity.
 
@@ -38,4 +39,6 @@ Currently this extension development requirement are :
 2. `ffplay` for playing sound on webpack
 3. `curl` used for reloading extension
 4. modified version from original [`chrome-stay-fresh`](https://github.com/ahw/chrome-stay-fresh) for auto reloading extension
-5. a little patient 
+5. advance knowledge about `shell`, `javascript`, `typescript`, `nodejs`, `vuejs`, `esbuild`, `chrome extension`
+
+

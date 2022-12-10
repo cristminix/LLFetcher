@@ -27,6 +27,6 @@ io.on("connection", (socket) => {
   // io.sockets.emit('_message_to_debugger_',`Welcome to log-server ${socket.id}`);
 });
 
-server.listen(2002, () => {
-  console.log('listening on *:2002');
+server.listen(2022, () => {
+  console.log('listening on *:2022');
 });

@@ -21,7 +21,7 @@ export default defineComponent({
   },  
   setup(props) {
     const nav = ref(props.nav);
-    const enableOption = ref(true);
+    const enableOption = ref(false);
     return {nav,enableOption};
   },
   methods:{

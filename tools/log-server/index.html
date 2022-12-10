@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Socket.IO chat</title>
+    <title>Log Server</title>
     <style>
       body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
 
@@ -32,7 +32,7 @@
     eruda.show('console');
     let debuggerConsole = eruda.get('console');
 
-    const socket = io('ws://localhost:2002');
+    const socket = io('ws://localhost:2022');
     socket.on('_message_to_debugger_',(consoleArgs)=>{
       if(typeof consoleArgs.src == 'string'){
         debuggerConsole.log(`${consoleArgs.src}:${consoleArgs.lineNumber}:`,consoleArgs.data)

@@ -90,31 +90,34 @@ export default defineComponent({
       return true;
     },
     loadCourseData(){
-      // console.log(this.course)
-      if(!this.isValidCourse()){
-        const appInfo = Store.getAppInfo();
-        if(!appInfo){
-          return;
+      Store.onReady(()=>{
+        // console.log(this.course)
+        if(!this.isValidCourse()){
+          const appInfo = Store.getAppInfo();
+          if(!appInfo){
+            return;
+          }
+          // console.log(appInfo)
+          this.course = Store.getCourse(appInfo.lastCourseSlug);
+          if(!this.course){
+            return;
+          }
         }
-        // console.log(appInfo)
-        this.course = Store.getCourse(appInfo.lastCourseSlug);
-        if(!this.course){
-          return;
-        }
-      }
-      Store.setAppState(1,this.course.slug);
-      const sections = Store.getSectionsByCourseId(this.course.ID);
-      sections.map((sectionTmp:Section_tableField)=>{
-        let section = sectionTmp as unknown as Section;
-        section.items = Store.getTocsBySectionId(sectionTmp.ID) as unknown as Toc[];
-        this.sections.push(section);
+        Store.setAppState(1,this.course.slug);
+        const sections = Store.getSectionsByCourseId(this.course.ID);
+        sections.map((sectionTmp:Section_tableField)=>{
+          let section = sectionTmp as unknown as Section;
+          section.items = Store.getTocsBySectionId(sectionTmp.ID) as unknown as Toc[];
+          this.sections.push(section);
+        });
+        this.course.authorIds.map((ID:number)=>{
+          const author = Store.getAuthorById(ID);
+          if(author){
+            this.authors.push(author);
+          }
+        })
       });
-      this.course.authorIds.map((ID:number)=>{
-        const author = Store.getAuthorById(ID);
-        if(author){
-          this.authors.push(author);
-        }
-      })
+      
     },
     updateTocItems(exerciseFile:ExerciseFile,toc:Toc,sectionId:number){
       this.exerciseFile = Store.createExerciseFile(this.course.ID, exerciseFile.name, exerciseFile.url, exerciseFile.sizeInBytes);

@@ -25,11 +25,17 @@ const instance  : ComponentPublicInstance<typeof Popup> = app.mount('#popup');
 logServer.log({ component: "Popup.ts" },getLineInfo());
 
 attachListener((a:any,b:any,c:any)=>{
-    // if(a.cmd == 'logServer'){
-    //     logServer.log(a.data,a.data.lineInfo);
-    // }
-
-    if(typeof instance.$refs.downloadPage != 'undefined'){
-        instance.$refs.downloadPage.recv(a,b,c);
+    if(a.cmd == 'retrieve_data_codes'){
+        logServer.log({a,b,c},getLineInfo());
+        if(typeof instance.$refs.welcomePage != 'undefined'){
+            instance.$refs.welcomePage.recv(a,b,c);
+        }
     }
+
+    if(a.cmd == 'update_download'){
+        if(typeof instance.$refs.downloadPage != 'undefined'){
+            instance.$refs.downloadPage.recv(a,b,c);
+        }
+    }
+    
 });

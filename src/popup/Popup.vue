@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <WelcomePage v-if="nav=='welcome'"/>
+    <WelcomePage v-if="nav=='welcome'" ref="welcomePage"/>
     <CoursePage @update="onCourseUpdate($event)" v-if="nav=='course'" :course="course"  ref="coursePage"/>
     <DownloadPage v-if="nav=='downloads'" ref="downloadPage"/>
     <HelpPage v-if="nav=='help'"/>
@@ -55,8 +55,9 @@ export default defineComponent({
     const message = ref<string>('');
     const app = ref<App_tableField>();
     const downloadPage = ref<ComponentPublicInstance<typeof DownloadPage>>();
+    const welcomePage = ref<ComponentPublicInstance<typeof WelcomePage>>();
     const pageNavigation = ref<ComponentPublicInstance<typeof PageNavigation>>();
-    return {nav, course,pageNavigation, onNavUpdate, onCourseUpdate, message,app,downloadPage};
+    return {nav, course,pageNavigation, onNavUpdate, onCourseUpdate, message,app,downloadPage,welcomePage};
   },
   mounted(){
     // console.log('App Entry Point Start here...');

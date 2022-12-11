@@ -20069,6 +20069,7 @@ function render3(_ctx, _cache) {
 }
 
 // vue:./views/WelcomePage.vue
+var logServer3 = new LogServer();
 var __sfc_main3 = defineComponent({
   setup() {
     const nav = ref("welcome");
@@ -20083,8 +20084,7 @@ var __sfc_main3 = defineComponent({
     };
   },
   mounted() {
-    setTimeout(() => {
-      const appInfo = store_default.getAppInfo();
+    store_default.onReady(() => {
       const lastCourses = store_default.getLastCourses();
       if (lastCourses) {
         if (lastCourses.length > 0) {
@@ -20094,9 +20094,19 @@ var __sfc_main3 = defineComponent({
           });
         }
       }
-    }, 1259);
+    });
   },
   methods: {
+    recv(a, b, c) {
+      if (a.cmd == "retrieve_data_codes") {
+        const dataCodes = JSON.parse(a.dataCodes);
+        this.fetchBtnState = 2;
+        logServer3.log(dataCodes, getLineInfo());
+        store_default.saveDataCodes(dataCodes);
+        const parent = this.$parent;
+        parent.setCourse(dataCodes.course);
+      }
+    },
     loadRecentCourse(course) {
       const parent = this.$parent;
       parent.setCourse(course);
@@ -20104,13 +20114,6 @@ var __sfc_main3 = defineComponent({
     retrieveDataCodesFromContent() {
       this.fetchBtnState = 1;
       sendMessageSaveDataCodesToLS();
-      store_default.getDataCodesLS((dataCodes) => {
-        this.fetchBtnState = 2;
-        console.log(dataCodes);
-        store_default.saveDataCodes(dataCodes);
-        const parent = this.$parent;
-        parent.setCourse(dataCodes.course);
-      });
     }
   }
 });
@@ -20857,7 +20860,7 @@ function render9(_ctx, _cache) {
 }
 
 // vue:./views/CoursePage.vue
-var logServer3 = new LogServer("src/popup/CoursePage.vue");
+var logServer4 = new LogServer("src/popup/CoursePage.vue");
 var __sfc_main9 = defineComponent({
   components: {
     TocItem: TocItem_default,
@@ -21183,7 +21186,7 @@ function render10(_ctx, _cache) {
 }
 
 // vue:./views/DownloadPage.vue
-var logServer4 = new LogServer();
+var logServer5 = new LogServer();
 var __sfc_main10 = defineComponent({
   components: {
     LogBar: LogBar_default
@@ -21214,7 +21217,7 @@ var __sfc_main10 = defineComponent({
       downloadState,
       logBar,
       downloads,
-      logServer: logServer4,
+      logServer: logServer5,
       percentage
     };
   },
@@ -21382,7 +21385,10 @@ function render13(_ctx, _cache) {
   const _component_MaintainPage = resolveComponent("MaintainPage");
   const _component_PageNavigation = resolveComponent("PageNavigation");
   return openBlock(), createElementBlock("div", _hoisted_115, [
-    _ctx.nav == "welcome" ? (openBlock(), createBlock(_component_WelcomePage, { key: 0 })) : createCommentVNode("v-if", true),
+    _ctx.nav == "welcome" ? (openBlock(), createBlock(_component_WelcomePage, {
+      key: 0,
+      ref: "welcomePage"
+    }, null, 512)) : createCommentVNode("v-if", true),
     _ctx.nav == "course" ? (openBlock(), createBlock(_component_CoursePage, {
       key: 1,
       onUpdate: _cache[0] || (_cache[0] = ($event) => _ctx.onCourseUpdate($event)),
@@ -21404,7 +21410,7 @@ function render13(_ctx, _cache) {
 }
 
 // vue:./Popup.vue
-var logServer5 = new LogServer();
+var logServer6 = new LogServer();
 var __sfc_main13 = defineComponent({
   name: "Popup",
   components: {
@@ -21428,8 +21434,9 @@ var __sfc_main13 = defineComponent({
     const message = ref("");
     const app2 = ref();
     const downloadPage = ref();
+    const welcomePage = ref();
     const pageNavigation = ref();
-    return { nav, course, pageNavigation, onNavUpdate, onCourseUpdate, message, app: app2, downloadPage };
+    return { nav, course, pageNavigation, onNavUpdate, onCourseUpdate, message, app: app2, downloadPage, welcomePage };
   },
   mounted() {
     const self2 = this;
@@ -26649,12 +26656,20 @@ defineJQueryPlugin(Toast);
 
 // src/popup/popup.ts
 var app = createApp(Popup_default);
-var logServer6 = new LogServer();
+var logServer7 = new LogServer();
 var instance = app.mount("#popup");
-logServer6.log({ component: "Popup.ts" }, getLineInfo());
+logServer7.log({ component: "Popup.ts" }, getLineInfo());
 attachListener((a, b, c) => {
-  if (typeof instance.$refs.downloadPage != "undefined") {
-    instance.$refs.downloadPage.recv(a, b, c);
+  if (a.cmd == "retrieve_data_codes") {
+    logServer7.log({ a, b, c }, getLineInfo());
+    if (typeof instance.$refs.welcomePage != "undefined") {
+      instance.$refs.welcomePage.recv(a, b, c);
+    }
+  }
+  if (a.cmd == "update_download") {
+    if (typeof instance.$refs.downloadPage != "undefined") {
+      instance.$refs.downloadPage.recv(a, b, c);
+    }
   }
 });
 /*!

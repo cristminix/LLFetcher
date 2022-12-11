@@ -207,7 +207,10 @@ export function myLogServer(){
           });
       },
       logWeb:(data,lineInfo)=>{
-          logServer.logContent(data,lineInfo);
+          setTimeout(()=>{
+            logServer.logContent(data,lineInfo);
+          },250);
+          
       }
   };
   return logServer;

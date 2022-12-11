@@ -3879,7 +3879,9 @@ function myLogServer() {
       });
     },
     logWeb: (data, lineInfo) => {
-      logServer4.logContent(data, lineInfo);
+      setTimeout(() => {
+        logServer4.logContent(data, lineInfo);
+      }, 250);
     }
   };
   return logServer4;
@@ -7047,7 +7049,7 @@ var DownloadQueue = class {
   fmt = null;
   downloadOptions = [];
   resetQueueAfterFinish = true;
-  resetQueueOnError = false;
+  resetQueueOnError = true;
   constructor() {
   }
   init() {
@@ -7113,12 +7115,9 @@ var DownloadQueue = class {
         const dl = this.downloadOptions[idx];
         let download = store_default.getDownload(dl.tocId, dl.filename);
         if (download) {
-          logServer2.logWeb("updateDownload", getLineInfo());
           download.url = dl.url;
           download.filename = dl.filename;
-          download = store_default.updateDownload(download.ID, download);
         } else {
-          logServer2.logWeb("createDownload", getLineInfo());
           download = store_default.createDownload(dl.url, dl.filename, dl.tocId, dl.courseId);
         }
         this.queues.push(download);
@@ -7153,7 +7152,6 @@ var DownloadQueue = class {
     const peak = this.successQueues.length;
     const maxPeak = this.counts;
     const percentage = Math.ceil(peak / maxPeak * 100);
-    logServer2.logWeb({ peak, maxPeak, percentage }, getLineInfo());
     return percentage;
   }
   afterProcessQueue(success, delta) {
@@ -7171,24 +7169,37 @@ var DownloadQueue = class {
       this.queues.push(this.currentDownload);
     }
   }
+  onDownloadStarted(item) {
+    const evt = "created";
+    logServer2.logWeb({ evt, item }, getLineInfo());
+  }
+  onDownloadErased(item) {
+    const evt = "erased";
+    logServer2.logWeb({ evt, item }, getLineInfo());
+  }
+  onDownloadChanged(delta) {
+    const evt = "changed";
+    logServer2.logWeb({ evt, delta }, getLineInfo());
+    if (typeof delta.state == "object") {
+      if (delta.state.current == "complete") {
+        this.afterProcessQueue(true, delta);
+      } else {
+      }
+    }
+    if (typeof delta.error == "object") {
+      this.onDownloadError(delta);
+    }
+  }
   chromeDownload() {
     if (!this.downloadHandlerSet) {
       chrome.downloads.onCreated.addListener((item) => {
-        logServer2.logWeb(item, getLineInfo());
+        this.onDownloadStarted(item);
       });
       chrome.downloads.onErased.addListener((downloadId) => {
         logServer2.logWeb(downloadId, getLineInfo());
       });
       chrome.downloads.onChanged.addListener((delta) => {
-        logServer2.logWeb(delta, getLineInfo());
-        if (typeof delta.state == "object") {
-          if (delta.state.current == "complete") {
-            this.afterProcessQueue(true, delta);
-          }
-        }
-        if (typeof delta.error == "object") {
-          this.onDownloadError(delta);
-        }
+        this.onDownloadChanged(delta);
       });
       this.downloadHandlerSet = true;
     }
@@ -7201,7 +7212,6 @@ var DownloadQueue = class {
       const currentDownload = this.currentDownload;
       chrome.runtime.sendMessage({ cmd, currentDownload }, (response) => {
       });
-      logServer2.logWeb(downloadId, getLineInfo());
     });
   }
   onDownloadError(delta) {

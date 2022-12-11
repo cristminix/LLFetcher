@@ -30,7 +30,7 @@ export default class DownloadQueue{
     fmt : string = null;
     downloadOptions : DownloadOption[] = [];
     resetQueueAfterFinish: boolean = true;
-    resetQueueOnError: boolean = false;
+    resetQueueOnError: boolean = true;
 
     constructor(){
         // this.init();
@@ -123,12 +123,12 @@ export default class DownloadQueue{
                 const dl = this.downloadOptions[idx];
                 let download = Store.getDownload(dl.tocId,dl.filename);
                 if(download){
-                    logServer.logWeb('updateDownload',getLineInfo());
+                    // logServer.logWeb('updateDownload',getLineInfo());
                     download.url = dl.url;
                     download.filename = dl.filename;
-                    download = Store.updateDownload(download.ID,download);
+                    // download = Store.updateDownload(download.ID,download);
                 }else{
-                    logServer.logWeb('createDownload',getLineInfo());
+                    // logServer.logWeb('createDownload',getLineInfo());
                     download = Store.createDownload(dl.url,dl.filename,dl.tocId,dl.courseId);
                 } 
                 this.queues.push(download);
@@ -169,11 +169,11 @@ export default class DownloadQueue{
         const peak = this.successQueues.length;
         const maxPeak = this.counts;
         const percentage = Math.ceil(peak / maxPeak * 100);
-        logServer.logWeb({peak,maxPeak,percentage},getLineInfo());
+        // logServer.logWeb({peak,maxPeak,percentage},getLineInfo());
         return percentage;
     }
     afterProcessQueue(success?:boolean,delta?:object){
-        // logServer.logWeb(currentDownload);
+        // logServer.logWeb(this.currentDownload,getLineInfo());
         if(success){
             this.successQueues.push(this.currentDownload);
             Store.updateDownload(this.currentDownload.ID,{status:success});
@@ -188,26 +188,43 @@ export default class DownloadQueue{
             this.queues.push(this.currentDownload); 
         }
     }
+    onDownloadStarted(item){
+        const evt = 'created';
+        logServer.logWeb({evt,item},getLineInfo())
+    }
+    onDownloadErased(item){
+        const evt = 'erased';
+        logServer.logWeb({evt,item},getLineInfo())
+    }
     
+    onDownloadChanged(delta){
+        const evt = 'changed';
+        logServer.logWeb({evt,delta},getLineInfo());
+
+        if(typeof delta.state == 'object'){
+            if(delta.state.current == 'complete'){
+                this.afterProcessQueue(true,delta);
+            }
+            else{
+                
+            }
+        }
+        if(typeof delta.error == 'object'){
+            this.onDownloadError(delta);
+        }
+    }
     chromeDownload(){
         // return;
         if(!this.downloadHandlerSet){
             chrome.downloads.onCreated.addListener((item)=>{
-                logServer.logWeb(item,getLineInfo())
+                this.onDownloadStarted(item);
             });
             chrome.downloads.onErased.addListener((downloadId)=>{
                 logServer.logWeb(downloadId,getLineInfo())
             });
             chrome.downloads.onChanged.addListener((delta)=>{
-                logServer.logWeb(delta,getLineInfo())
-                if(typeof delta.state == 'object'){
-                    if(delta.state.current == 'complete'){
-                        this.afterProcessQueue(true,delta);
-                    }
-                }
-                if(typeof delta.error == 'object'){
-                    this.onDownloadError(delta);
-                }
+                this.onDownloadChanged(delta);
+                
             });
     
             this.downloadHandlerSet = true;
@@ -221,7 +238,7 @@ export default class DownloadQueue{
                 const cmd = 'download_state';
                 const currentDownload = this.currentDownload;
                 chrome.runtime.sendMessage({cmd,currentDownload},(response)=>{});
-                logServer.logWeb(downloadId,getLineInfo());
+                // logServer.logWeb({evt:'created',downloadId},getLineInfo());
             });
             // afterProcessDownloadQueues(true);
         // },1000);

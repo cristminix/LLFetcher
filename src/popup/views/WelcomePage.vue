@@ -19,12 +19,12 @@
   </div>
 </template>
 <script lang="ts">
-import { sendMessageSaveDataCodesToLS } from 'src/libs/utils';
+import { sendMessageSaveDataCodesToLS ,LogServer,getLineInfo} from 'src/libs/utils';
 import { ComponentPublicInstance, defineComponent,ref } from 'vue';
 import Store from 'src/libs/store';
 import { Course_tableField } from 'src/types/tableFields';
 import CoursePage from 'src/popup/views/CoursePage.vue';
-
+const logServer = new LogServer();
 export default defineComponent({
   setup() {
     const nav = ref('welcome');
@@ -36,8 +36,8 @@ export default defineComponent({
     }
   },
   mounted(){
-    setTimeout(()=>{
-      const appInfo = Store.getAppInfo();
+    Store.onReady(()=>{
+      // const appInfo = Store.getAppInfo();
       // this.$parent.log(`AppState:${appInfo.state}`);
       
       const lastCourses = Store.getLastCourses();
@@ -49,11 +49,21 @@ export default defineComponent({
           });
         }
       }
-      
-    },1259);
+    }); 
 
   },
   methods:{
+    recv(a,b,c){
+      if(a.cmd == 'retrieve_data_codes'){
+        const dataCodes = JSON.parse(a.dataCodes);
+        this.fetchBtnState = 2;
+        logServer.log(dataCodes,getLineInfo());
+        Store.saveDataCodes(dataCodes);
+        const parent = this.$parent as ComponentPublicInstance<typeof CoursePage>;
+        parent.setCourse(dataCodes.course);
+        // contentConsoleLog(dataCodes);
+      }
+    },
     loadRecentCourse(course:Course_tableField){
       const parent = this.$parent as ComponentPublicInstance<typeof CoursePage>;
       parent.setCourse(course);
@@ -63,15 +73,7 @@ export default defineComponent({
       // send data code from content script to LS
       sendMessageSaveDataCodesToLS();
       // load data codes from ls
-      Store.getDataCodesLS((dataCodes)=>{
-
-        this.fetchBtnState = 2;
-        console.log(dataCodes)
-        Store.saveDataCodes(dataCodes);
-        const parent = this.$parent as ComponentPublicInstance<typeof CoursePage>;
-        parent.setCourse(dataCodes.course);
-        // contentConsoleLog(dataCodes);
-      })
+      // Store.getDataCodesLS()
 
     }
   }

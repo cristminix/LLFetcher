@@ -1,7 +1,7 @@
 import {isCoursePage,redirectNoAutoPlay} from './function';
 import { LogServer } from "../libs/utils";
 
-const logServer = new LogServer('content');
+const logServer = new LogServer('src/service_workers/background.ts');
 
 chrome.runtime.onMessage.addListener(function (response, sendResponse) {
 	// console.log(response);
@@ -34,7 +34,7 @@ chrome.runtime.onMessage.addListener(function (response, sendResponse) {
             console.log('Popup.log:',response.param);
         }
         else if(response.event == 'LogServer'){
-            logServer.log(response.data);
+            logServer.log(response.data,response.lineInfo);
             // console.log('Popup.log:',response.data);
         }
 	}

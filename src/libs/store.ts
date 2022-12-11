@@ -1,6 +1,6 @@
 import chromeStorageDB from "./chromeStorageDB";
 import Proxy  from "./proxy";
-import {makeSlug, makeTitle,LogServer} from "./utils";
+import {makeSlug, makeTitle,LogServer,getLineInfo} from "./utils";
 import {Course_tableField,ExerciseFile_tableField,Author_tableField,Section_tableField,Toc_tableField,StreamLocation_tableField,Downloads_tableField,DownloadConfig_tableField,App_tableField } from "../types/tableFields";
 import { Author, CourseInfo, StreamLocation } from "../types/lynda";
 const logServer = new LogServer('src/libs/store.ts');
@@ -23,7 +23,7 @@ class MyLS {
                     }
                 }
             }
-            logServer.log(`fresh install MyLS():${isFreshInstall}`,25)
+            logServer.log(`fresh install MyLS():${isFreshInstall}`,getLineInfo())
             this.fresh = isFreshInstall;
         });
         
@@ -94,7 +94,7 @@ class MyLS {
         //     return null;
         // }
         const tableExists = this.db.tableExists(table);
-        logServer.log(`MyLS.tableExits:${tableExists}`,96);
+        logServer.log(`MyLS.tableExits:${tableExists}`,getLineInfo());
         return tableExists;
     }
     setFresh(fresh:boolean){
@@ -130,14 +130,14 @@ class Store{
         return schema;
     }
     static initTables(fn:Function){
-        logServer.log(`Store.initTables()`,129);
+        logServer.log(`Store.initTables()`,getLineInfo());
         const db = Store.db();
         const schema = Store.getSchema();
-        logServer.log(schema,129);
+        logServer.log(schema,getLineInfo());
 
         Object.keys(schema).forEach((table)=>{
             if(!db.tableExists(table)){
-                logServer.log(`createTable:${table}`,25)
+                logServer.log(`createTable:${table}`,getLineInfo())
 
                 db.createTable(table, schema[table]);
 
@@ -150,7 +150,7 @@ class Store{
     static init(fn:Function){
         const db = Store.db();
         db.isNew((isNew:boolean)=>{
-            logServer.log(`Store.init():isNew:${isNew}`,144);
+            logServer.log(`Store.init():isNew:${isNew}`,getLineInfo());
             
             // if(isNew){
             Store.initTables(fn);
@@ -502,9 +502,9 @@ class Store{
         return course;
     }
     static prepareAppStorage(fn?:Function){
-        logServer.log(`Store.prepareAppStorage()`,494);
+        logServer.log(`Store.prepareAppStorage()`,getLineInfo());
         Store.init(()=>{
-            logServer.log(`After Store.init()`,498);
+            logServer.log(`After Store.init()`,getLineInfo());
 
             Store.initApp('',fn);
         });
@@ -552,6 +552,14 @@ class Store{
             
         }
         return app;
+    }
+    static getLastCourse():Course_tableField{
+        const app = Store.getAppState();
+        if(app){
+            const course = Store.getCourse(app.lastCourseSlug);
+            return course;
+        }
+        return null;
     }
     static setAppState(state : number,courseSlug?:string){
         const db = Store.db();

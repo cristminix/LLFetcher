@@ -9,12 +9,13 @@ export function contentConsoleLog(data : any) : void
 export function attachListener(fn:Function) : void
 export function sendMessageBg(data:Object):void
 declare class LogServer{
-	constructor(clientName:string)
-	log(data:any,lineNumber?:number)
-	logWeb(data:any,lineNumber?:number)
+	constructor(clientName?:string)
+	log(data:any,lineInfo?:string)
+	logWeb(data:any,lineInfo?:string)
 }
 export interface MyLogServer{
-	logContent(data:any,lineNumber?:number)
-	logWeb(data:any,lineNumber?:number)
+	logContent(data:any,lineInfo?:string)
+	logWeb(data:any,lineInfo?:string)
 }
 export function myLogServer() : MyLogServer
+export function getLineInfo() : string

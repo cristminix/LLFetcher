@@ -1,4 +1,4 @@
-import { myLogServer } from "../libs/utils";
+import { myLogServer,getLineInfo } from "../libs/utils";
 import Store from "../libs/store";
 import DownloadQueue from "../libs/downloadQueue";
 import { Downloads_tableField } from "src/types/tableFields";
@@ -13,7 +13,9 @@ if(ENV === 'production'){
     chrome.action.disable();
 }
 
-logServer.logWeb('LogServer initialize');
+
+
+logServer.logWeb('LogServer initialize',getLineInfo());
 
 
 function _isValidCoursePage  (url : string) : boolean {
@@ -76,20 +78,25 @@ chrome.webNavigation.onHistoryStateUpdated.addListener(function(tab) {
 chrome.runtime.onMessage.addListener((msg,sender,sendResponse)=>{
     Store.checkFreshInstall((freshInstall:boolean)=>{
         if(freshInstall){
-            logServer.logWeb('freshInstall detected');
+            logServer.logWeb('freshInstall detected',getLineInfo());
             return;
             //Store.prepareAppStorage();
         }
 
         setTimeout(()=>{
-            if(msg.cmd == 'start_download'){
+            if(msg.cmd == 'reset_queue'){
+                // downloadQueue.setCourse(msg.course);
+                downloadQueue.queueStarted = false;
+                logServer.logWeb('queue reset',getLineInfo())
+            }
+            else if(msg.cmd == 'start_download'){
                 downloadQueue.setCourse(msg.course);
-                logServer.logWeb(msg);
+                logServer.logWeb(msg,getLineInfo());
                 if(downloadQueue.queueStarted){
-                    logServer.logWeb('queue is running:skipped');
+                    logServer.logWeb('queue is running:skipped',getLineInfo());
                     return;
                 }
-                logServer.logWeb(msg)
+                logServer.logWeb(msg,getLineInfo())
                 if(downloadQueue.queues.length == 0){
                     downloadQueue.populate((queues:Downloads_tableField[])=>{
                         downloadQueue.queueStarted = true;
@@ -101,4 +108,4 @@ chrome.runtime.onMessage.addListener((msg,sender,sendResponse)=>{
     })
 });
 
-setInterval(()=>{logServer.logWeb('WAKE_UP');},3000)
+setInterval(()=>{logServer.logWeb('WAKE_UP',getLineInfo());},3000)

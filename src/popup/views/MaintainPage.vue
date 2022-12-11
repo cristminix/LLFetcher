@@ -1,12 +1,12 @@
 <template>
-	<div class="option-page text-center">
-    <div>
-      <button class="btn btn-danger"  @click="initDB()"><i class="fa fa-db"></i> Init DB</button>
+	<div class="maintain-page text-center" style="padding:2em">
+
+		<div class="btn-group">
+      <button class="btn btn-sm btn-primary"  @click="initDB()"><i class="fa fa-database"></i> Init DB</button>
+      <button class="btn btn-sm btn-danger" @click="clearDB()"><i class="fa fa-trash"></i> Clear DB</button>
+      <button class="btn btn-danger" @click="resetDownloadQueue()"><i class="fa fa-road"></i> Reset Download Queue</button>
+
     </div>
-    <div>
-      <button class="btn btn-danger" @click="clearDB()"><i class="fa fa-db"></i> Clear DB</button>
-    </div>
-		
 	</div>
 </template>
 
@@ -14,14 +14,14 @@
 import { Course_tableField, DownloadConfig_tableField, ExerciseFile_tableField } from 'src/types/tableFields';
 import { defineComponent, PropType, ref } from 'vue';
 import Store from 'src/libs/store';
-import {LogServer} from 'src/libs/utils';
+import { sendMessageBg,LogServer } from 'src/libs/utils';
 
 const logServer = new LogServer('OptionPage.vue');
 
 export default defineComponent({
   data() {
     return {
-      nav: 'batch-download'
+      nav: 'maintain'
     }
   },
   props:{
@@ -39,8 +39,17 @@ export default defineComponent({
     };
   },
   mounted(){
+    Store.onReady(()=>{
+      this.course = Store.getLastCourse();
+    });
   },
   methods:{
+    resetDownloadQueue(){
+      sendMessageBg({
+        cmd:'reset_queue',
+        course : this.course
+      });
+    },
      clearDB(){
       Store.clearStorage();
       logServer.log('clearing db_learning in chrome.storage.local');

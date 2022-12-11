@@ -1,6 +1,6 @@
 import { App_tableField, Course_tableField, DownloadConfig_tableField, Downloads_tableField, Section_tableField,DownloadState_tableField } from "src/types/tableFields";
 import Store from "../libs/store";
-import { myLogServer } from "../libs/utils";
+import { myLogServer,getLineInfo } from "../libs/utils";
 
 const logServer = myLogServer();
 
@@ -123,12 +123,12 @@ export default class DownloadQueue{
                 const dl = this.downloadOptions[idx];
                 let download = Store.getDownload(dl.tocId,dl.filename);
                 if(download){
-                    logServer.logWeb('updateDownload');
+                    logServer.logWeb('updateDownload',getLineInfo());
                     download.url = dl.url;
                     download.filename = dl.filename;
                     download = Store.updateDownload(download.ID,download);
                 }else{
-                    logServer.logWeb('createDownload');
+                    logServer.logWeb('createDownload',getLineInfo());
                     download = Store.createDownload(dl.url,dl.filename,dl.tocId,dl.courseId);
                 } 
                 this.queues.push(download);
@@ -169,7 +169,7 @@ export default class DownloadQueue{
         const peak = this.successQueues.length;
         const maxPeak = this.counts;
         const percentage = Math.ceil(peak / maxPeak * 100);
-        console.log(peak,maxPeak,percentage);
+        logServer.logWeb({peak,maxPeak,percentage},getLineInfo());
         return percentage;
     }
     afterProcessQueue(success?:boolean,delta?:object){
@@ -193,13 +193,13 @@ export default class DownloadQueue{
         // return;
         if(!this.downloadHandlerSet){
             chrome.downloads.onCreated.addListener((item)=>{
-                logServer.logWeb(item)
+                logServer.logWeb(item,getLineInfo())
             });
             chrome.downloads.onErased.addListener((downloadId)=>{
-                logServer.logWeb(downloadId)
+                logServer.logWeb(downloadId,getLineInfo())
             });
             chrome.downloads.onChanged.addListener((delta)=>{
-                logServer.logWeb(delta)
+                logServer.logWeb(delta,getLineInfo())
                 if(typeof delta.state == 'object'){
                     if(delta.state.current == 'complete'){
                         this.afterProcessQueue(true,delta);
@@ -221,13 +221,14 @@ export default class DownloadQueue{
                 const cmd = 'download_state';
                 const currentDownload = this.currentDownload;
                 chrome.runtime.sendMessage({cmd,currentDownload},(response)=>{});
-                logServer.logWeb(downloadId);
+                logServer.logWeb(downloadId,getLineInfo());
             });
             // afterProcessDownloadQueues(true);
         // },1000);
         
     }
     onDownloadError(delta){
+        logServer.logWeb('DOWNLOAD_ERROR',getLineInfo());
         const cmd = 'download_state';
         const success = false;
         const currentDownload = this.currentDownload;

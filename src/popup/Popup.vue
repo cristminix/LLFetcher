@@ -4,7 +4,8 @@
     <CoursePage @update="onCourseUpdate($event)" v-if="nav=='course'" :course="course"  ref="coursePage"/>
     <DownloadPage v-if="nav=='downloads'" ref="downloadPage"/>
     <HelpPage v-if="nav=='help'"/>
-    <OptionPage v-if="nav=='option'"/>
+    <MaintainPage v-if="nav=='maintain'"/>
+    
     <PageNavigation @update="onNavUpdate($event)" :nav="nav" ref="pageNavigation"/>
 
   </div>
@@ -14,19 +15,19 @@
 import {ComponentPublicInstance, defineComponent, PropType, ref} from 'vue';
 import NavTerm from '../types/navterm'; 
 import {Course} from '../types/lynda';
-
+import MaintainPage from './views/MaintainPage.vue';
 import PageNavigation from './components/PageNavigation.vue';
 import WelcomePage from './views/WelcomePage.vue'
 import CoursePage from './views/CoursePage.vue'
 import DownloadPage from './views/DownloadPage.vue'
 import AboutPage from './views/AboutPage.vue'
 import HelpPage from './views/HelpPage.vue'
-import OptionPage from './views/OptionPage.vue'
+
 import Store from '../libs/store';
 import { App_tableField,Course_tableField } from '../types/tableFields';
-import {LogServer} from '../libs/utils';
+import {LogServer,getLineInfo} from '../libs/utils';
 
-const logServer = new LogServer('src/popup/Popup.vue');
+const logServer = new LogServer();
 
 export default defineComponent({
   name: 'Popup',
@@ -37,7 +38,7 @@ export default defineComponent({
     DownloadPage,
     AboutPage,
     HelpPage,
-    OptionPage
+    MaintainPage
   },
   setup(){
     const nav = ref<NavTerm>('welcome');
@@ -60,9 +61,9 @@ export default defineComponent({
   mounted(){
     // console.log('App Entry Point Start here...');
 
-    chrome.storage.local.get('db_learning',(storage)=>{
-      logServer.log(storage,65);
-    });
+    // chrome.storage.local.get('db_learning',(storage)=>{
+    //   logServer.log(storage,65);
+    // });
     const self = this;
     // setTimeout(()=>{
       Store.checkFreshInstall((freshInstall:boolean)=>{
@@ -93,7 +94,7 @@ export default defineComponent({
             this.nav = this.pageNavigation.nav = this.app.nav as NavTerm;
           }
         }
-        logServer.log(this.app,96);
+        // logServer.log(this.app,96);
       });
 
     

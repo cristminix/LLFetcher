@@ -34,7 +34,10 @@
 
     const socket = io('ws://localhost:2022');
     socket.on('_message_to_debugger_',(consoleArgs)=>{
-      if(typeof consoleArgs.src == 'string'){
+      if(typeof consoleArgs.sourcemap == 'object'){
+        debuggerConsole.log(`${consoleArgs.sourcemap.file}:${consoleArgs.sourcemap.line}:${consoleArgs.sourcemap.column}`,consoleArgs.data)
+      }
+      else if(typeof consoleArgs.src == 'string'){
         debuggerConsole.log(`${consoleArgs.src}:${consoleArgs.lineNumber}:`,consoleArgs.data)
       }else{
         debuggerConsole.log(consoleArgs);

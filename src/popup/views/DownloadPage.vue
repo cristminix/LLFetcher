@@ -47,9 +47,12 @@ import { Section_tableField,Course_tableField, DownloadConfig_tableField, Exerci
 import { ComponentPublicInstance, defineComponent, PropType, ref } from 'vue';
 import Store from 'src/libs/store';
 import { createDownloadFile } from 'src/libs/ext';
-import { sendMessageBg,LogServer } from 'src/libs/utils';
+import { sendMessageBg,LogServer,getLineInfo } from 'src/libs/utils';
 import { Section,Toc } from 'src/types/lynda';
 import LogBar from 'src/popup/components/LogBar.vue';
+
+const logServer = new LogServer();
+
 export default defineComponent({
   components:{
     LogBar
@@ -71,7 +74,7 @@ export default defineComponent({
     const downloadConfig = ref<DownloadConfig_tableField>();
     const downloadState = ref({ID:0,courseId:0,state:0});
     const logBar=ref<ComponentPublicInstance<typeof LogBar>>();
-    const logServer = ref<LogServer>();
+    // const logServer = ref<LogServer>();
     const downloads = ref([]);
     const percentage = ref(0);
     return{
@@ -79,7 +82,7 @@ export default defineComponent({
     };
   },
   mounted(){
-    this.logServer = new LogServer('src/popup/views/DownloadPage.vue');
+    
     this.loadDownloadData();
     setTimeout(()=>{
       if(!this.course){
@@ -119,7 +122,7 @@ export default defineComponent({
           this.downloadState = Store.setDownloadState(this.course.ID,state);
 
         }
-        this.logServer.log(response);
+        // logServer.log(response,getLineInfo());
         if(response.success){
           this.logBar.log(response.currentDownload.filename,0)
         }else{

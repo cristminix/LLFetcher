@@ -6,7 +6,7 @@ export class LogServer{
  
   constructor(clientName){
 
-    this.clientName = clientName;
+    this.clientName = typeof clientName != 'undefined' ? clientName : 'LogServer';
     const socket = io('ws://localhost:2022');
     socket.on('connection',(r)=>{
       console.log(r) 
@@ -27,31 +27,24 @@ export class LogServer{
     this.socket = socket;
   }
 
-   log(data,lineNumber){
-    // const e = new Error();
-    // const regex = /\((.*):(\d+):(\d+)\)$/
-    // const match = regex.exec(e.stack.split("\n"));
-    // // console.log(e);
-    // console.log(e.stack);
-    // console.log(match);
-
-    // return;
-    // consoleArgs = {
-    //   filepath: match[1],
-    //   line: match[2],
-    //   column: match[3],
-    //   data
-    // };
-    const src = this.clientName;
-    let consoleArgs = {data,src,lineNumber};
-    
-    
+   log(data,lineInfo){
+    let src = this.clientName;
+    if(typeof data.src == 'string'){
+      delete data.src;
+    }
+    if(typeof lineInfo == 'undefined'){
+      lineInfo = null;
+    }
+    let consoleArgs = {data,src,lineInfo};
     try{
       this.socket.emit('log',consoleArgs);
     }catch(e){console.log(e)}
   }
-  logWeb(data){
+  logWeb(data,lineInfo){
     data.src = this.clientName;
+    if(typeof lineInfo != 'undefined'){
+      data.lineInfo = lineInfo;
+    }
     const data64 = btoa(JSON.stringify(data));
     const url = 'http://localhost:2002/log?data='+data64;
     // Proxy.post(url,data,(r)=>{},(r)=>{});
@@ -64,7 +57,19 @@ export class LogServer{
     
   }
 }
+export function  getLineInfo(){
+  const e = new Error();
+  let lines = e.stack.split("\n");
+  try{
+      lines = lines[lines.length-1].split('/');
+      let line = lines[lines.length-1];
 
+      return line;
+  }catch(e){}
+  
+
+  return '';
+}
 export function formatBytes(bytes) {
   if (bytes > 1024) return (bytes / 1024).toFixed(1) + 'K'
   return String(bytes)
@@ -193,20 +198,16 @@ export function sendMessageBg(data){
 
 export function myLogServer(){
   const logServer = {
-      logContent:(data)=>{
+      logContent:(data,lineInfo)=>{
           chrome.tabs.query({active: true, currentWindow: true}, function(tabs ) {
               try{
                   const tab = tabs[0];
-                  chrome.tabs.sendMessage(tab.id, {event: 'LogServer',data}, (r) => {});
+                  chrome.tabs.sendMessage(tab.id, {event: 'LogServer',data,lineInfo}, (r) => {});
               }catch(e){}
           });
       },
-      logWeb:(data)=>{
-          // if(typeof data !== 'object'){
-          //     data = {data};
-          // }
-          logServer.logContent(data);
-          // chrome.runtime.sendMessage({cmd: "logServer",data});
+      logWeb:(data,lineInfo)=>{
+          logServer.logContent(data,lineInfo);
       }
   };
   return logServer;

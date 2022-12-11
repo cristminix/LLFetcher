@@ -13,21 +13,21 @@ import 'src/styles/popup.css';
 // import hljsVuePlugin from "@highlightjs/vue-plugin";
 import 'bootstrap/dist/js/bootstrap.esm'
 
-import { attachListener,LogServer } from '../libs/utils';
+import { attachListener,LogServer,getLineInfo } from '../libs/utils';
 
 // hljs.registerLanguage('javascript', javascript);
 const app = createApp(Popup);
-const logServer = new LogServer('src/popup/popup.ts');
+const logServer = new LogServer();
 // logServer.init();
 // app.use(hljsVuePlugin);
 const instance  : ComponentPublicInstance<typeof Popup> = app.mount('#popup');
 
-logServer.log({ component: "Popup.ts" },25);
+logServer.log({ component: "Popup.ts" },getLineInfo());
 
 attachListener((a:any,b:any,c:any)=>{
-    if(a.cmd == 'logServer'){
-        logServer.log(a.data,29);
-    }
+    // if(a.cmd == 'logServer'){
+    //     logServer.log(a.data,a.data.lineInfo);
+    // }
 
     if(typeof instance.$refs.downloadPage != 'undefined'){
         instance.$refs.downloadPage.recv(a,b,c);

@@ -19083,7 +19083,7 @@ Object.assign(lookup2, {
 // src/libs/utils.js
 var LogServer = class {
   constructor(clientName) {
-    this.clientName = clientName;
+    this.clientName = typeof clientName != "undefined" ? clientName : "LogServer";
     const socket = lookup2("ws://localhost:2022");
     socket.on("connection", (r) => {
       console.log(r);
@@ -19098,17 +19098,26 @@ var LogServer = class {
     });
     this.socket = socket;
   }
-  log(data, lineNumber) {
-    const src = this.clientName;
-    let consoleArgs = { data, src, lineNumber };
+  log(data, lineInfo) {
+    let src = this.clientName;
+    if (typeof data.src == "string") {
+      delete data.src;
+    }
+    if (typeof lineInfo == "undefined") {
+      lineInfo = null;
+    }
+    let consoleArgs = { data, src, lineInfo };
     try {
       this.socket.emit("log", consoleArgs);
     } catch (e) {
       console.log(e);
     }
   }
-  logWeb(data) {
+  logWeb(data, lineInfo) {
     data.src = this.clientName;
+    if (typeof lineInfo != "undefined") {
+      data.lineInfo = lineInfo;
+    }
     const data64 = btoa(JSON.stringify(data));
     const url2 = "http://localhost:2002/log?data=" + data64;
     setTimeout(() => {
@@ -19116,6 +19125,17 @@ var LogServer = class {
     }, 100);
   }
 };
+function getLineInfo() {
+  const e = new Error();
+  let lines = e.stack.split("\n");
+  try {
+    lines = lines[lines.length - 1].split("/");
+    let line = lines[lines.length - 1];
+    return line;
+  } catch (e2) {
+  }
+  return "";
+}
 function findItems(searchTerm, source) {
   let __searchTerm__ = searchTerm;
   let __results__ = [];
@@ -19232,7 +19252,7 @@ var MyLS = class {
           }
         }
       }
-      logServer.log(`fresh install MyLS():${isFreshInstall}`, 25);
+      logServer.log(`fresh install MyLS():${isFreshInstall}`, getLineInfo());
       this.fresh = isFreshInstall;
     });
   }
@@ -19283,7 +19303,7 @@ var MyLS = class {
   }
   tableExists(table) {
     const tableExists = this.db.tableExists(table);
-    logServer.log(`MyLS.tableExits:${tableExists}`, 96);
+    logServer.log(`MyLS.tableExits:${tableExists}`, getLineInfo());
     return tableExists;
   }
   setFresh(fresh) {
@@ -19316,13 +19336,13 @@ var _Store = class {
     return schema;
   }
   static initTables(fn2) {
-    logServer.log(`Store.initTables()`, 129);
+    logServer.log(`Store.initTables()`, getLineInfo());
     const db2 = _Store.db();
     const schema = _Store.getSchema();
-    logServer.log(schema, 129);
+    logServer.log(schema, getLineInfo());
     Object.keys(schema).forEach((table) => {
       if (!db2.tableExists(table)) {
-        logServer.log(`createTable:${table}`, 25);
+        logServer.log(`createTable:${table}`, getLineInfo());
         db2.createTable(table, schema[table]);
       }
     });
@@ -19332,7 +19352,7 @@ var _Store = class {
   static init(fn2) {
     const db2 = _Store.db();
     db2.isNew((isNew) => {
-      logServer.log(`Store.init():isNew:${isNew}`, 144);
+      logServer.log(`Store.init():isNew:${isNew}`, getLineInfo());
       _Store.initTables(fn2);
     });
   }
@@ -19648,9 +19668,9 @@ var _Store = class {
     return course;
   }
   static prepareAppStorage(fn2) {
-    logServer.log(`Store.prepareAppStorage()`, 494);
+    logServer.log(`Store.prepareAppStorage()`, getLineInfo());
     _Store.init(() => {
-      logServer.log(`After Store.init()`, 498);
+      logServer.log(`After Store.init()`, getLineInfo());
       _Store.initApp("", fn2);
     });
   }
@@ -19692,6 +19712,14 @@ var _Store = class {
       app2 = apps[0];
     }
     return app2;
+  }
+  static getLastCourse() {
+    const app2 = _Store.getAppState();
+    if (app2) {
+      const course = _Store.getCourse(app2.lastCourseSlug);
+      return course;
+    }
+    return null;
   }
   static setAppState(state, courseSlug) {
     const db2 = _Store.db();
@@ -19841,12 +19869,98 @@ var Store = _Store;
 __publicField(Store, "__db__");
 var store_default = Store;
 
-// vue:./components/PageNavigation.vue?vue&type=template
-var _hoisted_1 = { class: "page-navigation text-center" };
+// vue:./views/MaintainPage.vue?vue&type=template
+var _hoisted_1 = {
+  class: "maintain-page text-center",
+  style: { "padding": "2em" }
+};
 var _hoisted_2 = { class: "btn-group" };
+var _hoisted_3 = /* @__PURE__ */ createBaseVNode("i", { class: "fa fa-database" }, null, -1);
+var _hoisted_4 = /* @__PURE__ */ createBaseVNode("i", { class: "fa fa-trash" }, null, -1);
+var _hoisted_5 = /* @__PURE__ */ createBaseVNode("i", { class: "fa fa-road" }, null, -1);
 function render(_ctx, _cache) {
   return openBlock(), createElementBlock("div", _hoisted_1, [
-    createBaseVNode("ul", _hoisted_2, [
+    createBaseVNode("div", _hoisted_2, [
+      createBaseVNode("button", {
+        class: "btn btn-sm btn-primary",
+        onClick: _cache[0] || (_cache[0] = ($event) => _ctx.initDB())
+      }, [
+        _hoisted_3,
+        createTextVNode(" Init DB")
+      ]),
+      createBaseVNode("button", {
+        class: "btn btn-sm btn-danger",
+        onClick: _cache[1] || (_cache[1] = ($event) => _ctx.clearDB())
+      }, [
+        _hoisted_4,
+        createTextVNode(" Clear DB")
+      ]),
+      createBaseVNode("button", {
+        class: "btn btn-danger",
+        onClick: _cache[2] || (_cache[2] = ($event) => _ctx.resetDownloadQueue())
+      }, [
+        _hoisted_5,
+        createTextVNode(" Reset Download Queue")
+      ])
+    ])
+  ]);
+}
+
+// vue:./views/MaintainPage.vue
+var logServer2 = new LogServer("OptionPage.vue");
+var __sfc_main = defineComponent({
+  data() {
+    return {
+      nav: "maintain"
+    };
+  },
+  props: {
+    course: {
+      required: false,
+      type: Object
+    }
+  },
+  setup() {
+    const course = ref();
+    const exerciseFile = ref();
+    const downloadConfig = ref();
+    return {
+      course,
+      exerciseFile,
+      downloadConfig
+    };
+  },
+  mounted() {
+    store_default.onReady(() => {
+      this.course = store_default.getLastCourse();
+    });
+  },
+  methods: {
+    resetDownloadQueue() {
+      sendMessageBg({
+        cmd: "reset_queue",
+        course: this.course
+      });
+    },
+    clearDB() {
+      store_default.clearStorage();
+      logServer2.log("clearing db_learning in chrome.storage.local");
+    },
+    initDB() {
+      logServer2.log("Store.prepareAppStorage()");
+      store_default.prepareAppStorage();
+    }
+  }
+});
+__sfc_main.render = render;
+var MaintainPage_default = __sfc_main;
+
+// vue:./components/PageNavigation.vue?vue&type=template
+var _hoisted_12 = { class: "page-navigation text-center" };
+var _hoisted_22 = { class: "btn-group" };
+function render2(_ctx, _cache) {
+  return openBlock(), createElementBlock("div", _hoisted_12, [
+    createBaseVNode("ul", _hoisted_22, [
       createBaseVNode("li", {
         onClick: _cache[0] || (_cache[0] = ($event) => _ctx.onNavClick("welcome")),
         class: normalizeClass(["btn btn-sm btn-primary", { active: _ctx.nav == "welcome" }])
@@ -19859,17 +19973,17 @@ function render(_ctx, _cache) {
         onClick: _cache[2] || (_cache[2] = ($event) => _ctx.onNavClick("downloads")),
         class: normalizeClass(["btn btn-sm btn-primary", { active: _ctx.nav == "downloads" }])
       }, "Downloads", 2),
-      _ctx.enableOption ? (openBlock(), createElementBlock("li", {
+      _ctx.enableMaintain ? (openBlock(), createElementBlock("li", {
         key: 0,
-        onClick: _cache[3] || (_cache[3] = ($event) => _ctx.onNavClick("option")),
-        class: normalizeClass(["btn btn-sm btn-primary", { active: _ctx.nav == "option" }])
-      }, "Option", 2)) : createCommentVNode("v-if", true)
+        onClick: _cache[3] || (_cache[3] = ($event) => _ctx.onNavClick("maintain")),
+        class: normalizeClass(["btn btn-sm btn-primary", { active: _ctx.nav == "maintain" }])
+      }, "Maintain", 2)) : createCommentVNode("v-if", true)
     ])
   ]);
 }
 
 // vue:./components/PageNavigation.vue
-var __sfc_main = defineComponent({
+var __sfc_main2 = defineComponent({
   props: {
     nav: {
       required: true,
@@ -19878,8 +19992,8 @@ var __sfc_main = defineComponent({
   },
   setup(props) {
     const nav = ref(props.nav);
-    const enableOption = ref(false);
-    return { nav, enableOption };
+    const enableMaintain = ref(true);
+    return { nav, enableMaintain };
   },
   methods: {
     onNavClick(target) {
@@ -19890,18 +20004,18 @@ var __sfc_main = defineComponent({
     }
   }
 });
-__sfc_main.render = render;
-var PageNavigation_default = __sfc_main;
+__sfc_main2.render = render2;
+var PageNavigation_default = __sfc_main2;
 
 // vue:./views/WelcomePage.vue?vue&type=template
-var _hoisted_12 = { class: "welcome-page page" };
-var _hoisted_22 = { class: "text-center" };
-var _hoisted_3 = { class: "action-cnt" };
-var _hoisted_4 = {
+var _hoisted_13 = { class: "welcome-page page" };
+var _hoisted_23 = { class: "text-center" };
+var _hoisted_32 = { class: "action-cnt" };
+var _hoisted_42 = {
   key: 0,
   class: "dropdown"
 };
-var _hoisted_5 = /* @__PURE__ */ createBaseVNode("button", {
+var _hoisted_52 = /* @__PURE__ */ createBaseVNode("button", {
   class: "btn btn-secondary dropdown-toggle",
   type: "button",
   id: "recentCourseButton",
@@ -19918,12 +20032,12 @@ var _hoisted_6 = {
 var _hoisted_7 = ["onClick"];
 var _hoisted_8 = { class: "btn-cnt" };
 var _hoisted_9 = ["disabled"];
-function render2(_ctx, _cache) {
-  return openBlock(), createElementBlock("div", _hoisted_12, [
-    createBaseVNode("p", _hoisted_22, toDisplayString(_ctx.greeting), 1),
-    createBaseVNode("div", _hoisted_3, [
-      _ctx.lastCourseList.length > 0 ? (openBlock(), createElementBlock("div", _hoisted_4, [
-        _hoisted_5,
+function render3(_ctx, _cache) {
+  return openBlock(), createElementBlock("div", _hoisted_13, [
+    createBaseVNode("p", _hoisted_23, toDisplayString(_ctx.greeting), 1),
+    createBaseVNode("div", _hoisted_32, [
+      _ctx.lastCourseList.length > 0 ? (openBlock(), createElementBlock("div", _hoisted_42, [
+        _hoisted_52,
         createBaseVNode("ul", _hoisted_6, [
           (openBlock(true), createElementBlock(Fragment, null, renderList(_ctx.lastCourseList, (course) => {
             return openBlock(), createElementBlock("li", {
@@ -19955,7 +20069,7 @@ function render2(_ctx, _cache) {
 }
 
 // vue:./views/WelcomePage.vue
-var __sfc_main2 = defineComponent({
+var __sfc_main3 = defineComponent({
   setup() {
     const nav = ref("welcome");
     const greeting = ref("Welcome to LLFetcher 1.0.1, what do you want to do ?");
@@ -20000,17 +20114,17 @@ var __sfc_main2 = defineComponent({
     }
   }
 });
-__sfc_main2.render = render2;
-var WelcomePage_default = __sfc_main2;
+__sfc_main3.render = render3;
+var WelcomePage_default = __sfc_main3;
 
 // vue:src/popup/components/FetchButton.vue
 var import_jquery = __toESM(require_jquery());
 
 // vue:src/popup/components/FetchButton.vue?vue&type=template
-var _hoisted_13 = { class: "btn-group" };
-var _hoisted_23 = ["disabled", "title"];
-function render3(_ctx, _cache) {
-  return openBlock(), createElementBlock("div", _hoisted_13, [
+var _hoisted_14 = { class: "btn-group" };
+var _hoisted_24 = ["disabled", "title"];
+function render4(_ctx, _cache) {
+  return openBlock(), createElementBlock("div", _hoisted_14, [
     createBaseVNode("button", {
       style: normalizeStyle({ border: _ctx.btnState != 1 && _ctx.btnState != 4 ? "none" : "inherit" }),
       disabled: _ctx.btnState > 1 && _ctx.btnState < 4,
@@ -20021,12 +20135,12 @@ function render3(_ctx, _cache) {
       createBaseVNode("i", {
         class: normalizeClass(["fa", { "fa-play": _ctx.btnState == 1, "fa-spin fa-spinner": _ctx.btnState == 2, "fa-check": _ctx.btnState == 3, "fa-refresh": _ctx.btnState == 4 }])
       }, null, 2)
-    ], 12, _hoisted_23)
+    ], 12, _hoisted_24)
   ]);
 }
 
 // vue:src/popup/components/FetchButton.vue
-var __sfc_main3 = defineComponent({
+var __sfc_main4 = defineComponent({
   props: {
     toc: {
       required: true,
@@ -20156,16 +20270,16 @@ var __sfc_main3 = defineComponent({
     }
   }
 });
-__sfc_main3.render = render3;
-var FetchButton_default = __sfc_main3;
+__sfc_main4.render = render4;
+var FetchButton_default = __sfc_main4;
 
 // vue:src/popup/components/TocItem.vue?vue&type=template
 var _withScopeId = (n) => (pushScopeId("data-v-3c3574fe"), n = n(), popScopeId(), n);
-var _hoisted_14 = { class: "toc-item-view" };
-var _hoisted_24 = { class: "toc-item-list" };
-var _hoisted_32 = { key: 0 };
-var _hoisted_42 = { colspan: "2" };
-var _hoisted_52 = /* @__PURE__ */ _withScopeId(() => /* @__PURE__ */ createBaseVNode("span", { style: { "padding-left": ".5em" } }, "Check All", -1));
+var _hoisted_15 = { class: "toc-item-view" };
+var _hoisted_25 = { class: "toc-item-list" };
+var _hoisted_33 = { key: 0 };
+var _hoisted_43 = { colspan: "2" };
+var _hoisted_53 = /* @__PURE__ */ _withScopeId(() => /* @__PURE__ */ createBaseVNode("span", { style: { "padding-left": ".5em" } }, "Check All", -1));
 var _hoisted_62 = /* @__PURE__ */ _withScopeId(() => /* @__PURE__ */ createBaseVNode("th", null, null, -1));
 var _hoisted_72 = /* @__PURE__ */ _withScopeId(() => /* @__PURE__ */ createBaseVNode("th", {
   class: "text-center",
@@ -20177,13 +20291,13 @@ var _hoisted_11 = {
   colspan: "2",
   style: { "text-align": "right" }
 };
-function render4(_ctx, _cache) {
+function render5(_ctx, _cache) {
   const _component_FetchButton = resolveComponent("FetchButton");
-  return openBlock(), createElementBlock("div", _hoisted_14, [
-    createBaseVNode("table", _hoisted_24, [
-      !_ctx.hideCheckAll ? (openBlock(), createElementBlock("thead", _hoisted_32, [
+  return openBlock(), createElementBlock("div", _hoisted_15, [
+    createBaseVNode("table", _hoisted_25, [
+      !_ctx.hideCheckAll ? (openBlock(), createElementBlock("thead", _hoisted_33, [
         createBaseVNode("tr", null, [
-          createBaseVNode("th", _hoisted_42, [
+          createBaseVNode("th", _hoisted_43, [
             createBaseVNode("label", null, [
               withDirectives(createBaseVNode("input", {
                 onClick: _cache[0] || (_cache[0] = ($event) => _ctx.onCheckAll()),
@@ -20194,7 +20308,7 @@ function render4(_ctx, _cache) {
                 [vModelCheckbox, _ctx.checkAll]
               ]),
               createTextVNode(),
-              _hoisted_52
+              _hoisted_53
             ])
           ]),
           _hoisted_62,
@@ -20239,7 +20353,7 @@ function render4(_ctx, _cache) {
 }
 
 // vue:src/popup/components/TocItem.vue
-var __sfc_main4 = defineComponent({
+var __sfc_main5 = defineComponent({
   components: {
     FetchButton: FetchButton_default
   },
@@ -20299,13 +20413,13 @@ var __sfc_main4 = defineComponent({
     }
   }
 });
-__sfc_main4.render = render4;
-__sfc_main4.__scopeId = "data-v-3c3574fe";
-var TocItem_default = __sfc_main4;
+__sfc_main5.render = render5;
+__sfc_main5.__scopeId = "data-v-3c3574fe";
+var TocItem_default = __sfc_main5;
 
 // vue:src/popup/components/FetchQueueBar.vue?vue&type=template
-var _hoisted_15 = { class: "fetch-queue-bar" };
-var _hoisted_53 = { class: "fetch-queue-pb" };
+var _hoisted_16 = { class: "fetch-queue-bar" };
+var _hoisted_54 = { class: "fetch-queue-pb" };
 var _hoisted_63 = { class: "progress" };
 var _hoisted_73 = ["aria-valuenow"];
 var _hoisted_83 = {
@@ -20313,10 +20427,10 @@ var _hoisted_83 = {
   class: "btn-fetch-cnt"
 };
 var _hoisted_92 = ["disabled"];
-function render5(_ctx, _cache) {
-  return openBlock(), createElementBlock("div", _hoisted_15, [
+function render6(_ctx, _cache) {
+  return openBlock(), createElementBlock("div", _hoisted_16, [
     false ? (openBlock(), createElementBlock("div", _hoisted_2, _hoisted_4)) : createCommentVNode("v-if", true),
-    createBaseVNode("div", _hoisted_53, [
+    createBaseVNode("div", _hoisted_54, [
       withDirectives(createBaseVNode("div", _hoisted_63, [
         createBaseVNode("div", {
           class: "progress-bar bg-info",
@@ -20346,7 +20460,7 @@ function render5(_ctx, _cache) {
 }
 
 // vue:src/popup/components/FetchQueueBar.vue
-var __sfc_main5 = defineComponent({
+var __sfc_main6 = defineComponent({
   props: {
     sectionIndex: {
       required: true,
@@ -20446,28 +20560,28 @@ var __sfc_main5 = defineComponent({
     }
   }
 });
-__sfc_main5.render = render5;
-__sfc_main5.__scopeId = "data-v-905aec42";
-var FetchQueueBar_default = __sfc_main5;
+__sfc_main6.render = render6;
+__sfc_main6.__scopeId = "data-v-905aec42";
+var FetchQueueBar_default = __sfc_main6;
 
 // vue:src/popup/components/FetchSectionQueue.vue?vue&type=template
-var _hoisted_16 = { class: "fetch-section-queue" };
-var _hoisted_25 = { class: "fsqbc" };
-var _hoisted_33 = { class: "fetch-section-queue-bar" };
-var _hoisted_43 = { class: "fetch-section-queue-pb" };
-var _hoisted_54 = { class: "progress" };
+var _hoisted_17 = { class: "fetch-section-queue" };
+var _hoisted_26 = { class: "fsqbc" };
+var _hoisted_34 = { class: "fetch-section-queue-bar" };
+var _hoisted_44 = { class: "fetch-section-queue-pb" };
+var _hoisted_55 = { class: "progress" };
 var _hoisted_64 = ["aria-valuenow"];
 var _hoisted_74 = {
   key: 0,
   class: "btn-fetch-section-queue-cnt"
 };
 var _hoisted_84 = ["disabled"];
-function render6(_ctx, _cache) {
-  return openBlock(), createElementBlock("div", _hoisted_16, [
-    createBaseVNode("div", _hoisted_25, [
-      createBaseVNode("div", _hoisted_33, [
-        createBaseVNode("div", _hoisted_43, [
-          withDirectives(createBaseVNode("div", _hoisted_54, [
+function render7(_ctx, _cache) {
+  return openBlock(), createElementBlock("div", _hoisted_17, [
+    createBaseVNode("div", _hoisted_26, [
+      createBaseVNode("div", _hoisted_34, [
+        createBaseVNode("div", _hoisted_44, [
+          withDirectives(createBaseVNode("div", _hoisted_55, [
             createBaseVNode("div", {
               class: "progress-bar bg-danger",
               role: "progressbar",
@@ -20498,7 +20612,7 @@ function render6(_ctx, _cache) {
 }
 
 // vue:src/popup/components/FetchSectionQueue.vue
-var __sfc_main6 = defineComponent({
+var __sfc_main7 = defineComponent({
   setup() {
     const queueSlugs = ref([]);
     const excludeTocCount = ref(0);
@@ -20593,14 +20707,14 @@ var __sfc_main6 = defineComponent({
     }
   }
 });
-__sfc_main6.render = render6;
-__sfc_main6.__scopeId = "data-v-6afda649";
-var FetchSectionQueue_default = __sfc_main6;
+__sfc_main7.render = render7;
+__sfc_main7.__scopeId = "data-v-6afda649";
+var FetchSectionQueue_default = __sfc_main7;
 
 // vue:src/popup/components/LogBar.vue?vue&type=template
-var _hoisted_17 = { class: "log-bar" };
-function render7(_ctx, _cache) {
-  return openBlock(), createElementBlock("div", _hoisted_17, [
+var _hoisted_18 = { class: "log-bar" };
+function render8(_ctx, _cache) {
+  return openBlock(), createElementBlock("div", _hoisted_18, [
     createBaseVNode("div", {
       class: normalizeClass(["log-message", { error: _ctx.mode == 1, success: _ctx.mode == 0, warning: _ctx.mode == 2 }])
     }, [
@@ -20610,7 +20724,7 @@ function render7(_ctx, _cache) {
 }
 
 // vue:src/popup/components/LogBar.vue
-var __sfc_main7 = defineComponent({
+var __sfc_main8 = defineComponent({
   setup() {
     const mode = ref(-1);
     const message = ref("");
@@ -20623,25 +20737,25 @@ var __sfc_main7 = defineComponent({
     }
   }
 });
-__sfc_main7.render = render7;
-__sfc_main7.__scopeId = "data-v-5c8a287c";
-var LogBar_default = __sfc_main7;
+__sfc_main8.render = render8;
+__sfc_main8.__scopeId = "data-v-5c8a287c";
+var LogBar_default = __sfc_main8;
 
 // vue:./views/CoursePage.vue
 var import_jquery2 = __toESM(require_jquery());
 
 // vue:./views/CoursePage.vue?vue&type=template
-var _hoisted_18 = { class: "course-page page" };
-var _hoisted_26 = {
+var _hoisted_19 = { class: "course-page page" };
+var _hoisted_27 = {
   key: 0,
   class: "fsqc"
 };
-var _hoisted_34 = {
+var _hoisted_35 = {
   key: 1,
   class: "course"
 };
-var _hoisted_44 = /* @__PURE__ */ createBaseVNode("i", { class: "fa fa-bookmark" }, null, -1);
-var _hoisted_55 = { style: { "font-style": "italic" } };
+var _hoisted_45 = /* @__PURE__ */ createBaseVNode("i", { class: "fa fa-bookmark" }, null, -1);
+var _hoisted_56 = { style: { "font-style": "italic" } };
 var _hoisted_65 = { key: 0 };
 var _hoisted_75 = {
   class: "accordion accordion-flush",
@@ -20662,22 +20776,22 @@ var _hoisted_142 = { class: "col-md-4" };
 var _hoisted_152 = ["id", "aria-labelledby"];
 var _hoisted_162 = { class: "accordion-body" };
 var _hoisted_172 = { class: "lbc" };
-function render8(_ctx, _cache) {
+function render9(_ctx, _cache) {
   const _component_FetchSectionQueue = resolveComponent("FetchSectionQueue");
   const _component_FetchQueueBar = resolveComponent("FetchQueueBar");
   const _component_TocItem = resolveComponent("TocItem");
   const _component_LogBar = resolveComponent("LogBar");
-  return openBlock(), createElementBlock("div", _hoisted_18, [
-    _ctx.course ? (openBlock(), createElementBlock("div", _hoisted_26, [
+  return openBlock(), createElementBlock("div", _hoisted_19, [
+    _ctx.course ? (openBlock(), createElementBlock("div", _hoisted_27, [
       createVNode(_component_FetchSectionQueue, { ref: "fetchSectionQueue" }, null, 512)
     ])) : createCommentVNode("v-if", true),
-    _ctx.course ? (openBlock(), createElementBlock("div", _hoisted_34, [
+    _ctx.course ? (openBlock(), createElementBlock("div", _hoisted_35, [
       createBaseVNode("h2", null, [
-        _hoisted_44,
+        _hoisted_45,
         createTextVNode(),
         createBaseVNode("span", null, toDisplayString(_ctx.course.title), 1)
       ]),
-      createBaseVNode("div", _hoisted_55, [
+      createBaseVNode("div", _hoisted_56, [
         createBaseVNode("h4", null, [
           _ctx.authors.length > 0 ? (openBlock(), createElementBlock("span", _hoisted_65, "By")) : createCommentVNode("v-if", true),
           createTextVNode(),
@@ -20743,8 +20857,8 @@ function render8(_ctx, _cache) {
 }
 
 // vue:./views/CoursePage.vue
-var logServer2 = new LogServer("src/popup/CoursePage.vue");
-var __sfc_main8 = defineComponent({
+var logServer3 = new LogServer("src/popup/CoursePage.vue");
+var __sfc_main9 = defineComponent({
   components: {
     TocItem: TocItem_default,
     FetchQueueBar: FetchQueueBar_default,
@@ -20847,8 +20961,8 @@ var __sfc_main8 = defineComponent({
     }
   }
 });
-__sfc_main8.render = render8;
-var CoursePage_default = __sfc_main8;
+__sfc_main9.render = render9;
+var CoursePage_default = __sfc_main9;
 
 // src/libs/ext.js
 function generateShellScript(config) {
@@ -20930,17 +21044,17 @@ function createDownloadFile(kind, config) {
 
 // vue:./views/DownloadPage.vue?vue&type=template
 var _withScopeId2 = (n) => (pushScopeId("data-v-36213f66"), n = n(), popScopeId(), n);
-var _hoisted_19 = { class: "download-page page" };
-var _hoisted_27 = {
+var _hoisted_110 = { class: "download-page page" };
+var _hoisted_28 = {
   key: 0,
   class: "dl-cnt text-center"
 };
-var _hoisted_35 = {
+var _hoisted_36 = {
   key: 0,
   class: "exercise-file-cnt"
 };
-var _hoisted_45 = { key: 0 };
-var _hoisted_56 = /* @__PURE__ */ _withScopeId2(() => /* @__PURE__ */ createBaseVNode("label", { class: "form-label" }, "Exercise File: ", -1));
+var _hoisted_46 = { key: 0 };
+var _hoisted_57 = /* @__PURE__ */ _withScopeId2(() => /* @__PURE__ */ createBaseVNode("label", { class: "form-label" }, "Exercise File: ", -1));
 var _hoisted_66 = {
   key: 1,
   class: "dl-config-cnt"
@@ -20971,13 +21085,13 @@ var _hoisted_20 = {
 };
 var _hoisted_21 = /* @__PURE__ */ _withScopeId2(() => /* @__PURE__ */ createBaseVNode("label", { class: "form-label" }, "Source Repository : ", -1));
 var _hoisted_222 = ["href"];
-function render9(_ctx, _cache) {
+function render10(_ctx, _cache) {
   const _component_LogBar = resolveComponent("LogBar");
-  return openBlock(), createElementBlock("div", _hoisted_19, [
-    _ctx.course ? (openBlock(), createElementBlock("div", _hoisted_27, [
-      _ctx.exerciseFile ? (openBlock(), createElementBlock("div", _hoisted_35, [
-        _ctx.exerciseFile.url ? (openBlock(), createElementBlock("div", _hoisted_45, [
-          _hoisted_56,
+  return openBlock(), createElementBlock("div", _hoisted_110, [
+    _ctx.course ? (openBlock(), createElementBlock("div", _hoisted_28, [
+      _ctx.exerciseFile ? (openBlock(), createElementBlock("div", _hoisted_36, [
+        _ctx.exerciseFile.url ? (openBlock(), createElementBlock("div", _hoisted_46, [
+          _hoisted_57,
           createBaseVNode("a", {
             onClick: _cache[0] || (_cache[0] = ($event) => _ctx.downloadFile("exercise_file")),
             href: "javascript:;"
@@ -21069,7 +21183,8 @@ function render9(_ctx, _cache) {
 }
 
 // vue:./views/DownloadPage.vue
-var __sfc_main9 = defineComponent({
+var logServer4 = new LogServer();
+var __sfc_main10 = defineComponent({
   components: {
     LogBar: LogBar_default
   },
@@ -21090,7 +21205,6 @@ var __sfc_main9 = defineComponent({
     const downloadConfig = ref();
     const downloadState = ref({ ID: 0, courseId: 0, state: 0 });
     const logBar = ref();
-    const logServer6 = ref();
     const downloads = ref([]);
     const percentage = ref(0);
     return {
@@ -21100,12 +21214,11 @@ var __sfc_main9 = defineComponent({
       downloadState,
       logBar,
       downloads,
-      logServer: logServer6,
+      logServer: logServer4,
       percentage
     };
   },
   mounted() {
-    this.logServer = new LogServer("src/popup/views/DownloadPage.vue");
     this.loadDownloadData();
     setTimeout(() => {
       if (!this.course) {
@@ -21139,7 +21252,6 @@ var __sfc_main9 = defineComponent({
           }
           this.downloadState = store_default.setDownloadState(this.course.ID, state);
         }
-        this.logServer.log(response);
         if (response.success) {
           this.logBar.log(response.currentDownload.filename, 0);
         } else {
@@ -21191,24 +21303,24 @@ var __sfc_main9 = defineComponent({
     }
   }
 });
-__sfc_main9.render = render9;
-__sfc_main9.__scopeId = "data-v-36213f66";
-var DownloadPage_default = __sfc_main9;
+__sfc_main10.render = render10;
+__sfc_main10.__scopeId = "data-v-36213f66";
+var DownloadPage_default = __sfc_main10;
 
 // vue:./views/AboutPage.vue?vue&type=template
-var _hoisted_110 = {
+var _hoisted_111 = {
   key: 0,
   class: "about-page page"
 };
-function render10(_ctx, _cache) {
-  return _ctx.app ? (openBlock(), createElementBlock("div", _hoisted_110, [
+function render11(_ctx, _cache) {
+  return _ctx.app ? (openBlock(), createElementBlock("div", _hoisted_111, [
     createTextVNode(" version "),
     createBaseVNode("span", null, toDisplayString(_ctx.app.version), 1)
   ])) : createCommentVNode("v-if", true);
 }
 
 // vue:./views/AboutPage.vue
-var __sfc_main10 = defineComponent({
+var __sfc_main11 = defineComponent({
   setup() {
     const nav = ref("about");
     const app2 = ref();
@@ -21222,21 +21334,21 @@ var __sfc_main10 = defineComponent({
     console.log(this.app);
   }
 });
-__sfc_main10.render = render10;
-var AboutPage_default = __sfc_main10;
+__sfc_main11.render = render11;
+var AboutPage_default = __sfc_main11;
 
 // vue:./views/HelpPage.vue?vue&type=template
-var _hoisted_111 = { class: "help-page page" };
-var _hoisted_28 = /* @__PURE__ */ createBaseVNode("i", { class: "fa fa-sync" }, null, -1);
-function render11(_ctx, _cache) {
-  return openBlock(), createElementBlock("div", _hoisted_111, [
+var _hoisted_114 = { class: "help-page page" };
+var _hoisted_29 = /* @__PURE__ */ createBaseVNode("i", { class: "fa fa-sync" }, null, -1);
+function render12(_ctx, _cache) {
+  return openBlock(), createElementBlock("div", _hoisted_114, [
     createTextVNode(" HELP "),
     createBaseVNode("div", null, [
       createBaseVNode("button", {
         class: "btn btn-danger",
         onClick: _cache[0] || (_cache[0] = ($event) => _ctx.syncLS())
       }, [
-        _hoisted_28,
+        _hoisted_29,
         createTextVNode(" Sync LS")
       ])
     ])
@@ -21244,7 +21356,7 @@ function render11(_ctx, _cache) {
 }
 
 // vue:./views/HelpPage.vue
-var __sfc_main11 = defineComponent({
+var __sfc_main12 = defineComponent({
   data() {
     return {
       nav: "help"
@@ -21257,75 +21369,8 @@ var __sfc_main11 = defineComponent({
     }
   }
 });
-__sfc_main11.render = render11;
-var HelpPage_default = __sfc_main11;
-
-// vue:./views/OptionPage.vue?vue&type=template
-var _hoisted_114 = { class: "option-page text-center" };
-var _hoisted_29 = /* @__PURE__ */ createBaseVNode("i", { class: "fa fa-db" }, null, -1);
-var _hoisted_36 = /* @__PURE__ */ createBaseVNode("i", { class: "fa fa-db" }, null, -1);
-function render12(_ctx, _cache) {
-  return openBlock(), createElementBlock("div", _hoisted_114, [
-    createBaseVNode("div", null, [
-      createBaseVNode("button", {
-        class: "btn btn-danger",
-        onClick: _cache[0] || (_cache[0] = ($event) => _ctx.initDB())
-      }, [
-        _hoisted_29,
-        createTextVNode(" Init DB")
-      ])
-    ]),
-    createBaseVNode("div", null, [
-      createBaseVNode("button", {
-        class: "btn btn-danger",
-        onClick: _cache[1] || (_cache[1] = ($event) => _ctx.clearDB())
-      }, [
-        _hoisted_36,
-        createTextVNode(" Clear DB")
-      ])
-    ])
-  ]);
-}
-
-// vue:./views/OptionPage.vue
-var logServer3 = new LogServer("OptionPage.vue");
-var __sfc_main12 = defineComponent({
-  data() {
-    return {
-      nav: "batch-download"
-    };
-  },
-  props: {
-    course: {
-      required: false,
-      type: Object
-    }
-  },
-  setup() {
-    const course = ref();
-    const exerciseFile = ref();
-    const downloadConfig = ref();
-    return {
-      course,
-      exerciseFile,
-      downloadConfig
-    };
-  },
-  mounted() {
-  },
-  methods: {
-    clearDB() {
-      store_default.clearStorage();
-      logServer3.log("clearing db_learning in chrome.storage.local");
-    },
-    initDB() {
-      logServer3.log("Store.prepareAppStorage()");
-      store_default.prepareAppStorage();
-    }
-  }
-});
 __sfc_main12.render = render12;
-var OptionPage_default = __sfc_main12;
+var HelpPage_default = __sfc_main12;
 
 // vue:./Popup.vue?vue&type=template
 var _hoisted_115 = { class: "app-container" };
@@ -21334,7 +21379,7 @@ function render13(_ctx, _cache) {
   const _component_CoursePage = resolveComponent("CoursePage");
   const _component_DownloadPage = resolveComponent("DownloadPage");
   const _component_HelpPage = resolveComponent("HelpPage");
-  const _component_OptionPage = resolveComponent("OptionPage");
+  const _component_MaintainPage = resolveComponent("MaintainPage");
   const _component_PageNavigation = resolveComponent("PageNavigation");
   return openBlock(), createElementBlock("div", _hoisted_115, [
     _ctx.nav == "welcome" ? (openBlock(), createBlock(_component_WelcomePage, { key: 0 })) : createCommentVNode("v-if", true),
@@ -21349,7 +21394,7 @@ function render13(_ctx, _cache) {
       ref: "downloadPage"
     }, null, 512)) : createCommentVNode("v-if", true),
     _ctx.nav == "help" ? (openBlock(), createBlock(_component_HelpPage, { key: 3 })) : createCommentVNode("v-if", true),
-    _ctx.nav == "option" ? (openBlock(), createBlock(_component_OptionPage, { key: 4 })) : createCommentVNode("v-if", true),
+    _ctx.nav == "maintain" ? (openBlock(), createBlock(_component_MaintainPage, { key: 4 })) : createCommentVNode("v-if", true),
     createVNode(_component_PageNavigation, {
       onUpdate: _cache[1] || (_cache[1] = ($event) => _ctx.onNavUpdate($event)),
       nav: _ctx.nav,
@@ -21359,7 +21404,7 @@ function render13(_ctx, _cache) {
 }
 
 // vue:./Popup.vue
-var logServer4 = new LogServer("src/popup/Popup.vue");
+var logServer5 = new LogServer();
 var __sfc_main13 = defineComponent({
   name: "Popup",
   components: {
@@ -21369,7 +21414,7 @@ var __sfc_main13 = defineComponent({
     DownloadPage: DownloadPage_default,
     AboutPage: AboutPage_default,
     HelpPage: HelpPage_default,
-    OptionPage: OptionPage_default
+    MaintainPage: MaintainPage_default
   },
   setup() {
     const nav = ref("welcome");
@@ -21387,9 +21432,6 @@ var __sfc_main13 = defineComponent({
     return { nav, course, pageNavigation, onNavUpdate, onCourseUpdate, message, app: app2, downloadPage };
   },
   mounted() {
-    chrome.storage.local.get("db_learning", (storage) => {
-      logServer4.log(storage, 65);
-    });
     const self2 = this;
     store_default.checkFreshInstall((freshInstall) => {
       if (freshInstall) {
@@ -21410,7 +21452,6 @@ var __sfc_main13 = defineComponent({
             this.nav = this.pageNavigation.nav = this.app.nav;
           }
         }
-        logServer4.log(this.app, 96);
       });
     },
     log(message) {
@@ -26608,13 +26649,10 @@ defineJQueryPlugin(Toast);
 
 // src/popup/popup.ts
 var app = createApp(Popup_default);
-var logServer5 = new LogServer("src/popup/popup.ts");
+var logServer6 = new LogServer();
 var instance = app.mount("#popup");
-logServer5.log({ component: "Popup.ts" }, 25);
+logServer6.log({ component: "Popup.ts" }, getLineInfo());
 attachListener((a, b, c) => {
-  if (a.cmd == "logServer") {
-    logServer5.log(a.data, 29);
-  }
   if (typeof instance.$refs.downloadPage != "undefined") {
     instance.$refs.downloadPage.recv(a, b, c);
   }

@@ -1,5 +1,0 @@
-{
-    "git.ignoreLimitWarning": true,
-    "deno.enable": true,
-    "deno.unstable": true
-}

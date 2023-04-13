@@ -31,7 +31,7 @@ watch.watchTree('./', {
     console.log(fileObjs)
     if(fileObjs.match(/^dist/)){
       console.log(`dist detected`)
-      if(fileObjs.match(/app\.js/) ||fileObjs.match(/learning\.js/) || fileObjs.match(/content\.js/)){
+      if(fileObjs.match(/app\.js$/) ||fileObjs.match(/learning\.js/) || fileObjs.match(/content\.js/)){
         shouldReload()
       }
     }else{

@@ -45,21 +45,65 @@ class ContentScript {
     initController(){
         onMessage((evt, source) => {
             switch(evt.name){
-                case 'cmd.getDataCode':
-                    this.onGetDataCode();
+                case 'cmd.getCourseInfo':
+                    this.onCommand(evt.name);
                 break
+
+                case 'console.log':
+                    evt.data.map(item => console.log(item));
+                break 
             }
             console.log(evt, source);
         });
     }
 
-    onGetDataCode(){
-        const btnGetDataEl = document.getElementById('getData');
-        btnGetDataEl.click();
+    getExecuteBtn(){
+        return document.getElementById('exec-button')
+    }
+    getInputScriptEl(){
+        return document.getElementById('input-script')
+    }
+    getOutputScriptEl(){
+        return document.getElementById('output-script')
+    }
+    setInputScriptContent(is){
+        this.getInputScriptEl().value = JSON.stringify(is);
+    }
+    executeScriptContent(is, callback){
+        this.setInputScriptContent(is);
+        this.getExecuteBtn().click();
+        this.waitForScriptOutput(is.ocls, callback);
+    }
+    waitForScriptOutput(ocls, callback){
+        waitForElm(`.${ocls}`).then((elm) => {
+            const data = JSON.parse(elm.value);
+            callback(data);
+        });
+    }
+    /*onGetCourseInfo(){
+        const ocls = `ocls-${(new Date).getTime()}`
+        const is = {
+            cmd : 'getCourseInfo',
+            ocls
+        }
         
-        waitForElm('#dataCodes').then((elm) => {
-            const data = elm.getAttribute('data');
-            sendMessage('cmd.getDataCode', data);
+        this.executeScriptContent(is, data => {
+            // console.log(data)
+            sendMessage(`cmd.${is.cmd}`, data)
+        })
+
+    }*/
+
+    onCommand(command){
+        const cmd = command.replace(/^cmd\./,'');
+        const ocls = `ocls-${(new Date).getTime()}`;
+        const is = {
+            cmd, 
+            ocls
+        };
+        this.executeScriptContent(is, data => {
+            // console.log(data)
+            sendMessage(`${command}`, data);
         });
     }
 }

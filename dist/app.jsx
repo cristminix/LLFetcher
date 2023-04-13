@@ -1,7 +1,11 @@
 console.log('app.jsx')
 const App = ()=>{
+	const getData = () => {
+		console.log(chrome)
+		createDataCodes()
+	}
 	return (<div>
-			<h1>Hello World</h1>
+			<h1><button id="getData" onClick={e=>{getData()}}>Get Data</button></h1>
 		</div>)
 }
 

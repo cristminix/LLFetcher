@@ -18,14 +18,6 @@
   "host_permissions":[
     "https://www.linkedin.com/learning/*"
   ],
-  "web_accessible_resources": [{
-    "resources": [
-      "learning.js",
-      "app.js",
-      "lib/react.development.js",
-      "lib/react-dom.development.js"
-    ],
-     "matches": ["http://*/*", "https://*/*"]
-  }],
+ 
   "action": { "default_popup": "index.html" }
 }

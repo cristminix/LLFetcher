@@ -192,23 +192,31 @@ function createDataCodes(){
     };
     console.log(courseInfo);
     
-    let code = document.createElement('code');
-    code.id = 'dataCodes';
+    let code = document.querySelector('#dataCodes');
+    if(!code){
+
+    	code = document.createElement('code');
+    	code.id = 'dataCodes';
+    	let node = document.getElementsByTagName('body')[0];
+    	node.appendChild(code);
+    }
+    
     code.setAttribute('data', JSON.stringify(courseInfo));  
-    let node = document.getElementsByTagName('body')[0];
-    node.appendChild(code);
+    
 }
 function isLogedIn(){
     // return document.querySelector('li[data-live-test-me-menu]') !== null;
     return true
 };
-
-attachRouteChangesEvent((path)=>{
-    detectVideoJs(()=>{
+function pauseVideo(timeout=5000){
+	detectVideoJs(()=>{
         setTimeout(()=>{
             document.querySelector('video').pause()
-        },5000)
+        },timeout)
     })
+}
+attachRouteChangesEvent((path)=>{
+    pauseVideo()
 })
 createReactRootElement()
 

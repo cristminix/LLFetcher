@@ -1,10 +1,12 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App'
-import './index.css'
-
-ReactDOM.createRoot(document.getElementById('root')).render(
+import Popup from './components/Popup'
+// import './index.css'
+import 'bootstrap/dist/css/bootstrap.css';
+import 'fontawesome-4.7/css/font-awesome.min.css';
+// import 'bootstrap/dist/js/bootstrap.min.js'
+ReactDOM.createRoot(document.getElementById('popup')).render(
   <React.StrictMode>
-    <App />
+    <Popup />
   </React.StrictMode>
 )

@@ -3,12 +3,37 @@ import FetchSectionQueue from "./coursePage/FetchSectionQueue"
 import FetchQueueBar from "./coursePage/FetchQueueBar"
 import TocItem from "./coursePage/TocItem"
 
-const CoursePage = ({}) => {
-	const [course, setCourse] = useState(null)
-	const [authors, setAuthors] = useState([])
+const CourseAuthors = ({authors}) =>{
+  useEffect(()=>{
+  console.log(authors)
 
-	return(<div class="course-page page">
-   CoursePage
+  },[authors])
+  return(<>
+  <div style={{fontStyle:'italic'}}> 
+      <span>By</span>
+      {
+        authors.map((author, index)=>{
+      		return <h4 key={index}> <span>{author.slug}</span></h4>
+      	})
+      }
+      </div>
+  </>)
+}
+
+const CourseDetail = ({course, children}) => {
+  return (<>
+    <div className="course">
+      <h2><i className="fa fa-bookmark"></i> <span>{course.title}</span></h2>
+      {children}
+    </div>
+  </>)
+}
+const CoursePage = ({course, authors}) => {
+
+	return(<div className="course-page page">
+    <CourseDetail course={course}>
+      <CourseAuthors authors={authors} key={course.id}/>
+    </CourseDetail>  
   </div>)
 }
 
@@ -18,19 +43,7 @@ export default CoursePage
  <div class="fsqc">
       <FetchSectionQueue/>
     </div>
-    <div class="course" v-if="course">
-      <h2><i class="fa fa-bookmark"></i> <span>{course.title}</span></h2>
-      <div style="font-style:italic"> 
-      {
-      	authors ? (<span>By</span>):""
-      } 
-      {
-      	authors ? authors.map((author, index)=>{
-      		return <h4> <span key={index}>{author.name}</span></h4>
-      	}) :""
-      }
-      </div>
-    </div>
+    
     <div class="accordion accordion-flush" id="accordionCourse">
     <div v-for="(section,sectionIndex ) in sections" :key="sectionIndex" class="accordion-item">
       <div class="accordion-header" :id="'heading'+sectionIndex">

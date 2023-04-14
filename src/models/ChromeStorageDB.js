@@ -469,7 +469,7 @@ export default class ChromeStorageDB{
         for(field in data) {
             var index = this.db.tables[table_name].fields.indexOf(field);
             if (index === -1) {
-                error("Invalid query parameter: " + field);
+                this.error("Invalid query parameter: " + field);
             }
             new_data[field] = data[field];
         }
@@ -495,9 +495,9 @@ export default class ChromeStorageDB{
     createTable(table_name, fields) {
         var result = false;
         if(!this.validateName(table_name)) {
-            error("The database name '" + table_name + "' contains invalid characters.");
+            this.error("The database name '" + table_name + "' contains invalid characters.");
         } else if(this.tableExists(table_name)) {
-            error("The table name '" + table_name + "' already exists.");
+            this.error("The table name '" + table_name + "' already exists.");
         } else {
             // make sure field names are valid
             var is_valid = true;
@@ -528,7 +528,7 @@ export default class ChromeStorageDB{
                 this._createTable(table_name, fields);
                 result = true;
             } else {
-                error("One or more field names in the table definition contains invalid characters");
+                this.error("One or more field names in the table definition contains invalid characters");
             }
         }
 
@@ -538,7 +538,7 @@ export default class ChromeStorageDB{
     // Create a table using array of Objects @ [{k:v,k:v},{k:v,k:v},etc]
     createTableWithData(table_name, data) {
         if(typeof data !== 'object' || !data.length || data.length < 1) {
-            error("Data supplied isn't in object form. Example: [{k:v,k:v},{k:v,k:v} ..]");
+            this.error("Data supplied isn't in object form. Example: [{k:v,k:v},{k:v,k:v} ..]");
         }
 
         var fields = Object.keys(data[0]);
@@ -550,7 +550,7 @@ export default class ChromeStorageDB{
             // populate
             for (var i=0; i<data.length; i++) {
                 if( !insert(table_name, data[i]) ) {
-                    error("Failed to insert record: [" + JSON.stringify(data[i]) + "]");
+                    this.error("Failed to insert record: [" + JSON.stringify(data[i]) + "]");
                 }
             }
             this.commit();
@@ -574,7 +574,7 @@ export default class ChromeStorageDB{
     alterTable(table_name, new_fields, default_values) {
         var result = false;
         if(!this.validateName(table_name)) {
-            error("The database name '" + table_name + "' contains invalid characters");
+            this.error("The database name '" + table_name + "' contains invalid characters");
         } else {
             if(typeof new_fields === "object") {
                 // make sure field names are valid

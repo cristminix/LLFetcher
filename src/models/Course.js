@@ -1,4 +1,7 @@
 import DB from "./DB"
+import App from "./App"
+
+const mApp = App.getInstance()
 
 class Course extends DB {
 	table = 'course'
@@ -6,64 +9,54 @@ class Course extends DB {
 
 
 	getBySlug(slug){
-		/*static getCourse(slug:string): Course_tableField{
-	        const db = Store.db();
-	        const results =  db.queryAll('course',{query: {slug}});
-	        if(results.length>0){
-	            return results[0] as Course_tableField
-	        }
-	        return null;
-	    }*/
+	    const results =  this.db.queryAll(this.table,{query: {slug}});
+        return this.singleResult(results)
 	}
 
-	/*
 
-	static getLastCourses(slug?:string): Course_tableField[]{
-        const db = Store.db();
-        if(typeof slug === 'undefined'){
-            const appState = Store.getAppState();
-            if(!appState){
-                return [];
-            }
-            slug = appState.lastCourseSlug;
-
-        }
-
-        const results = db.queryAll('course',{query: (row)=>{
-                if(row.slug !== slug){
-                    return true;
-                }
-            }
-        });
-
-        return results as Course_tableField[];
-
-
+	getList(){
+        const results =  this.db.queryAll(this.table);
+        return results
     }
 
-static getCourseById(ID:number) : Course_tableField{
-        const db = Store.db();
-        const results = db.queryAll('course',{query: {ID}});
-        if(results.length>0){
-            return results[0] as Course_tableField
-        }
-        return null;
+    getById(id){
+        return this.singleQuery({query: {id}});
     }
 
-static createCourse(title:string,slug:string,duration:number,sourceCodeRepository:string,description:string):Course_tableField{
-        const db = Store.db();
-        let course = Store.getCourse(slug);
+    async addAuthorId(id, authorId){
+        const course = this.getById(id)
+        if(course){
+            const authorIds = course.authorIds
+            if(!authorIds.includes(authorId)){
+                authorIds.push(authorId)
+
+                this.db.update(this.table,{id}, row => {
+                    row.authorIds = authorIds
+                    return row
+                });
+                
+                await this.db.commit()
+            }
+        }
+
+        return course
+        
+    }
+    async create(title,slug,duration,sourceCodeRepository,description){
+        let course = this.getBySlug(slug);
         if(!course){
-            const ID = 0;
+            const id = 0;
             const authorIds = [];
-            course = {ID,title,slug,duration,sourceCodeRepository,description,authorIds};
-            course.ID = db.insert('course',course);
-            db.commit();
+            course = {id,title,slug,duration,sourceCodeRepository,description,authorIds};
+            course.id = this.db.insert(this.table,course);
+            await this.db.commit();
+        }else{
+            console.error(`${this.constructor.name}.create() rowExist`)
+
         }
 
         return course;
     }
-    */
 }
 
 export default Course

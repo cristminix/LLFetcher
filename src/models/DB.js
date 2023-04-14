@@ -33,6 +33,20 @@ class DB {
 		
 	}
 
+	singleResult(results){
+		if(results.length>0){
+			return results[0]
+		}
+		return null
+	}
+	singleQuery(params){
+		if(!this.table){
+			console.error(`${this.constructor.name}.singleQuery() table is not specified`)
+			return null
+		}
+		const results = this.db.queryAll(this.table,params);
+        return this.singleResult(results)
+	}
 	/**
 	 * get singleton instance */
 	static async getInstance(){

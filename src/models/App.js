@@ -4,91 +4,67 @@ class App extends DB {
 	table = 'app'
 	fields = ["version","state","lastCourseSlug","nav","freshInstall"]
 	type = 'single'
-
+    version = '2.0'
+    defaultNav = 'welcome'
+    rowExists = false
 	
+    get(){
+        const version = this.version;
+        const results = this.db.queryAll(this.table,{query:{version}});
+        return this.singleResult(results)
+    }
 
-/*
- static initApp(courseSlug:string,fn?:Function):App_tableField{
-        const db = Store.db();
-        const version = '1.0';
-     
-        const apps = db.queryAll('app',{query:{version}});
-        let app = null;
-        if(apps.length === 0){
-            const state = 0;
-            const ID = 0;
-            const lastCourseSlug = courseSlug;
-            const nav = 'welcome';
-            app = {ID,state,version,lastCourseSlug,nav};
-            app.ID = db.insert('app',app);
-            db.commit();
-            
-            
+    async init(courseSlug = ''){
+        
+        let app = this.get()
+        if(!app){
+            const state = 0
+            const id = 0
+            const lastCourseSlug = courseSlug
+            const nav = this.defaultNav
+            app = {id,state,version:this.version,lastCourseSlug,nav}
+            app.id = this.db.insert(this.table,app)
+            await this.db.commit()
+            this.rowExists = true
         }else{
-            app = apps[0];
-            if(app.lastCourseSlug !== courseSlug && courseSlug !==''){
-                app.lastCourseSlug = courseSlug;
-                db.update('app',{version},(row)=>{
-                    row.lastCourseSlug = courseSlug;
-                    return row;
-                });
-                db.commit();
+            if(app.lastCourseSlug !== courseSlug){
+                app.lastCourseSlug = courseSlug
+                await this.update(row => {
+                    row.lastCourseSlug = courseSlug
+                    return row
+                })
             } 
         }
-        if(typeof fn == 'function'){
-            fn(app);
-        }
-        return app;
+        return app
     }
-static getAppState():App_tableField{
-        const db = Store.db();
-        const version = '1.0';
-        const apps = db.queryAll('app',{query:{version}});
-        let app = null;
-        if(apps.length > 0){
-            app = apps[0];
-            
-        }
-        return app;
-    }
-    static setAppState(state : number,courseSlug?:string){
-        const db = Store.db();
-        const version = '1.0';
-        const apps = db.queryAll('app',{query:{version}} );
-        if(apps.length > 0){
-            db.update('app',{version},(row)=>{
-                row.state = state;
-                if(typeof courseSlug !== 'undefined'){
-                    row.lastCourseSlug = courseSlug;
-                }
-                return row;
-            });
-            db.commit();
-        }
-    }
-    static setAppNav(nav : string){
-        const db = Store.db();
-        const version = '1.0';
-        const apps = db.queryAll('app',{query:{version}});
-        if(apps.length > 0){
-            db.update('app',{version},(row)=>{
-                row.nav = nav;
-                return row;
-            });
-            db.commit();
-        }
-    }
-    static getAppInfo():App_tableField{
-        const db = Store.db();
-        const version = '1.0';
-        const apps = db.queryAll('app',{query:{version}});
-        if(apps.length > 0){
-            return apps[0] as App_tableField;
-        }
 
-        return null;
+    async setState(state, courseSlug){
+        await this.update( row =>{
+            row.state = state
+            if(courseSlug){
+                row.lastCourseSlug = courseSlug
+            }
+            return row
+        })
+        
     }
-*/	
+
+    async setNav(nav){
+        await this.update( row => {
+            row.nav = nav
+            return row
+        })
+    }
+
+    async update(callback){
+        if(!this.rowExists){
+            console.error(`${this.constructor.name}.update() rowExists is false`)
+            return
+        }
+        const version = this.version
+        this.db.update(this.table,{version}, callback);
+        await this.db.commit()
+    }	
 }
 
 export default App

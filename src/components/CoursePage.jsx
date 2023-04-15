@@ -2,18 +2,21 @@ import {useState, useEffect} from "react"
 import FetchSectionQueue from "./coursePage/FetchSectionQueue"
 import FetchQueueBar from "./coursePage/FetchQueueBar"
 import TocItem from "./coursePage/TocItem"
-
+import  {
+	titleCase
+} from "./fn"
 const CourseAuthors = ({authors}) =>{
   useEffect(()=>{
-  console.log(authors)
+  // console.log(authors)
 
   },[authors])
+  if(authors)
   return(<>
   <div style={{fontStyle:'italic'}}> 
       <span>By</span>
       {
         authors.map((author, index)=>{
-      		return <h4 key={index}> <span>{author.slug}</span></h4>
+      		return <h4 key={index}> <span>{titleCase(author.slug)}</span></h4>
       	})
       }
       </div>
@@ -29,7 +32,7 @@ const CourseDetail = ({course, children}) => {
   </>)
 }
 const CoursePage = ({course, authors}) => {
-
+  if(course)
 	return(<div className="course-page page">
     <CourseDetail course={course}>
       <CourseAuthors authors={authors} key={course.id}/>

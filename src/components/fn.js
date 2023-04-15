@@ -33,17 +33,22 @@ const konsole = {
 		sendMessage('console.log', args)
 	}
 }
-class Store {
-	static getCourseInfo(){
 
-	}
+const titleCase = str => {
+	let words = str.replace(/\W+/g,' ').split(' ').map(word=>word.charAt(0).toUpperCase() + word.slice(1))
+	return words.join(' ')
 }
 
-export default Store
+const slugify = str => {
+	const words = str.replace(/\W+/g,' ').split(' ')
+    return words.join('-').toLowerCase()
+}
 export {
 	onMessage,
 	MsgEvt,
 	sendMessage,
-	konsole
+	konsole,
+	titleCase,
+	slugify
 }
 

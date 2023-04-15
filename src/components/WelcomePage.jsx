@@ -1,10 +1,7 @@
-import {useState, useEffect} from "react"
-import Store, {
-	onMessage,
-	MsgEvt,
-	sendMessage,
-	konsole
-} from "./Store"
+import React, {useState, useEffect} from "react"
+import  {
+	sendMessage, titleCase
+} from "./fn"
 
 import App  from "../models/App"
 import Course  from "../models/Course"
@@ -16,7 +13,7 @@ const mApp = await App.getInstance()
 const mCourse = await Course.getInstance()
 const mAuthor = await Author.getInstance()
 
-console.log(mApp, mCourse, mAuthor)
+// console.log(mApp, mCourse, mAuthor)
 
 const exampleCourse = {
     "title": "Creating and Managing a YouTube Channel",
@@ -35,116 +32,161 @@ const exampleCourse = {
         }
     ]
 }
-const WelcomePage = ({onSelectCourse}) => {
-	const [greeting, setGreeting] = useState('Welcome to LLFetcher 2.0')
-	const [lastCourseList, setLastCourseList] = useState({})
-	const [fetchBtnState, setFetchBtnState] = useState(0)
-	const [courseInfo,setCourseInfo] = useState({})
-	const courseAuthors = []
-	const btnCls = fetchBtnState==0 ? 'fa-hand-o-right': fetchBtnState==1 ? 'fa-spin fa-spinner' : fetchBtnState==2 ? 'fa-refresh' : 'fa-hand-o-right'
+class WelcomePage extends React.Component {
+	courseAuthors = []
+	constructor(props){
+		super(props)
+		this.state = {
+			greeting : 'Welcome to LLFetcher 2.0',
+			lastCourseList : {},
+			fetchBtnState : 0,
+			courseInfo : null,
+			validCoursePage : false
+		}
+	}
 
-	const getCourseInfo = async() => {
+	async getCourseInfo(){
 		// konsole.log(`Popup.WelcomePage.getCourseInfo`)
 		
 		// console.log(course)
-		addToLastCourseList(exampleCourse)
+		// this.addToLastCourseList(exampleCourse)
+		this.setState({fetchBtnState:1})
 		sendMessage('cmd.getCourseInfo')
 	}
-	const addToLastCourseList = async(ci) =>{
-		setCourseInfo(ci)
-		const slug = ci.slug
-		const course = await createCourse(ci)
-		if(!Object.keys(lastCourseList).includes(slug)){
-			const lastCourseList_tmp = Object.assign({}, lastCourseList)
-			lastCourseList_tmp[slug] = course
 
-			setLastCourseList(lastCourseList_tmp)
-			
-			onSelectCourse(course, courseAuthors)
+	async addToLastCourseList(ci){
+		this.setState({courseInfo:ci})
+		const slug = ci.slug
+		const course = await this.createCourse(ci)
+		if(!Object.keys(this.state.lastCourseList).includes(slug)){
+			this.populateLastCourseList()
 		}
+		this.props.onSelectCourse(course, this.courseAuthors)
+
 	}
-	
-	const createAuthors = async(authors, course) => {
+	async createAuthors(authors, course){
 		// const courseAuthorsTmp = []
 		for(let i in authors){
-			const {name,slug,biography,shortBiography} = authors[i]
+			const {slug,biography,shortBiography} = authors[i]
+			const name = titleCase(slug)
 			const author = await mAuthor.create(name,slug,biography,shortBiography,course.id)
+			console.log(author)
+			if(this.courseAuthors.filter(_author_ => _author_.id === author.id).length === 0){
+				this.courseAuthors.push(author)
+				course = mCourse.addAuthorId(course.id, author.id)
+			}
 			
-			courseAuthors.push(author)
-			course = mCourse.addAuthorId(course.id, author.id)
 		}
 
 		return course
 
 	}
-	const createCourse = async(ci) =>{
+
+	async createCourse(ci){
 		// insert course
-		const {title,slug,duration,sourceCodeRepository,description} = ci
-		let course = await mCourse.create(title,slug,duration,sourceCodeRepository,description)
-		// console.log(course)
+		const {title,slug,duration,sourceCodeRepository,description,urn} = ci
+		let course = await mCourse.create(title,slug,duration,sourceCodeRepository,description,urn)
+		console.log(course)
 		
-		course = await createAuthors(ci.authors, course)
+		course = await this.createAuthors(ci.authors, course)
 		return course
 	}
-	const onGetCourseInfo = async(evt, source) => {
+
+	onGetCourseInfo(evt){
 		const course = evt.data
 		console.log(course)
-		addToLastCourseList(course)
+		this.addToLastCourseList(course)
 		// konsole.log(`Popup.WelcomePage.getCourseInfo`, evt.data)
 	}
 
-	const onCommand = (evt, source) => {
+	onCommand(evt, source){
 		// console.log(evt)
     	if(evt.name === 'cmd.getCourseInfo'){
-    		onGetCourseInfo(evt, source)
+    		this.onGetCourseInfo(evt, source)
+			this.setState({fetchBtnState:2})
     	}
-	}
-	useEffect(()=>{
-		setLastCourseList(mCourse.getList())
-		if(!onMessageAttached){
-			onMessage((evt, source)=>{
-				if( evt.name.match(/^cmd\./) ){
-					onCommand(evt, source)
-				}
-		    })
-		    onMessageAttached = true
+		if(evt.name === 'cmd.validCoursePage'){
+    		this.setState({validCoursePage:evt.data})
+			
+			// console.log(this,evt.data)
+			// console.log(`validCoursePage = ${evt.data}`)
 		}
-	},[])
+	}
 
-	const lastCourseListKeys = Object.keys(lastCourseList)
-	return(<>
-		<div className="welcome-page page">
-		    <p className="text-center">{greeting}</p>
-		    <div className="action-cnt">
-		    {
-		    	lastCourseListKeys.length > 0 ? (<>
-		    		<div className="dropdown">
-				        <button className="btn btn-secondary dropdown-toggle" type="button" id="recentCourseButton" data-bs-toggle="dropdown" aria-expanded="false">
-				          <i className="fa fa-history"></i> Load Recent Course
-				        </button>
-				        <ul className="dropdown-menu" aria-labelledby="recentCourseButton">
-				        {
-				        	lastCourseListKeys.map((slug,index)=>{
-				        		const course = lastCourseList[slug]
-				        		return (<li key={index}>
-				        			<a className="dropdown-item" href="#" onClick={e => onSelectCourse(course)}>{ course.title }</a>
-				        			</li>)
-				        	})	
-				          
-				        }
-				        </ul>
-				     </div>
-		    	</>) : ""
-		    }
-		      
+	// shouldComponentUpdate(props, state){
+	// 	console.log(props, state)
+	// 	return true
+	// }
+	populateLastCourseList(){
+		const savedCourseList = mCourse.getList()
+		let courseListObj = {}
+		for(let i in savedCourseList){
+			courseListObj[savedCourseList[i].slug] = savedCourseList[i]
+		} 
+		this.setState({lastCourseList :courseListObj})
 
-		      <div className="btn-cnt">
-		        <button disabled={fetchBtnState==1} className="btn btn-primary" onClick={e => getCourseInfo()}><i className={`fa ${btnCls}`}></i> Fetch This Course</button>
-		      </div>
+	}
+	commandListener = (evt, source) => {
+		this.onCommand(evt, source)
+	}
+	onMessage(){
+		try{
+			chrome.runtime.onMessage.removeListener(this.commandListener)
+			chrome.runtime.onMessage.addListener(this.commandListener)
+		}catch(e){
+			// console.log(e)
+		}	
+	
+	}
+	async componentDidMount(){
+		this.populateLastCourseList() 
+		this.onMessage()
 
-		    </div>
-		  </div>
-  </>)
+		sendMessage('cmd.validCoursePage')
+
+	}
+	render(){
+		const {greeting,lastCourseList,fetchBtnState,validCoursePage} = this.state
+		const lastCourseListKeys = Object.keys(lastCourseList)
+		const btnCls = fetchBtnState==0 ? 'fa-hand-o-right': fetchBtnState==1 ? 'fa-spin fa-spinner' : fetchBtnState==2 ? 'fa-refresh' : 'fa-hand-o-right'
+
+		return(<>
+			<div className="welcome-page page">
+				<p className="text-center">{greeting}</p>
+				<div className="action-cnt">
+				{
+					lastCourseListKeys.length > 0 ? (<>
+						<div className="dropdown">
+							<button className="btn btn-secondary dropdown-toggle" type="button" id="recentCourseButton" data-bs-toggle="dropdown" aria-expanded="false">
+							<i className="fa fa-history"></i> Load Recent Course
+							</button>
+							<ul className="dropdown-menu" aria-labelledby="recentCourseButton">
+							{
+								lastCourseListKeys.map((slug,index)=>{
+									const course = lastCourseList[slug]
+									return (<li key={index}>
+										<a className="dropdown-item" href="#" onClick={e => this.props.onSelectCourse(course)}>{ course.title }</a>
+										</li>)
+								})	
+							
+							}
+							</ul>
+						</div>
+					</>) : ""
+				}
+				
+
+				<div className="btn-cnt">
+					<button  disabled={fetchBtnState==1 || !validCoursePage} className="btn btn-primary" onClick={e => this.getCourseInfo()}><i className={`fa ${btnCls}`}></i> Fetch This Course</button>
+					{/* <span>Valid CoursePage ? {validCoursePage ? 'Yes' : 'No'}</span> */}
+				</div>
+
+				</div>
+			</div>
+	</>)
+	}
+    
 }
+
 
 export default WelcomePage

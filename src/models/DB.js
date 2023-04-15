@@ -8,11 +8,18 @@ class DB {
 	database = 'learning'
 	type = 'collection'
 
+
 	static instance = null
+	static instances = []
 	static configSet = null
+	static connection = null
 	
 	constructor(){
-		this.db = new ChromeStorageDB(this.database, 'local')
+		if(!DB.connection){
+			DB.connection = new ChromeStorageDB(this.database, 'local')
+			DB.connection.setInitiator(this.constructor.name)
+		}
+		this.db = DB.connection
 	}
 
 	async getCount(){
@@ -20,7 +27,7 @@ class DB {
 	}
 
 	async initTable(){
-		console.log(`${this.constructor.name}.initTable()`)
+		// console.log(`${this.constructor.name}.initTable()`)
 		if(!this.db.tableExists(this.table)){
 			this.db.createTable(this.table, this.fields)
 			await this.db.commit()
@@ -28,7 +35,11 @@ class DB {
 	}	
 	async initDB(){
 		await this.db.init()
-		await this.initTable()
+		if(this.constructor.name !== 'DB'){
+			await this.initTable()
+		}else{
+			console.error(`${this.constructor.name}.initTable() not implemented`)
+		}
 
 		
 	}
@@ -44,16 +55,25 @@ class DB {
 			console.error(`${this.constructor.name}.singleQuery() table is not specified`)
 			return null
 		}
-		const results = this.db.queryAll(this.table,params);
+		const results = this.db.queryAll(this.table,params)
         return this.singleResult(results)
+	}
+	query(params){
+		if(!this.table){
+			console.error(`${this.constructor.name}.query() table is not specified`)
+			return []
+		}
+		return this.db.queryAll(this.table,params)
 	}
 	/**
 	 * get singleton instance */
 	static async getInstance(){
 		if(this.instance instanceof this){
 		}else{
-			this.instance = this.factory();
+			this.instance = this.factory()
 			await this.instance.initDB()
+
+			DB.instances.push(this.instance)
 		}	
 
 		return this.instance;
@@ -73,8 +93,25 @@ class DB {
         // });
     }
 
-	static async drop(){
-        // chrome.storage.local.remove('db_learning');
+	async sync(){
+		this.db.reload()
+	}
+
+	async drop(){
+
+		if(this.constructor.name === 'DB'){
+			await this.db.drop()
+
+			for(let i in DB.instances){
+				const instance = DB.instances[i]
+				await instance.initDB()
+				if(instance.constructor.name === 'App'){
+					await instance.init()
+				}
+			}
+		}else{
+			console.error(`${this.constructor.name}.drop() only implemented for DB instaces`)
+		}
         // Store.db().setFresh(true);
 
     }

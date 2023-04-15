@@ -4,7 +4,9 @@
     padding: 1em 0;
     border: solid 1px #ddd;
 }
-
+.py-10{
+  padding: 10px 0;
+}
 .page{
   margin :0 1em;
   padding: 1em;

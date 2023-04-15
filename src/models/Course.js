@@ -5,7 +5,7 @@ const mApp = App.getInstance()
 
 class Course extends DB {
 	table = 'course'
-	fields = ["title", "slug", "duration", "sourceCodeRepository", "description",'authorIds']
+	fields = ["title", "slug", "duration", "sourceCodeRepository", "description",'authorIds','urn']
 
 
 	getBySlug(slug){
@@ -42,12 +42,12 @@ class Course extends DB {
         return course
         
     }
-    async create(title,slug,duration,sourceCodeRepository,description){
+    async create(title,slug,duration,sourceCodeRepository,description,urn){
         let course = this.getBySlug(slug);
         if(!course){
             const id = 0;
             const authorIds = [];
-            course = {id,title,slug,duration,sourceCodeRepository,description,authorIds};
+            course = {id,title,slug,duration,sourceCodeRepository,description,authorIds,urn};
             course.id = this.db.insert(this.table,course);
             await this.db.commit();
         }else{

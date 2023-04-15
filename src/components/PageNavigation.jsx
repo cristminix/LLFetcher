@@ -24,6 +24,7 @@ const PageNavigation = ({onNavUpdate}) => {
 	        	enableOption ? (<li> <a href="#" onClick={evt = onNavClick('option')} className={getBtnCls('option')}>Option</a></li>
 	        	):""
 	        }
+	        <li> <a href="#" onClick={evt => onNavClick('setting')} className={getBtnCls('setting')}>Setting</a></li>
 	        
 	    </ul>
   	</div>)

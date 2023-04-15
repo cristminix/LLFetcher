@@ -1,7 +1,7 @@
 var listeningTabIds = {};
 var exactMatchTabIds = {};
 var port = null; // This is the port used to communicate to the native host
-var enableRefreshActivePage = true;
+var enableRefreshActivePage = false;
 var extensionIdToReload = 'ennlmlmejjfgkocagljjaonphojefpeh';
 
 function changeToActiveIcon(tabId) {

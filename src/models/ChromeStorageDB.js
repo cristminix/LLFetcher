@@ -12,7 +12,8 @@ export default class ChromeStorageDB{
     db_new ; // this flag determines whether a new database was created during an object initialisation
     db = null;
     storage;
-
+    stype = 0
+    initiator = null
     constructor(db_name, engine) {
         this.db_name = db_name
         this.db_id = this.db_prefix + db_name;
@@ -22,36 +23,30 @@ export default class ChromeStorageDB{
             this.storage = chrome.storage[(engine === 'local' ? 'local': 'sync')];
         } catch(e) { // ie8 hack
             this.storage = localStorage;
+            this.stype = 1
         }
 
         
         // this.init()
     }
-
+    setInitiator(initiator){
+        this.initiator = initiator
+    }
     async init(){
         console.log(`${this.constructor.name}.init()`)
-        let tmpDb ;
-        let mode = 1;
-        try{
-            tmpDb = await this.storage.get([ this.db_id ]);
-        }
-        catch(e){
-            tmpDb = await this.storage.getItem([ this.db_id ]);
+        let tmpDb = await this.getItem(this.db_id )
+        if(this.stype === 1){
             tmpDb = JSON.parse(tmpDb)
-
-        }
-
-        console.log('A', tmpDb)
-        if(tmpDb){
+            this.db = tmpDb
+        }else{
             if(typeof tmpDb[this.db_id] !== 'undefined'){
                 this.db = tmpDb[this.db_id];
-            }else{
-                this.db = tmpDb
             }
         }
+
         
         if( !( this.db  && this.db.tables && this.db.data ) ) {
-            console.log('B',tmpDb)
+            console.log(`${this.constructor.name}.init() storage is null`)
 
             if(!this.validateName(this.db_name)) {
                 this.error("The name '" + this.db_name + "' contains invalid characters");
@@ -62,20 +57,9 @@ export default class ChromeStorageDB{
             }
         }
     }
-    sync(fn){
-        (async () => {
-            let tmpDb ;
-            try{
-                tmpDb = await this.storage.get([ this.db_id ]);
-            }
-            catch(e){
-                tmpDb = await this.storage.getItem([ this.db_id ]);
-            }
-            if(typeof fn == 'function'){
-                fn();
-            }
-            
-        })();
+    async reload(){
+        await this.init()
+        return this
     }
 
     // ______________________ private methods
@@ -83,16 +67,18 @@ export default class ChromeStorageDB{
     // _________ database functions
     // drop the database
    async drop() {
-        await this.storage.remove([ this.db_id ]);
-        this.db = null;
+        
+        await this.setItem(this.db_id, null)
+        this.db = null
+
     }
 
     async getItem(key) {
         let data = null
-        try{
-            data = await this.storage.get([key]);
-        }catch(e){
-            data = await this.storage.getItem([key]);
+        if(this.stype === 0){
+            data = await this.storage.get([key])
+        }else{
+            data = await this.storage.getItem([key])
         }
         
         return data
@@ -104,11 +90,12 @@ export default class ChromeStorageDB{
 
     async setItem(key, value) {
 
-        try {
-
-            await this.storage.set(value);
+        if(this.stype === 0){
+            const obj = {}
+            obj[key] = value
+            await this.storage.set(obj)
             return true;
-        } catch (e) {
+        } else{
             await this.storage.setItem(key, JSON.stringify(value));
             return false;
         }
@@ -409,30 +396,15 @@ export default class ChromeStorageDB{
     }
 
     // commit the database to localStorage
-    async commit(fn) {
-        try {
-            const data = {};
-            data[this.db_id] = this.db;
-            if(typeof this.storage.set === 'function'){
-                await this.storage.set(data,(data_)=>{
-                    if(typeof fn === 'function'){
-                        fn(data_);
-                    }
-                    // console.log(data_)
-                });
-            }else{
-                await this.storage.setItem(this.db_id, this.serialize(),(data_)=>{
-                    if(typeof fn === 'function'){
-                        fn(data_);
-                    }
-                    // console.log(data_)
-                });
-            }
+    async commit() {
+        console.log(this.initiator,this.db)
+        if(this.stype === 0) {
+            console.log(this.db)
+            await this.setItem(this.db_id, this.db)
             
-            return true;
-        } catch(e) {
-            console.log(e)
-            return false;
+        } else {
+            await this.setItem(this.db_id, this.serialize())
+
         }
     }
 

@@ -48,6 +48,12 @@ class ContentScript {
                 case 'cmd.getCourseInfo':
                     this.onCommand(evt.name)
                 break
+                case 'cmd.getCourseSections':
+                    this.onCommand(evt.name, evt.data)
+                break
+                case 'cmd.validCoursePage':
+                    this.onCommand(evt.name)
+                break
 
                 case 'console.log':
                     evt.data.map(item => console.log(item))
@@ -55,6 +61,8 @@ class ContentScript {
             }
             console.log(evt, source);
         })
+
+        this.waitForCheckerElm()
     }
 
     getExecuteBtn(){
@@ -70,9 +78,15 @@ class ContentScript {
         this.getInputScriptEl().value = JSON.stringify(is)
     }
     executeScriptContent(is, callback){
-        this.setInputScriptContent(is)
-        this.getExecuteBtn().click()
-        this.waitForScriptOutput(is.ocls, callback)
+        try{
+            this.setInputScriptContent(is)
+            this.getExecuteBtn().click()
+            this.waitForScriptOutput(is.ocls, callback)
+        }catch(e){
+            // console.log(e)
+        }
+        
+        
     }
     waitForScriptOutput(ocls, callback){
         waitForElm(`.${ocls}`).then((elm) => {
@@ -93,27 +107,49 @@ class ContentScript {
         })
 
     }*/
+    waitForCheckerElm(){
+        waitForElm('.course-checker-last').then(el => {
+            // console.log(el)
+            
+            if(el){
+                el.setAttribute('class','_blank')
+                setTimeout(()=>{
+                    this.onCommand('cmd.validCoursePage')
+                    this.waitForCheckerElm()
 
-    onCommand(command){
+                },3000)
+    
+            }
+        })
+    }
+
+    onCommand(command, param){
         const cmd = command.replace(/^cmd\./,'')
         const ocls = `ocls-${(new Date).getTime()}`
         const is = {
             cmd, 
-            ocls
+            ocls,
+            param
         }
         this.executeScriptContent(is, data => {
             // console.log(data)
             sendMessage(`${command}`, data)
         })
     }
+
+    
 }
+
+
 const main = async () => {
     injectScript(chrome.runtime.getURL('learning.js'), 'body');
     injectScript(chrome.runtime.getURL('lib/react.development.js'), 'body');
     injectScript(chrome.runtime.getURL('lib/react-dom.development.js'), 'body');
     injectScript(chrome.runtime.getURL('app.js'), 'body');
 
-    const contentScript = new ContentScript()    
+    const contentScript = new ContentScript()  
+    
+     
 }
 
 

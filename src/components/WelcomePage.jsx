@@ -40,8 +40,10 @@ class WelcomePage extends React.Component {
 			greeting : 'Welcome to LLFetcher 2.0',
 			lastCourseList : {},
 			fetchBtnState : 0,
+			loading : false,
 			courseInfo : null,
-			validCoursePage : false
+			validCoursePage : false,
+			disableFetchBtn:false
 		}
 	}
 
@@ -145,8 +147,24 @@ class WelcomePage extends React.Component {
 		sendMessage('cmd.validCoursePage')
 
 	}
+
+	 onSelectCourse(course){
+	 	setTimeout(()=>{
+	 		this.setState({loading:true, disableFetchBtn:true})
+		
+			this.props.onSelectCourse(course)
+
+			
+
+	 	},100)
+	 	setTimeout(()=>{
+			this.setState({loading:false, disableFetchBtn:false})
+
+		},3000)
+		
+	}
 	render(){
-		const {greeting,lastCourseList,fetchBtnState,validCoursePage} = this.state
+		const {greeting,lastCourseList,fetchBtnState,validCoursePage, loading, disableFetchBtn} = this.state
 		const lastCourseListKeys = Object.keys(lastCourseList)
 		const btnCls = fetchBtnState==0 ? 'fa-hand-o-right': fetchBtnState==1 ? 'fa-spin fa-spinner' : fetchBtnState==2 ? 'fa-refresh' : 'fa-hand-o-right'
 
@@ -157,15 +175,15 @@ class WelcomePage extends React.Component {
 				{
 					lastCourseListKeys.length > 0 ? (<>
 						<div className="dropdown">
-							<button className="btn btn-secondary dropdown-toggle" type="button" id="recentCourseButton" data-bs-toggle="dropdown" aria-expanded="false">
-							<i className="fa fa-history"></i> Load Recent Course
+							<button disabled={loading} className="btn btn-secondary dropdown-toggle" type="button" id="recentCourseButton" data-bs-toggle="dropdown" aria-expanded="false">
+							<i className={loading?"fa fa-spin fa-spinner":"fa fa-history"}></i> Load Recent Course
 							</button>
 							<ul className="dropdown-menu" aria-labelledby="recentCourseButton">
 							{
 								lastCourseListKeys.map((slug,index)=>{
 									const course = lastCourseList[slug]
 									return (<li key={index}>
-										<a className="dropdown-item" href="#" onClick={e => this.props.onSelectCourse(course)}>{ course.title }</a>
+										<a className="dropdown-item" href="#" onClick={e => this.onSelectCourse(course)}>{ course.title }</a>
 										</li>)
 								})	
 							
@@ -177,7 +195,7 @@ class WelcomePage extends React.Component {
 				
 
 				<div className="btn-cnt">
-					<button  disabled={fetchBtnState==1 || !validCoursePage} className="btn btn-primary" onClick={e => this.getCourseInfo()}><i className={`fa ${btnCls}`}></i> Fetch This Course</button>
+					<button  disabled={fetchBtnState==1 || !validCoursePage || disableFetchBtn} className="btn btn-primary" onClick={e => this.getCourseInfo()}><i className={`fa ${btnCls}`}></i> Fetch This Course</button>
 					{/* <span>Valid CoursePage ? {validCoursePage ? 'Yes' : 'No'}</span> */}
 				</div>
 

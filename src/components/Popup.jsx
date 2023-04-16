@@ -67,14 +67,14 @@ const Popup = ({}) => {
 	const onPopupOpen = () => {
 		// sendMessage('cmd.validCoursePage')
 	}
-	const onSelectCourse = (course, authors) => {
+	const onSelectCourse = (_course_, authors) => {
 		// console.log(authors)
-		setCourse(course)
+		setCourse(_course_)
 		if(!authors){
-			authors = mAuthor.getListByCourse(course)
+			authors = mAuthor.getListByCourse(_course_)
 		}
 		setCourseAuthors(authors)
-		sendMessage('cmd.getCourseSections', course.urn)
+		sendMessage('cmd.getCourseSections', _course_.urn)
 	}
 	const createCourseTocs = async(items, section) => {
 		const tocs = []
@@ -124,6 +124,7 @@ const Popup = ({}) => {
 			setCourseTocsStr(JSON.stringify(tocs))
 			if(course.slug !== '')
 				await mCourse.setLastSlug(course.slug)
+
 			setNav('course')
 		}
 

@@ -73,7 +73,7 @@ class WelcomePage extends React.Component {
 			console.log(author)
 			if(this.courseAuthors.filter(_author_ => _author_.id === author.id).length === 0){
 				this.courseAuthors.push(author)
-				course = mCourse.addAuthorId(course.id, author.id)
+				course = await mCourse.addAuthorId(course.id, author.id)
 			}
 			
 		}
@@ -92,10 +92,10 @@ class WelcomePage extends React.Component {
 		return course
 	}
 
-	onGetCourseInfo(evt){
+	async onGetCourseInfo(evt){
 		const course = evt.data
 		console.log(course)
-		this.addToLastCourseList(course)
+		await this.addToLastCourseList(course)
 		// konsole.log(`Popup.WelcomePage.getCourseInfo`, evt.data)
 	}
 

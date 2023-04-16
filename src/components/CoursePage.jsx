@@ -16,11 +16,11 @@ const CourseAuthors = ({authors}) =>{
   },[authors])
   if(authors)
   return(<>
-  <div style={{fontStyle:'italic'}}> 
-      <span>By</span>
+  <div style={{display:'flex'}}> 
+      <span style={{fontStyle:'italic',marginRight:4}}>By</span>
       {
         authors.map((author, index)=>{
-      		return <h4 key={index}> <span>{titleCase(author.slug)}</span></h4>
+      		return <h4 key={index}> <span>{titleCase(author.slug)}</span> {index<authors.length-1?", ":""}</h4>
       	})
       }
       </div>

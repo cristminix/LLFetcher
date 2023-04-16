@@ -12,15 +12,18 @@ import "./styles/Popup.css"
 import App from "../models/App"
 import Author from "../models/Author"
 import Section from "../models/Section"
+import Toc from "../models/Toc"
 import  {
 	onMessage,
 	slugify,
-	sendMessage
+	sendMessage,
+	konsole
 } from "./fn"
 
 const mApp = await App.getInstance()
 const mAuthor = await Author.getInstance()
 const mSection = await Section.getInstance()
+const mToc = await Toc.getInstance()
 // console.log(mApp)
 await mApp.init()
 let onMessageAttached = false
@@ -30,11 +33,13 @@ const Popup = ({}) => {
 	const [course, setCourse] = useState(null)
 	const [courseAuthors, setCourseAuthors] = useState(null)
 	const [courseSectionInfoStr, setCourseSectionInfoStr] = useState('[]')
+	const [courseSectionStr, setCourseSectionStr] = useState('[]')
+	const [courseTocsStr, setCourseTocsStr] = useState('{}')
 
 	const setPage = () => {
 		const pages = {
 			welcome : (<WelcomePage onSelectCourse={onSelectCourse}/>),
-			course : (<CoursePage  course={course} authors={courseAuthors}/>),
+			course : (<CoursePage  course={course} authors={courseAuthors} sections={JSON.parse(courseSectionStr)} tocs={JSON.parse(courseTocsStr)}/>),
 			download : (<DownloadPage />),
 			help : (<HelpPage />),
 			setting : (<SettingPage />),
@@ -50,9 +55,9 @@ const Popup = ({}) => {
 	const onCommand = (evt, source) => {
 		// console.log(evt)
     	if(evt.name === 'cmd.getCourseSections'){
-    		console.log(evt, source)
+    		// console.log(evt, source)
 
-			// setNav('course')
+			
 			setCourseSectionInfoStr(JSON.stringify(evt.data))
 
     	}
@@ -69,19 +74,57 @@ const Popup = ({}) => {
 		setCourseAuthors(authors)
 		sendMessage('cmd.getCourseSections', course.urn)
 	}
-	const createCourseTocs = async(tocs) => {
-
+	const createCourseTocs = async(items, section) => {
+		const tocs = []
+		const tocIds = []
+		for(let i in items){
+			const {title, slug, duration} = items[i]
+			const captionFmt = ""
+			const captionUrl = ""
+			const url = ""
+			const toc = await mToc.create(title, slug, url, duration, captionUrl, captionFmt, section.id)
+			tocs.push(toc)
+			tocIds.push(toc.id)
+		}
+		const newSection = await mSection.updateTocIds(section.id, tocIds)
+		return [newSection, tocs]
 	}
 	const createCourseSections = async(csi) =>{
+		let sections = []
+		let tocs = {}
 		if(course){
-			console.log(csi)
-			for(let i in csi){
-				let section = csi[i]
-				const items = section.items
-				section = await mSection.create(section.title, slugify(section.title), course.id)
-				await createCourseTocs(items, section)
+			konsole.log(csi)
+
+			if( csi.length === 0){
+				konsole.log(`Popup.createCourseSections() empty csi `)
+				konsole.log(`try to load from database `)
+
+				const sections = mSection.getList(course.id)
+
+				for(let i in sections){
+					const section = sections[i]
+					tocs[section.slug] = mToc.getListBySectionId(section.id)
+				}
 			}
+			else{
+				for(let i in csi){
+					const {title,items} = csi[i]
+					const section = await mSection.create(title, slugify(title), course.id)
+					console.log(section)
+					const [newSection, newTocs] = await createCourseTocs(items, section)
+					console.log(newSection)
+					sections.push(newSection)
+					tocs[section.slug] = newTocs
+				}
+			}
+			
 		}
+
+		konsole.log(sections, tocs)
+		setCourseSectionStr(JSON.stringify(sections))
+		setCourseTocsStr(JSON.stringify(tocs))
+
+		setNav('course')
 				
 	}
 	useEffect(()=>{

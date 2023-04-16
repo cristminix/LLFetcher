@@ -31,13 +31,96 @@ const CourseDetail = ({course, children}) => {
     </div>
   </>)
 }
-const CoursePage = ({course, authors}) => {
-  if(course)
-	return(<div className="course-page page">
-    <CourseDetail course={course}>
-      <CourseAuthors authors={authors} key={course.id}/>
-    </CourseDetail>  
-  </div>)
+const SectionToolBar = ({sidx}) => {
+  return(<><div className="section-toolbar">
+    SectionToolBar
+  </div></>)
+}
+
+const TocToolBar = ({}) => {
+  return(<>CourseTocToolBar</>)
+  
+}
+const CourseToc = ({section,toc, sidx}) => {
+  return (<>
+      <div id={`collapse${sidx}`} className="accordion-collapse" 
+          aria-labelledby={`heading${sidx}`} data-bs-parent="#accordionCourse">
+        <div className="accordion-body">
+          <div className="toc-item-container" style={{display:'flex'}}>
+            <div className="item"></div>
+            <div className="item" style={{flexGrow:3}}>{toc.title}</div>
+            <div className="item"><TocToolBar/></div>
+
+          </div>
+          {/*<TocItem :items="section.items" :sectionIndex="sectionIndex" @update="onTocUpdate($event)" ref="tocItems"/>*/}
+        </div>
+      </div>
+  </>)
+}
+/*
+sidx = sectionIndex sorthand
+*/
+const CourseSection = ({section, items, sidx}) => {
+  return(<><div className="accordion-item">
+    <div className="course-section-container">
+        <div className="item">
+        <button className="btn btn-default accordion-button custom btn-collapse" 
+                data-bs-toggle="collapse" data-bs-target={`#collapse${sidx}`} 
+                aria-expanded="false" aria-controls={`collapse${sidx}`}>
+          <i className="fa fa-plus"></i>
+        </button>
+        </div>
+        <div className="item" style={{flexGrow:3}}>{section.title}</div>
+        <div className="item">
+          {/*<FetchQueueBar ref="fetchQueueBar" sectionIndex={sectionIndex}/>*/}
+          <SectionToolBar sidx={sidx}/>
+        </div>    
+    </div>
+    <div className="course-section-items-container">
+      {
+    
+        items.map((toc, index)=>{
+          return (<CourseToc toc={toc} key={index} sidx={sidx}/>)
+        })
+             
+      }
+    </div>
+  
+  </div></>)
+}
+const CourseTree = ({sections, tocs}) => {
+  if(sections.length > 0){
+    return(<><div className="accordion accordion-flush" id="accordion-course-tree">
+      {
+        sections.map((section, index) => {
+          const items = tocs[section.slug]
+          return(<CourseSection section={section} items={items} sidx={index} key={index}/>)
+        })
+      }  
+    </div></>)
+  }else{
+    return (<>
+      No course sections data available
+      <code>{JSON.stringify(sections)}</code>
+      <code>{JSON.stringify(tocs)}</code>
+      </>)
+  }
+}
+
+const CoursePage = ({course, authors, sections, tocs}) => {
+  if(course){
+    return(<div className="course-page page">
+      <CourseDetail course={course}>
+        <CourseAuthors authors={authors} key={course.id}/>
+      </CourseDetail>
+
+      <CourseTree sections={sections} tocs={tocs}/>  
+    </div>)
+  }else{
+    return (<div className="course-page page">
+      No data available !  
+    </div>)
+  }
 }
 
 export default CoursePage

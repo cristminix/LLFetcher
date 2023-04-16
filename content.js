@@ -59,7 +59,7 @@ class ContentScript {
                     evt.data.map(item => console.log(item))
                 break 
             }
-            console.log(evt, source);
+            // console.log(evt, source);
         })
 
         this.waitForCheckerElm()

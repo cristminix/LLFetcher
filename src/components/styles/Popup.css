@@ -38,10 +38,10 @@
   background:none;
 }
 .course-page .accordion-button.custom {
-position: absolute;
-    width: 24px;
+/*position: absolute;*/
+    width: 22px;
     padding: 0px 6px;
-    left: 42px;
+/*    left: 42px;*/
     margin-top: 3px;
     background: none;
     font-size: 10px;
@@ -73,4 +73,17 @@ position: absolute;
 
 .page-navigation ul.btn-group > li > a{
   margin: .5em;
+}
+
+.course-section-container{
+  display: flex;
+/*  justify-content: space-around;*/
+}
+
+.course-section-container > .item{
+  border: solid 1px #ddd;
+}
+.section-toolbar{
+  color: blue;
+  right:0;
 }

@@ -4,50 +4,44 @@ class Toc extends DB {
 	table = 'toc'
 	fields = ["sectionId","title","slug","url","duration","captionUrl","captionFmt","streamLocationIds"]
 
-/*
- static getTocsBySectionId(sectionId:number):Toc_tableField[]{
-        const db = Store.db();
-        const results = db.queryAll('toc',{query: {sectionId}});
-        return results as Toc_tableField[];
+
+    getListBySectionId(sectionId){
+        return this.query({query: {sectionId}})
     }
-    static getToc(slug:string,sectionId:number):Toc_tableField{
-        const db = Store.db();
-        const results = db.queryAll('toc',{query: {slug,sectionId}});
-        if(results.length>0){
-            return results[0] as Toc_tableField
-        }
-        return null;
+    getBySlug(slug,sectionId){
+        return this.singleQuery({query: {slug,sectionId}})
     }
 
-static updateTocCaption(slug:string,captionUrl:string,captionFmt:string,sectionId:number){
-        const db = Store.db();
-        const toc = Store.getToc(slug,sectionId);
+    async updateCaption( captionUrl, captionFmt, slug, sectionId){
+        const toc = this.getBySlug(slug,sectionId)
         if(toc){
-            db.update("toc", {slug}, function(newToc) {
-                newToc.captionUrl = captionUrl;
-                newToc.captionFmt = captionFmt;
-                return newToc;
-            });
-            db.commit();
+            this.db.update(this.table, {slug, sectionId}, row => {
+                row.captionUrl = captionUrl
+                row.captionFmt = captionFmt
+                return row
+            })
+            await this.db.commit()
+        }else{
+            console.warn(`${this.constructor.name}.updateCaption() toc is not exists`)
         }
     }
 
-static createToc(sectionId:number,title:string,slug:string,url:string,duration:number, captionUrl?:string, captionFmt?:string):Toc_tableField{
-        const db = Store.db();
-        let toc = Store.getToc(slug,sectionId);
+    async create(title, slug, url, duration, captionUrl, captionFmt, sectionId){
+        let toc = this.getBySlug(slug,sectionId)
 
         if(!toc){
-            const ID = 0;
-            const streamLocationIds = [];
-            toc = {ID,sectionId,title,slug,url,duration,captionUrl,captionFmt,streamLocationIds};
-            toc.ID = db.insert('toc',toc);
-            db.commit();
+            const id = 0
+            const streamLocationIds = []
+            toc = {id,sectionId,title,slug,url,duration,captionUrl,captionFmt,streamLocationIds}
+            toc.id = this.db.insert('toc',toc)
+            await this.db.commit()
 
+        }else{
+            console.error(`${this.constructor.name}.create() toc row exists`)
         }
 
-        return toc;
+        return toc
     }    
-*/
 }
 
 export default Toc

@@ -2,16 +2,19 @@ import DB from "./DB"
 
 class Section extends DB {
 	table = 'section'
-	fields = ["courseId","slug","title"]
+	fields = ["courseId","slug","title","tocIds"]
 
-    get(slug, courseId){
+    getBySlug(slug, courseId){
         return this.singleQuery({query: {slug,courseId}})
+    }
+    get(id){
+        return this.singleQuery({query: {id}})
     }
     getList(courseId){
         return this.query({query: {courseId}})
     }
     async create(title, slug, courseId){
-        let section = this.get(slug,courseId)
+        let section = this.getBySlug(slug,courseId)
 
         if(!section){
             const id = 0
@@ -20,6 +23,25 @@ class Section extends DB {
             section.id = this.db.insert(this.table,section)
             await this.db.commit()
 
+        }else{
+            console.error(`${this.constructor.name}.create() section row exists`)
+        }
+
+        return section
+    }
+    async updateTocIds(id, tocIds){
+        let section = this.get(id)
+        if(section){
+            this.db.update(this.table,{id}, row => {
+                row.tocIds = tocIds
+                return row
+            })
+
+            await this.db.commit()
+            section.tocIds = tocIds
+
+        }else{
+            console.error(`${this.constructor.name}.updateTocIds() toc row not exists`)
         }
 
         return section

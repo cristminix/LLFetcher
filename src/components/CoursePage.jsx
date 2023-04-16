@@ -5,6 +5,10 @@ import TocItem from "./coursePage/TocItem"
 import  {
 	titleCase
 } from "./fn"
+
+import Course from "../models/Course"
+const mCourse = await Course.getInstance()
+
 const CourseAuthors = ({authors}) =>{
   useEffect(()=>{
   // console.log(authors)
@@ -89,6 +93,24 @@ const CourseSection = ({section, items, sidx}) => {
   </div></>)
 }
 const CourseTree = ({sections, tocs}) => {
+  const [loading, setLoading] = useState(false)
+  const [warningText, setWarningText] = useState('')
+
+  const stopLoading = ()=>{
+    setTimeout(()=>{
+      setLoading(false)
+      setTimeout(()=>{
+        setWarningText("No course sections and tocs data available")
+      },1000)
+    },3000)
+
+
+  }
+
+  useEffect(()=>{
+    setLoading(true)
+    setWarningText('Please wait ...')
+  },[])
   if(sections.length > 0){
     return(<><div className="accordion accordion-flush" id="accordion-course-tree">
       {
@@ -100,14 +122,29 @@ const CourseTree = ({sections, tocs}) => {
     </div></>)
   }else{
     return (<>
-      No course sections data available
-      <code>{JSON.stringify(sections)}</code>
-      <code>{JSON.stringify(tocs)}</code>
+      
+      <span><i className={loading?"fa fa-spin fa-spinner":"fa fa-exclamation"}></i> {warningText} </span>
+      
       </>)
   }
 }
 
-const CoursePage = ({course, authors, sections, tocs}) => {
+const CoursePage = ({course, authors, sections, tocs, setNav}) => {
+  const [lastCourse, setLastCourse] = useState('')
+  if(!course){
+    const slug = mCourse.getLastSlug()
+    console.log(slug)
+    if(slug){
+      if(slug !== ''){
+        const courseData = mCourse.getCoursePageData(slug)
+        course = courseData.course
+        authors = courseData.authors
+        sections = courseData.sections
+        tocs = courseData.tocs
+  
+      }
+    }
+  }
   if(course){
     return(<div className="course-page page">
       <CourseDetail course={course}>
@@ -117,6 +154,7 @@ const CoursePage = ({course, authors, sections, tocs}) => {
       <CourseTree sections={sections} tocs={tocs}/>  
     </div>)
   }else{
+    // return setNav('welcome')
     return (<div className="course-page page">
       No data available !  
     </div>)

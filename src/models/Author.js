@@ -1,6 +1,4 @@
 import DB from "./DB"
-import Course from "./Course"
-const mCourse = await Course.getInstance()
 class Author extends DB {
 	table = 'author'
 	fields = ["name","slug","biography", "shortBiography","courseIds"]
@@ -12,8 +10,8 @@ class Author extends DB {
     getById(id){
         return this.singleQuery({query: {id}})
     }
-    getListByCourseId(courseId){
-        const course = mCourse.getById(courseId)
+    getListByCourse(course){
+
         const authors = []
         if(!course){
             return authors

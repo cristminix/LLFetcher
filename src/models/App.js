@@ -27,13 +27,16 @@ class App extends DB {
             await this.db.commit()
             this.rowExists = true
         }else{
-            if(app.lastCourseSlug !== courseSlug){
-                app.lastCourseSlug = courseSlug
-                await this.update(row => {
-                    row.lastCourseSlug = courseSlug
-                    return row
-                })
-            } 
+        	if(courseSlug !== ''){
+	            if(app.lastCourseSlug !== courseSlug){
+	                app.lastCourseSlug = courseSlug
+	                console.log(`App.init() update courseSlug=${courseSlug}`)
+	                await this.update(row => {
+	                    row.lastCourseSlug = courseSlug
+	                    return row
+	                })
+	            }
+	        } 
         }
         return app
     }
@@ -57,10 +60,10 @@ class App extends DB {
     }
 
     async update(callback){
-        if(!this.rowExists){
-            console.error(`${this.constructor.name}.update() rowExists is false`)
-            return
-        }
+        // if(!this.rowExists){
+        //     console.error(`${this.constructor.name}.update() rowExists is false`)
+        //     return
+        // }
         const version = this.version
         this.db.update(this.table,{version}, callback);
         await this.db.commit()

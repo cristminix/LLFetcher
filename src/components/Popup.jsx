@@ -13,6 +13,7 @@ import App from "../models/App"
 import Author from "../models/Author"
 import Section from "../models/Section"
 import Toc from "../models/Toc"
+import Course from "../models/Course"
 import  {
 	onMessage,
 	slugify,
@@ -24,6 +25,7 @@ const mApp = await App.getInstance()
 const mAuthor = await Author.getInstance()
 const mSection = await Section.getInstance()
 const mToc = await Toc.getInstance()
+const mCourse = await Course.getInstance()
 // console.log(mApp)
 await mApp.init()
 let onMessageAttached = false
@@ -39,7 +41,7 @@ const Popup = ({}) => {
 	const setPage = () => {
 		const pages = {
 			welcome : (<WelcomePage onSelectCourse={onSelectCourse}/>),
-			course : (<CoursePage  course={course} authors={courseAuthors} sections={JSON.parse(courseSectionStr)} tocs={JSON.parse(courseTocsStr)}/>),
+			course : (<CoursePage setNav={setNav} course={course} authors={courseAuthors} sections={JSON.parse(courseSectionStr)} tocs={JSON.parse(courseTocsStr)}/>),
 			download : (<DownloadPage />),
 			help : (<HelpPage />),
 			setting : (<SettingPage />),
@@ -69,7 +71,7 @@ const Popup = ({}) => {
 		// console.log(authors)
 		setCourse(course)
 		if(!authors){
-			authors = mAuthor.getListByCourseId(course.id)
+			authors = mAuthor.getListByCourse(course)
 		}
 		setCourseAuthors(authors)
 		sendMessage('cmd.getCourseSections', course.urn)
@@ -117,14 +119,15 @@ const Popup = ({}) => {
 					tocs[section.slug] = newTocs
 				}
 			}
-			
+			konsole.log(sections, tocs)
+			setCourseSectionStr(JSON.stringify(sections))
+			setCourseTocsStr(JSON.stringify(tocs))
+			if(course.slug !== '')
+				await mCourse.setLastSlug(course.slug)
+			setNav('course')
 		}
 
-		konsole.log(sections, tocs)
-		setCourseSectionStr(JSON.stringify(sections))
-		setCourseTocsStr(JSON.stringify(tocs))
-
-		setNav('course')
+		
 				
 	}
 	useEffect(()=>{

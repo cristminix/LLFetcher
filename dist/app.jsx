@@ -116,7 +116,7 @@ class ContentScriptApp extends Action_csa{
 
 		try{
 			is = JSON.parse(this.inputScriptRef.current.value)
-			console.log(is)
+			// console.log(is)
 			const method = is.cmd
 			const param = is.param || null
 			const ocls = is.ocls || 'default'

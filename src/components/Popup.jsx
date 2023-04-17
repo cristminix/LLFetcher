@@ -1,5 +1,5 @@
 
-import {useState, useEffect} from "react"
+import React, {useState, useEffect} from "react"
 
 import WelcomePage from "./WelcomePage"
 import CoursePage from "./CoursePage"
@@ -30,58 +30,31 @@ const mCourse = await Course.getInstance()
 await mApp.init()
 let onMessageAttached = false
 
-const Popup = ({}) => {
-	const [nav, setNav] = useState('welcome')
-	const [course, setCourse] = useState(null)
-	const [courseAuthors, setCourseAuthors] = useState(null)
-	const [courseSectionInfoStr, setCourseSectionInfoStr] = useState('[]')
-	const [courseSectionStr, setCourseSectionStr] = useState('[]')
-	const [courseTocsStr, setCourseTocsStr] = useState('{}')
-
-	const setPage = () => {
-		const pages = {
-			welcome : (<WelcomePage onSelectCourse={onSelectCourse}/>),
-			course : (<CoursePage setNav={setNav} course={course} authors={courseAuthors} sections={JSON.parse(courseSectionStr)} tocs={JSON.parse(courseTocsStr)}/>),
-			download : (<DownloadPage />),
-			help : (<HelpPage />),
-			setting : (<SettingPage />),
-			option : (<OptionPage />)
+class PopupAction extends React.Component{
+	constructor(props){
+		super(props)
+		this.state = {
+			course : null,
+			courseAuthors : null,
+			courseSectionInfoStr : '[]',
+			courseSectionStr : '[]',
+			courseTocsStr : '[]',
+			nav : 'welcome'
 		}
-	
-		return pages[nav]
 	}
-	
-	const onNavUpdate = navName => {
-		setNav(navName)
+
+	onNavUpdate(nav){
+		this.setState({nav})
 	}
-	const onCommand = (evt, source) => {
-		// console.log(evt)
+	onCommand(evt, source){
     	if(evt.name === 'cmd.getCourseSections'){
-    		// console.log(evt, source)
-
-			
-			setCourseSectionInfoStr(JSON.stringify(evt.data))
-			createCourseSections(evt.data)
-
+			const csi = evt.data
+			const courseSectionInfoStr = JSON.stringify(csi)
+			this.setState({courseSectionInfoStr})
+			this.createCourseSections(csi)
     	}
 	}
-	const onPopupOpen = () => {
-		// sendMessage('cmd.validCoursePage')
-	}
-	const onSelectCourse = async (_course_, authors = null, donstSendMessage = false) => {
-		// console.log(authors)
-		setCourse(_course_)
-		if(!authors){
-			authors = mAuthor.getListByCourse(_course_)
-		}
-		setCourseAuthors(authors)
-		if(donstSendMessage){
-			await loadCourseSections(_course_)
-		}else{
-			sendMessage('cmd.getCourseSections', _course_.urn)
-		}
-	}
-	const createCourseTocs = async(items, section) => {
+	async createCourseTocs(items, section){
 		const tocs = []
 		const tocIds = []
 		for(let i in items){
@@ -96,84 +69,117 @@ const Popup = ({}) => {
 		const newSection = await mSection.updateTocIds(section.id, tocIds)
 		return [newSection, tocs]
 	}
-	const loadCourseSections = async (_course_) => {
+
+	async loadCourseSections(){
 		konsole.log(`Popup.createCourseSections() empty csi `)
 		konsole.log(`try to load from database `)
-		if(_course_){
-
-			const sections = mSection.getList(_course_.id)
+		if(this.state.course){
+			const sections = mSection.getList(this.state.course.id)
 			let tocs = {}
 
 			for(let i in sections){
 				const section = sections[i]
 				tocs[section.slug] = mToc.getListBySectionId(section.id)
 			}
-			await updateCourseData(_course_, sections, tocs)
+			await this.updateCourseData(sections, tocs)
 
 		}
 	}
-	const updateCourseData = async (_course_, sections, tocs) => {
-		setCourseSectionStr(JSON.stringify(sections))
-		setCourseTocsStr(JSON.stringify(tocs))
-		if(_course_.slug !== '')
-			await mCourse.setLastSlug(_course_.slug)
-		
-		konsole.log(_course_,sections, tocs)
-		setCourse(_course_)
-		setNav('course')
-	}
-	const createCourseSections = async(csi) =>{
-		if(course){
+	async createCourseSections(csi){
+		if(this.state.course){
 			let sections = []
 			let tocs = {}
 			if( csi.length > 0){
 				for(let i in csi){
 					const {title,items} = csi[i]
-					const section = await mSection.create(title, slugify(title), course.id)
-					console.log(section)
-					const [newSection, newTocs] = await createCourseTocs(items, section)
-					console.log(newSection)
+					const section = await mSection.create(title, slugify(title), this.state.course.id)
+					// console.log(section)
+					const [newSection, newTocs] = await this.createCourseTocs(items, section)
+					// console.log(newSection)
 					sections.push(newSection)
 					tocs[section.slug] = newTocs
 				}
 			}
-			await updateCourseData(course, sections, tocs)
+			await this.updateCourseData(sections, tocs)
 		}
 
 		
 				
 	}
-	useEffect(()=>{
+	async updateCourseData(sections, tocs){
+		const courseSectionStr = JSON.stringify(sections)
+		const courseTocsStr = JSON.stringify(tocs)
+		
+		this.setState({courseSectionStr, courseTocsStr},async()=>{
+			if(this.state.course.slug !== ''){
+				await mCourse.setLastSlug(this.state.course.slug)
+				
+				this.setState({nav : 'course'},()=>{
+					const {course,sections, tocs} = this.state
+					konsole.log(course,sections, tocs)
+				})
+			}
+		})
+	}
+}
+
+class Popup extends PopupAction{
+	setPage(){
+		const pages = {
+			welcome : (<WelcomePage onSelectCourse={(a,b,c)=>this.onSelectCourse(a,b,c)}/>),
+			course : (<CoursePage setNav={nav => this.setState({nav})} 
+								  course={this.state.course} 
+								  authors={this.state.courseAuthors} 
+								  sections={JSON.parse(this.state.courseSectionStr)} 
+								  tocs={JSON.parse(this.state.courseTocsStr)}/>),
+			download : (<DownloadPage />),
+			help : (<HelpPage />),
+			setting : (<SettingPage />),
+			option : (<OptionPage />)
+		}
+	
+		return pages[this.state.nav]
+	}
+	onPopupOpen(){
+		// sendMessage('cmd.validCoursePage')
+	}
+	async onSelectCourse(course, authors = null, dontSendMessage = false){
+		this.setState({course},async ()=>{
+			if(!authors){
+				authors = mAuthor.getListByCourse(this.state.course)
+			}
+			this.setState({courseAuthors :authors})
+
+			if(dontSendMessage){
+				await this.loadCourseSections()
+			}else{
+				sendMessage('cmd.getCourseSections', this.state.course.urn)
+			}
+		})
+	}
+
+	
+
+	componentDidMount(){
 		if(!onMessageAttached){
 			onMessage((evt, source)=>{
-				if( evt.name.match(/^cmd\./) ){
-					onCommand(evt, source)
-				}
+				this.onCommand(evt, source)
 		    })
 		    onMessageAttached = true
-			onPopupOpen()
+			this.onPopupOpen()
 		}
-	},[])
-	
-	// useEffect(() => {
-		
-	// 	try{
-	// 		const csi = JSON.parse(courseSectionInfoStr)
-	// 		createCourseSections(csi)
-	// 	}catch(e){
-	// 		console.log(csi)
-	// 	}
-		
-	// },[courseSectionInfoStr,course])
-
-	return (<div className="app-container">
+	}
+	render(){
+		return (<div className="app-container">
 		{
-			setPage() 
+			this.setPage() 
 		}
 	   
-	    <PageNavigation onNavUpdate={onNavUpdate}  nav={nav}/>
+	    <PageNavigation onNavUpdate={nav => this.onNavUpdate(nav)}  nav={this.state.nav}/>
 
 	  </div>)
+	}
 }
+
 
 export default Popup

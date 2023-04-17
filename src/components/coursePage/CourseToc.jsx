@@ -3,9 +3,9 @@ const TocToolBar = ({toc}) => {
     return(<><FetchButton toc={toc}/></>)
     
   }
-const CourseToc = ({section,toc, sidx}) => {
+const CourseToc = ({section,toc, sidx, collapsed}) => {
     return (<>
-        <div id={`collapse${sidx}`} className="accordion-collapse" 
+        <div id={`collapse${sidx}`} className={`accordion-collapse ${collapsed ? "collapse" : ""}`} 
             aria-labelledby={`heading${sidx}`} data-bs-parent="#accordionCourse">
           <div className="accordion-body">
             <div className="toc-item-container" style={{display:'flex'}}>

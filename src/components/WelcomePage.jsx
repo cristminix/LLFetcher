@@ -170,7 +170,7 @@ class WelcomePage extends React.Component {
 
 		return(<>
 			<div className="welcome-page page">
-				<p className="text-center">{greeting}</p>
+				<p className="text-center" style={{fontFamily:"Monoton, cursive"}}>{greeting}</p>
 				<div className="action-cnt">
 				{
 					lastCourseListKeys.length > 0 ? (<>

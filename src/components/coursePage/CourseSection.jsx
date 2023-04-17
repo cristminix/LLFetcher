@@ -3,7 +3,7 @@ import FetchQueueBar from "./FetchQueueBar"
 /*
 sidx = sectionIndex sorthand
 */
-
+import {useState} from "react"
 const SectionToolBar = ({sidx}) => {
     return(<><div className="section-toolbar">
       <FetchQueueBar sectionIndex={sidx}/>
@@ -11,13 +11,15 @@ const SectionToolBar = ({sidx}) => {
     </div></>)
   }
 const CourseSection = ({section, items, sidx}) => {
-    return(<><div className="accordion-item">
+  const [collapsed, setCollapsed] = useState(true)
+  return(<><div className="accordion-item">
       <div className="course-section-container">
           <div className="item">
           <button className="btn btn-default accordion-button custom btn-collapse" 
                   data-bs-toggle="collapse" data-bs-target={`#collapse${sidx}`} 
-                  aria-expanded="false" aria-controls={`collapse${sidx}`}>
-            <i className="fa fa-plus"></i>
+                  aria-expanded="false" aria-controls={`collapse${sidx}`}
+                  onClick={e => {setCollapsed(!collapsed)}}>
+            <i className={!collapsed?"fa fa-minus":"fa fa-plus"}></i>
           </button>
           </div>
           <div className="item" style={{flexGrow:3}}>{section.title}</div>
@@ -25,15 +27,17 @@ const CourseSection = ({section, items, sidx}) => {
             <SectionToolBar sidx={sidx}/>
           </div>    
       </div>
-      <div className="course-section-items-container">
+      {
+        !collapsed ?( <div className="course-section-items-container" style={{padding:".5em 0 .5em 1.5em"}}>
         {
-      
+          
           items.map((toc, index)=>{
-            return (<CourseToc toc={toc} key={index} sidx={sidx}/>)
-          })
+            return (<CourseToc toc={toc} key={index} sidx={sidx} collapsed={collapsed}/>)
+          }) 
                
         }
-      </div>
+        </div>) : ""
+      }
     
     </div></>)
   }

@@ -146,14 +146,14 @@ class ContentScriptApp extends Action_csa{
 			param : null,
 			ocls : `os-${(new Date).getTime()}`
 		} )
-		return (<><div id={appContainerId}>
+		return (<><div id={appContainerId} style={{display:'flex',flexDirection:'column',width:'400px',position:'absolute', background:'#000',color:'#fff',zIndex:2001,opacity:.7,fontFamily:'monospace',marginTop:'3.1em',marginLeft:'22%',padding:'1em'}}>
 			
 		{
 			this.state.validCoursePage ? (<>
 				<span>{this.state.slug}</span>
-				<textarea id="input-script" defaultValue={inputScriptDefaultValue} onChange={evt => this.onInputScriptChange(evt)} ref={this.inputScriptRef}></textarea>
-				<textarea id="output-script" className={this.state.outputScriptCls} onChange={f=>f} value={this.state.outputScript}></textarea>
-				<button id="exec-button" onClick={e=>{this.runScript()}}>Execute Page Fn</button>
+				<textarea id="input-script" style={{color:'#fff'}} defaultValue={inputScriptDefaultValue} onChange={evt => this.onInputScriptChange(evt)} ref={this.inputScriptRef}></textarea>
+				<textarea id="output-script" style={{color:'#fff'}} className={this.state.outputScriptCls} onChange={f=>f} value={this.state.outputScript}></textarea>
+				<div style={{width:'100%',textAlign:'right'}}><button style={{padding:'1em', background:'#fff', color:'#000'}} id="exec-button" onClick={e=>{this.runScript()}}>Execute Page Fn</button></div>
 			</>) : ""
 				
 		}

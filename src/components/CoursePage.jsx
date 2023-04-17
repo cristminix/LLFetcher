@@ -2,6 +2,7 @@ import {useState, useEffect} from "react"
 import FetchSectionQueue from "./coursePage/FetchSectionQueue"
 import FetchQueueBar from "./coursePage/FetchQueueBar"
 import TocItem from "./coursePage/TocItem"
+import FetchButton from "./coursePage/FetchButton"
 import  {
 	titleCase
 } from "./fn"
@@ -27,22 +28,29 @@ const CourseAuthors = ({authors}) =>{
   </>)
 }
 
-const CourseDetail = ({course, children}) => {
+const CourseDetail = ({course, children, section}) => {
   return (<>
-    <div className="course">
-      <h2><i className="fa fa-bookmark"></i> <span>{course.title}</span></h2>
-      {children}
+    <div className="course" style={{
+      display : 'flex'
+    }}>
+      <div className="item">
+        <h2><i className="fa fa-bookmark"></i> <span>{course.title}</span></h2>
+        {children}
+      </div>
+      <div className="item" style={{width : '200px'}}></div>
+        <FetchSectionQueue course={course}/>
     </div>
   </>)
 }
 const SectionToolBar = ({sidx}) => {
   return(<><div className="section-toolbar">
-    SectionToolBar
+    <FetchQueueBar sectionIndex={sidx}/>
+
   </div></>)
 }
 
-const TocToolBar = ({}) => {
-  return(<>CourseTocToolBar</>)
+const TocToolBar = ({toc}) => {
+  return(<><FetchButton toc={toc}/></>)
   
 }
 const CourseToc = ({section,toc, sidx}) => {
@@ -53,7 +61,7 @@ const CourseToc = ({section,toc, sidx}) => {
           <div className="toc-item-container" style={{display:'flex'}}>
             <div className="item"></div>
             <div className="item" style={{flexGrow:3}}>{toc.title}</div>
-            <div className="item"><TocToolBar/></div>
+            <div className="item"><TocToolBar toc={toc}/></div>
 
           </div>
           {/*<TocItem :items="section.items" :sectionIndex="sectionIndex" @update="onTocUpdate($event)" ref="tocItems"/>*/}
@@ -76,7 +84,6 @@ const CourseSection = ({section, items, sidx}) => {
         </div>
         <div className="item" style={{flexGrow:3}}>{section.title}</div>
         <div className="item">
-          {/*<FetchQueueBar ref="fetchQueueBar" sectionIndex={sectionIndex}/>*/}
           <SectionToolBar sidx={sidx}/>
         </div>    
     </div>
@@ -130,7 +137,7 @@ const CourseTree = ({sections, tocs}) => {
 }
 
 const CoursePage = ({course, authors, sections, tocs, setNav}) => {
-  const [lastCourse, setLastCourse] = useState('')
+  const [activeCourse, setLastCourse] = useState('')
   if(!course){
     const slug = mCourse.getLastSlug()
     console.log(slug)

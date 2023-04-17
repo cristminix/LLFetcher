@@ -61,20 +61,25 @@ const Popup = ({}) => {
 
 			
 			setCourseSectionInfoStr(JSON.stringify(evt.data))
+			createCourseSections(evt.data)
 
     	}
 	}
 	const onPopupOpen = () => {
 		// sendMessage('cmd.validCoursePage')
 	}
-	const onSelectCourse = (_course_, authors) => {
+	const onSelectCourse = async (_course_, authors = null, donstSendMessage = false) => {
 		// console.log(authors)
 		setCourse(_course_)
 		if(!authors){
 			authors = mAuthor.getListByCourse(_course_)
 		}
 		setCourseAuthors(authors)
-		sendMessage('cmd.getCourseSections', _course_.urn)
+		if(donstSendMessage){
+			await loadCourseSections(_course_)
+		}else{
+			sendMessage('cmd.getCourseSections', _course_.urn)
+		}
 	}
 	const createCourseTocs = async(items, section) => {
 		const tocs = []
@@ -91,24 +96,37 @@ const Popup = ({}) => {
 		const newSection = await mSection.updateTocIds(section.id, tocIds)
 		return [newSection, tocs]
 	}
-	const createCourseSections = async(csi) =>{
-		let sections = []
-		let tocs = {}
-		if(course){
-			konsole.log(csi)
+	const loadCourseSections = async (_course_) => {
+		konsole.log(`Popup.createCourseSections() empty csi `)
+		konsole.log(`try to load from database `)
+		if(_course_){
 
-			if( csi.length === 0){
-				konsole.log(`Popup.createCourseSections() empty csi `)
-				konsole.log(`try to load from database `)
+			const sections = mSection.getList(_course_.id)
+			let tocs = {}
 
-				const sections = mSection.getList(course.id)
-
-				for(let i in sections){
-					const section = sections[i]
-					tocs[section.slug] = mToc.getListBySectionId(section.id)
-				}
+			for(let i in sections){
+				const section = sections[i]
+				tocs[section.slug] = mToc.getListBySectionId(section.id)
 			}
-			else{
+			await updateCourseData(_course_, sections, tocs)
+
+		}
+	}
+	const updateCourseData = async (_course_, sections, tocs) => {
+		setCourseSectionStr(JSON.stringify(sections))
+		setCourseTocsStr(JSON.stringify(tocs))
+		if(_course_.slug !== '')
+			await mCourse.setLastSlug(_course_.slug)
+		
+		konsole.log(_course_,sections, tocs)
+		setCourse(_course_)
+		setNav('course')
+	}
+	const createCourseSections = async(csi) =>{
+		if(course){
+			let sections = []
+			let tocs = {}
+			if( csi.length > 0){
 				for(let i in csi){
 					const {title,items} = csi[i]
 					const section = await mSection.create(title, slugify(title), course.id)
@@ -119,13 +137,7 @@ const Popup = ({}) => {
 					tocs[section.slug] = newTocs
 				}
 			}
-			konsole.log(sections, tocs)
-			setCourseSectionStr(JSON.stringify(sections))
-			setCourseTocsStr(JSON.stringify(tocs))
-			if(course.slug !== '')
-				await mCourse.setLastSlug(course.slug)
-
-			setNav('course')
+			await updateCourseData(course, sections, tocs)
 		}
 
 		
@@ -143,16 +155,16 @@ const Popup = ({}) => {
 		}
 	},[])
 	
-	useEffect(() => {
+	// useEffect(() => {
 		
-		try{
-			const csi = JSON.parse(courseSectionInfoStr)
-			createCourseSections(csi)
-		}catch(e){
-			console.log(csi)
-		}
+	// 	try{
+	// 		const csi = JSON.parse(courseSectionInfoStr)
+	// 		createCourseSections(csi)
+	// 	}catch(e){
+	// 		console.log(csi)
+	// 	}
 		
-	},[courseSectionInfoStr,course])
+	// },[courseSectionInfoStr,course])
 
 	return (<div className="app-container">
 		{

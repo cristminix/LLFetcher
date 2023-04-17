@@ -152,7 +152,7 @@ class WelcomePage extends React.Component {
 	 	setTimeout(()=>{
 	 		this.setState({loading:true, disableFetchBtn:true})
 		
-			this.props.onSelectCourse(course)
+			this.props.onSelectCourse(course,null,true)
 
 			
 

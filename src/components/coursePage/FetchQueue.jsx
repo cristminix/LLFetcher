@@ -9,11 +9,11 @@ class FetchQueue extends Component{
 	prefixCls = null
 	constructor(props){
 		super(props)
-		const {section, sidx, prefixCls} = props
+		const {section, sidx,tidx, prefixCls} = props
 		this.prefixCls = prefixCls || 'fetch-queue'
 		this.state = {
 			btnState : 1,
-			hideProgress : true,
+			hideProgress : false,
 			hideBtn : false,
 			percentage : 0,
 			qiData : initialQiData,
@@ -23,11 +23,11 @@ class FetchQueue extends Component{
 	
 	
 	startQueue(){
-		konsole.log(`FetchQueueBar.startQueue() sidx=${sidx}`)
+		konsole.log(`FetchQueueBar.startQueue() sidx=${sidx} sidx=${tidx}`)
 	}
 
 	render(){
-		const {btnState, hideProgress, percentage, hideBtn,qiData} = this.state
+		const {btnState, hideProgress, percentage, hideBtn,qiData, queueStarted} = this.state
 		
 		const iconCls = btnState === 1 ? 'fa-play'
 				   : btnState === 2 ? 'fa-spin fa-spinner' 
@@ -35,11 +35,8 @@ class FetchQueue extends Component{
 				   									 : btnState === 4 ? 'fa-refresh' 
 				   									 				  : 'fa-play'
 		const {prefixCls} = this    									 				  
-		return(<> <div className={`${prefixCls}-bar`}>
-	        <div className="test-data">
-	            <code></code>
-	        </div>
-	        <div className={`${prefixCls}-pb`}>
+		return(<> <div className={`${prefixCls}-bar`} style={style.qcnt}>
+	        <div className={`${prefixCls}-pb item`} style={{width:100}}>
 	        	{
 	        		!hideProgress ? (<div className="progress">
 		                <div className="progress-bar bg-info" 
@@ -53,13 +50,16 @@ class FetchQueue extends Component{
 	        	}
 	        </div>
 	        {
-	        	!hideBtn ? (<div className={`btn-${prefixCls}-cnt`}>
-		            <button style={{ color : btnState === 3 ? 'white' : 'inherit' }} 
+	        	!hideBtn ? (<div className={`btn-${prefixCls}-cnt item`} style={{position:'absolute'}}>
+		            <button style={Object.assign({ color : btnState === 3 ? 'white' : 'inherit' },style.btnFetch)} 
 		            		disabled={btnState !==1 && btnState !== 4} 
 		            		onClick={e => this.startQueue()} 
 		            		className={`btn btn-sm btn-${prefixCls}`}>
 		            	<i className={`fa ${iconCls}`}></i></button>
-		            <QueueInfo data={qiData}/>	
+		            	{
+		            		queueStarted ? (<QueueInfo data={qiData}/>):""
+		            	}
+		            	
 		        </div>) : ""
 	        }
 	        
@@ -68,4 +68,23 @@ class FetchQueue extends Component{
 	
 }
 
+const style={
+	qcnt : {
+		display : 'flex',
+		justifyContent : 'end'
+	},
+	item:{
+		display:'block',
+		border:'solid 1px #ddd'
+	},
+	btnFetch:{
+		padding: 0,
+	    marginTop: '-10px',
+	    fontSize: '70%',
+	    marginRight: '4px',
+	    border:'none',
+	    color:'#333'
+
+	}
+}
 export default FetchQueue

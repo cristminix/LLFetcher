@@ -60,14 +60,18 @@ class CoursePage extends Component{
       }
     }
   }
-  runSectionQueue(sidx){
+  async runSectionQueue(sidx){
     konsole.log(sidx)
     this.setState({ qsidx:sidx })
 
     // this.fetchSectionQueueRef.current.startQueue()
     // console.log(this.mainQueueRef)
-    console.log(this.sectionToolBarRefs[sidx])
-    console.log(this.tocToolBarRefs[this.state.sections[sidx].slug])
+    const sectionToolBarRef = this.sectionToolBarRefs[sidx]
+    const result = await sectionToolBarRef.current.processQueue()
+
+    return result
+    // console.log()
+    // console.log(this.tocToolBarRefs[this.state.sections[sidx].slug])
   }
   runTocsQueue(tidx){
     // this.fetchQueueBarRef[this.state.qsidx].current.startQueue()

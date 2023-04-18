@@ -1,20 +1,32 @@
 import CourseToc from "./CourseToc"
 import FetchQueueBar from "./FetchQueueBar"
+import {konsole} from "../fn"
 /*
 sidx = sectionIndex sorthand
 */
-import {useState, Component, useEffect} from "react"
+import {useState, Component, useEffect,createRef} from "react"
 class SectionToolBar extends Component{
+  fetchQueueRef = null
   constructor(props){
     super(props)
+    this.fetchQueueRef = createRef(null)
+  }
+  async processQueue(){
+    const {sidx, section, runSectionQueue, runTocsQueue} = this.props
+    konsole.log(sidx, runTocsQueue)
+
+    const result = await this.fetchQueueRef.current.startQueue()
+    return result
   }
   render(){
-    const {sidx, section, runSectionQueue, runTocsQueue} = this.props
+    const {sidx, section, runSectionQueue, runTocsQueue, items} = this.props
     return(<><div className="section-toolbar">
       <FetchQueueBar sidx={sidx} 
                      section={section}  
                      runSectionQueue={runSectionQueue} 
-                     runTocsQueue={runTocsQueue}/>
+                     runTocsQueue={runTocsQueue}
+                     items={items}
+                     ref={this.fetchQueueRef}/>
   
     </div></>)
   }
@@ -39,7 +51,8 @@ const CourseSection = ({section, items, sidx, runSectionQueue, runTocsQueue,
           </div>
           <div className="item" style={{flexGrow:3}}>{section.title} ({items.length})</div>
           <div className="item">
-            <SectionToolBar ref={sectionToolBarRefs[sidx]} sidx={sidx} section={section} runSectionQueue={runSectionQueue} runTocsQueue={runTocsQueue}/>
+            <SectionToolBar ref={sectionToolBarRefs[sidx]} items={items} sidx={sidx} 
+            section={section} runSectionQueue={runSectionQueue} runTocsQueue={runTocsQueue}/>
           </div>    
       </div>
        <div className="course-section-items-container" style={{padding:".5em 0 .5em 1.5em",display:(!collapsed?'block':'none')}}>

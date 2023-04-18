@@ -5,7 +5,7 @@ class TocToolBar extends Component{
     render(){
         const {toc, sidx, tidx} = this.props
         
-        return(<><FetchButton toc={toc}  sidx={sidx}/></>)
+        return(<><FetchButton toc={toc}  sidx={sidx} tidx={tidx}/></>)
 
     }
     
@@ -19,7 +19,7 @@ const CourseToc = ({section, toc, sidx, tidx, collapsed, tocToolBarRefs}) => {
             <div className="toc-item-container" style={{display:'flex'}}>
               <div className="item"></div>
               <div className="item" style={{flexGrow:3}}>{toc.title}</div>
-              <div className="item"><TocToolBar ref={tocToolBarRefs[section.slug][tidx]} toc={toc} sidx={sidx}/></div>
+              <div className="item"><TocToolBar ref={tocToolBarRefs[section.slug][tidx]} toc={toc} sidx={sidx} tidx={tidx}/></div>
   
             </div>
             {/*<TocItem :items="section.items" :sectionIndex="sectionIndex" @update="onTocUpdate($event)" ref="tocItems"/>*/}

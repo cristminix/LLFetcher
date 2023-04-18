@@ -39,8 +39,8 @@ const initialQiData = {
 		infoText : ''
 	}
 const style = {
-	queueInfo : {display:'flex', position:'absolute',right:4},
-	items : {border:'solid 1px #ddd'}
+	queueInfo : {display:'flex', position:'absolute',right:4, marginLeft:'-400px',top:0},
+	items : {border:'none',padding:'2px 2px',fontSize:'50%'}
 }
 
 export default QueueInfo

@@ -28,6 +28,9 @@ const sendMessage = (eventName, data = null, target='content', callback = f => f
     
     
 }
+const timeout =(ms)=> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 const konsole = {
 	log(...args){
 		sendMessage('console.log', args)
@@ -49,6 +52,7 @@ export {
 	sendMessage,
 	konsole,
 	titleCase,
-	slugify
+	slugify,
+	timeout
 }
 

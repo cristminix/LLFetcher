@@ -29,12 +29,29 @@ const onMessage = (callback) => {
         callback(evt, source);
     });
 };
-const injectScript = (file_path, tag ) => {
+const injectScript = (file_path, tag , callback = f=>f, error= f=>f) => {
     let node = document.getElementsByTagName(tag)[0];
     let script = document.createElement('script');
+        script.addEventListener("load", () => {
+            console.log(`${script.src} loaded`);
+            callback(script);
+        });
+        script.addEventListener("error", (ev) => {
+            console.log("Error on loading file", ev);
+            error(ev);
+        });
     script.setAttribute('type', 'text/javascript');
     script.setAttribute('src', file_path);
     node.appendChild(script);
+};
+const injectScriptAsync = async(src)=>{
+    return new Promise((resolve, reject) => {
+        injectScript(chrome.runtime.getURL(src), 'body', (el)=>{
+            resolve(el);
+        },(ev)=>{
+            reject(ev);
+        });
+    })
 };
 
 class ContentScript {
@@ -142,14 +159,14 @@ class ContentScript {
 
 
 const main = async () => {
-    injectScript(chrome.runtime.getURL('learning.js'), 'body');
-    injectScript(chrome.runtime.getURL('lib/react.development.js'), 'body');
-    injectScript(chrome.runtime.getURL('lib/react-dom.development.js'), 'body');
-    injectScript(chrome.runtime.getURL('app.js'), 'body');
-
-    const contentScript = new ContentScript();  
-    
-     
+    const scripts = ['learning.js', 'lib/react.development.js', 
+        'lib/react-dom.development.js', 'app.js'];
+    for(let i in scripts){
+        const src =  scripts[i];
+        await injectScriptAsync(src);
+    }
+   
+    const contentScript = new ContentScript();   
 };
 
 

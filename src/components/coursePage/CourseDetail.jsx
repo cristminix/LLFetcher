@@ -1,5 +1,5 @@
 import FetchSectionQueue from "./FetchSectionQueue"
-const CourseDetail = ({course, children, section}) => {
+const CourseDetail = ({course, children, sections, tocs, runSectionQueue, mainQueueRef}) => {
     return (<>
       <div className="course" style={{
         display : 'flex'
@@ -9,7 +9,7 @@ const CourseDetail = ({course, children, section}) => {
           {children}
         </div>
         <div className="item" style={{width : '200px'}}></div>
-          <FetchSectionQueue course={course}/>
+          <FetchSectionQueue  course={course} sections={sections} tocs={tocs} runSectionQueue={runSectionQueue}/>
       </div>
     </>)
   }

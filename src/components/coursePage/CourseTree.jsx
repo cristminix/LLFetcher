@@ -1,7 +1,8 @@
 import React, {useState, useEffect} from "react"
 import CourseSection from "./CourseSection"
 
-const CourseTree = ({sections, tocs}) => {
+const CourseTree = ({ sections, tocs, qsidx, qtidx, runTocsQueue, runSectionQueue,
+                      tocToolBarRefs, sectionToolBarRefs}) => {
     const [loading, setLoading] = useState(false)
     const [warningText, setWarningText] = useState('')
   
@@ -17,15 +18,29 @@ const CourseTree = ({sections, tocs}) => {
     }
   
     useEffect(()=>{
+  // console.log(tocToolBarRefs)
+      
       setLoading(true)
       setWarningText('Please wait ...')
     },[])
+
     if(sections.length > 0){
       return(<><div className="accordion accordion-flush" id="accordion-course-tree">
         {
           sections.map((section, index) => {
             const items = tocs[section.slug]
-            return(<CourseSection section={section} items={items} sidx={index} key={index}/>)
+            return(<CourseSection 
+              section={section} 
+              items={items} 
+              sidx={index} 
+              key={index} 
+              qsidx={qsidx} 
+              qtidx={qtidx}
+              runSectionQueue={runSectionQueue}
+              runTocsQueue={runTocsQueue}
+              tocToolBarRefs={tocToolBarRefs}
+              sectionToolBarRefs={sectionToolBarRefs}
+              />)
           })
         }  
       </div></>)

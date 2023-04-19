@@ -19,14 +19,15 @@ class SectionToolBar extends Component{
     return result
   }
   render(){
-    const {sidx, section, runSectionQueue, runTocsQueue, items} = this.props
+    const {sidx, section, runSectionQueue, runTocsQueue, items, tocToolBarRefs} = this.props
     return(<><div className="section-toolbar" style={{paddingTop:4}}>
       <FetchQueueBar sidx={sidx} 
                      section={section}  
                      runSectionQueue={runSectionQueue} 
                      runTocsQueue={runTocsQueue}
                      items={items}
-                     ref={this.fetchQueueRef}/>
+                     ref={this.fetchQueueRef}
+                     tocToolBarRefs={tocToolBarRefs}/>
   
     </div></>)
   }
@@ -51,7 +52,7 @@ const CourseSection = ({course, section, items, sidx, runSectionQueue, runTocsQu
           </div>
           <div className="item" style={{flexGrow:3}}>{section.title} ({items.length})</div>
           <div className="item">
-            <SectionToolBar ref={sectionToolBarRefs[sidx]} items={items} sidx={sidx} 
+            <SectionToolBar tocToolBarRefs={tocToolBarRefs} ref={sectionToolBarRefs[sidx]} items={items} sidx={sidx} 
             section={section} runSectionQueue={runSectionQueue} runTocsQueue={runTocsQueue}/>
           </div>    
       </div>

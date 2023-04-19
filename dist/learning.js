@@ -428,8 +428,8 @@ function parseToc(responseText){
             // transcript
             const transcriptObj = findDS('$type',"com.linkedin.videocontent.Transcript",results,['captionFile','captionFormat']);
             if('object' === typeof transcriptObj){
-              toc.captionUrl = transcriptObj.captionFile;
-              toc.captionFmt = transcriptObj.captionFormat;
+              toc.captionUrl = transcriptObj.captionFile  || ''
+              toc.captionFmt = transcriptObj.captionFormat || ''
             }
           }
           if(searchTermIdx == 2){
@@ -445,8 +445,8 @@ function parseToc(responseText){
           }
       }
     }
-    if(toc.captionUrl.length > 0 && streamLocations.length > 0){
-      validResource = true; 
+    if( streamLocations.length > 0){
+        validResource = true
     }
     
     return [validResource, toc, exerciseFile, streamLocations]

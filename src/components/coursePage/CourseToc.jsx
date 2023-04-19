@@ -1,11 +1,16 @@
 import FetchButton from "./FetchButton"
 
-import {Component} from "react"
+import {Component, createRef} from "react"
 class TocToolBar extends Component{
+    fetchBtnRef = null
+    constructor(props){
+      super(props)
+      this.fetchBtnRef = createRef(null)
+    }
     render(){
         const {toc, sidx, tidx, course} = this.props
         
-        return(<><FetchButton toc={toc}  sidx={sidx} tidx={tidx} course={course}/></>)
+        return(<><FetchButton ref={this.fetchBtnRef} toc={toc}  sidx={sidx} tidx={tidx} course={course}/></>)
 
     }
     

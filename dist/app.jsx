@@ -99,7 +99,7 @@ class Action_csa extends React.Component{
 		// console.log(toc.url)
 		let resultCode = 4
 		try{
-			const res = await fetch(url)
+			const res = await fetch(`${url}?rand=${(new Date).getTime()}`)
 			const text= await res.text()
 			resultCode = 3
 			const parsed = parseToc(text)
@@ -170,12 +170,13 @@ class ContentScriptApp extends Action_csa{
 		{
 			this.state.validCoursePage ? (<>
 				<span>{this.state.slug}</span>
+				</>) : ""
+				
+		}
 				<textarea id="input-script" style={{color:'#fff'}} defaultValue={inputScriptDefaultValue} onChange={evt => this.onInputScriptChange(evt)} ref={this.inputScriptRef}></textarea>
 				<textarea id="output-script" style={{color:'#fff'}} className={this.state.outputScriptCls} onChange={f=>f} value={this.state.outputScript}></textarea>
 				<div style={{width:'100%',textAlign:'right'}}><button style={{padding:'1em', background:'#fff', color:'#000'}} id="exec-button" onClick={e=>{this.runScript()}}>Execute Page Fn</button></div>
-			</>) : ""
-				
-		}
+			
 		<CoursePageChecker validCoursePage={this.state.validCoursePage}/>
 		</div></>)
 		

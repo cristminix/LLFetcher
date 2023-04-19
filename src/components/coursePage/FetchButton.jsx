@@ -12,22 +12,24 @@ const mExfile = await ExerciseFile.getInstance()
 
 class FetchButton extends ComponentWithMessaging{
 	course = null
-	toc = null
 	constructor(props){
 		super(props)
 		this.course = props.course
-		this.toc = props.toc
+		
 		this.state = {
-			btnState : 0	
+			btnState : 0,
+			toc : props.toc	,
+			exerciseFile : null, 
+			streamlocs : []
 		}
 	}
 	
 	async fetchToc() {
-		// console.log(this.toc)
-		const url =  `https://www.linkedin.com/learning/${this.course.slug}/${this.toc.slug}`;
+		console.log(this.state.toc)
+		const url =  `https://www.linkedin.com/learning/${this.course.slug}/${this.state.toc.slug}`;
 		this.setState({btnState:2})
 		const [validResource, tocUp, exFile, streamLocations] = await this.getCourseTocMessage(url)
-		// console.log([validResource, toc, exerciseFile, streamLocations])
+		console.log([validResource, tocUp, exFile, streamLocations])
 		const btnState = validResource ? 3 : 4
 
 		if(validResource){
@@ -53,16 +55,16 @@ class FetchButton extends ComponentWithMessaging{
 
 		for(let i in streamLocations){
 			const {fmt, url} = streamLocations[i]
-			const streamloc = await mStreamloc.create(fmt, url, this.toc.id)
+			const streamloc = await mStreamloc.create(fmt, url, this.state.toc.id)
 			streamlocIds.push(streamloc.id)
 			streamlocs.push(streamloc)
 		}
 
 		// update toc , with streamlocation ids
 		const {captionUrl, captionFmt} = tocUp
-		const toc = await mToc.update(this.toc.id,tocUp.url, captionUrl, captionFmt, streamlocIds)
+		const toc = await mToc.update(this.state.toc.id,tocUp.url, captionUrl, captionFmt, streamlocIds)
 
-
+		this.setState({toc,  exerciseFile, streamlocs})
 		return [toc, exerciseFile, streamlocs]
 
 	}
@@ -74,13 +76,13 @@ class FetchButton extends ComponentWithMessaging{
 	}
 
 	componentDidMount(){
-		if(this.toc.streamLocationIds.length > 0){
+		if(this.state.toc.streamLocationIds.length > 0){
 			this.setState({btnState:3})
 		}
 	}
 	render(){
 
-		const {course, toc} = this.props
+		const {toc} = this.state
 		const {btnState} = this.state
 		const btnStateNotLoading = btnState !== 1 && btnState !== 4
 		const btnStyle = { border : ( btnStateNotLoading ? 'none' : 'inherit') }

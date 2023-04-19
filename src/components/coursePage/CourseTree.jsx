@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from "react"
 import CourseSection from "./CourseSection"
 
-const CourseTree = ({ sections, tocs, qsidx, qtidx, runTocsQueue, runSectionQueue,
+const CourseTree = ({ course, sections, tocs, qsidx, qtidx, runTocsQueue, runSectionQueue,
                       tocToolBarRefs, sectionToolBarRefs}) => {
     const [loading, setLoading] = useState(false)
     const [warningText, setWarningText] = useState('')
@@ -30,6 +30,7 @@ const CourseTree = ({ sections, tocs, qsidx, qtidx, runTocsQueue, runSectionQueu
           sections.map((section, index) => {
             const items = tocs[section.slug]
             return(<CourseSection 
+              course={course}
               section={section} 
               items={items} 
               sidx={index} 

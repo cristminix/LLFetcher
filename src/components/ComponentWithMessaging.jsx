@@ -2,7 +2,7 @@ import {Component} from "react"
 import  {
 	sendMessage
 } from "./fn"
-class BasicPageWithMessaging extends Component{
+class ComponentWithMessaging extends Component{
 	async sendMessageAsync(msg, data){
 		
 		return new Promise((resolve, reject)=>{
@@ -53,4 +53,4 @@ class BasicPageWithMessaging extends Component{
 	}
 }
 
-export default BasicPageWithMessaging
+export default ComponentWithMessaging

@@ -5,7 +5,7 @@ import  {
 import App  from "../models/App"
 import Course  from "../models/Course"
 import Author  from "../models/Author"
-import BasicPageWithMessaging from "./BasicPageWithMessaging"
+import ComponentWithMessaging from "./ComponentWithMessaging"
 
 let onMessageAttached = false
 
@@ -14,7 +14,7 @@ const mCourse = await Course.getInstance()
 const mAuthor = await Author.getInstance()
 
 
-class WelcomePage extends BasicPageWithMessaging {
+class WelcomePage extends ComponentWithMessaging {
 	courseAuthors = []
 	constructor(props){
 		super(props)

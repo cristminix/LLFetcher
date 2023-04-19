@@ -68,6 +68,9 @@ class ContentScript {
                 case 'cmd.getCourseSections':
                     this.onCommand(evt.name, evt.data);
                 break
+                case 'cmd.getCourseToc':
+                    this.onCommand(evt.name, evt.data);
+                break
                 case 'cmd.validCoursePage':
                 case 'cmd.validCoursePageAuto':
                     this.onCommand(evt.name);

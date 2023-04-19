@@ -97,7 +97,7 @@ class CoursePage extends Component{
         <CourseAuthors authors={authors} key={course.id}/>
       </CourseDetail>
 
-      <CourseTree sections={sections} 
+      <CourseTree course={course} sections={sections} 
                   tocs={tocs} 
                   qsidx={qsidx} 
                   qtidx={qtidx} 

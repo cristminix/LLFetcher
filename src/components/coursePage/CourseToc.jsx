@@ -3,14 +3,14 @@ import FetchButton from "./FetchButton"
 import {Component} from "react"
 class TocToolBar extends Component{
     render(){
-        const {toc, sidx, tidx} = this.props
+        const {toc, sidx, tidx, course} = this.props
         
-        return(<><FetchButton toc={toc}  sidx={sidx} tidx={tidx}/></>)
+        return(<><FetchButton toc={toc}  sidx={sidx} tidx={tidx} course={course}/></>)
 
     }
     
   }
-const CourseToc = ({section, toc, sidx, tidx, collapsed, tocToolBarRefs}) => {
+const CourseToc = ({course, section, toc, sidx, tidx, collapsed, tocToolBarRefs}) => {
     // console.log(tocToolBarRefs[section.slug][tidx])
     return (<>
         <div id={`collapse${sidx}`} className={`accordion-collapse ${collapsed ? "collapse" : ""}`} 
@@ -19,7 +19,7 @@ const CourseToc = ({section, toc, sidx, tidx, collapsed, tocToolBarRefs}) => {
             <div className="toc-item-container" style={{display:'flex'}}>
               <div className="item"></div>
               <div className="item" style={{flexGrow:3}}>{toc.title}</div>
-              <div className="item"><TocToolBar ref={tocToolBarRefs[section.slug][tidx]} toc={toc} sidx={sidx} tidx={tidx}/></div>
+              <div className="item"><TocToolBar course={course} ref={tocToolBarRefs[section.slug][tidx]} toc={toc} sidx={sidx} tidx={tidx}/></div>
   
             </div>
             {/*<TocItem :items="section.items" :sectionIndex="sectionIndex" @update="onTocUpdate($event)" ref="tocItems"/>*/}

@@ -14,7 +14,7 @@ import Author from "../models/Author"
 import Section from "../models/Section"
 import Toc from "../models/Toc"
 import Course from "../models/Course"
-import BasicPageWithMessaging from "./BasicPageWithMessaging"
+import ComponentWithMessaging from "./ComponentWithMessaging"
 
 import  {
 	onMessage,
@@ -32,7 +32,7 @@ const mCourse = await Course.getInstance()
 await mApp.init()
 let onMessageAttached = false
 
-class PopupAction extends BasicPageWithMessaging{
+class PopupAction extends ComponentWithMessaging{
 	constructor(props){
 		super(props)
 		this.state = {

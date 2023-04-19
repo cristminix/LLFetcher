@@ -1,26 +1,105 @@
-import {useState, useEffect} from "react"
+import {Component} from "react"
+import ComponentWithMessaging from "../ComponentWithMessaging"
+import Course from "../../models/Course"
+import Toc from "../../models/Toc"
+import StreamLocation from "../../models/StreamLocation"
+import ExerciseFile from "../../models/ExerciseFile"
 
-const FetchButton = ({toc}) => {
-	const [btnState,setBtnState] = useState(0)
-	const btnStateNotLoading = btnState !== 1 && btnState !== 4
-	const btnStyle = { border : ( btnStateNotLoading ? 'none' : 'inherit') }
-	const iconCls = btnState === 1 ? 'fa-play' 
-		   : btnState === 2 ? 'fa-spin fa-spinner' 
-		   					: btnState === 3 ? 'fa-check' 
-		   									 : btnState === 4 ? 'fa-refresh'
-		   									 				  : 'fa-play'
-	const fetchToc = async () => {
+const mCourse = await Course.getInstance()
+const mToc = await Toc.getInstance()
+const mStreamloc = await StreamLocation.getInstance()
+const mExfile = await ExerciseFile.getInstance()
+
+class FetchButton extends ComponentWithMessaging{
+	course = null
+	toc = null
+	constructor(props){
+		super(props)
+		this.course = props.course
+		this.toc = props.toc
+		this.state = {
+			btnState : 0	
+		}
+	}
+	
+	async fetchToc() {
+		// console.log(this.toc)
+		const url =  `https://www.linkedin.com/learning/${this.course.slug}/${this.toc.slug}`;
+		this.setState({btnState:2})
+		const [validResource, tocUp, exFile, streamLocations] = await this.getCourseTocMessage(url)
+		// console.log([validResource, toc, exerciseFile, streamLocations])
+		const btnState = validResource ? 3 : 4
+
+		if(validResource){
+			tocUp.url = url
+			const records = await this.saveRecords(tocUp, exFile, streamLocations)
+
+			console.log(records)
+
+		}
+		this.setState({btnState})
+
+		return validResource
+		
+	}
+	async saveRecords(tocUp, exFile, streamLocations){
+		// store exercise file
+		const {name,sizeInBytes} = exFile
+		const exerciseFile = await mExfile.create(name,exFile.url,sizeInBytes,this.course.id)
+		// store streamlocations
+		
+		const streamlocIds = []
+		const streamlocs = []
+
+		for(let i in streamLocations){
+			const {fmt, url} = streamLocations[i]
+			const streamloc = await mStreamloc.create(fmt, url, this.toc.id)
+			streamlocIds.push(streamloc.id)
+			streamlocs.push(streamloc)
+		}
+
+		// update toc , with streamlocation ids
+		const {captionUrl, captionFmt} = tocUp
+		const toc = await mToc.update(this.toc.id,tocUp.url, captionUrl, captionFmt, streamlocIds)
+
+
+		return [toc, exerciseFile, streamlocs]
 
 	}
-	return(<><div className="btn-group">
-	    <button style={btnStyle} 
-	    		disabled={btnState > 1 && btnState < 4} 
-	    		onClick={e => fetchToc()} 
-	    		className="btn btn-sm" 
-	    		title={`Click to fetch TOC resources ${toc.title}`}>
-	      	<i className={"fa " + iconCls}></i>
-	    </button>
-  	</div></>)
+	async getCourseTocMessage(url){
+		const msg = 'cmd.getCourseToc'
+		const results = await this.getFromMessage(msg, url)
+		return results
+		// console.log(results)
+	}
+
+	componentDidMount(){
+		if(this.toc.streamLocationIds.length > 0){
+			this.setState({btnState:3})
+		}
+	}
+	render(){
+
+		const {course, toc} = this.props
+		const {btnState} = this.state
+		const btnStateNotLoading = btnState !== 1 && btnState !== 4
+		const btnStyle = { border : ( btnStateNotLoading ? 'none' : 'inherit') }
+		const iconCls = btnState === 1 ? 'fa-play' 
+			   : btnState === 2 ? 'fa-spin fa-spinner' 
+			   					: btnState === 3 ? 'fa-check' 
+		   									 : btnState === 4 ? 'fa-refresh'
+		   									 				  : 'fa-play'
+		return(<><div className="btn-group">
+		    <button style={btnStyle} 
+		    		disabled={btnState > 1 && btnState < 4} 
+		    		onClick={e => this.fetchToc()} 
+		    		className="btn btn-sm" 
+		    		title={`Click to fetch TOC resources ${toc.title}`}>
+		      	<i className={"fa " + iconCls}></i>
+		    </button>
+	  	</div></>)
+	}
+	
 }
 
 export default FetchButton

@@ -82,20 +82,35 @@ class Action_csa extends React.Component{
 			// ocls : 'default'
 		}
 	}
-	getCourseInfo(){
+	async getCourseInfo(){
 		return getCourseInfo(this.state.slug)
 	}
 
 
-	validCoursePage(){
+	async validCoursePage(){
 		return this.state.validCoursePage
 
 	}
-	validCoursePageAuto(){
+	async validCoursePageAuto(){
 		return this.state.validCoursePage
 
 	}
-	getCourseSections(urn){
+	async getCourseToc(url){
+		// console.log(toc.url)
+		let resultCode = 4
+		try{
+			const res = await fetch(url)
+			const text= await res.text()
+			resultCode = 3
+			const parsed = parseToc(text)
+			console.log(parsed)
+			return parsed
+		}catch(e){
+			console.log(e)
+
+		}
+	}
+	async getCourseSections(urn){
 		// console.log(urn)
 		return getCourseSections(urn)
 	}
@@ -110,7 +125,7 @@ class ContentScriptApp extends Action_csa{
 		console.log(chrome)
 		createDataCodes(this.state.slug)
 	}
-	runScript(){
+	async runScript(){
 		// is = inputScript shorthand
 		let is = {
 			cmd : 'getCourseInfo',
@@ -127,7 +142,7 @@ class ContentScriptApp extends Action_csa{
 
 			if(typeof this[method] === 'function'){
 				// this.setState({ocls})
-				const result = this[method](param)
+				const result = await this[method](param)
 				this.setState({
 					outputScript : JSON.stringify(result, null, 4),
 					outputScriptCls : ocls

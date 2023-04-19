@@ -20,7 +20,7 @@ class SectionToolBar extends Component{
   }
   render(){
     const {sidx, section, runSectionQueue, runTocsQueue, items} = this.props
-    return(<><div className="section-toolbar">
+    return(<><div className="section-toolbar" style={{paddingTop:4}}>
       <FetchQueueBar sidx={sidx} 
                      section={section}  
                      runSectionQueue={runSectionQueue} 
@@ -31,7 +31,7 @@ class SectionToolBar extends Component{
     </div></>)
   }
 }
-const CourseSection = ({section, items, sidx, runSectionQueue, runTocsQueue,
+const CourseSection = ({course, section, items, sidx, runSectionQueue, runTocsQueue,
                         tocToolBarRefs, sectionToolBarRefs}) => {
   const [collapsed, setCollapsed] = useState(true)
 
@@ -59,7 +59,7 @@ const CourseSection = ({section, items, sidx, runSectionQueue, runTocsQueue,
         {
           
           items.map((toc, index)=>{
-            return (<CourseToc toc={toc} section={section} key={index} sidx={sidx} tidx={index} collapsed={collapsed} tocToolBarRefs={tocToolBarRefs}/>)
+            return (<CourseToc course={course} toc={toc} section={section} key={index} sidx={sidx} tidx={index} collapsed={collapsed} tocToolBarRefs={tocToolBarRefs}/>)
           }) 
                
         }

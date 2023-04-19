@@ -8,7 +8,7 @@ const CourseDetail = ({course, children, sections, tocs, runSectionQueue, mainQu
           <h2><i className="fa fa-bookmark"></i> <span>{course.title}</span></h2>
           {children}
         </div>
-        <div className="item" style={{width : '200px'}}>
+        <div className="item" style={{width : '200px',paddingTop:'.7em'}}>
           <FetchSectionQueue  course={course} sections={sections} tocs={tocs} runSectionQueue={runSectionQueue}/>
       </div>
       </div>

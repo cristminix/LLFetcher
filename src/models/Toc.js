@@ -11,19 +11,26 @@ class Toc extends DB {
     getBySlug(slug,sectionId){
         return this.singleQuery({query: {slug,sectionId}})
     }
+    get(id){
+        return this.singleQuery({query: {id}})
+    }
 
-    async updateCaption( captionUrl, captionFmt, slug, sectionId){
-        const toc = this.getBySlug(slug,sectionId)
+    async update(id, tocUrl, captionUrl, captionFmt, streamlocIds){
+        const toc = this.get(id)
         if(toc){
-            this.db.update(this.table, {slug, sectionId}, row => {
+            this.db.update(this.table, {id}, row => {
                 row.captionUrl = captionUrl
                 row.captionFmt = captionFmt
+                row.streamLocationIds = streamlocIds
+                row.url = tocUrl
                 return row
             })
+            toc.streamLocationIds = streamlocIds
             await this.db.commit()
         }else{
-            console.warn(`${this.constructor.name}.updateCaption() toc is not exists`)
+            console.warn(`${this.constructor.name}.update() row is not exists`)
         }
+        return toc
     }
 
     async create(title, slug, url, duration, captionUrl, captionFmt, sectionId){

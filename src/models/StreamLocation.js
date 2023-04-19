@@ -3,72 +3,33 @@ import DB from "./DB"
 class StreamLocation extends DB {
 	table = 'streamLocation'
 	fields = ["tocId","fmt","url"]
-/*
- static getStreamLocation(tocId:number,fmt:string):StreamLocation_tableField{
-        const db = Store.db();
-        const results = db.queryAll('streamLocation',{query: {tocId,fmt}});
-        if(results.length>0){
-            return results[0] as StreamLocation_tableField;
-        }
-        return null;
+
+    getByTocId(tocId,fmt){
+        return this.singleQuery({query: {tocId,fmt}})
         
     }
-    static getStreamLocations(tocId:number):StreamLocation_tableField[]{
-        const db = Store.db();
-        const results = db.queryAll('streamLocation',{query: {tocId}});
-        return results as StreamLocation_tableField[];
+    getListByTocId(tocId){
+        return this.query({query: {tocId}})
     }
-    static createStreamLocation(tocId:number,fmt:string,url:string):StreamLocation_tableField{
-        const db = Store.db();
-        let streamLocation = Store.getStreamLocation(tocId,fmt);
-        if(streamLocation){
-            streamLocation.url = url;
-            db.update('streamLocation',(row)=>{
-                row.url = url;
-                return row;
-            });
+    async create(fmt, url, tocId){
+        
+        let streamloc = this.getByTocId(tocId,fmt)
+        if(streamloc){
+            streamloc.url = url
+            this.db.update(this.table,(row)=>{
+                row.url = url
+                return row
+            })
         }else{
-            const ID = 0;
-            streamLocation = {ID,tocId,fmt,url};
-            streamLocation.ID = db.insert('streamLocation',streamLocation);
+            const id = 0
+            streamloc = {id,tocId,fmt,url}
+            streamloc.id = this.db.insert(this.table,streamloc)
         }
-        setTimeout(()=>db.commit(),100);
+        await this.db.commit()
 
-        return streamLocation;
+        return streamloc
     }
-static createStreamLocationList(slug:string,sectionId:number,streamLocations:StreamLocation[],courseId?:number):StreamLocation_tableField[]{
-        const db = Store.db();
-        const toc = Store.getToc(slug,sectionId);
-        const streamLocationResults : StreamLocation_tableField[] = [];
-        const fmtList : string[]=[];
-        if(toc){
-            const streamLocationIds = toc.streamLocationIds;
-            streamLocations.map((streamLocation)=>{
-                // console.log(streamLocation);
-                if(!fmtList.includes(streamLocation.fmt)){
-                    fmtList.push(streamLocation.fmt);
-                }
-                const streamLoc = Store.createStreamLocation(toc.ID,streamLocation.fmt,streamLocation.url);
-                if(!streamLocationIds.includes(streamLoc.ID)){
-                    streamLocationIds.push(streamLoc.ID);
-                }
-                streamLocationResults.push(streamLoc);
-            });
 
-            db.update('toc',{slug},(row)=>{
-               row.streamLocationIds = streamLocationIds;
-               return row;
-            });
-
-            db.commit();
-            if(courseId){
-                Store.updateDownloadConfig('fmtList',fmtList,courseId);
-            }
-            
-        }
-        return streamLocationResults;
-    }
-*/	
 }
 
 export default StreamLocation

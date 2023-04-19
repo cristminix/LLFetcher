@@ -5,34 +5,21 @@ class ExerciseFile extends DB {
 	fields = ["courseId","name","url","size"]
 
 	getByCourseId(courseId){
-		/*
-static getExerciseFile(courseId:number) : ExerciseFile_tableField{
-        const db = Store.db();
-        const results =  db.queryAll('exerciseFile',{query: {courseId}});
-        if(results.length>0){
-            return results[0] as unknown as ExerciseFile_tableField;
-        }
-        return null;
-    }
-
-		*/
+        return this.singleQuery({query: {courseId}})
 	}
-/*
-static createExerciseFile(courseId:number,name:string,url:string,size:number):ExerciseFile_tableField{
-        const db = Store.db();
-        let exerciseFile = Store.getExerciseFile(courseId);
+    async create(name,url,size,courseId){
+        let exerciseFile = this.getByCourseId(courseId)
 
         if(!exerciseFile){
-            const ID = 0;
-            exerciseFile = {ID,courseId,name,url,size};
-            exerciseFile.ID = db.insert('exerciseFile',exerciseFile);
-            db.commit();
+            const id = 0
+            exerciseFile = {id,courseId,name,url,size}
+            exerciseFile.id = this.db.insert(this.table,exerciseFile)
+            await this.db.commit()
 
         }
 
         return exerciseFile;
     }
-*/	
 }
 
 export default ExerciseFile

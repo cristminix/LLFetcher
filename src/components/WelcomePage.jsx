@@ -1,11 +1,11 @@
-import React, {useState, useEffect} from "react"
 import  {
-	sendMessage, titleCase
+	titleCase
 } from "./fn"
 
 import App  from "../models/App"
 import Course  from "../models/Course"
 import Author  from "../models/Author"
+import BasicPageWithMessaging from "./BasicPageWithMessaging"
 
 let onMessageAttached = false
 
@@ -13,26 +13,8 @@ const mApp = await App.getInstance()
 const mCourse = await Course.getInstance()
 const mAuthor = await Author.getInstance()
 
-// console.log(mApp, mCourse, mAuthor)
 
-const exampleCourse = {
-    "title": "Creating and Managing a YouTube Channel",
-    "slug": "creating-and-managing-a-youtube-channel-14769404",
-    "duration": 11409,
-    "sourceCodeRepository": null,
-    "subtitle": null,
-    "description": "YouTube is where video and video creators thrive. By creating a YouTube channel, you can build a highly visible online brand and share content with the world. This course explains how to set up a brand-new YouTube channel, build your subscriber base, and convert clicks into action. Throughout the course, instructor Rich Harrington shares essential strategies for building an audience and maximizing engagement. Rich explains how to design compelling artwork, choose engaging thumbnails, and use YouTube cards and captions. He also dives into building a YouTube community, live streaming, and more. Start watching and learn everything you need to build a YouTube channel into a successful business.\n<br><br>\nThis course was created by Rhed Pixel. We are pleased to host this training in our library.\n",
-    "urn": "urn:li:learningApiCourse:38964028",
-    "authors": [
-        {
-            "biography": "Rich Harrington is a digital video expert, educator, speaker, and author.\n\nAs a digital video expert and trained business professional, Rich Harrington understands both the creative and management sides of the visual communications industry. He is the founder of the visual communications company RHED Pixel in Washington, DC. He is a certified instructor for Adobe and Apple and a member of the National Association of Photoshop Professionals Instructor Dream Team. Rich is a popular speaker on the digital video circuit and has served as program manager for conferences hosted by the National Association of Broadcasters (NAB). He has also written several books for the video industry, including An Editor's Guide to Adobe Premiere Pro, From Still to Motion, and Photoshop for Video. To explore more resources for media professionals and to listen to Rich's many podcasts, visit RichardHarrington.com.",
-            "shortBiography": "Digital Video Expert, Educator, Speaker",
-            "slug": "richard-harrington",
-            "urn": "urn:li:learningApiAuthor:538088"
-        }
-    ]
-}
-class WelcomePage extends React.Component {
+class WelcomePage extends BasicPageWithMessaging {
 	courseAuthors = []
 	constructor(props){
 		super(props)
@@ -47,14 +29,7 @@ class WelcomePage extends React.Component {
 		}
 	}
 
-	async getCourseInfo(){
-		// konsole.log(`Popup.WelcomePage.getCourseInfo`)
-		
-		// console.log(course)
-		// this.addToLastCourseList(exampleCourse)
-		this.setState({fetchBtnState:1})
-		sendMessage('cmd.getCourseInfo')
-	}
+
 
 	async addToLastCourseList(ci){
 		this.setState({courseInfo:ci})
@@ -63,7 +38,7 @@ class WelcomePage extends React.Component {
 		if(!Object.keys(this.state.lastCourseList).includes(slug)){
 			this.populateLastCourseList()
 		}
-		this.props.onSelectCourse(course, this.courseAuthors)
+		await this.props.onSelectCourse(course, this.courseAuthors)
 
 	}
 	async createAuthors(authors, course){
@@ -72,7 +47,7 @@ class WelcomePage extends React.Component {
 			const {slug,biography,shortBiography} = authors[i]
 			const name = titleCase(slug)
 			const author = await mAuthor.create(name,slug,biography,shortBiography,course.id)
-			console.log(author)
+			// console.log(author)
 			if(this.courseAuthors.filter(_author_ => _author_.id === author.id).length === 0){
 				this.courseAuthors.push(author)
 				course = await mCourse.addAuthorId(course.id, author.id)
@@ -94,31 +69,14 @@ class WelcomePage extends React.Component {
 		return course
 	}
 
-	async onGetCourseInfo(evt){
-		const course = evt.data
-		console.log(course)
-		await this.addToLastCourseList(course)
-		// konsole.log(`Popup.WelcomePage.getCourseInfo`, evt.data)
-	}
 
-	onCommand(evt, source){
-		// console.log(evt)
-    	if(evt.name === 'cmd.getCourseInfo'){
-    		this.onGetCourseInfo(evt, source)
-			this.setState({fetchBtnState:2})
-    	}
-		if(evt.name === 'cmd.validCoursePage'){
+
+	onMessageCommand(evt, source){
+		if(evt.name === 'cmd.validCoursePageAuto'){
     		this.setState({validCoursePage:evt.data})
-			
-			// console.log(this,evt.data)
-			// console.log(`validCoursePage = ${evt.data}`)
 		}
 	}
 
-	// shouldComponentUpdate(props, state){
-	// 	console.log(props, state)
-	// 	return true
-	// }
 	populateLastCourseList(){
 		const savedCourseList = mCourse.getList()
 		let courseListObj = {}
@@ -128,40 +86,30 @@ class WelcomePage extends React.Component {
 		this.setState({lastCourseList :courseListObj})
 
 	}
-	commandListener = (evt, source) => {
-		this.onCommand(evt, source)
-	}
-	onMessage(){
-		try{
-			chrome.runtime.onMessage.removeListener(this.commandListener)
-			chrome.runtime.onMessage.addListener(this.commandListener)
-		}catch(e){
-			// console.log(e)
-		}	
 	
-	}
 	async componentDidMount(){
 		this.populateLastCourseList() 
-		this.onMessage()
-
-		sendMessage('cmd.validCoursePage')
+		this.initMessaging()
+		await this.getValidCourseMessage()
 
 	}
+	async getValidCourseMessage(){
+		const msg = 'cmd.validCoursePage'
+		const validCoursePage = await this.getFromMessage(msg)
+		this.setState({validCoursePage})
+	}
+	async getCourseInfoMessage(){
+		const msg = 'cmd.getCourseInfo'
+		this.setState({fetchBtnState:1})
 
-	 onSelectCourse(course){
-	 	setTimeout(()=>{
-	 		this.setState({loading:true, disableFetchBtn:true})
-		
-			this.props.onSelectCourse(course,null,true)
-
-			
-
-	 	},100)
-	 	setTimeout(()=>{
-			this.setState({loading:false, disableFetchBtn:false})
-
-		},3000)
-		
+		const course = await this.getFromMessage(msg)
+		await this.addToLastCourseList(course)
+	}
+	
+	async onSelectCourse(course){
+	 	this.setState({loading:true, disableFetchBtn:true})
+		await this.props.onSelectCourse(course,null,true)
+		this.setState({loading:false, disableFetchBtn:false})
 	}
 	render(){
 		const {greeting,lastCourseList,fetchBtnState,validCoursePage, loading, disableFetchBtn} = this.state
@@ -195,7 +143,7 @@ class WelcomePage extends React.Component {
 				
 
 				<div className="btn-cnt">
-					<button  disabled={fetchBtnState==1 || !validCoursePage || disableFetchBtn} className="btn btn-primary" onClick={e => this.getCourseInfo()}><i className={`fa ${btnCls}`}></i> Fetch This Course</button>
+					<button  disabled={fetchBtnState==1 || !validCoursePage || disableFetchBtn} className="btn btn-primary" onClick={e => this.getCourseInfoMessage()}><i className={`fa ${btnCls}`}></i> Fetch This Course</button>
 					{/* <span>Valid CoursePage ? {validCoursePage ? 'Yes' : 'No'}</span> */}
 				</div>
 

@@ -14,6 +14,8 @@ import Author from "../models/Author"
 import Section from "../models/Section"
 import Toc from "../models/Toc"
 import Course from "../models/Course"
+import BasicPageWithMessaging from "./BasicPageWithMessaging"
+
 import  {
 	onMessage,
 	slugify,
@@ -30,7 +32,7 @@ const mCourse = await Course.getInstance()
 await mApp.init()
 let onMessageAttached = false
 
-class PopupAction extends React.Component{
+class PopupAction extends BasicPageWithMessaging{
 	constructor(props){
 		super(props)
 		this.state = {
@@ -46,14 +48,14 @@ class PopupAction extends React.Component{
 	onNavUpdate(nav){
 		this.setState({nav})
 	}
-	onCommand(evt, source){
-    	if(evt.name === 'cmd.getCourseSections'){
-			const csi = evt.data
-			const courseSectionInfoStr = JSON.stringify(csi)
-			this.setState({courseSectionInfoStr})
-			this.createCourseSections(csi)
-    	}
-	}
+	// onMessageCommand(evt, source){
+    // 	if(evt.name === 'cmd.getCourseSections'){
+	// 		const csi = evt.data
+	// 		const courseSectionInfoStr = JSON.stringify(csi)
+	// 		this.setState({courseSectionInfoStr})
+	// 		this.createCourseSections(csi)
+    // 	}
+	// }
 	async createCourseTocs(items, section){
 		const tocs = []
 		const tocIds = []
@@ -140,9 +142,9 @@ class Popup extends PopupAction{
 	
 		return pages[this.state.nav]
 	}
-	onPopupOpen(){
-		// sendMessage('cmd.validCoursePage')
-	}
+	// onPopupOpen(){
+	// 	// sendMessage('cmd.validCoursePage')
+	// }
 	async onSelectCourse(course, authors = null, dontSendMessage = false){
 		this.setState({course},async ()=>{
 			if(!authors){
@@ -153,22 +155,33 @@ class Popup extends PopupAction{
 			if(dontSendMessage){
 				await this.loadCourseSections()
 			}else{
-				sendMessage('cmd.getCourseSections', this.state.course.urn)
+				// sendMessage('cmd.getCourseSections', this.state.course.urn)
+				await this.getCourseSectionsMessage()
 			}
 		})
 	}
 
-	
+	async getCourseSectionsMessage(){
+		const msg = 'cmd.getCourseSections'
+		const csi = await this.getFromMessage(msg, this.state.course.urn)
 
-	componentDidMount(){
-		if(!onMessageAttached){
-			onMessage((evt, source)=>{
-				this.onCommand(evt, source)
-		    })
-		    onMessageAttached = true
-			this.onPopupOpen()
+		if(csi){
+			const courseSectionInfoStr = JSON.stringify(csi)
+			await this.setState({courseSectionInfoStr})
+			await this.createCourseSections(csi)
 		}
+		// this.setState({validCoursePage})
 	}
+
+	// componentDidMount(){
+	// 	if(!onMessageAttached){
+	// 		onMessage((evt, source)=>{
+	// 			this.onCommand(evt, source)
+	// 	    })
+	// 	    onMessageAttached = true
+	// 		this.onPopupOpen()
+	// 	}
+	// }
 	render(){
 		return (<div className="app-container">
 		{

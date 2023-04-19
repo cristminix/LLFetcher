@@ -91,6 +91,10 @@ class Action_csa extends React.Component{
 		return this.state.validCoursePage
 
 	}
+	validCoursePageAuto(){
+		return this.state.validCoursePage
+
+	}
 	getCourseSections(urn){
 		// console.log(urn)
 		return getCourseSections(urn)

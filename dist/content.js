@@ -69,6 +69,7 @@ class ContentScript {
                     this.onCommand(evt.name, evt.data);
                 break
                 case 'cmd.validCoursePage':
+                case 'cmd.validCoursePageAuto':
                     this.onCommand(evt.name);
                 break
 
@@ -131,7 +132,7 @@ class ContentScript {
             if(el){
                 el.setAttribute('class','_blank');
                 setTimeout(()=>{
-                    this.onCommand('cmd.validCoursePage');
+                    this.onCommand('cmd.validCoursePageAuto');
                     this.waitForCheckerElm();
 
                 },3000);

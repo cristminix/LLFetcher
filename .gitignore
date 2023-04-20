@@ -31,3 +31,4 @@ dist-ssr
 /src/__unused
 /src/models/__unused
 /tools/chrome-stay-fresh/host/stayfresh.log.*
+/*.lock

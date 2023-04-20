@@ -163,8 +163,8 @@ class ContentScript {
 
 
 const main = async () => {
-    const scripts = ['learning.js', 'lib/react.development.js', 
-        'lib/react-dom.development.js', 'app.js'];
+     const scripts = ['lib/jquery.min.js','lib/underscore.min.js','lib/learning.js', 'lib/react.development.js', 
+        'lib/react-dom.development.js', 'lib/app.js'];
     for(let i in scripts){
         const src =  scripts[i];
         await injectScriptAsync(src);

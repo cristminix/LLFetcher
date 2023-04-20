@@ -74,8 +74,20 @@ class FetchButton extends ComponentWithMessaging{
 		return results
 		// console.log(results)
 	}
+	async loadCourseToc(){
+		const toc = mToc.get(this.state.toc.id)
+		const exerciseFile = mExfile.getByCourseId(this.course.id)
+		const streamlocs = mStreamloc.getListByTocId(this.state.toc.id)
 
-	componentDidMount(){
+		this.setState({toc,  exerciseFile, streamlocs})
+
+	}
+
+	isFetched(){
+		return this.state.streamlocs.length > 0
+	}
+	async componentDidMount(){
+		await this.loadCourseToc()
 		if(this.state.toc.streamLocationIds.length > 0){
 			this.setState({btnState:3})
 		}

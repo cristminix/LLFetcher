@@ -57,7 +57,7 @@ class FetchQueue extends Component{
 		            		className={`btn btn-sm btn-${prefixCls}`}>
 		            	<i className={`fa ${iconCls}`}></i></button>
 		            	{
-		            		queueStarted ? (<QueueInfo data={qiData}/>):""
+		            		// queueStarted ? (<QueueInfo data={qiData}/>):""
 		            	}
 		            	
 		        </div>) : ""

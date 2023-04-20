@@ -41,9 +41,8 @@ class FetchSectionQueue extends FetchQueue{
 
 			})
 			await runSectionQueue(sidx)
-			await timeout(5)
 		}
-		this.setState({btnState:4, queueStarted:false})
+		this.setState({btnState:3, queueStarted:false})
 
 	}
 

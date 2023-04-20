@@ -1,5 +1,5 @@
 
-import React, {useState, useEffect} from "react"
+import {createRef} from "react"
 
 import WelcomePage from "./WelcomePage"
 import CoursePage from "./CoursePage"
@@ -120,12 +120,18 @@ class PopupAction extends ComponentWithMessaging{
 					const {course,sections, tocs} = this.state
 					konsole.log(course,sections, tocs)
 				})
+				this.pageNavigationRef.current.setNav('course')
 			}
 		})
 	}
 }
 
 class Popup extends PopupAction{
+	pageNavigationRef = null
+	constructor(props){
+		super(props)
+		this.pageNavigationRef = createRef(null)
+	}
 	setPage(){
 		const pages = {
 			welcome : (<WelcomePage onSelectCourse={(a,b,c)=>this.onSelectCourse(a,b,c)}/>),
@@ -133,7 +139,8 @@ class Popup extends PopupAction{
 								  course={this.state.course} 
 								  authors={this.state.courseAuthors} 
 								  sections={JSON.parse(this.state.courseSectionStr)} 
-								  tocs={JSON.parse(this.state.courseTocsStr)}/>),
+								  tocs={JSON.parse(this.state.courseTocsStr)}
+								  pageNavigationRef={this.pageNavigationRef}/>),
 			download : (<DownloadPage />),
 			help : (<HelpPage />),
 			setting : (<SettingPage />),
@@ -188,7 +195,7 @@ class Popup extends PopupAction{
 			this.setPage() 
 		}
 	   
-	    <PageNavigation onNavUpdate={nav => this.onNavUpdate(nav)}  nav={this.state.nav}/>
+	    <PageNavigation ref={this.pageNavigationRef} onNavUpdate={nav => this.onNavUpdate(nav)}  nav={this.state.nav}/>
 
 	  </div>)
 	}

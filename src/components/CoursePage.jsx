@@ -81,8 +81,23 @@ class CoursePage extends Component{
     console.log(this.mainQueueRef)
 
   }
+  onUpdateQueueProgress(src, data){
+    console.log(src, data)
+    console.log(this.mainQueueRef.current)
+    const {pageNavigationRef} = this.props
+
+    if(src === 'FetchQueueBar'){
+      const {section, percentage} = data
+      const result = this.mainQueueRef.current.updateProgressView(section, percentage)
+
+      
+      pageNavigationRef.current.enableDownload(result === 100)
+      
+    }
+  }
   render(){
     const {course, authors, sections, tocs, qsidx, qtidx} = this.state
+    const {pageNavigationRef} = this.props
     return(<>
     {
       course ? (<div className="course-page page">
@@ -93,7 +108,8 @@ class CoursePage extends Component{
                     qtidx={qtidx} 
                     runSectionQueue={sidx=>this.runSectionQueue(sidx)} 
                     runTocsQueue={tidx=>this.runTocsQueue(tidx)}
-                    mainQueueRef={this.mainQueueRef}>
+                    mainQueueRef={this.mainQueueRef}
+                    pageNavigationRef={pageNavigationRef}>
         <CourseAuthors authors={authors} key={course.id}/>
       </CourseDetail>
 
@@ -105,6 +121,7 @@ class CoursePage extends Component{
                   runTocsQueue={tidx=>this.runTocsQueue(tidx)}
                   sectionToolBarRefs={this.sectionToolBarRefs}
                   tocToolBarRefs={this.tocToolBarRefs}
+                  onUpdateQueueProgress={(src, data)=>this.onUpdateQueueProgress(src, data)}
                   />  
     </div>):(<div className="course-page page">
       No data available !  

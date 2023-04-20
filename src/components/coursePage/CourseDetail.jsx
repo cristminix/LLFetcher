@@ -9,7 +9,9 @@ const CourseDetail = ({course, children, sections, tocs, runSectionQueue, mainQu
           {children}
         </div>
         <div className="item" style={{width : '200px',paddingTop:'.7em'}}>
-          <FetchSectionQueue  course={course} sections={sections} tocs={tocs} runSectionQueue={runSectionQueue}/>
+          <FetchSectionQueue  course={course} sections={sections} tocs={tocs} 
+          runSectionQueue={runSectionQueue}
+          ref={mainQueueRef}/>
       </div>
       </div>
     </>)

@@ -7,6 +7,7 @@ import {konsole, timeout, makeDelay, isEqual} from "../fn"
 import FetchQueue from "./FetchQueue"
 class FetchQueueBar extends FetchQueue{
 	delay = null
+	checkChildProgressChecked = false
 	constructor(props){
 		super(props)
 		this.prefixCls = 'fetch-queue'
@@ -15,20 +16,16 @@ class FetchQueueBar extends FetchQueue{
 	}
 	
 	async startQueue(){
-		const {items, sidx, section} = this.props
-		konsole.log(`FetchQueueBar.startQueue() sidx=${sidx}`)
-
-		this.setState({btnState:2, queueStarted:true})
-
+		const {items, sidx, section, tocToolBarRefs, onUpdateQueueProgress} = this.props
 		
-		const {tocToolBarRefs} = this.props
 		let queues = Object.keys(items)
 		let tidx
 		let retryCount = queues.map(n => 0)
-		this.setState({retryCount})
+		this.setState({retryCount, btnState:2, queueStarted:true})
 		const successQueues = []
 		const failedQueues = []
 		while(tidx = queues.shift()){
+			// this.setState({btnState:2})
 			const item = items[tidx]
 			const key = item.slug
 			konsole.log(tidx)
@@ -41,6 +38,7 @@ class FetchQueueBar extends FetchQueue{
 				const percentage = Math.ceil(
 					Math.floor( nidx / items.length * 100 )
 				)
+				onUpdateQueueProgress('FetchQueueBar', {sidx,section, percentage})
 				this.setState({
 					qiData:{
 						current:tidx, 
@@ -61,6 +59,8 @@ class FetchQueueBar extends FetchQueue{
 				const percentage = Math.ceil(
 					Math.floor( nidx / items.length * 100 )
 				)
+				onUpdateQueueProgress('FetchQueueBar', {sidx,section, percentage})
+
 				this.setState({
 					qiData:{
 						current:tidx, 
@@ -102,19 +102,15 @@ class FetchQueueBar extends FetchQueue{
 		return percentage
 	}
 	checkChildProgress(props){
-		const {section, items, tocToolBarRefs} = props
+		const {section, items, tocToolBarRefs, onUpdateQueueProgress,sidx} = props
 		let tidx=0,queues = Object.keys(items)
 		let percentage = 0
 		while(tidx = queues.shift()){
-			// try{
-				const fetchBtn = tocToolBarRefs[section.slug][tidx].current.fetchBtnRef.current
-				if(fetchBtn.isFetched()){
-					percentage = this.checkProgressItem(queues, items)
-					console.log(percentage)
-				}
-			// }catch(e){
-				// console.error(e)
-			// }
+			const fetchBtn = tocToolBarRefs[section.slug][tidx].current.fetchBtnRef.current
+			if(fetchBtn.isFetched()){
+				percentage = this.checkProgressItem(queues, items)
+				console.log(percentage)
+			}
 			
 		}
 		this.setState({
@@ -122,17 +118,15 @@ class FetchQueueBar extends FetchQueue{
 			percentage,
 			btnState : percentage === 0 ? 1 : percentage === 100 ? 3 : 4
 		})
-
+		onUpdateQueueProgress('FetchQueueBar', {sidx,section, percentage})
 		return percentage
 	}
 	componentWillReceiveProps(props){
-		
 		this.delay(()=>{
-			
-			this.checkChildProgress(props)
-			// if(!isEqual(props.tocToolBarRefs, this.props.tocToolBarRefs)){
-				// console.log(props.tocToolBarRefs[props.section.slug])
-			// }	
+			if(!this.checkChildProgressChecked){
+				this.checkChildProgress(props)
+				this.checkChildProgressChecked = true
+			}
 		})
 		return true
 	}

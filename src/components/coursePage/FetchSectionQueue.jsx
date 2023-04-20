@@ -6,6 +6,7 @@ class FetchSectionQueue extends FetchQueue{
 	constructor(props){
 		super(props)
 		this.prefixCls = 'fetch-section-queue'
+		this.state.progressItems = {}
 	}
 	
 	
@@ -24,29 +25,69 @@ class FetchSectionQueue extends FetchQueue{
 
 		for(let sidx in sectionKeys){
 			const key = sectionKeys[sidx]
-			konsole.log(sidx)
-			konsole.log(`Processing ${key}`)
-			const nidx = parseInt(sidx)+1
-			const percentage = Math.ceil(
-				Math.floor( nidx / sectionKeys.length * 100 )
-			)
-			this.setState({
-				qiData:{
-					current:sidx, 
-					infoText:`Processing ${key}`,
-					percentage
-				},
-				hideProgress : !(percentage > 0),
-				percentage
-
-			})
+			
+			this.updateProgressIter(sidx, sectionKeys.length,key, 1)
 			await runSectionQueue(sidx)
 		}
 		this.setState({btnState:3, queueStarted:false})
 
 	}
 
-	
+	updateProgressView(section, percentageItem){
+		const {progressItems} = this.state
+		// console.log(progressItems)
+		// return
+		progressItems[section.slug] = percentageItem
+		const sectionKeys = Object.keys(progressItems)
+		// const percentageSum = sectionKeys.reduce((sum, i)=>{
+		// 	const key = sectionKeys[i]
+		// 	return sum + progressItems[key]
+		// })
+		let percentageSum = 0
+		for(let key in progressItems){
+			percentageSum += progressItems[key]
+		}
+		const pDevider = sectionKeys.length * 100
+		const percentage= Math.ceil(Math.floor((percentageSum / pDevider) * 100))
+		// const percentage= (percentageSum / pDevider))
+		// console.log(progressItems,percentageSum,percentage)
+		
+		this.setState({
+			progressItems,
+			hideProgress : !(percentage > 0),
+			percentage,
+			btnState : percentage === 100 ? 3 : 4
+		})
+
+		return percentage
+	}
+	updateProgressIter(sidx, itemsLength,key, inc=0){
+		const nidx = parseInt(sidx)+inc
+		const percentage = Math.ceil(
+			Math.floor( nidx / itemsLength * 100 )
+		)
+		this.setState({
+			qiData:{
+				current:sidx, 
+				infoText:`Processing ${key}`,
+				percentage
+			},
+			// hideProgress : !(percentage > 0),
+			// percentage
+
+		})
+	}
+	populateProgressItemsState(){
+		const progressItems = {}
+		for(let key in this.props.tocs){
+			progressItems[key] = 0
+		}
+		this.setState({progressItems})
+	}
+	componentDidMount(){
+		this.populateProgressItemsState()
+
+	}
 	
 }
 

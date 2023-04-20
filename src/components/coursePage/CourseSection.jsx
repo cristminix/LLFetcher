@@ -19,7 +19,7 @@ class SectionToolBar extends Component{
     return result
   }
   render(){
-    const {sidx, section, runSectionQueue, runTocsQueue, items, tocToolBarRefs} = this.props
+    const {sidx, section, runSectionQueue, runTocsQueue, items, tocToolBarRefs, onUpdateQueueProgress} = this.props
     return(<><div className="section-toolbar" style={{paddingTop:4}}>
       <FetchQueueBar sidx={sidx} 
                      section={section}  
@@ -27,13 +27,14 @@ class SectionToolBar extends Component{
                      runTocsQueue={runTocsQueue}
                      items={items}
                      ref={this.fetchQueueRef}
-                     tocToolBarRefs={tocToolBarRefs}/>
+                     tocToolBarRefs={tocToolBarRefs}
+                     onUpdateQueueProgress={onUpdateQueueProgress}/>
   
     </div></>)
   }
 }
 const CourseSection = ({course, section, items, sidx, runSectionQueue, runTocsQueue,
-                        tocToolBarRefs, sectionToolBarRefs}) => {
+                        tocToolBarRefs, sectionToolBarRefs, onUpdateQueueProgress}) => {
   const [collapsed, setCollapsed] = useState(true)
 
   // useEffect(()=>{
@@ -53,7 +54,8 @@ const CourseSection = ({course, section, items, sidx, runSectionQueue, runTocsQu
           <div className="item" style={{flexGrow:3}}>{section.title} ({items.length})</div>
           <div className="item">
             <SectionToolBar tocToolBarRefs={tocToolBarRefs} ref={sectionToolBarRefs[sidx]} items={items} sidx={sidx} 
-            section={section} runSectionQueue={runSectionQueue} runTocsQueue={runTocsQueue}/>
+            section={section} runSectionQueue={runSectionQueue} runTocsQueue={runTocsQueue}
+            onUpdateQueueProgress={onUpdateQueueProgress}/>
           </div>    
       </div>
        <div className="course-section-items-container" style={{padding:".5em 0 .5em 1.5em",display:(!collapsed?'block':'none')}}>

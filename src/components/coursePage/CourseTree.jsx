@@ -2,7 +2,7 @@ import React, {useState, useEffect} from "react"
 import CourseSection from "./CourseSection"
 
 const CourseTree = ({ course, sections, tocs, qsidx, qtidx, runTocsQueue, runSectionQueue,
-                      tocToolBarRefs, sectionToolBarRefs}) => {
+                      tocToolBarRefs, sectionToolBarRefs, onUpdateQueueProgress}) => {
     const [loading, setLoading] = useState(false)
     const [warningText, setWarningText] = useState('')
   
@@ -41,6 +41,7 @@ const CourseTree = ({ course, sections, tocs, qsidx, qtidx, runTocsQueue, runSec
               runTocsQueue={runTocsQueue}
               tocToolBarRefs={tocToolBarRefs}
               sectionToolBarRefs={sectionToolBarRefs}
+              onUpdateQueueProgress={onUpdateQueueProgress}
               />)
           })
         }  

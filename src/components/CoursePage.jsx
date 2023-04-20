@@ -47,7 +47,7 @@ class CoursePage extends Component{
     const {course} = this.state
     if(!course){
       const slug = mCourse.getLastSlug()
-      console.log(slug)
+      // console.log(slug)
       if(slug){
         if(slug !== ''){
           const {course, authors, sections, tocs} = mCourse.getCoursePageData(slug)
@@ -82,8 +82,8 @@ class CoursePage extends Component{
 
   }
   onUpdateQueueProgress(src, data){
-    console.log(src, data)
-    console.log(this.mainQueueRef.current)
+    // console.log(src, data)
+    // console.log(this.mainQueueRef.current)
     const {pageNavigationRef} = this.props
 
     if(src === 'FetchQueueBar'){

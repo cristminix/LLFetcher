@@ -109,7 +109,7 @@ class FetchQueueBar extends FetchQueue{
 			const fetchBtn = tocToolBarRefs[section.slug][tidx].current.fetchBtnRef.current
 			if(fetchBtn.isFetched()){
 				percentage = this.checkProgressItem(queues, items)
-				console.log(percentage)
+				// console.log(percentage)
 			}
 			
 		}

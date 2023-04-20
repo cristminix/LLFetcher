@@ -11,7 +11,7 @@ class PageNavigation extends Component{
 			activeNav : 'welcome',
 			enableOptionPage : false,
 			lastCourseSlug : '',
-			enableDownloadPage : false
+			enableDownloadPage : true
 		}
 	}
 	

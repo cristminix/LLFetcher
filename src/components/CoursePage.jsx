@@ -43,14 +43,14 @@ class CoursePage extends Component{
     // console.log(this.sectionToolBarRefs)
     // console.log(this.tocToolBarRefs)
   }
-  componentDidMount(){
+  async componentDidMount(){
     const {course} = this.state
     if(!course){
-      const slug = mCourse.getLastSlug()
+      const slug = await mCourse.getLastSlug()
       // console.log(slug)
       if(slug){
         if(slug !== ''){
-          const {course, authors, sections, tocs} = mCourse.getCoursePageData(slug)
+          const {course, authors, sections, tocs} = await mCourse.getCoursePageData(slug)
           this.initRefs(sections, tocs)
           this.setState({course, authors, sections, tocs},()=>{
             

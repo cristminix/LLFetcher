@@ -9,7 +9,8 @@ import Download from "../models/Download"
 import Toc from "../models/Toc"
 import StreamLocation from "../models/StreamLocation"
 
-import {konsole} from "./fn"
+import {konsole, sendMessage, makeDelay} from "./fn"
+import ComponentWithMessaging from "./ComponentWithMessaging"
 
 const mCourse = await Course.getInstance()
 const mExfile = await ExerciseFile.getInstance()
@@ -18,39 +19,49 @@ const mDlState = await DownloadState.getInstance()
 const mDownload = await Download.getInstance()
 const mToc = await Toc.getInstance()
 const mStreamloc = await StreamLocation.getInstance()
-
+const delay = makeDelay(500)
 const DLExerciseFile = ({exerciseFile})=> {
+	const downloadExerciseFile = () =>{
+		console.log(exerciseFile)
+	}
 	return(<div className="exercise-file-cnt">
 		<div>
 			<label className="form-label">Exercise File: </label>
-			<a onClick={ e=>download() }  href="#">{exerciseFile.name}</a>
+			<a onClick={ e=>downloadExerciseFile() }  href="#">{exerciseFile.name}</a>
 		</div>
 	</div>)
 }
-const DLConfig = ({downloadConfig,onSelectFmt}) =>{
+const DLConfig = ({fmtList,fmt,onSelectFmt, processDownloadQueue,percentage,downloadState}) =>{
 	const iconCls = "fa-download"
-	const downloadState = 0
 	const downloads = []
-	const percentage = 0
-	const startDownloadVideoResource = ()=>{}
+	const [fmtValue, setFmt] = useState(fmt)
+	const startDownloadVideoResource = ()=>{
+		
+		processDownloadQueue()
+	}
 	const updateSelectedFmt = async(e) => {
-		await onSelectFmt(e.target.value)
+		const v = e.target.value
+		setFmt(v)
+		
+		onSelectFmt(v)
+		console.log(v)
+
 	}
 	return(<div className="dl-config-cnt">
 	<div><label className="form-label">Set video quality : </label> 
 	  <select className="form-control" 
-	  onChange={e=>updateSelectedFmt(e)} style={{width:'120px',display:"inline"}}>
+	  onChange={e=>updateSelectedFmt(e)} style={{width:'120px',display:"inline"}} defaultValue={fmtValue}>
 		<option value="">--Choose--</option>
 		{
-			downloadConfig.fmtList.map((fmt,index)=>{
+			fmtList.map((fmt,index)=>{
 				return(<option value={fmt} key={index}>{fmt}</option>)
 			})
 		}
 	  </select>
 	</div>
-	<span className="form-helper">Available video format: {downloadConfig.fmtList.join(', ')}</span>
+	<span className="form-helper">Available video format: {fmtList.join(', ')}</span>
 	{
-		downloadConfig.selectedFmtList ? (<div className="dl-batch-cnt">
+		fmtList ? (<div className="dl-batch-cnt">
 		<button disabled={downloadState===1} className="btn btn-danger" 
 		onClick={e=>startDownloadVideoResource()}>
 			<i className={`fa ${iconCls}`}/> Download All Video &amp; Caption
@@ -76,21 +87,21 @@ const DLConfig = ({downloadConfig,onSelectFmt}) =>{
 	
   </div>)
 }
-const DLAux = ({course,downloadConfig, downloadFile}) =>{
+const DLAux = ({course,fmt, downloadFile}) =>{
 	return(<div>
 		{
-			downloadConfig.selectedFmtList ?(<>
+			fmt ?(<>
 				<div className="dl-playlist-cnt">
 				  <label className="form-label">Playlist : </label>
-				  <a onClick={e=>downloadFile('playlist')}  href="#">{course.slug}-{downloadConfig.selectedFmtList}.m3u</a>
+				  <a onClick={e=>downloadFile('playlist')}  href="#">{course.slug}-{fmt}.m3u</a>
 				</div>
 				<div className="dl-playlist-cnt">
 				  <label className="form-label">Helper Bash : </label>
-				  <a onClick={e=>downloadFile('shell_script')}  href="#">{course.slug}-{downloadConfig.selectedFmtList}-helper.sh</a>
+				  <a onClick={e=>downloadFile('shell_script')}  href="#">{course.slug}-{fmt}-helper.sh</a>
 				</div>
 				<div className="dl-playlist-cnt">
 				  <label className="form-label">Helper Cmd : </label>
-				  <a onlick={downloadFile('batch_script')} href="#">{course.slug}-{downloadConfig.selectedFmtList}-helper.bat</a>
+				  <a onClick={e=>downloadFile('batch_script')} href="#">{course.slug}-{fmt}-helper.bat</a>
 				</div>
 			</>):""
 		}
@@ -106,11 +117,29 @@ const DLAux = ({course,downloadConfig, downloadFile}) =>{
 }
 
 class LogBar extends Component {
+	constructor(props){
+		super(props)
+		const {mode,message} = this.props
+		this.state = {mode, message}
+
+	}
+	log(message, mode){
+		this.setState({mode, message})
+	}
 	render(){
-	return(<>LogBar</>)
+		const {mode,message} = this.state
+	return(<><div className="log-bar">
+	{
+		mode >= 0 && message ? (
+        <div className={`log-message ${mode === 1 ? 'error' : mode === 0 ? 'success' : 'warning'}`}>
+            <span>{message}</span>
+        </div>):""
+	}
+
+    </div></>)
 	}
 }
-class DownloadPage extends Component{
+class DownloadPage extends ComponentWithMessaging{
 	btnPrimary = "btn btn-sm btn-primary"
 	btnDanger = "btn btn-sm btn-danger"
 	logBarRef = null
@@ -126,16 +155,82 @@ class DownloadPage extends Component{
 				selectedFmtList:'720',
 				fmtList:['720','480','360']
 			},
-			downloadState:0,
-			exerciseFile : null
+			downloadState: null,
+			exerciseFile : null,
+
+			fmt:'',
+			fmtList:[],
+			percentage : 0
 				
 		}
 	}
+	onMessageCommand(evt, source){
+
+		// if(evt.name === 'cmd.validCoursePageAuto'){
+    	// 	this.setState({validCoursePage:evt.data})
+		// }
+	}
+	async onMessageCommand(evt, source){
+
+		if(evt.name === 'sw.downloadState'){
+    		console.log(evt)
+    		let state = 1
+    		if(typeof evt.data.percentage != 'undefined'){
+	          this.setState({percentage :evt.data.percentage})
+	          if(evt.data.percentage == 100){
+	            state = 2;
+	          }
+	          const downloadState = await mDlState.set(this.state.course.id,state)
+	        }
+	        this.setState({downloadState:state})
+	        if(response.success){
+	          this.logBarRef.current.log(evt.data.currentDownload.filename,0)
+	        }else{
+	          this.logBarRef.current.log(evt.data.currentDownload.filename,2)
+	        }
+    		/*
+(response,b,c){
+      // this.downloads = Store.getDownloadByCourseId(this.course.ID);
+      // console.log(a,b,c);
+      // this.downloadVideoState = a.downloadState;
+      if(response.cmd == 'download_state'){
+        let state = 1;
+        if(typeof response.percentage != 'undefined'){
+          this.percentage = response.percentage;
+          if(this.percentage == 100){
+            state = 2;
+          }
+          this.downloadState = Store.setDownloadState(this.course.ID,state);
+        }
+        this.logServer.log(response);
+        if(response.success){
+          this.logBar.log(response.currentDownload.filename,0)
+        }else{
+          this.logBar.log(response.currentDownload.filename,2)
+        }
+      }
+    },
+    		*/
+		}
+	}
 	async componentDidMount(){
+
 		await this.loadDownloadData()
+		this.initMessaging()
 	}
 	downloadFile(t){
 		console.log(t)
+	}
+	async processDownloadQueue(){
+		// delay(async()=>{
+		const data = {
+			course : this.state.course,
+			config : this.state.downloadConfig
+		}
+		const result = await this.sendMessageAsync('sw.processDownload', data, 'bg')
+		console.log(result)
+		// })
+		
 	}
 	async populateDownloadConfig(course, sections, tocs){
 		let downloadConfig = mDlConf.get(course.id)
@@ -170,23 +265,25 @@ class DownloadPage extends Component{
 		return downloadConfig
 	}
 	async loadDownloadData(){
-		const lastCourseSlug = mCourse.getLastSlug()
-		const {course, authors, sections, tocs} = mCourse.getCoursePageData(lastCourseSlug)
+		const lastCourseSlug = await mCourse.getLastSlug()
+		const {course, authors, sections, tocs} = await mCourse.getCoursePageData(lastCourseSlug)
 		const exerciseFile = mExfile.getByCourseId(course.id)
-		
+		const downloadState = await mDlState.get(course.id)
 		const downloadConfig = await this.populateDownloadConfig(course, sections, tocs)
 
-		this.setState({lastCourseSlug, course, exerciseFile, downloadConfig})
+		this.setState({downloadState:downloadState.state,lastCourseSlug, course, exerciseFile, downloadConfig,fmtList:downloadConfig.fmtList,fmt:downloadConfig.selectedFmtList})
 
       
     }
     async onSelectFmt(fmt){
-    	const {downloadConfig} = this.state
-    	downloadConfig.selectedFmtList = fmt
-    	this.setState({downloadConfig})
+    	// const {downloadConfig} = this.state
+    	// downloadConfig.selectedFmtList = fmt
+    	const fieldName = 'selectedFmtList'
+		const downloadConfig = await mDlConf.set(fieldName, fmt, this.state.course.id)
+    	this.setState({downloadConfig,fmt})
     }
 	render(){
-		const {course,downloads, downloadConfig,exerciseFile,downloadState} = this.state
+		const {course,downloads, downloadConfig,exerciseFile,downloadState,fmt,fmtList,percentage} = this.state
 		console.log(course)
 		return(<div className="download-page page">
 			{
@@ -196,10 +293,10 @@ class DownloadPage extends Component{
 				}
 				
 				{
-					downloadConfig ? (<DLConfig downloadConfig={downloadConfig} onSelectFmt={fmt=>this.onSelectFmt(fmt)}/>):""
+					downloadConfig ? (<DLConfig downloadState={downloadState} percentage={percentage} processDownloadQueue={e=>this.processDownloadQueue(e)} fmtList={fmtList} fmt={fmt} onSelectFmt={fmt=>this.onSelectFmt(fmt)}/>):""
 				}
 				{
-					downloadConfig ? (<DLAux course={course} downloadConfig={downloadConfig} downloadFile={t=>this.downloadFile(t)}/>):""
+					downloadConfig ? (<DLAux course={course} fmt={fmt} downloadFile={t=>this.downloadFile(t)}/>):""
 				}
 				
 			  </div>):""

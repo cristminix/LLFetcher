@@ -5,48 +5,37 @@ class DownloadState extends DB {
 	fields = ["courseId","state","total","success","fails","lastTocId"]
 	type = "single"
 
-/*
-static getDownloadState(courseId: number): any {
-        const db = Store.db();
-        let downloadState = null;
-        const downloadStates = db.queryAll('downloadState',{query:{courseId}});
-        if(downloadStates.length > 0){
-            downloadState = downloadStates[0];
-        }else{
-            const ID=0;
-            const state=0;
-            downloadState ={ID,courseId,state}
-            downloadState.ID = db.insert('downloadState',downloadState);
-            db.commit();
-        }
-        
 
-        
-        return downloadState;
-    }
-    static setDownloadState(courseId: number,state_:number): any {
-        const db = Store.db();
-        let downloadState = null;
-        const downloadStates = db.queryAll('downloadState',{query:{courseId}} );
-        if(downloadStates.length > 0){
-            downloadState = downloadStates[0];
-            db.update('downloadState',{courseId},(row)=>{
-                row.state = state_;
-                return row;
-            });
-            db.commit();
-            downloadState.state = state_;
-        }else{
-            const ID=0;
-            const state=state_;
-            downloadState ={ID,courseId,state}
-            downloadState.ID = db.insert('downloadState',downloadState);
-            db.commit();
+    async get(courseId){
+        let downloadState = this.singleQuery({query:{courseId}})
+        if(!downloadState){
+            const id = 0
+            const state = 0
+            downloadState = {id, courseId, state}
+            downloadState.id = this.db.insert(this.table,downloadState)
+            await this.db.commit()
         }
         
-        return downloadState;
+        return downloadState
     }
-*/	
+    async set(courseId,state_) {
+        let downloadState = this.singleQuery({query:{courseId}})
+        if(downloadState){
+            this.db.update(this.table,{courseId},(row)=>{
+                row.state = state_
+                return row
+            })
+            downloadState.state = state_
+        }else{
+            const id = 0
+            const state=state_
+            downloadState ={id,courseId,state}
+            downloadState.it = db.insert(this.table,downloadState)
+        }
+        await this.db.commit()
+        
+        return downloadState
+    }
 }
 
 export default DownloadState

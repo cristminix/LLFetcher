@@ -24,6 +24,10 @@
   "host_permissions": [
     "https://www.linkedin.com/learning/*"
   ],
+  "background": {
+    "service_worker": "service-worker-loader.js",
+    "type": "module"
+  },
   "action": {
     "default_popup": "index.html"
   },
@@ -38,9 +42,5 @@
       ],
       "use_dynamic_url": true
     }
-  ],
-  "background": {
-    "service_worker": "service-worker-loader.js",
-    "type": "module"
-  }
+  ]
 }

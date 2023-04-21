@@ -3,7 +3,7 @@ import  {
 	sendMessage
 } from "./fn"
 class ComponentWithMessaging extends Component{
-	async sendMessageAsync(msg, data){
+	async sendMessageAsync(msg, data, target='content'){
 		
 		return new Promise((resolve, reject)=>{
 			const commandListener = (evt, source) => {
@@ -15,7 +15,7 @@ class ComponentWithMessaging extends Component{
 			try{
 				chrome.runtime.onMessage.addListener(commandListener)
 
-				sendMessage(msg, data)
+				sendMessage(msg, data, target)
 
 			}catch(e){
 				reject(e)
@@ -30,7 +30,7 @@ class ComponentWithMessaging extends Component{
 		}
 		return null
 	}
-	onMessageCommand(evt, source){
+	async onMessageCommand(evt, source){
 
 		// if(evt.name === 'cmd.validCoursePageAuto'){
     	// 	this.setState({validCoursePage:evt.data})

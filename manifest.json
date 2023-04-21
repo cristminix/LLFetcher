@@ -18,6 +18,8 @@
   "host_permissions":[
     "https://www.linkedin.com/learning/*"
   ],
- 
+  "background":{
+    "service_worker" : "background.js"
+  },
   "action": { "default_popup": "index.html" }
 }

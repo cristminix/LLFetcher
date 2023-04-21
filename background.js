@@ -192,6 +192,7 @@ class DownloadQueue{
                 console.log('updateDownload')
                 download.url = dl.url
                 download.filename = dl.filename
+                download.status = false
                 download = await this.store.updateDownload(download.id,download)
             }else{
                 console.log('createDownload')
@@ -234,20 +235,26 @@ class DownloadQueue{
     }
     async afterProcessQueue(success,delta){
         // console.log(currentDownload)
+
         if(success){
+            this.successQueues.push(this.currentDownload)
+
+            const percentage = this.setProgress()
+
             try{
-                this.successQueues.push(this.currentDownload)
                 await this.store.updateDownload(this.currentDownload.id,{status:success})
                 
                 const cmd = 'sw.downloadState'
-                const percentage = this.setProgress()
+                
                 const currentDownload = this.currentDownload
                 sendMessage(cmd,{success,delta,currentDownload,percentage})
                 this.startQueue()
             }catch(e){
                 console.log(e)
             }
-            
+            if(percentage >= 100){
+                this.resetQueue()
+            }
         }else{
             this.queues.push(this.currentDownload) 
         }

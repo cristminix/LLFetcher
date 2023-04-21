@@ -32,7 +32,7 @@ const DLExerciseFile = ({exerciseFile})=> {
 	</div>)
 }
 const DLConfig = ({fmtList,fmt,onSelectFmt, processDownloadQueue,percentage,downloadState}) =>{
-	const iconCls = "fa-download"
+	const iconCls = percentage === 0 ? "fa-download" : percentage === 100 ? "fa-check" : "fa-spin fa-spinner"
 	const downloads = []
 	const [fmtValue, setFmt] = useState(fmt)
 	const startDownloadVideoResource = ()=>{
@@ -66,7 +66,7 @@ const DLConfig = ({fmtList,fmt,onSelectFmt, processDownloadQueue,percentage,down
 		onClick={e=>startDownloadVideoResource()}>
 			<i className={`fa ${iconCls}`}/> Download All Video &amp; Caption
 			{
-				percentage ? (`${percentage}%`) : ""
+				percentage ? (` ${percentage}%`) : ""
 			} 
 			</button>
 	  <div>
@@ -183,7 +183,7 @@ class DownloadPage extends ComponentWithMessaging{
 	          const downloadState = await mDlState.set(this.state.course.id,state)
 	        }
 	        this.setState({downloadState:state})
-	        if(response.success){
+	        if(evt.data.success){
 	          this.logBarRef.current.log(evt.data.currentDownload.filename,0)
 	        }else{
 	          this.logBarRef.current.log(evt.data.currentDownload.filename,2)

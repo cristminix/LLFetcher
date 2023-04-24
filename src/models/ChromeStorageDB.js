@@ -410,7 +410,7 @@ export default class ChromeStorageDB{
 
     // serialize the database
     serialize() {
-        return JSON.stringify(this.db);
+        return this.db
     }
 
     // throw an error
@@ -682,7 +682,7 @@ export default class ChromeStorageDB{
 
     // delete rows
     deleteRows(table_name, query) {
-        tableExistsWarn(table_name);
+        this.tableExistsWarn(table_name);
 
         var result_ids = [];
         if(!query) {

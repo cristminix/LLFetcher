@@ -12,6 +12,7 @@ const onMessage = (callback) => {
 }
 
 import {konsole,  makeDelay} from "./src/components/fn"
+import DB from "./src/models/DB"
 import Course from "./src/models/Course"
 import Download from "./src/models/Download"
 import DownloadState from "./src/models/DownloadState"
@@ -25,12 +26,17 @@ class MsgStore {
     constructor(){
 
     }
-    async init(){
-        this.mCourse = await Course.getInstance()
-        this.mDownload = await Download.getInstance()
-        this.mDownloadState = await DownloadState.getInstance()
-        this.mStreamloc = await StreamLocation.getInstance()
+    async init(reInit=false){
+        if(!reInit){
+            this.mCourse = await Course.getInstance()
+            this.mDownload = await Download.getInstance()
+            this.mDownloadState = await DownloadState.getInstance()
+            this.mStreamloc = await StreamLocation.getInstance()
+        }else{
+            await DB.connection.reload()
+        }
     }
+        
     async getDownloadState(courseId){
         const dlstate = await this.mDownloadState.get(courseId)
         return dlstate
@@ -51,17 +57,12 @@ class MsgStore {
         const dl = await this.mDownload.create(url,filename,tocId,courseId)
         return dl    
     }
-    async getCoursePageData(slug){
-        const result = await this.mCourse.getCoursePageData(slug)
+    async getCourseSecsTocs(courseId){
+        const result = await this.mCourse.getCourseSecsTocs(courseId)
         return result
     }
 }
 
-const logServer = {
-    logWeb:(a)=>{
-        console.log(a)
-    }
-}
 class DownloadQueue{
     
     queues = []//Downloads_tableField[]
@@ -71,13 +72,12 @@ class DownloadQueue{
     downloadHandlerSet = false
     queueStarted = false
 
-    app = null //: App_tableField 
     course = null //: Course_tableField
     downloadState  = null //: DownloadState_tableField
-    downloadConfig = null //: DownloadConfig_tableField
+    fmt = null //: DownloadConfig_tableField
     sections = [] //: Section_tableField
 
-    fmt = null
+    // fmt = null
     downloadOptions = [] //: DownloadOption[] = []
     resetQueueAfterFinish = true //boolean
     resetQueueOnError = false //: boolean
@@ -85,21 +85,11 @@ class DownloadQueue{
     store = null
     percentage = 0
     constructor(){
-        // this.init()
         this.store = new MsgStore()
     }
 
-    async init(){
-        await this.store.init()
-        // this.app = await this.store.getAppState()
-        // this.course = await this.store.getCourse(this.app.lastCourseSlug)
-        // await this.store.onReady(()=>{
-            // this.downloadState = await this.store.getDownloadState(this.course.id)
-            // this.downloadConfig = await this.store.getDownloadConfig(this.course.id)
-            // this.sections = await this.store.getSectionsByCourseId(this.course.id)
-
-            // this.fmt = this.downloadConfig.selectedFmtList
-        // })
+    async init(reInit=false){
+        await this.store.init(reInit)
         
     }
     async setCourse(course) {
@@ -115,15 +105,15 @@ class DownloadQueue{
 
         if(reInit){
             this.resetQueue()
-            const { sections, tocs} = await this.store.getCoursePageData(course.slug)
+            const { sections, tocs} = await this.store.getCourseSecsTocs(course.id)
             this.sections = sections
             this.tocs = tocs
             // this.init()
         }
 
     }
-    setConfig(config){
-        this.downloadConfig = config
+    setFmt(fmt){
+        this.fmt = fmt
     }
     truncateTables(){
         // await this.store.db().getStoreDB().truncate('downloads')
@@ -137,22 +127,10 @@ class DownloadQueue{
         this.downloadOptions = []
         this.queueStarted = false
         this.percentage = 0
-        /*
-        downloadCounts = 0
-            downloadQueues = []
-            downloadSuccessQueues = []
-            currentDownload = null
-            queueStarted = false
-            await this.store.db().getStoreDB().truncate('downloads')
-            await this.store.db().commit()
-        */
+
     }
     async populate(){
         this.downloadState = this.store.getDownloadState(this.course.id)
-        // this.downloadConfig = await this.store.getDownloadConfig(this.course.id)
-        // this.sections = await this.store.getSectionsByCourseId(this.course.id)
-        this.fmt = this.downloadConfig.selectedFmtList
-
 
         for(let sidx in this.sections){
             const section = this.sections[sidx]
@@ -188,16 +166,6 @@ class DownloadQueue{
         for(let idx in this.downloadOptions){
             const dl = this.downloadOptions[idx]
             let download = this.store.getDownload(dl.tocId,dl.filename)
-            if(download){
-                console.log('updateDownload')
-                download.url = dl.url
-                download.filename = dl.filename
-                download.status = false
-                download = await this.store.updateDownload(download.id,download)
-            }else{
-                console.log('createDownload')
-                download = await this.store.createDownload(dl.url,dl.filename,dl.tocId,dl.courseId)
-            } 
             this.queues.push(download)
         }
         this.counts = this.queues.length   
@@ -287,9 +255,12 @@ class DownloadQueue{
             filename : this.currentDownload.filename,
             url : this.currentDownload.url
         }
-        chrome.downloads.download(opt,(downloadId)=>{
+        chrome.downloads.download(opt,async(downloadId)=>{
             const cmd = 'sw.downloadState'
-            const currentDownload = this.currentDownload
+            let download = this.currentDownload
+            download.downloadId = downloadId
+            const currentDownload =  await this.store.updateDownload(download.id,download)
+
             sendMessage(cmd,{currentDownload})
             console.log(downloadId)
         })
@@ -313,10 +284,10 @@ class DownloadQueue{
             return
         }
         ///
-        const {course, config} = data
+        const {course, fmt} = data
         
         await this.setCourse(course)
-        this.setConfig(config)
+        this.setFmt(fmt)
 
         if(this.queues.length === 0){
             await this.populate()
@@ -349,10 +320,33 @@ const main = async() =>{
 	onMessage(async(evt,source)=>{
         if(evt.name.match(/^sw\./)){
             switch(evt.name){
-                case 'sw.processDownload':
+                case 'sw.queue.process':
                     downloadQueue.main(evt.data)
                     console.log(evt.data)
-                break    
+                break
+                case 'sw.queue.started':
+                    sendMessage('sw.queue.started', downloadQueue.queueStarted)
+                    console.log(evt.data)
+                break
+                case 'sw.queue.reset':
+                    // downloadQueue.main(evt.data)
+                    downloadQueue.resetQueue()
+                    downloadQueue.setFmt(evt.data)
+                    await downloadQueue.init(true)
+                    console.log(evt.data)
+                break
+                case 'sw.queue.course':
+                    // downloadQueue.main(evt.data)
+                    sendMessage('sw.queue.course', downloadQueue.course)
+                    console.log(evt.data)
+                break  
+                case 'sw.queue.fmt':
+                    // downloadQueue.main(evt.data)
+                    sendMessage('sw.queue.course', downloadQueue.fmt)
+
+                    console.log(evt.data)
+                break  
+
             }
 
         }

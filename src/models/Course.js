@@ -57,6 +57,20 @@ class Course extends DB {
         return {course, authors, sections, tocs}
 
     }
+    async getCourseSecsTocs(courseId){
+        let  sections=[], tocs={}
+
+        const mSection = await Section.getInstance()
+        const mToc = await Toc.getInstance()
+        sections = mSection.getList(courseId)
+        for(let i in sections){
+            const section = sections[i]
+            tocs[section.slug] = mToc.getListBySectionId(section.id)
+        }
+
+        return {sections, tocs}
+
+    }
 	getList(){
         const results =  this.db.queryAll(this.table);
         return results

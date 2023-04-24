@@ -56,7 +56,7 @@ class FetchSectionQueue extends FetchQueue{
 			progressItems,
 			hideProgress : percentage === 0,
 			percentage,
-			btnState : percentage === 0 ? 1 : percentage === 100 ? 3 : 4
+			btnState : percentage === 100 ? 3 :  percentage > 0 ? 2: percentage === 0 ? 1 : 4
 		})
 
 		return percentage

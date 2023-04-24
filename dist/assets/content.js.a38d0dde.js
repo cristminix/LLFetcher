@@ -170,7 +170,7 @@ const main = async () => {
         await injectScriptAsync(src);
     }
    
-    const contentScript = new ContentScript();   
+    new ContentScript();   
 };
 
 

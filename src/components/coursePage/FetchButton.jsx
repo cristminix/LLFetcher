@@ -1,21 +1,26 @@
 import {Component} from "react"
 import ComponentWithMessaging from "../ComponentWithMessaging"
-import Course from "../../models/Course"
-import Toc from "../../models/Toc"
-import StreamLocation from "../../models/StreamLocation"
-import ExerciseFile from "../../models/ExerciseFile"
+ 
 
-const mCourse = await Course.getInstance()
-const mToc = await Toc.getInstance()
-const mStreamloc = await StreamLocation.getInstance()
-const mExfile = await ExerciseFile.getInstance()
 
 class FetchButton extends ComponentWithMessaging{
 	course = null
+	mCourse = null 
+	mExfile = null 
+	mToc = null 
+	mStreamloc = null 
+
 	constructor(props){
 		super(props)
+		const {store} = props
+		this.store = store
 		this.course = props.course
-		
+
+		this.mCourse = store.get('Course') 
+		this.mExfile = store.get('ExerciseFile') 
+		this.mToc = store.get('Toc') 
+		this.mStreamloc = store.get('StreamLocation')
+
 		this.state = {
 			btnState : 0,
 			toc : props.toc	,
@@ -47,7 +52,7 @@ class FetchButton extends ComponentWithMessaging{
 	async saveRecords(tocUp, exFile, streamLocations){
 		// store exercise file
 		const {name,sizeInBytes} = exFile
-		const exerciseFile = await mExfile.create(name,exFile.url,sizeInBytes,this.course.id)
+		const exerciseFile = await this.mExfile.create(name,exFile.url,sizeInBytes,this.course.id)
 		// store streamlocations
 		
 		const streamlocIds = []
@@ -55,14 +60,14 @@ class FetchButton extends ComponentWithMessaging{
 
 		for(let i in streamLocations){
 			const {fmt, url} = streamLocations[i]
-			const streamloc = await mStreamloc.create(fmt, url, this.state.toc.id)
+			const streamloc = await this.mStreamloc.create(fmt, url, this.state.toc.id)
 			streamlocIds.push(streamloc.id)
 			streamlocs.push(streamloc)
 		}
 
 		// update toc , with streamlocation ids
 		const {captionUrl, captionFmt} = tocUp
-		const toc = await mToc.update(this.state.toc.id,tocUp.url, captionUrl, captionFmt, streamlocIds)
+		const toc = await this.mToc.update(this.state.toc.id,tocUp.url, captionUrl, captionFmt, streamlocIds)
 
 		this.setState({toc,  exerciseFile, streamlocs})
 		return [toc, exerciseFile, streamlocs]
@@ -75,9 +80,9 @@ class FetchButton extends ComponentWithMessaging{
 		// console.log(results)
 	}
 	async loadCourseToc(){
-		const toc = mToc.get(this.state.toc.id)
-		const exerciseFile = mExfile.getByCourseId(this.course.id)
-		const streamlocs = mStreamloc.getListByTocId(this.state.toc.id)
+		const toc = this.mToc.get(this.state.toc.id)
+		const exerciseFile = this.mExfile.getByCourseId(this.course.id)
+		const streamlocs = this.mStreamloc.getListByTocId(this.state.toc.id)
 
 		this.setState({toc,  exerciseFile, streamlocs})
 

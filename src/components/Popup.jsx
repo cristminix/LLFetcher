@@ -23,18 +23,28 @@ import  {
 	konsole
 } from "./fn"
 
-const mApp = await App.getInstance()
-const mAuthor = await Author.getInstance()
-const mSection = await Section.getInstance()
-const mToc = await Toc.getInstance()
-const mCourse = await Course.getInstance()
-// console.log(mApp)
-await mApp.init()
+
 let onMessageAttached = false
 
 class PopupAction extends ComponentWithMessaging{
+	store = null
+	mApp = null
+	mAuthor = null
+	mSection = null
+	mToc = null
+	mCourse = null
+
 	constructor(props){
 		super(props)
+		const {store} = props
+		this.store = store
+		
+		this.mApp = store.get('App')
+		this.mAuthor = store.get('Author')
+		this.mSection = store.get('Section')
+		this.mToc = store.get('Toc')
+		this.mCourse = store.get('Course')
+		
 		this.state = {
 			course : null,
 			courseAuthors : null,
@@ -64,11 +74,11 @@ class PopupAction extends ComponentWithMessaging{
 			const captionFmt = ""
 			const captionUrl = ""
 			const url = ""
-			const toc = await mToc.create(title, slug, url, duration, captionUrl, captionFmt, section.id)
+			const toc = await this.mToc.create(title, slug, url, duration, captionUrl, captionFmt, section.id)
 			tocs.push(toc)
 			tocIds.push(toc.id)
 		}
-		const newSection = await mSection.updateTocIds(section.id, tocIds)
+		const newSection = await this.mSection.updateTocIds(section.id, tocIds)
 		return [newSection, tocs]
 	}
 
@@ -76,12 +86,12 @@ class PopupAction extends ComponentWithMessaging{
 		konsole.log(`Popup.createCourseSections() empty csi `)
 		konsole.log(`try to load from database `)
 		if(this.state.course){
-			const sections = mSection.getList(this.state.course.id)
+			const sections = this.mSection.getList(this.state.course.id)
 			let tocs = {}
 
 			for(let i in sections){
 				const section = sections[i]
-				tocs[section.slug] = mToc.getListBySectionId(section.id)
+				tocs[section.slug] = this.mToc.getListBySectionId(section.id)
 			}
 			await this.updateCourseData(sections, tocs)
 
@@ -94,7 +104,7 @@ class PopupAction extends ComponentWithMessaging{
 			if( csi.length > 0){
 				for(let i in csi){
 					const {title,items} = csi[i]
-					const section = await mSection.create(title, slugify(title), this.state.course.id)
+					const section = await this.mSection.create(title, slugify(title), this.state.course.id)
 					// console.log(section)
 					const [newSection, newTocs] = await this.createCourseTocs(items, section)
 					// console.log(newSection)
@@ -114,7 +124,7 @@ class PopupAction extends ComponentWithMessaging{
 		
 		this.setState({courseSectionStr, courseTocsStr},async()=>{
 			if(this.state.course.slug !== ''){
-				await mCourse.setLastSlug(this.state.course.slug)
+				await this.mCourse.setLastSlug(this.state.course.slug)
 				
 				this.setState({nav : 'course'},()=>{
 					const {course,sections, tocs} = this.state
@@ -128,23 +138,25 @@ class PopupAction extends ComponentWithMessaging{
 
 class Popup extends PopupAction{
 	pageNavigationRef = null
+
 	constructor(props){
 		super(props)
 		this.pageNavigationRef = createRef(null)
 	}
 	setPage(){
+		const {store} = this
 		const pages = {
-			welcome : (<WelcomePage onSelectCourse={(a,b,c)=>this.onSelectCourse(a,b,c)}/>),
-			course : (<CoursePage setNav={nav => this.setState({nav})} 
+			welcome : (<WelcomePage store={store} onSelectCourse={(a,b,c)=>this.onSelectCourse(a,b,c)}/>),
+			course : (<CoursePage store={store} setNav={nav => this.setState({nav})} 
 								  course={this.state.course} 
 								  authors={this.state.courseAuthors} 
 								  sections={JSON.parse(this.state.courseSectionStr)} 
 								  tocs={JSON.parse(this.state.courseTocsStr)}
 								  pageNavigationRef={this.pageNavigationRef}/>),
-			download : (<DownloadPage />),
-			help : (<HelpPage />),
-			setting : (<SettingPage />),
-			option : (<OptionPage />)
+			download : (<DownloadPage store={store}/>),
+			help : (<HelpPage store={store}/>),
+			setting : (<SettingPage store={store}/>),
+			option : (<OptionPage store={store}/>)
 		}
 	
 		return pages[this.state.nav]
@@ -155,7 +167,7 @@ class Popup extends PopupAction{
 	async onSelectCourse(course, authors = null, dontSendMessage = false){
 		this.setState({course},async ()=>{
 			if(!authors){
-				authors = mAuthor.getListByCourse(this.state.course)
+				authors = this.mAuthor.getListByCourse(this.state.course)
 			}
 			this.setState({courseAuthors :authors})
 
@@ -190,12 +202,13 @@ class Popup extends PopupAction{
 	// 	}
 	// }
 	render(){
+		const {store} = this
 		return (<div className="app-container">
 		{
 			this.setPage() 
 		}
 	   
-	    <PageNavigation ref={this.pageNavigationRef} onNavUpdate={nav => this.onNavUpdate(nav)}  nav={this.state.nav}/>
+	    <PageNavigation store={store} ref={this.pageNavigationRef} onNavUpdate={nav => this.onNavUpdate(nav)}  nav={this.state.nav}/>
 
 	  </div>)
 	}

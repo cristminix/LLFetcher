@@ -3,9 +3,7 @@ import {Component,createRef} from "react"
 import CourseTree from "./coursePage/CourseTree"
 import CourseAuthors from "./coursePage/CourseAuthors"
 import CourseDetail from "./coursePage/CourseDetail"
-import Course from "../models/Course"
 import {konsole} from "./fn"
-const mCourse = await Course.getInstance()
 
 
 class CoursePage extends Component{
@@ -13,10 +11,13 @@ class CoursePage extends Component{
   mainQueueRef = null
   sectionToolBarRefs = []
   tocToolBarRefs = {}
-
+  mCourse = null
+  store = null
   constructor(props){
     super(props)
-    const {course, authors, sections, tocs} = props
+    const {course, authors, sections, tocs, store} = props
+    this.store = store
+    this.mCourse = store.get('Course')
     this.state = {
       course, authors, sections, tocs,
       qsidx : 0,
@@ -46,11 +47,11 @@ class CoursePage extends Component{
   async componentDidMount(){
     const {course} = this.state
     if(!course){
-      const slug = await mCourse.getLastSlug()
+      const slug = await this.mCourse.getLastSlug()
       // console.log(slug)
       if(slug){
         if(slug !== ''){
-          const {course, authors, sections, tocs} = await mCourse.getCoursePageData(slug)
+          const {course, authors, sections, tocs} = await this.mCourse.getCoursePageData(slug)
           this.initRefs(sections, tocs)
           this.setState({course, authors, sections, tocs},()=>{
             
@@ -97,7 +98,7 @@ class CoursePage extends Component{
   }
   render(){
     const {course, authors, sections, tocs, qsidx, qtidx} = this.state
-    const {pageNavigationRef} = this.props
+    const {pageNavigationRef,store} = this.props
     return(<>
     {
       course ? (<div className="course-page page">
@@ -113,7 +114,7 @@ class CoursePage extends Component{
         <CourseAuthors authors={authors} key={course.id}/>
       </CourseDetail>
 
-      <CourseTree course={course} sections={sections} 
+      <CourseTree store={store} course={course} sections={sections} 
                   tocs={tocs} 
                   qsidx={qsidx} 
                   qtidx={qtidx} 

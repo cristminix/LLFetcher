@@ -33,7 +33,7 @@ export default class ChromeStorageDB{
         this.initiator = initiator
     }
     async init(){
-        console.log(`${this.constructor.name}.init()`)
+        // console.log(`${this.constructor.name}.init()`)
         let tmpDb = await this.getItem(this.db_id )
         if(this.stype === 1){
             tmpDb = JSON.parse(tmpDb)
@@ -46,7 +46,7 @@ export default class ChromeStorageDB{
 
         
         if( !( this.db  && this.db.tables && this.db.data ) ) {
-            console.log(`${this.constructor.name}.init() storage is null`)
+            // console.log(`${this.constructor.name}.init() storage is null`)
 
             if(!this.validateName(this.db_name)) {
                 this.error("The name '" + this.db_name + "' contains invalid characters");
@@ -397,7 +397,7 @@ export default class ChromeStorageDB{
 
     // commit the database to localStorage
     async commit() {
-        console.log(this.initiator,this.db)
+        // console.log(this.initiator,this.db)
         if(this.stype === 0) {
             console.log(this.db)
             await this.setItem(this.db_id, this.db)

@@ -10,8 +10,8 @@ import * as child from 'child_process';
 
 export default defineConfig({
   build: {
-    target: 'esnext',
-     minify: false,
+    // target: 'esnext',
+     // minify: false,
   },
   plugins: [
     react(), 

@@ -1,14 +1,6 @@
 import {useState, useEffect, Component, createRef} from "react"
 import "./styles/DownloadPage.css"
 
-import Course from "../models/Course"
-import ExerciseFile from "../models/ExerciseFile"
-import DownloadConfig from "../models/DownloadConfig"
-import DownloadState from "../models/DownloadState"
-import Download from "../models/Download"
-import Toc from "../models/Toc"
-import StreamLocation from "../models/StreamLocation"
-
 import {konsole, sendMessage, makeDelay} from "./fn"
 import ComponentWithMessaging from "./ComponentWithMessaging"
 
@@ -16,13 +8,7 @@ import DLAux from "./downloadPage/DLAux"
 import DLConfig from "./downloadPage/DLConfig"
 import DLExerciseFile from "./downloadPage/DLExerciseFile"
 
-const mCourse = await Course.getInstance()
-const mExfile = await ExerciseFile.getInstance()
-const mDlConf = await DownloadConfig.getInstance()
-const mDlState = await DownloadState.getInstance()
-const mDownload = await Download.getInstance()
-const mToc = await Toc.getInstance()
-const mStreamloc = await StreamLocation.getInstance()
+
 const delay = makeDelay(500)
 
 
@@ -33,9 +19,28 @@ class DownloadPage extends ComponentWithMessaging{
 	btnPrimary = "btn btn-sm btn-primary"
 	btnDanger = "btn btn-sm btn-danger"
 	logBarRef = null
+	mCourse = null 
+	mExfile = null 
+	mDlConf = null 
+	mDlState = null 
+	mDownload = null
+	mToc = null 
+	mStreamloc = null 
+
 	constructor(props){
 		super(props)
+		const {store} = props
+		this.store = store
+		this.mCourse = store.get('Course') 
+		this.mExfile = store.get('ExerciseFile') 
+		this.mDlConf = store.get('DownloadConfig') 
+		this.mDlState = store.get('DownloadState') 
+		this.mDownload = store.get('Download') 
+		this.mToc = store.get('Toc') 
+		this.mStreamloc = store.get('StreamLocation')
+
 		this.logBarRef = createRef(null)
+		
 		this.state = {
 			enableDownloadBtn : false,
 			lastCourseSlug : '',
@@ -83,7 +88,7 @@ class DownloadPage extends ComponentWithMessaging{
 	    if(percentage == 100){
 	      state = 2;
 	    }
-		   const downloadState = await mDlState.set(course.id, state)
+		   const downloadState = await this.mDlState.set(course.id, state)
 		}
 		this.setState({
 			downloadState : state,
@@ -103,16 +108,21 @@ class DownloadPage extends ComponentWithMessaging{
 		console.log(t)
 	}
 
-	async onResetQueue(){
+	async onResetQueue(flag=false){
 		const {course,sections,tocs,fmt,downloadConfig} = this.state
-		await mDownload.clear(course.id)
-		   const downloadState = await mDlState.set(course.id, 0)
+		await this.mDownload.clear(course.id)
+		   const downloadState = await this.mDlState.set(course.id, 0)
 
 		const downloads = await this.populateDownloads(course, sections, tocs, fmt, true)
-		this.setState({downloads,downloadState:downloadState.state,percentage:0})
+		const logBarData = {
+				message : '',
+				mode : null
+			}
+			this.setState({logBarData})
+		this.setState({downloads,downloadState:downloadState.state,percentage:0,logBarData})
 		console.log(downloads)
 		try{
-		const result = await this.sendMessageAsync('sw.queue.reset', fmt, 'bg')
+		const result = await this.sendMessageAsync('sw.queue.reset', {fmt,flag}, 'bg')
 			console.log(result)
 
 		}catch(e){
@@ -122,17 +132,29 @@ class DownloadPage extends ComponentWithMessaging{
 	}
 	async processDownloadQueue(){
 		// delay(async()=>{
+		const [evt,source] = await this.sendMessageAsync('sw.queue.started', null, 'bg')
+		let queueStarted = evt.data
+
+		if(queueStarted){
+			const logBarData = {
+				message : 'Queue already started ! please reset or wait until download complete!',
+				mode : 1
+			}
+			this.setState({logBarData})
+			return
+		}
+		// console.log(result)
 		const data = {
 			course : this.state.course,
-			fmt : this.state.downloadConfig.selectedFmtList
+			fmt : this.state.fmt
 		}
-		const result = await this.sendMessageAsync('sw.queue.process', data, 'bg')
-		console.log(result)
+		const [evt2,source2] = await this.sendMessageAsync('sw.queue.process', data, 'bg')
+		console.log(evt2)
 		// })
 		
 	}
 	async populateDownloadConfig(course, sections, tocs){
-		let downloadConfig = mDlConf.get(course.id)
+		let downloadConfig = this.mDlConf.get(course.id)
 		
 
 		if(!downloadConfig){
@@ -143,7 +165,7 @@ class DownloadPage extends ComponentWithMessaging{
 
 				for(let tidx in items){
 					const toc = items[tidx]
-						const streamlocs = mStreamloc.getListByTocId(toc.id)
+						const streamlocs = this.mStreamloc.getListByTocId(toc.id)
 						const fmtListToc = streamlocs.map(streamloc => streamloc.fmt)
 						for(let i in fmtListToc){
 							const fmt = fmtListToc[i]
@@ -158,7 +180,7 @@ class DownloadPage extends ComponentWithMessaging{
 			}
 			const fieldName = 'fmtList'
 
-			downloadConfig = await mDlConf.set(fieldName, fmtList.sort(), course.id)
+			downloadConfig = await this.mDlConf.set(fieldName, fmtList.sort(), course.id)
 
 		}
 		return downloadConfig
@@ -173,7 +195,7 @@ class DownloadPage extends ComponentWithMessaging{
 
       for(let tidx in items){
           const toc = items[tidx]
-          const streamLocations = mStreamloc.getListByTocId(toc.id).filter(r=>r.fmt == fmt)
+          const streamLocations = this.mStreamloc.getListByTocId(toc.id).filter(r=>r.fmt == fmt)
           
           let streamLoc=null, opt={video:null,transcript:null}
           
@@ -196,16 +218,16 @@ class DownloadPage extends ComponentWithMessaging{
 
               for(let key in opt){
 		            const dl = opt[key]
-		            let download =  mDownload.getByTocFname(dl.tocId,dl.filename)
+		            let download =  this.mDownload.getByTocFname(dl.tocId,dl.filename)
 		            if(download){
 		                console.log('updateDownload')
 		                download.url = dl.url
 		                download.filename = dl.filename
 		                download.status = false
-		                download = await mDownload.update(download.id,download)
+		                download = await this.mDownload.update(download.id,download)
 		            }else{
 		                console.log('createDownload')
-		                download = await  mDownload.create(dl.url,dl.filename,dl.tocId,dl,dl.courseId)
+		                download = await  this.mDownload.create(dl.url,dl.filename,dl.tocId,dl,dl.courseId)
 		            } 
 		           	downloads.push(download)
 
@@ -219,17 +241,17 @@ class DownloadPage extends ComponentWithMessaging{
   	return downloads
 	}
 	async loadDownloadData(){
-		const lastCourseSlug = await mCourse.getLastSlug()
-		const {course, authors, sections, tocs} = await mCourse.getCoursePageData(lastCourseSlug)
-		const exerciseFile = mExfile.getByCourseId(course.id)
-		const downloadState = await mDlState.get(course.id)
+		const lastCourseSlug = await this.mCourse.getLastSlug()
+		const {course, authors, sections, tocs} = await this.mCourse.getCoursePageData(lastCourseSlug)
+		const exerciseFile = this.mExfile.getByCourseId(course.id)
+		const downloadState = await this.mDlState.get(course.id)
 		const downloadConfig = await this.populateDownloadConfig(course, sections, tocs)
-		let downloads = mDownload.getListByCourseId(course.id)
+		let downloads = this.mDownload.getListByCourseId(course.id)
 
 		if(downloads.length === 0){
 			downloads = await this.populateDownloads(course, sections, tocs, downloadConfig.selectedFmtList)
 		}
-		console.log(downloads)
+		// console.log(downloads)
 		this.setState({sections,tocs,downloads,downloadState:downloadState.state,lastCourseSlug, course, exerciseFile, downloadConfig,fmtList:downloadConfig.fmtList,fmt:downloadConfig.selectedFmtList})
 
       
@@ -238,22 +260,18 @@ class DownloadPage extends ComponentWithMessaging{
     	// const {downloadConfig} = this.state
     	// downloadConfig.selectedFmtList = fmt
     	const fieldName = 'selectedFmtList'
-			const downloadConfig = await mDlConf.set(fieldName, fmt, this.state.course.id)
-			// let downloads = mDownload.getListByCourseId(
-			// 	this.state.course.id, 
-			// 	this.state.sections,
-			// 	this.state.tocs,
-			// 	fmt)
+			const downloadConfig = await this.mDlConf.set(fieldName, fmt, this.state.course.id)
+		
 			const {course,sections,tocs} = this.state
 			const downloads = await this.populateDownloads(course, sections, tocs, fmt)
 
-			console.log(downloads)
+			// console.log(downloads)
 
     	this.setState({downloadConfig,fmt,downloads})
     }
 	render(){
 		const {activeDownloadId,logBarData,course,downloads, downloadConfig,exerciseFile,downloadState,fmt,fmtList,percentage} = this.state
-		console.log(course)
+		// console.log(course)
 		return(<div className="download-page page">
 			{
 			course ?(<div className="dl-cnt">

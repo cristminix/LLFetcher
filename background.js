@@ -166,7 +166,11 @@ class DownloadQueue{
         for(let idx in this.downloadOptions){
             const dl = this.downloadOptions[idx]
             let download = this.store.getDownload(dl.tocId,dl.filename)
-            this.queues.push(download)
+            if(download){
+                this.queues.push(download)
+            }else{
+                console.error(`download is null`)
+            }
         }
         this.counts = this.queues.length   
         
@@ -288,12 +292,13 @@ class DownloadQueue{
         
         await this.setCourse(course)
         this.setFmt(fmt)
-
+        await this.init(true)
         if(this.queues.length === 0){
             await this.populate()
-            this.queueStarted = true
-            this.startQueue()
+            
         }
+        this.queueStarted = true
+        this.startQueue()
         ///
     }
 }
@@ -330,10 +335,17 @@ const main = async() =>{
                 break
                 case 'sw.queue.reset':
                     // downloadQueue.main(evt.data)
-                    downloadQueue.resetQueue()
-                    downloadQueue.setFmt(evt.data)
-                    await downloadQueue.init(true)
+                    const {fmt,flag} = evt.data
+                    if(!flag){
+                        downloadQueue.resetQueue()
+                        downloadQueue.setFmt(fmt)
+                        await downloadQueue.init(true)
+                    }else{
+                        downloadQueue.queueStarted = false
+                    }
                     console.log(evt.data)
+                    sendMessage('sw.queue.reset', {fmt,flag})
+
                 break
                 case 'sw.queue.course':
                     // downloadQueue.main(evt.data)

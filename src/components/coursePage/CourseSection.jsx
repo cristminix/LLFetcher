@@ -33,7 +33,7 @@ class SectionToolBar extends Component{
     </div></>)
   }
 }
-const CourseSection = ({course, section, items, sidx, runSectionQueue, runTocsQueue,
+const CourseSection = ({store,course, section, items, sidx, runSectionQueue, runTocsQueue,
                         tocToolBarRefs, sectionToolBarRefs, onUpdateQueueProgress}) => {
   const [collapsed, setCollapsed] = useState(true)
 
@@ -62,7 +62,7 @@ const CourseSection = ({course, section, items, sidx, runSectionQueue, runTocsQu
         {
           
           items.map((toc, index)=>{
-            return (<CourseToc course={course} toc={toc} section={section} key={index} sidx={sidx} tidx={index} collapsed={collapsed} tocToolBarRefs={tocToolBarRefs}/>)
+            return (<CourseToc store={store} course={course} toc={toc} section={section} key={index} sidx={sidx} tidx={index} collapsed={collapsed} tocToolBarRefs={tocToolBarRefs}/>)
           }) 
                
         }

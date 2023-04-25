@@ -14,7 +14,7 @@
   "content_scripts": [
     {
       "js": [
-        "assets/content-script-loader.content.js.a38d0dde.d0661135.js"
+        "assets/content-script-loader.content.js.js"
       ],
       "matches": [
         "https://www.linkedin.com/*"
@@ -34,11 +34,11 @@
   "web_accessible_resources": [
     {
       "matches": [
-        "https://www.linkedin.com/*"
+        "<all_urls>"
       ],
       "resources": [
-        "assets/content.js.a38d0dde.js",
-        "lib/*"
+        "**/*",
+        "*"
       ],
       "use_dynamic_url": true
     }

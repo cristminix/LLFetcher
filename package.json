@@ -17,6 +17,7 @@
     "localforage": "^1.10.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
+    "underscore": "^1.13.6",
     "watch": "^1.0.2"
   },
   "devDependencies": {

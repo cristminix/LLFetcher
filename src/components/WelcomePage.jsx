@@ -2,22 +2,27 @@ import  {
 	titleCase
 } from "./fn"
 
-import App  from "../models/App"
-import Course  from "../models/Course"
-import Author  from "../models/Author"
+
 import ComponentWithMessaging from "./ComponentWithMessaging"
 
 let onMessageAttached = false
 
-const mApp = await App.getInstance()
-const mCourse = await Course.getInstance()
-const mAuthor = await Author.getInstance()
-
-
 class WelcomePage extends ComponentWithMessaging {
+	mApp = null
+	mCourse = null
+	mAuthor = null
+	store = null
+
 	courseAuthors = []
 	constructor(props){
 		super(props)
+		const {store} = props
+		this.store = store
+		
+		this.mApp = store.get('App')
+		this.mCourse = store.get('Course')
+		this.mAuthor = store.get('Author')
+
 		this.state = {
 			greeting : 'Welcome to LLFetcher 2.0',
 			lastCourseList : {},
@@ -46,11 +51,11 @@ class WelcomePage extends ComponentWithMessaging {
 		for(let i in authors){
 			const {slug,biography,shortBiography} = authors[i]
 			const name = titleCase(slug)
-			const author = await mAuthor.create(name,slug,biography,shortBiography,course.id)
+			const author = await this.mAuthor.create(name,slug,biography,shortBiography,course.id)
 			// console.log(author)
 			if(this.courseAuthors.filter(_author_ => _author_.id === author.id).length === 0){
 				this.courseAuthors.push(author)
-				course = await mCourse.addAuthorId(course.id, author.id)
+				course = await this.mCourse.addAuthorId(course.id, author.id)
 			}
 			
 		}
@@ -62,7 +67,7 @@ class WelcomePage extends ComponentWithMessaging {
 	async createCourse(ci){
 		// insert course
 		const {title,slug,duration,sourceCodeRepository,description,urn} = ci
-		let course = await mCourse.create(title,slug,duration,sourceCodeRepository,description,urn)
+		let course = await this.mCourse.create(title,slug,duration,sourceCodeRepository,description,urn)
 		console.log(course)
 		
 		course = await this.createAuthors(ci.authors, course)
@@ -78,7 +83,7 @@ class WelcomePage extends ComponentWithMessaging {
 	}
 
 	populateLastCourseList(){
-		const savedCourseList = mCourse.getList()
+		const savedCourseList = this.mCourse.getList()
 		let courseListObj = {}
 		for(let i in savedCourseList){
 			courseListObj[savedCourseList[i].slug] = savedCourseList[i]

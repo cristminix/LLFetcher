@@ -1,8 +1,5 @@
 import ChromeStorageDB from "./ChromeStorageDB"
 
-
-
-
 class DB {
 	db = null
 	database = 'learning'
@@ -27,7 +24,13 @@ class DB {
 	}
 
 	async initTable(){
-		// console.log(`${this.constructor.name}.initTable()`)
+		console.log(`${this.constructor.name}.initTable()`)
+
+		if(!this.table){
+			console.error(`${this.constructor.name}.initTable() empty table`)
+
+			return
+		}
 		if(!this.db.tableExists(this.table)){
 			this.db.createTable(this.table, this.fields)
 			await this.db.commit()
@@ -35,7 +38,7 @@ class DB {
 	}	
 	async initDB(){
 		await this.db.init()
-		if(this.constructor.name !== 'DB'){
+		if(this instanceof DB){
 			await this.initTable()
 		}else{
 			console.error(`${this.constructor.name}.initTable() not implemented`)
@@ -99,13 +102,13 @@ class DB {
 
 	async drop(){
 
-		if(this.constructor.name === 'DB'){
+		if(this instanceof DB){
 			await this.db.drop()
 
 			for(let i in DB.instances){
 				const instance = DB.instances[i]
 				await instance.initDB()
-				if(instance.constructor.name === 'App'){
+				if(instance.table === 'app'){
 					await instance.init()
 				}
 			}

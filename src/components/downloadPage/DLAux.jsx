@@ -1,6 +1,6 @@
 import {Component} from "react"
 const DLAux = ({course,fmt, downloadFile}) =>{
-	return(<div>
+	return(<div className="dl-aux text-center">
 		{
 			fmt ?(<>
 				<div className="dl-playlist-cnt">

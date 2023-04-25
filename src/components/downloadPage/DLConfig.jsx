@@ -36,27 +36,27 @@ const DLConfig = ({activeDownloadId,onResetQueue,logBarData, downloads, fmtList,
 			  })
 		})
 	}
-	const resetQueue = async()=>{
-		await onResetQueue()
+	const resetQueue = async(flag)=>{
+		await onResetQueue(flag)
 	}
-	useEffect(()=>{
-		for(let i in pis){
-			clearInterval(pis[i])
-		}
-		if(activeDownloadId){
-			const pi = setInterval(async()=>{
-				const pc = await getProgress(activeDownloadId)
-				// console.log(pc)
-				setPct(pc)
-				if(pc === -1 || pc === 100){
-					clearInterval(pi)
-				}
-			},250)
-			pis.push(pi)
-		}
+	// useEffect(()=>{
+	// 	for(let i in pis){
+	// 		clearInterval(pis[i])
+	// 	}
+	// 	if(activeDownloadId){
+	// 		const pi = setInterval(async()=>{
+	// 			const pc = await getProgress(activeDownloadId)
+	// 			// console.log(pc)
+	// 			setPct(pc)
+	// 			if(pc === -1 || pc === 100){
+	// 				clearInterval(pi)
+	// 			}
+	// 		},250)
+	// 		pis.push(pi)
+	// 	}
 
-	},[activeDownloadId])
-	console.log(logBarData)
+	// },[activeDownloadId])
+	// console.log(downloads)
 	return(<div className="dl-config-cnt">
 		<div className="text-center">
 			<label className="form-label">Set video quality : </label> 
@@ -73,21 +73,23 @@ const DLConfig = ({activeDownloadId,onResetQueue,logBarData, downloads, fmtList,
 
 		</div>
 	{
-		fmtList ? (<><div className="dl-batch-cnt text-center">
+		fmtValue ? (<><div className="dl-batch-cnt text-center">
 			<div className="btn-group">
-		<button disabled={downloadState===1} className="btn btn-danger" 
+		<button disabled={downloadState===1} className="btn btn-primary" 
 		onClick={e=>startDownloadVideoResource()}>
-			<i className={`fa ${iconCls}`}/> Download All Video &amp; Caption
+			<i className={`fa ${iconCls}`}/> Download Video &amp; Caption
 			{
 				percentage ? (` ${percentage}%`) : ""
 			} 
 			</button>
-			<button onClick={e=>resetQueue()} className="btn btn-primary"><i className="fa fa-trash"/> Reset Queue</button>
+			<button onClick={e=>resetQueue(true)} className="btn btn-warning"><i className="fa fa-refresh"/> Reset Flag</button>
+			<button onClick={e=>resetQueue()} className="btn btn-danger"><i className="fa fa-trash"/> Reset Queue</button>
 			</div>
 			<LogBar data={logBarData} pct={pct}/>
 
 	  </div>
 	  <div>
+	  {downloads ?(
 		<table className="table table-bordered">
 			<thead>
 				<tr>
@@ -107,8 +109,11 @@ const DLConfig = ({activeDownloadId,onResetQueue,logBarData, downloads, fmtList,
 				})
 			}
 		  </tbody>
-		</table>
-	  </div></>) :""
+		</table>):null
+	}
+	  </div>
+
+	  </>) :""
 	}
 	
   </div>)

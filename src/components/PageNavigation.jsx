@@ -1,12 +1,17 @@
 
 import {Component, useState, useEffect} from "react"
-import App from "../models/App"
-const mApp = await App.getInstance()
+// import App from "../models/App"
+// const mApp = await App.getInstance()
 // const savedlastCourseSlug = mApp.get().lastCourseSlug
 class PageNavigation extends Component{
 	btnCls = "btn btn-sm btn-primary"
+	store = null
+	mApp = null
 	constructor(props){
 		super(props)
+		const {store} = props
+		this.store = store
+		this.mApp = store.get('App')
 		this.state = {
 			activeNav : 'welcome',
 			enableOptionPage : false,
@@ -25,7 +30,7 @@ class PageNavigation extends Component{
 		return this.btnCls
 	}
 	componentDidMount(){
-		this.setState({lastCourseSlug:mApp.get().lastCourseSlug})
+		this.setState({lastCourseSlug:this.mApp.get().lastCourseSlug})
 	}
 
 	enableDownload(enableDownloadPage){

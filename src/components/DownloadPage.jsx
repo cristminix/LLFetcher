@@ -1,7 +1,7 @@
 import {useState, useEffect, Component, createRef} from "react"
 import "./styles/DownloadPage.css"
 
-import {konsole, sendMessage, makeDelay} from "./fn"
+import {konsole, sendMessage, makeDelay,createDownloadFile} from "./fn"
 import ComponentWithMessaging from "./ComponentWithMessaging"
 
 import DLAux from "./downloadPage/DLAux"
@@ -104,8 +104,17 @@ class DownloadPage extends ComponentWithMessaging{
 		await this.loadDownloadData()
 		this.initMessaging()
 	}
-	downloadFile(t){
-		console.log(t)
+	downloadFile(kind){
+		const {course,sections,tocs,fmt,exerciseFile} = this.state
+		const config = {
+			slug : course.slug,
+			fmt,
+			sections,
+			tocs,
+			exerciseFile
+		}
+		createDownloadFile(kind, config)
+		console.log(kind)
 	}
 
 	async onResetQueue(flag=false){
@@ -276,7 +285,7 @@ class DownloadPage extends ComponentWithMessaging{
 			{
 			course ?(<div className="dl-cnt">
 				{
-					exerciseFile ? (<DLExerciseFile exerciseFile={exerciseFile}/>):""
+					exerciseFile ? (<DLExerciseFile exerciseFile={exerciseFile} downloadFile={t=>this.downloadFile(t)}/>):""
 				}
 				
 				{

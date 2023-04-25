@@ -1,12 +1,13 @@
-const DLExerciseFile = ({exerciseFile})=> {
-	const downloadExerciseFile = () =>{
-		console.log(exerciseFile)
+const DLExerciseFile = ({exerciseFile, downloadFile})=> {
+	const dlFile = async(e,kind)=>{
+		e.preventDefault()
+		await downloadFile(kind)
 	}
 	// console.log(exerciseFile)
 	return(<div className="exercise-file-cnt text-center">
 		{exerciseFile.url ? (<div>
 			<label className="form-label">Exercise File: </label>
-			<a onClick={ e=>downloadExerciseFile() }  href="#">{exerciseFile.name}</a>
+			<a onClick={ e=>dlFile(e,'exercise_file') }  href="#">{exerciseFile.name}</a>
 		</div>):""
 		}
 	</div>)

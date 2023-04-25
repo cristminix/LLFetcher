@@ -15,8 +15,8 @@ class LogBar extends Component {
 	return(<><div className="log-bar">
 	{
 		mode >= 0 && message ? (
-        <div className={`log-message ${mode === 1 ? 'error' : mode === 0 ? 'success' : 'warning'}`}>
-            <span>{message} {pct}%</span>
+        <div style={{marginTop:'.5em'}} className={`log-message ${mode === 1 ? 'error' : mode === 0 ? 'success' : 'warning'}`}>
+            <span>{message} </span>
         </div>):""
 	}
 

@@ -57,7 +57,7 @@ const DLConfig = ({activeDownloadId,onResetQueue,logBarData, downloads, fmtList,
 
 	// },[activeDownloadId])
 	// console.log(downloads)
-	return(<div className="dl-config-cnt">
+	return(<div className="dl-config-cnt" >
 		<div className="text-center">
 			<label className="form-label">Set video quality : </label> 
 		  		<select className="form-control" 
@@ -73,23 +73,24 @@ const DLConfig = ({activeDownloadId,onResetQueue,logBarData, downloads, fmtList,
 
 		</div>
 	{
-		fmtValue ? (<><div className="dl-batch-cnt text-center">
+		fmtValue ? (<><div className="dl-batch-cnt text-center" style={{display:'flex',flexDirection:'column'}}>
 			<div className="btn-group">
 		<button disabled={downloadState===1} className="btn btn-primary" 
 		onClick={e=>startDownloadVideoResource()}>
-			<i className={`fa ${iconCls}`}/> Download Video &amp; Caption
+			<i className={`fa ${iconCls}`}/> {downloadState===1?'Downloading':'Download Video & Caption'}
 			{
 				percentage ? (` ${percentage}%`) : ""
 			} 
 			</button>
-			<button onClick={e=>resetQueue(true)} className="btn btn-warning"><i className="fa fa-refresh"/> Reset Flag</button>
+			<button onClick={e=>resetQueue(true)} className="btn btn-warning"><i className="fa fa-flag"/> Reset Flag</button>
 			<button onClick={e=>resetQueue()} className="btn btn-danger"><i className="fa fa-trash"/> Reset Queue</button>
 			</div>
 			<LogBar data={logBarData} pct={pct}/>
 
 	  </div>
 	  <div>
-	  {downloads ?(
+	  {
+	  	/*downloads ?(
 		<table className="table table-bordered">
 			<thead>
 				<tr>
@@ -109,7 +110,7 @@ const DLConfig = ({activeDownloadId,onResetQueue,logBarData, downloads, fmtList,
 				})
 			}
 		  </tbody>
-		</table>):null
+		</table>):null*/
 	}
 	  </div>
 

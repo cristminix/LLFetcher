@@ -135,7 +135,11 @@ const DLConfig = ({activeDownloadId,onResetQueue,logBarData, downloads, fmtList,
 
 		}
 		else{
-			if(pctg_ < 100){
+			if(pctg_ === 0){
+				setIconCls("fa-download")
+				setDlText("Download Video & Caption")
+			}
+			else if(pctg_ < 100){
 				setIconCls("fa-refresh")
 				setDlText("Resume")
 			}else{

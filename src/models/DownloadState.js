@@ -2,7 +2,7 @@ import DB from "./DB"
 
 class DownloadState extends DB {
 	table = 'downloadState'
-	fields = ["courseId","state","total","success","fails","lastTocId"]
+	fields = ["courseId","state","total","success","fails","lastTocId","percentage"]
 	type = "single"
 
 
@@ -35,6 +35,42 @@ class DownloadState extends DB {
         await this.db.commit()
         
         return downloadState
+    }
+    async setTotal(courseId, total){
+        this.db.update(this.table,{courseId},(row)=>{
+            row.total = total
+            return row
+        })
+    }
+    async setSuccess(courseId, success){
+        this.db.update(this.table,{courseId},(row)=>{
+            row.success = success
+            return row
+        })
+    }
+    async setFails(courseId, fails){
+        this.db.update(this.table,{courseId},(row)=>{
+            row.fails = fails
+            return row
+        })
+    }
+    async setLastTocId(courseId, tocId){
+        this.db.update(this.table,{courseId},(row)=>{
+            row.lastTocId = tocId
+            return row
+        })
+    }
+    async setState(courseId, state){
+        this.db.update(this.table,{courseId},(row)=>{
+            row.state = state
+            return row
+        })
+    }
+    async setPercentage(courseId, percentage){
+        this.db.update(this.table,{courseId},(row)=>{
+            row.percentage = percentage
+            return row
+        })
     }
 }
 

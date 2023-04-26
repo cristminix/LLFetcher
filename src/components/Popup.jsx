@@ -9,11 +9,7 @@ import OptionPage from "./OptionPage"
 import PageNavigation from "./PageNavigation"
 import SettingPage from "./SettingPage"
 import "./styles/Popup.css"
-import App from "../models/App"
-import Author from "../models/Author"
-import Section from "../models/Section"
-import Toc from "../models/Toc"
-import Course from "../models/Course"
+
 import ComponentWithMessaging from "./ComponentWithMessaging"
 
 import  {
@@ -144,7 +140,7 @@ class Popup extends PopupAction{
 		this.pageNavigationRef = createRef(null)
 	}
 	setPage(){
-		const {store} = this
+		const {store,pageNavigationRef} = this
 		const pages = {
 			welcome : (<WelcomePage store={store} onSelectCourse={(a,b,c)=>this.onSelectCourse(a,b,c)}/>),
 			course : (<CoursePage store={store} setNav={nav => this.setState({nav})} 
@@ -155,7 +151,7 @@ class Popup extends PopupAction{
 								  pageNavigationRef={this.pageNavigationRef}/>),
 			download : (<DownloadPage store={store}/>),
 			help : (<HelpPage store={store}/>),
-			setting : (<SettingPage store={store}/>),
+			setting : (<SettingPage store={store} pageNavigationRef={pageNavigationRef}/>),
 			option : (<OptionPage store={store}/>)
 		}
 	

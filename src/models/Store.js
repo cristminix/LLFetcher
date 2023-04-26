@@ -51,7 +51,9 @@ class Store {
 		}
 		return Store.instance	
 	}
-
+	async reload(){
+		await DB.connection.reload()
+	}
 	get(model){
 		const availables = ['DB','App','Author','Course', 'Download', 'DownloadConfig', 'DownloadState','ExerciseFile','Section','StreamLocation','Toc']
 		if(availables.includes(model)){

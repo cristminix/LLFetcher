@@ -3,6 +3,7 @@ import {Component, useState, useEffect} from "react"
 // import App from "../models/App"
 // const mApp = await App.getInstance()
 // const savedlastCourseSlug = mApp.get().lastCourseSlug
+import {konsole} from "./fn"
 class PageNavigation extends Component{
 	btnCls = "btn btn-sm btn-primary"
 	store = null
@@ -13,7 +14,7 @@ class PageNavigation extends Component{
 		this.store = store
 		this.mApp = store.get('App')
 		this.state = {
-			activeNav : 'welcome',
+			activeNav : '',
 			enableOptionPage : false,
 			lastCourseSlug : '',
 			enableDownloadPage : true
@@ -24,17 +25,27 @@ class PageNavigation extends Component{
 	onNavClick(activeNav){
 		this.setState({activeNav})
 		this.props.onNavUpdate(activeNav)
+		this.mApp.setNav(activeNav)
+
 	}
 
 	getBtnCls(navName){
-		return this.btnCls
+		return `${this.btnCls} ${navName===this.state.activeNav?'active':''}`
 	}
 	componentDidMount(){
-		this.setState({lastCourseSlug:this.mApp.get().lastCourseSlug})
+		const {lastCourseSlug, nav} = this.mApp.get()
+
+		const activeNav = nav || 'welcome'
+		konsole.log(lastCourseSlug, nav)
+		this.setState({lastCourseSlug, activeNav})
+		this.props.onNavUpdate(activeNav)
 	}
 
 	enableDownload(enableDownloadPage){
 		this.setState({enableDownloadPage})
+	}
+	disableCourse(){
+		this.setState({lastCourseSlug:''})
 	}
 	setNav(activeNav){
 		this.setState({activeNav})
@@ -45,7 +56,7 @@ class PageNavigation extends Component{
 		return(<div className="page-navigation text-center">
 			<div className="btn-group">
 				<button disabled={activeNav==='welcome'} onClick={evt => this.onNavClick('welcome')} className={this.getBtnCls('welcome')}><i className="fa fa-home"/> Welcome</button>
-				<button disabled={lastCourseSlug === '' || activeNav==='course'} onClick={evt => this.onNavClick('course')} className={this.getBtnCls('course')} title={lastCourseSlug}><i className="fa fa-bookmark"/> Course {lastCourseSlug !== '' ? `(1)`: ''}</button>
+				<button disabled={lastCourseSlug === '' || activeNav==='course'} onClick={evt => this.onNavClick('course')} className={this.getBtnCls('course')} title={lastCourseSlug}><i className="fa fa-bookmark"/> Course</button>
 				<button disabled={activeNav==='download' || !enableDownloadPage}  onClick={evt => this.onNavClick('download')} className={this.getBtnCls('download')}><i className="fa fa-download"/> Downloads</button>
 				{
 					enableOptionPage ? (<button  disabled={activeNav==='option'}  onClick={evt = this.onNavClick('option')} className={this.getBtnCls('option')}><i className="fa fa-cog"/> Option</button>

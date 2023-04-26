@@ -81,7 +81,7 @@ class DownloadPage extends ComponentWithMessaging{
 	}
 	async updateDownloadState(data){
 		let state = 1
-		const {percentage, currentDownload, success} = data
+		const {percentage, download, success} = data
 		const {course} = this.state
 		if(typeof percentage != 'undefined'){
 	    this.setState({percentage})
@@ -93,10 +93,10 @@ class DownloadPage extends ComponentWithMessaging{
 		this.setState({
 			downloadState : state,
 			logBarData : {
-				message : currentDownload.filename,
+				message : download.filename,
 				mode : success ? 0 : 2
 			},
-			activeDownloadId: currentDownload.downloadId
+			activeDownloadId: download.downloadId
 		})
 	}
 	async componentDidMount(){
@@ -195,6 +195,7 @@ class DownloadPage extends ComponentWithMessaging{
 		return downloadConfig
 	}
 	async populateDownloads(course, sections, tocs, fmt){
+		await this.mDownload.clear(course.id)
 		let dummy = false
 		const downloads = []
 		const dummyBaseUrl = `http://localhost/linked-learning/${course.slug}`

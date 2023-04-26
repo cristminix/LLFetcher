@@ -83,7 +83,7 @@ class Action_queue {
             this.reset()
         }
     }
-    async startDownload(){
+    async dl(){
     	const download = this.items[this.current]
     	const {filename, url} = download
         const option ={ filename, url }
@@ -214,7 +214,7 @@ class DownloadQueue extends Action_queue{
 			// const download = this.items[qindex]
 			// console.log(download)
 			// await timeout(500)
-			await this.startDownload()
+			await this.dl()
 		}
 	}
 }

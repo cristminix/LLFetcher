@@ -1,10 +1,18 @@
 import {useState, useEffect} from "react"
 import LogBar from "./LogBar"
+import {queryDownloadProgress,
+    getDownloadFilenames} from "../fn"
 let pis = []
 const DLConfig = ({activeDownloadId,onResetQueue,logBarData, downloads, fmtList,fmt,onSelectFmt, processDownloadQueue,percentage,downloadState}) =>{
-	const iconCls = percentage === 0 ? "fa-download" : percentage === 100 ? "fa-check" : "fa-spin fa-spinner"
+	
 	const [fmtValue, setFmt] = useState(fmt)
 	const [pct, setPct] = useState(0)
+	const [inProgress, setInProgress] = useState(false)
+	const [interuptCount, setInteruptCount] = useState(0)
+	const [successCount, setSuccessCount] = useState(0)
+	const [iconCls, setIconCls] = useState("fa-download")
+	const [enableDl, setEnableDl] = useState(true)
+	const [dlText, setDlText] = useState("'Download Video & Caption'") 
 	const startDownloadVideoResource = ()=>{
 		
 		processDownloadQueue()
@@ -39,7 +47,7 @@ const DLConfig = ({activeDownloadId,onResetQueue,logBarData, downloads, fmtList,
 	const resetQueue = async(flag)=>{
 		await onResetQueue(flag)
 	}
-	// useEffect(()=>{
+	useEffect(()=>{
 	// 	for(let i in pis){
 	// 		clearInterval(pis[i])
 	// 	}
@@ -54,9 +62,50 @@ const DLConfig = ({activeDownloadId,onResetQueue,logBarData, downloads, fmtList,
 	// 		},250)
 	// 		pis.push(pi)
 	// 	}
+		const queryDownload = async()=>{
+			const filenames = getDownloadFilenames(downloads)
+			const [pct_, elist, slist, ilist] = await queryDownloadProgress(filenames)
+			console.log([percentage, elist, slist])
+			setPct(pct_)
+			const interuptCount_ = elist.length
+			const successCount_ = slist.length
+			const inProgress_ = ilist.length > 0
 
-	// },[activeDownloadId])
+			setInteruptCount(interuptCount_)
+			setSuccessCount(successCount_)
+			setInProgress(inProgress_)
+			const pctg_ = percentage || pct_
+			if(pctg_ === 100){
+				setIconCls("fa-check")
+				setEnableDl(true)
+				setDlText("Complete")
+			}
+			else if(inProgress_){
+				setIconCls("fa-spin fa-spinner")
+				setEnableDl(false)
+				setDlText("Downloading")
+
+			}
+			else if(interuptCount_ > 0){
+				setIconCls("fa-refresh")
+				setEnableDl(true)
+				setDlText("Resume")
+
+			}
+			else{
+				setIconCls("fa-download")
+				setEnableDl(true)
+				setDlText("Download Video & Caption")
+			}
+
+			// percentage === 0 ? "fa-download" : percentage === 100 ? "fa-check" : "fa-spin fa-spinner"
+		}
+
+		queryDownload()
+		
+	},[])
 	// console.log(downloads)
+	const pctg = percentage || pct
 	return(<div className="dl-config-cnt" >
 		<div className="text-center">
 			<label className="form-label">Set video quality : </label> 
@@ -75,11 +124,11 @@ const DLConfig = ({activeDownloadId,onResetQueue,logBarData, downloads, fmtList,
 	{
 		fmtValue ? (<><div className="dl-batch-cnt text-center" style={{display:'flex',flexDirection:'column'}}>
 			<div className="btn-group">
-		<button disabled={downloadState===1} className="btn btn-primary" 
+		<button disabled={!enableDl} className="btn btn-primary" 
 		onClick={e=>startDownloadVideoResource()}>
-			<i className={`fa ${iconCls}`}/> {downloadState===1?'Downloading':'Download Video & Caption'}
+			<i className={`fa ${iconCls}`}/> {dlText}
 			{
-				percentage ? (` ${percentage}%`) : ""
+				pctg ? (` ${pctg}%`) : ""
 			} 
 			</button>
 			<button onClick={e=>resetQueue(true)} className="btn btn-warning"><i className="fa fa-flag"/> Reset Flag</button>

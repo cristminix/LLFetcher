@@ -273,6 +273,26 @@ function createDownloadFile(kind,config){
     anchor.href = objectURL
     anchor.click()
 }
+
+const queryDownloadProgress = async(filenames)=>{
+    let dlist = await chrome.downloads.search({limit: 1000})
+    if(dlist.length > 0){
+        dlist = dlist.filter(d=>d.byExtensionName === "LLFetcher")
+        dlist = dlist.filter(d=>filenames.includes(d.filename.split(/[\\/]/).pop()))
+        const elist = dlist.filter(d=>d.state === 'interrupted')
+        const slist = dlist.filter(d=>d.state === 'complete')
+        const ilist = dlist.filter(d=>d.state === 'in_progress')
+        const ppeak = Math.floor(slist.length/filenames.length * 100)
+        const percentage = Math.ceil(ppeak)
+
+        return [percentage, elist, slist, ilist]
+    }
+    return [0, [], [],[]]
+}
+
+const getDownloadFilenames = (downloads) => {
+    return downloads.map(d=>d.filename)
+}
 export {
 	onMessage,
 	MsgEvt,
@@ -286,6 +306,8 @@ export {
 	isRefsHasCurrent,
 	createDownloadFile,
 	generateM3u,
-	generateShellScript
+	generateShellScript,
+    queryDownloadProgress,
+    getDownloadFilenames
 }
 

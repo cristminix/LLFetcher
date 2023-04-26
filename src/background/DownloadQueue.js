@@ -168,7 +168,12 @@ class DownloadQueue extends Action_queue{
             	return
 			}
 			if(this.queues.length === 0){
-				await this.populate()
+				const result = await this.populate()
+
+                if(!result){
+                    console.error('DownloadQueue.populate() return false')
+                    return
+                }
 			}
 			this.started = true
 			await this.process()
@@ -181,11 +186,15 @@ class DownloadQueue extends Action_queue{
 	 * populate queues
 	 * */
 	async populate(){
-		this.init(true)
+		await this.init(true)
 		const courseId = this.course.id
         //const { sections, tocs} = await this.mCourse.getCourseSecsTocs(this.course.id)
-		this.items = this.mDownload.getListByCourseId(courseId)
+		this.items = this.mDownload.getListByCourseId(courseId,this.fmt)
+        if(this.items.length === 0){
+            return false
+        }
 		this.queues = Object.keys(this.items)
+        return true
 	}
 	/**
 	 * reset queue
@@ -200,8 +209,8 @@ class DownloadQueue extends Action_queue{
 	 * calculate progress queue, return percentage
 	 * */
 	calculateProgress(){
-		const peak = Math.floor(this.queues.length / this.items.length)
-        const percentage = Math.ceil(peak * 100)
+		const peak = Math.floor(this.queues.length / this.items.length  * 100)
+        const percentage = Math.ceil(peak)
         return percentage
 	}
 	/**

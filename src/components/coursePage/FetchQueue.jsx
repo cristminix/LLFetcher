@@ -13,7 +13,7 @@ class FetchQueue extends Component{
 		this.prefixCls = prefixCls || 'fetch-queue'
 		this.state = {
 			btnState : 1,
-			hideProgress : false,
+			hideProgress : true,
 			hideBtn : false,
 			percentage : 0,
 			qiData : initialQiData,

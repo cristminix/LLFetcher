@@ -29,7 +29,7 @@ const main = async() =>{
                     {
                         const {fmt,flag} = data
                         if(!flag){
-                            queue.resetQueue()
+                            queue.reset()
                             queue.setFmt(fmt)
                             await queue.init(true)
                         }else{

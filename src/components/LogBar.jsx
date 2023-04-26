@@ -11,7 +11,7 @@ class LogBar extends Component {
 	// }
 	render(){
 		const {mode,message} = this.props.data
-		const {pct} = this.props
+ 
 	return(<><div className="log-bar">
 	{
 		mode >= 0 && message ? (

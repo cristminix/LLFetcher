@@ -2,27 +2,30 @@ import DB from "./DB"
 
 class Download extends DB {
 	table = 'download'
-	fields = ["tocId","courseId","downloadId","filename","url","status","exclude","opt"]
+	fields = ["tocId","courseId","downloadId","filename","url","status","exclude","opt","fmt"]
 
     getByTocCourse(tocId,courseId){
         return this.singleQuery({query:{tocId,courseId}})
     }
-    getListByCourseId(courseId){
+    getListByCourseId(courseId, fmt=''){
+        if(fmt.length>0){
+            return this.query({query:{courseId,fmt}})
+        }
         return this.query({query:{courseId}})
     }
     getById(id){
         return this.singleQuery({query:{id}})
     }
-    getByTocFname(tocId, filename){
-        return this.singleQuery({query:{tocId,filename}})    
+    getByTocFname(tocId, filename,courseId){
+        return this.singleQuery({query:{tocId,filename,courseId}})    
     }
-    async create(url,filename,tocId,opt,courseId){
+    async create(url,filename,tocId,opt,fmt,courseId){
         let download = this.getByTocFname(tocId,filename)
         if(!download){
             const id = 0
             const downloadId = 0
             const status = false
-            download = {id,tocId,courseId,downloadId,filename,url,status,opt}
+            download = {id,tocId,courseId,downloadId,filename,url,status,opt,fmt}
             download.id = this.db.insert(this.table, download)
             await this.db.commit()
         }

@@ -1,241 +1,239 @@
-import {useState, useEffect} from "react"
+import {Component, useState, useEffect} from "react"
 import LogBar from "../LogBar"
 import {queryDownloadProgress,
     getDownloadFilenames} from "../fn"
 let pis = []
-const DLConfig = ({activeDownloadId,onResetQueue,logBarData, downloads, fmtList,fmt,onSelectFmt, processDownloadQueue,percentage,downloadState}) =>{
-	
-	const [fmtValue, setFmt] = useState(fmt)
-	const [pct, setPct] = useState(0)
-	const [pctg, setPctg] = useState(0)
-	const [inProgress, setInProgress] = useState(false)
-	const [interuptCount, setInteruptCount] = useState(0)
-	const [successCount, setSuccessCount] = useState(0)
-	const [iconCls, setIconCls] = useState("fa-download")
-	const [enableDl, setEnableDl] = useState(true)
-	const [dlText, setDlText] = useState("'Download Video & Caption'") 
-	const [enableResetFlag, setEnableResetFlag] = useState(true)
-	const [enableResetQueue, setEnableResetQueue] = useState(true)
-	const [loadingResetFlag, setLoadingResetFlag] = useState(false)
-	const [loadingResetQueue, setLoadingResetQueue] = useState(false)
-	const [lbData,setLbData] = useState(logBarData)
-	const startDownloadVideoResource = ()=>{
-		
-		processDownloadQueue()
+const SelectFmt = ({fmt, updateSelectedFmt, fmtList}) =>{
+	return(<div className="text-center">
+		<label className="form-label">Set video quality : </label> 
+	  		<select className="form-control" 
+	  onChange={e=>updateSelectedFmt(e)} style={{width:'120px',display:"inline"}} defaultValue={fmt}>
+		<option value="">--Choose--</option>
+		{
+			fmtList.map((fm,index)=>{
+				return(<option value={fm} key={index}>{fm}</option>)
+			})
+		}
+	  </select>
+	<div className="form-helper">Available video format: {fmtList.join(', ')}</div>
+
+	</div>)
+}
+
+const DLButtons = ({startDownloadVideoResource, logBarData, enableDl, percentage, iconCls, dlText, enableResetFlag, enableResetQueue,resetQueue,rfIconCls,rqIconCls}) =>{
+	return (<><div className="dl-batch-cnt text-center" style={{display:'flex',flexDirection:'column'}}>
+				<div className="btn-group">
+		<button disabled={!enableDl} className="btn btn-primary" 
+		onClick={e=>startDownloadVideoResource()}>
+			<i className={`fa ${iconCls}`}/> {dlText}
+			{
+				percentage ? (` ${percentage}%`) : ""
+			} 
+			</button>
+			<button disabled={!enableResetFlag} onClick={e=>resetQueue(true)} className="btn btn-warning"><i className={`fa ${rfIconCls}`}/> Reset Flag</button>
+			<button disabled={!enableResetQueue} onClick={e=>resetQueue()} className="btn btn-danger"><i className={`fa ${rqIconCls}`}/> Reset Queue</button>
+			</div>
+			<LogBar data={logBarData} />
+
+	  </div>
+	  <div>
+	  
+	  </div></>)
+}
+class DLConfig extends Component{
+	constructor(props){
+		super(props)
+		const {fmt, logBarData, percentage, activeDownloadId, downloadState} = props
+		this.state = {
+			fmt,			 // selected format
+			percentage:0,
+			qPercentage : percentage, // queue progress from message bg
+			cPercentage : 0, // chrome download percentage
+			cInProgress : false, // there is download state in_progress by chrome download
+			cInteruptCount : 0, // there is download state interupt by chrome download
+			cSuccessCount : 0, // count of download state complete by chrome download
+
+			iconCls : "fa-download", // Download button icon className
+			enableDl : false, // Enable /Disable Download btn
+			dlText : "Download Video & Caption", // Download Button Text
+
+
+			enableResetFlag : false,
+			enableResetQueue : false,
+			loadingResetFlag : false,
+			loadingResetQueue : false,
+			logBarData
+		}
 	}
-	const updateSelectedFmt = async(e) => {
-		const v = e.target.value
-		setFmt(v)
-		
-		onSelectFmt(v)
-		console.log(v)
+	startDownloadVideoResource(){
+		this.props.processDownloadQueue()
+	}
+	async updateSelectedFmt(e){
+		const {onSelectFmt} = this.props
+		const fmt = e.target.value
+		this.setState({fmt})
+		onSelectFmt(fmt)
 
 	}
-	const getProgress = async (id) => {
-		return new Promise((resolve,reject)=>{
-			chrome.downloads.search({id}, (item) => {
-				if(item.length > 0)
-				{item = item[0]
-			    if(item.totalBytes > 0) {
-			    	const percentage = Math.ceil(
-					Math.floor( item.bytesReceived / item.totalBytes * 100 )
-				)
-			      resolve(percentage)
-			    } else {
-			      resolve(-1)
-			    }
-				}else {
-			      resolve(-1)
-			    }
-			  })
-		})
-	}
-	const resetQueue = async(flag)=>{
-		setEnableDl(false)
+	async resetQueue(flag){
+		const {onResetQueue} = this.props
+		let enableDl = false
+		this.setState({enableDl})
+		let logBarData
 		if(flag){
-			setLbData({
-				message : 'resetting queue flag',
-				mode : 2
+			logBarData = {message : 'resetting queue flag', mode : 2}
+			this.setState({
+				logBarData,
+				enableResetFlag : false,
+				loadingResetFlag : true,
+				enableResetQueue : false
 			})
-			setEnableResetFlag(false)
-			setLoadingResetFlag(true)
-			setEnableResetQueue(false)
 
 		}else{
-			setLbData({
-				message : 'resetting queue data',
-				mode : 2
+			logBarData = {message : 'resetting queue data', mode : 2 }
+			this.setState({
+				logBarData,
+				enableResetQueue : false,
+				loadingResetQueue : true,
+				enableResetFlag : false,
+				
 			})
-			setEnableResetQueue(false)
-			setLoadingResetQueue(true)
-			setEnableResetFlag(false)
 
 		}
 		await onResetQueue(flag)
 		if(flag){
-			setLbData({
-				message : 'resetting queue flag complete',
-				mode : 0
+			logBarData = {message : 'resetting queue flag complete', mode : 0 }
+			this.setState({
+				logBarData,
+				enableResetFlag : true,
+				loadingResetFlag : false,
+				enableResetQueue : true
 			})
-			setEnableResetFlag(true)
-			setLoadingResetFlag(false)
-			setEnableResetQueue(true)
 
 		}else{
-			setLbData({
-				message : 'resetting queue data complete',
-				mode : 0
+			logBarData = {message : 'resetting queue data complete', mode : 0 } 
+			this.setState({
+				logBarData,
+				enableResetQueue : true,
+				loadingResetQueue : false,
+				enableResetFlag : true
 			})
-			setEnableResetQueue(true)
-			setLoadingResetQueue(false)
-			setEnableResetFlag(true)
-
-
 		}
-		setEnableDl(true)
-		await queryDownload()
+		enableDl = true
+		this.setState({enableDl})
+
+		await this.queryDownload()
 
 	}
-	const queryDownload = async()=>{
+	async queryDownload(){
+		const {downloads}=this.props
 		const filenames = getDownloadFilenames(downloads)
-		const [pct_, elist, slist, ilist] = await queryDownloadProgress(filenames)
-		console.log([percentage, elist, slist])
-		setPct(pct_)
-		const interuptCount_ = elist.length
-		const successCount_ = slist.length
-		const inProgress_ = ilist.length > 0
+		const [cPercentage, elist, slist, ilist] = await queryDownloadProgress(filenames)
+		// console.log([percentage, elist, slist])
+		// setPct(pct_)
+		const cInteruptCount = elist.length
+		const cSuccessCount = slist.length
+		const cInProgress = ilist.length > 0
 
-		setInteruptCount(interuptCount_)
-		setSuccessCount(successCount_)
-		setInProgress(inProgress_)
-		const pctg_ = percentage || pct_
-		if(pctg_ === 100){
-			setIconCls("fa-check")
-			setEnableDl(true)
-			setDlText("Complete")
+		this.setState({
+			cPercentage, cInteruptCount, cSuccessCount, cInProgress
+		})
+		if(cPercentage === 100){ 
+			this.setState({
+				iconCls : 'fa-check',
+				enableDl : true,
+				dlText : 'Complete'
+			})
 		}
-		else if(inProgress_){
-			setIconCls("fa-spin fa-spinner")
-			setEnableDl(false)
-			setDlText("Downloading")
+		else if(cInProgress){ 
+			this.setState({
+				iconCls : 'fa-spin fa-spinner',
+				enableDl : false,
+				dlText : 'Downloading'
+			})
 
 		}
-		else if(interuptCount_ > 0){
-			setIconCls("fa-refresh")
-			setEnableDl(true)
-			setDlText("Resume")
+		else if(cInteruptCount > 0){
+			this.setState({
+				iconCls : 'fa-refresh',
+				enableDl : true,
+				dlText : 'Resume'
+			})
+
 			const chromeDownloads = [...elist]
 
 			for(let i in chromeDownloads){
 				const id = chromeDownloads[i].id
-				console.log(id)
+				// console.log(id)
 				const eresult = await chrome.downloads.erase({id})
-				console.log(eresult)
+				console.log('chrome.downloads.erase() result=',eresult)
 			}
 
 		}
 		else{
-			if(pctg_ === 0){
-				setIconCls("fa-download")
-				setDlText("Download Video & Caption")
+
+			if(cPercentage === 0){
+				this.setState({
+					iconCls : 'fa-download',
+					dlText : "Download Video & Caption"
+				}) 
 			}
-			else if(pctg_ < 100){
-				setIconCls("fa-refresh")
-				setDlText("Resume")
+			else if(cPercentage < 100){
+				this.setState({
+					iconCls : 'fa-refresh',
+					dlText : "Resume"
+				}) 
 			}else{
-				setIconCls("fa-download")
-				setDlText("Download Video & Caption")
+				this.setState({
+					iconCls : 'fa-download',
+					dlText : "Download Video & Caption"
+				}) 
 			}
-			setEnableDl(true)
+			this.setState({enableDl:true})
 			
 		}
 
 		
 	}
-	useEffect(()=>{
-		queryDownload()
-	},[fmt])
-	useEffect(()=>{
+	async componentDidMount(){
+		await this.queryDownload()
+		const {qPercentage, cPercentage} = this.state
+		const percentage =  qPercentage || cPercentage
+		this.setState({percentage})
+	 
+	}
+	render(){
+		const {fmtList, downloads } = this.props
 
-		setLbData(logBarData)
-	},[logBarData])
-	// console.log(downloads)
-	useEffect(()=>{
-		queryDownload()
-		const pctg_ = percentage || pct
-		console.log(pctg_)
-		setPctg(pctg_)
-		//setIconCls(pctg_ === 0 ? "fa-download" : pctg_ === 100 ? "fa-check" : "fa-spin fa-spinner")
+		const {loadingResetFlag, loadingResetQueue,percentage,iconCls, fmt, logBarData, enableDl, qPercentage,cPercentage, dlText,enableResetFlag,enableResetQueue} = this.state
 
-	},[percentage,pct])
-	const rfIconCls = loadingResetFlag ? "fa-spin fa-spinner" : "fa-flag"
-	const rqIconCls = loadingResetQueue ? "fa-spin fa-spinner" : "fa-trash"
-	const hideOnLoading = loadingResetFlag || loadingResetQueue
-	// const iconCls = 
-		return(<div className="dl-config-cnt" >
-			<div className="text-center">
-				<label className="form-label">Set video quality : </label> 
-			  		<select className="form-control" 
-			  onChange={e=>updateSelectedFmt(e)} style={{width:'120px',display:"inline"}} defaultValue={fmtValue}>
-				<option value="">--Choose--</option>
-				{
-					fmtList.map((fmt,index)=>{
-						return(<option value={fmt} key={index}>{fmt}</option>)
-					})
-				}
-			  </select>
-			<div className="form-helper">Available video format: {fmtList.join(', ')}</div>
+		const rfIconCls = loadingResetFlag ? "fa-spin fa-spinner" : "fa-flag"
+		const rqIconCls = loadingResetQueue ? "fa-spin fa-spinner" : "fa-trash"
+		const hideOnLoading = loadingResetFlag || loadingResetQueue
+			return(<div className="dl-config-cnt" >
+				<SelectFmt fmt={fmt} updateSelectedFmt={e=>this.updateSelectedFmt(e)} fmtList={fmtList}/>
+			{
+				fmt && downloads.length > 0? (<DLButtons startDownloadVideoResource={e=>this.startDownloadVideoResource(e)}
+													logBarData={logBarData} 
+													enableDl={enableDl} 
+													qPercentage={qPercentage} 
+													cPercentage={cPercentage}
+													percentage={percentage} 
+													iconCls={iconCls} 
+													dlText={dlText} 
+													enableResetFlag={enableResetFlag} 
+													enableResetQueue={enableResetQueue}
+													resetQueue={e=>this.resetQueue(e)}
+													rfIconCls={rfIconCls}
+													rqIconCls={rqIconCls}/>) : fmt ?(<>
+				<i className="fa fa-spin fa-spinner"/> Loading ...
+			</>):""
+			}
+			
+		  </div>)
+	}
 
-			</div>
-		{
-			fmtValue && downloads.length > 0? (<><div className="dl-batch-cnt text-center" style={{display:'flex',flexDirection:'column'}}>
-				<div className="btn-group">
-			<button disabled={!enableDl} className="btn btn-primary" 
-			onClick={e=>startDownloadVideoResource()}>
-				<i className={`fa ${iconCls}`}/> {dlText}
-				{
-					pctg ? (` ${pctg}%`) : ""
-				} 
-				</button>
-				<button disabled={!enableResetFlag} onClick={e=>resetQueue(true)} className="btn btn-warning"><i className={`fa ${rfIconCls}`}/> Reset Flag</button>
-				<button disabled={!enableResetQueue} onClick={e=>resetQueue()} className="btn btn-danger"><i className={`fa ${rqIconCls}`}/> Reset Queue</button>
-				</div>
-				<LogBar data={lbData} />
-
-		  </div>
-		  <div>
-		  {
-		  	/*downloads ?(
-			<table className="table table-bordered">
-				<thead>
-					<tr>
-						<th>No.</th>
-						<th>Filename</th>
-						<th>Status</th>
-					</tr>
-				</thead>	
-			  <tbody>
-				{
-					downloads.map((dl, index)=>{
-						return(<tr key={index}>
-							<td>{index+1}</td>
-							<td><span title={dl.url}>{dl.filename}</span></td>
-							<td>{dl.status}</td>
-					  </tr>)
-					})
-				}
-			  </tbody>
-			</table>):null*/
-		}
-		  </div>
-
-		  </>) : fmt ?(<>
-			<i className="fa fa-spin fa-spinner"/> Loading ...
-		</>):""
-		}
-		
-	  </div>)
-	
 }
+
 
 export default DLConfig

@@ -20,7 +20,7 @@ class Action_queue {
                 createcb1(item)
             }
             const onErased = downloadId =>{
-                reject(delta)
+                reject(downloadId)
 
             }
 

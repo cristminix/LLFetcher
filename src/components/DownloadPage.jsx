@@ -58,7 +58,8 @@ class DownloadPage extends ComponentWithMessaging{
 			sections : [],
 			tocs : {},
 			logBarData:{message:'',mode:0},
-			activeDownloadId : -1
+			activeDownloadId : -1,
+			queueStarted: false
 				
 		
 			
@@ -73,31 +74,45 @@ class DownloadPage extends ComponentWithMessaging{
 	async onMessageCommand(evt, source){
 
 		if(evt.name === 'sw.downloadState'){
-    		console.log(evt)
-    		this.updateDownloadState(evt.data)
+    		// console.log(evt)
+				const {data} = evt
+    		this.updateDownloadState(data)
     		
 		}
 	}
 	async updateDownloadState(data){
 		console.log(data)
 		let state = 1
-		const {percentage, download, success} = data
+		const {percentage, download, success, delta} = data
 		const {course} = this.state
-		if(typeof percentage != 'undefined'){
-	    this.setState({percentage})
-	    if(percentage == 100){
-	      state = 2;
-	    }
-		   const downloadState = await this.mDlState.set(course.id, state)
+
+		if(success){
+			if(typeof percentage != 'undefined'){
+		    this.setState({percentage})
+		    if(percentage == 100){
+		      state = 2;
+		    }
+			   const downloadState = await this.mDlState.set(course.id, state)
+			}
+			this.setState({
+				downloadState : state,
+				logBarData : {
+					message : download.filename,
+					mode : success ? 0 : 1
+				},
+				activeDownloadId: download.downloadId
+			})
+		}else{
+			//error
+			if(typeof delta === 'object'){
+					const {error,filename,id,state} = delta
+					const message = `${filename} download ${state} because of ${error}`
+					const mode = 1
+					const logBarData = {message, mode}
+					this.setState({logBarData})
+				}
 		}
-		this.setState({
-			downloadState : state,
-			logBarData : {
-				message : download.filename,
-				mode : success ? 0 : 2
-			},
-			activeDownloadId: download.downloadId
-		})
+		
 	}
 	async componentDidMount(){
 
@@ -124,12 +139,12 @@ class DownloadPage extends ComponentWithMessaging{
 			// erase chrome downloads
 
 			const filenames = getDownloadFilenames(this.state.downloads)
-			const [pct_, elist, slist, ilist] = await queryDownloadProgress(filenames)
+			const [ elist, slist, ilist] = await queryDownloadProgress(filenames)
 			const chromeDownloads = [...elist,...slist,...ilist]
 
 			for(let i in chromeDownloads){
 				const id = chromeDownloads[i].id
-				console.log(id)
+				// console.log(id)
 				const eresult = await chrome.downloads.erase({id})
 				console.log(eresult)
 			}
@@ -141,7 +156,7 @@ class DownloadPage extends ComponentWithMessaging{
 				mode : null
 			}
 		this.setState({downloads,downloadState:downloadState.state,percentage:0,logBarData})
-		console.log(downloads)
+		// console.log(downloads)
 		try{
 			const result = await this.sendMessageAsync('sw.queue.reset', {fmt,flag}, 'bg')
 			console.log(result)
@@ -159,7 +174,8 @@ class DownloadPage extends ComponentWithMessaging{
 		if(queueStarted){
 			const logBarData = {
 				message : 'Queue already started ! please reset or wait until download complete!',
-				mode : 1
+				mode : 1,
+				queueStarted
 			}
 			this.setState({logBarData})
 			return
@@ -170,6 +186,8 @@ class DownloadPage extends ComponentWithMessaging{
 			fmt : this.state.fmt
 		}
 		const [evt2,source2] = await this.sendMessageAsync('sw.queue.process', data, 'bg')
+		queueStarted = true
+		this.setState({queueStarted})
 		console.log(evt2)
 		// })
 		
@@ -211,7 +229,7 @@ class DownloadPage extends ComponentWithMessaging{
 			await this.mDownload.clear(course.id)	
 		}
 		
-		let dummy = false
+		let dummy = true
 		const downloads = []
 		const dummyBaseUrl = `http://localhost/linked-learning/${course.slug}`
 		for(let sidx in sections){
@@ -271,10 +289,12 @@ class DownloadPage extends ComponentWithMessaging{
 		const exerciseFile = this.mExfile.getByCourseId(course.id)
 		const downloadState = await this.mDlState.get(course.id)
 		const downloadConfig = await this.populateDownloadConfig(course, sections, tocs)
-		let downloads = this.mDownload.getListByCourseId(course.id)
+		const fmt = downloadConfig.selectedFmtList
+		const fmtList = downloadConfig.fmtList
+		let downloads = this.mDownload.getListByCourseId(course.id,fmt)
 
 		if(downloads.length === 0){
-			downloads = await this.populateDownloads(course, sections, tocs, downloadConfig.selectedFmtList)
+			downloads = await this.populateDownloads(course, sections, tocs, fmt)
 		}
 		// console.log(downloads)
 		this.setState({
@@ -286,8 +306,8 @@ class DownloadPage extends ComponentWithMessaging{
 				course, 
 				exerciseFile, 
 				downloadConfig,
-				fmtList:downloadConfig.fmtList,
-				fmt:downloadConfig.selectedFmtList
+				fmtList,
+				fmt
 			})
 
       
@@ -306,7 +326,9 @@ class DownloadPage extends ComponentWithMessaging{
   	this.setState({downloadConfig,fmt,downloads})
   }
 	render(){
-		const {activeDownloadId,logBarData,course,downloads, downloadConfig,exerciseFile,downloadState,fmt,fmtList,percentage} = this.state
+		const {queueStarted,activeDownloadId,logBarData,course,downloads, 
+		downloadConfig,exerciseFile,downloadState,
+		fmt,fmtList,percentage} = this.state
 		// console.log(course)
 		return(<div className="download-page page">
 			{
@@ -316,7 +338,7 @@ class DownloadPage extends ComponentWithMessaging{
 				}
 				
 				{
-					downloadConfig ? (<DLConfig activeDownloadId={activeDownloadId} onResetQueue={e=>this.onResetQueue(e)} logBarData={logBarData} downloads={downloads} downloadState={downloadState} percentage={percentage} processDownloadQueue={e=>this.processDownloadQueue(e)} fmtList={fmtList} fmt={fmt} onSelectFmt={fmt=>this.onSelectFmt(fmt)}/>):""
+					downloadConfig ? (<DLConfig queueStarted={queueStarted} activeDownloadId={activeDownloadId} onResetQueue={e=>this.onResetQueue(e)} logBarData={logBarData} downloads={downloads} downloadState={downloadState} percentage={percentage} processDownloadQueue={e=>this.processDownloadQueue(e)} fmtList={fmtList} fmt={fmt} onSelectFmt={fmt=>this.onSelectFmt(fmt)}/>):""
 				}
 				{
 					downloadConfig ? (<DLAux course={course} fmt={fmt} downloadFile={t=>this.downloadFile(t)}/>):""

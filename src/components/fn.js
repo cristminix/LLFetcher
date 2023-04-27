@@ -279,15 +279,15 @@ const queryDownloadProgress = async(filenames)=>{
     if(dlist.length > 0){
         dlist = dlist.filter(d=>d.byExtensionName === "LLFetcher")
         dlist = dlist.filter(d=>filenames.includes(d.filename.split(/[\\/]/).pop()))
+        console.log(dlist)
         const elist = dlist.filter(d=>d.state === 'interrupted')
         const slist = dlist.filter(d=>d.state === 'complete')
         const ilist = dlist.filter(d=>d.state === 'in_progress')
-        const ppeak = Math.floor(slist.length/filenames.length * 100)
-        const percentage = Math.ceil(ppeak)
+        
 
-        return [percentage, elist, slist, ilist]
+        return [ elist, slist, ilist]
     }
-    return [0, [], [],[]]
+    return [[], [],[]]
 }
 
 const getDownloadFilenames = (downloads) => {

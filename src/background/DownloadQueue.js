@@ -72,13 +72,22 @@ class Action_queue {
 		const cmd = 'sw.downloadState'
 		sendMessage(cmd,{success,delta,download,percentage})
     }
-    async onDownloadError(delta){
+    async onDownloadError(edelta){
+        let {error,id,state,filename} = edelta
+        console.log(delta,{error,id,state,filename} )
+        filename = filename.current.split(/[\\/]/).pop()
+        error = error.current
+        state = state.current
+
         const cmd = 'sw.downloadState'
         const success = false
-        const download = this.current
-        
+        const download = this.items[this.current]
+        const delta = {filename, error, state, id}
+
         sendMessage(cmd,{delta, success, download})
-        
+        if(!this.qfails.includes(this.current)){
+            this.qfails.push(this.current)
+        }
         if(this.resetOnError){
             this.reset()
         }
@@ -104,8 +113,9 @@ class Action_queue {
             console.log(result)
             await this.onDownloadComplete(result)
         }catch(e){
-            console.error(e)
+            
             await this.onDownloadError(e)
+            console.error(e)
         } 
     }
 }
@@ -201,6 +211,8 @@ class DownloadQueue extends Action_queue{
 	 * */
 	reset(){
 		this.queues = []
+        this.qsuccess = []
+        this.qfails = []
 		this.items = []
 		this.started = false
 		this.current = null
@@ -209,8 +221,11 @@ class DownloadQueue extends Action_queue{
 	 * calculate progress queue, return percentage
 	 * */
 	calculateProgress(){
-		const peak = Math.floor(this.queues.length / this.items.length  * 100)
+		const peak = Math.floor(this.qsuccess.length / this.items.length  * 100)
         const percentage = Math.ceil(peak)
+        if(percentage >= 100){
+            this.started = false
+        }
         return percentage
 	}
 	/**

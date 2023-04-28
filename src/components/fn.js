@@ -278,7 +278,16 @@ const queryDownloadProgress = async(filenames)=>{
     let dlist = await chrome.downloads.search({limit: 1000})
     if(dlist.length > 0){
         dlist = dlist.filter(d=>d.byExtensionName === "LLFetcher")
-        dlist = dlist.filter(d=>filenames.includes(d.filename.split(/[\\/]/).pop()))
+        dlist = dlist.filter(d=>{
+            const dfname = d.filename.split(/[\\/]/).pop()
+            const cmpresult = filenames.filter(fname=>{
+                const [base,ext] = fname.split('.')
+                const baserx = new RegExp(base) 
+                const extrx = new RegExp(`\.${ext}$`)
+                return dfname.match(base) && dfname.match(extrx)
+            })
+            return cmpresult.length > 0
+        })
         console.log(dlist)
         const elist = dlist.filter(d=>d.state === 'interrupted')
         const slist = dlist.filter(d=>d.state === 'complete')

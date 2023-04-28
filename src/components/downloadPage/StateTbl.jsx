@@ -10,7 +10,7 @@ const StateTbl = ({logBarData,
 					rfIconCls,
 					rqIconCls,
 					cInProgress,
-					cSuccessCount,cInteruptCount,downloads}) => {
+					cSuccessCount,cInteruptCount,downloads,queueStarted}) => {
 	return (<div className="state-tbl">
 		<table className="table table-bordered">
 			<thead>
@@ -43,7 +43,7 @@ const StateTbl = ({logBarData,
 				</tr>
 				<tr>
 					<td>cInProgress</td><td>{cInProgress?'Y':'N'}</td>
-					<td></td><td>{''}</td>
+					<td>queueStarted</td><td>{queueStarted?'Y':'N'}</td>
 					<td></td><td>{''}</td>
 				</tr>
 				<tr>

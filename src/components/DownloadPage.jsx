@@ -173,7 +173,7 @@ class DownloadPage extends ComponentWithMessaging{
 
 		if(queueStarted){
 			const logBarData = {
-				message : 'Queue already started ! please reset or wait until download complete!',
+				message : 'Queue is locked ! please wait until download complete, you can unlock or reset',
 				mode : 1,
 				queueStarted
 			}

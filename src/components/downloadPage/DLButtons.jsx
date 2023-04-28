@@ -10,8 +10,8 @@ const DLButtons = ({queueStarted,startDownloadVideoResource, logBarData, enableD
 				percentage ? (` ${percentage}%`) : ""
 			} 
 			</button>
-			<button disabled={queueStarted ? false : !enableResetFlag } onClick={e=>resetQueue(true)} className="btn btn-warning"><i className={`fa ${rfIconCls}`}/> Reset Flag</button>
-			<button disabled={queueStarted ? false : !enableResetQueue} onClick={e=>resetQueue()} className="btn btn-danger"><i className={`fa ${rqIconCls}`}/> Reset Queue</button>
+			<button disabled={queueStarted ? false : !enableResetFlag } onClick={e=>resetQueue(true)} className="btn btn-warning"><i className={`fa ${rfIconCls}`}/> Unlock</button>
+			<button disabled={queueStarted ? false : !enableResetQueue} onClick={e=>resetQueue()} className="btn btn-danger"><i className={`fa ${rqIconCls}`}/> Reset</button>
 			</div>
 			<LogBar data={logBarData} />
 

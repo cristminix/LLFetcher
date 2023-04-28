@@ -74,7 +74,7 @@ class Action_queue {
     }
     async onDownloadError(edelta){
         let {error,id,state,filename} = edelta
-        console.log(delta,{error,id,state,filename} )
+        console.log(edelta,{error,id,state,filename} )
         filename = filename.current.split(/[\\/]/).pop()
         error = error.current
         state = state.current

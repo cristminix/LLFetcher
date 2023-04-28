@@ -7,8 +7,10 @@ import DLButtons from "./DLButtons"
 import StateTbl from "./StateTbl"
 
 class DLConfig extends Component{
+	pauseOnRecieveProps = false
 	constructor(props){
 		super(props)
+		// this.pauseOnRecieveProps = false
 		const {fmt, logBarData, percentage, activeDownloadId, downloadState,queueStarted} = props
 		this.state = {
 			fmt,			 // selected format
@@ -25,11 +27,11 @@ class DLConfig extends Component{
 			dlText : "Download Video & Caption", // Download Button Text
 
 
-			enableResetFlag : true,
-			enableResetQueue : true,
+			enableResetFlag : false,
+			enableResetQueue : false,
 			loadingResetFlag : false,
 			loadingResetQueue : false,
-			logBarData,queueStarted
+			logBarData,queueStarted,
 		}
 	}
 	startDownloadVideoResource(){
@@ -87,9 +89,11 @@ class DLConfig extends Component{
 			})
 		}
 		enableDl = true
-		this.setState({enableDl})
+		this.pauseRecieveProps()
+		this.setState({enableDl,queueStarted:false,enableResetFlag:false,enableResetQueue:false})
+		
 
-		await this.queryDownload()
+		// await this.queryDownload()
 
 	}
 	async queryDownload(){
@@ -115,7 +119,9 @@ class DLConfig extends Component{
 			this.setState({
 				iconCls : 'fa-check',
 				enableDl : true,
-				dlText : 'Complete'
+				dlText : 'Complete',
+				enableResetFlag: false,
+				enableResetQueue: false
 			})
 			console.log('A')
 		}
@@ -123,7 +129,10 @@ class DLConfig extends Component{
 			this.setState({
 				iconCls : 'fa-spin fa-spinner',
 				enableDl : false,
-				dlText : 'Downloading'
+				dlText : 'Downloading',
+
+				enableResetFlag: false,
+				enableResetQueue: false
 			})
 			console.log('B')
 
@@ -133,7 +142,10 @@ class DLConfig extends Component{
 			this.setState({
 				iconCls : 'fa-refresh',
 				enableDl : true,
-				dlText : 'Resume'
+				dlText : 'Resume',
+
+				enableResetFlag: true,
+				enableResetQueue: true
 			})
 
 			const chromeDownloads = [...elist]
@@ -153,13 +165,18 @@ class DLConfig extends Component{
 			if(cPercentage === 0){
 				this.setState({
 					iconCls : 'fa-download',
-					dlText : "Download Video & Caption"
+					dlText : "Download Video & Caption",
+
+				enableResetFlag: false,
+				enableResetQueue: false
 				}) 
 			}
 			else if(cPercentage < 100){
 				this.setState({
 					iconCls : 'fa-refresh',
-					dlText : "Resume"
+					dlText : "Resume",
+					enableResetFlag: true,
+					enableResetQueue: true
 				}) 
 			}else{
 				this.setState({
@@ -201,12 +218,26 @@ class DLConfig extends Component{
 
 		this.setState({percentage:nPercentage,qPercentage})
 	}
-	componentWillReceiveProps(props){
-		this.delay(()=>{
-			const {logBarData,queueStarted} = props
-			this.setState({logBarData,queueStarted})
-			this.updateDownloadProgress()
-		})
+	pauseRecieveProps(callback){
+		this.pauseOnRecieveProps = true
+
+	}
+	componentWillReceiveProps(props,state){
+		
+			this.delay(()=>{
+				if(!this.pauseOnRecieveProps){
+					const {logBarData,queueStarted} = props
+					this.setState({logBarData,queueStarted})
+					
+				}else{
+					setTimeout(()=>{
+						this.pauseOnRecieveProps = false
+					},1000)
+				}
+				this.updateDownloadProgress()
+			})
+			
+
 		return true
 	}
 	render(){
@@ -216,8 +247,8 @@ class DLConfig extends Component{
 		dlText,enableResetFlag,enableResetQueue,loadingResetQueue,loadingResetFlag,loadingDl,
 		cInteruptCount,cInProgress,cSuccessCount,queueStarted} = this.state
 
-		const rfIconCls = loadingResetFlag ? "fa-spin fa-spinner" : "fa-flag"
-		const rqIconCls = loadingResetQueue ? "fa-spin fa-spinner" : "fa-trash"
+		const rfIconCls = loadingResetFlag ? "fa-spin fa-spinner" : "fa-unlock"
+		const rqIconCls = loadingResetQueue ? "fa-spin fa-spinner" : "fa-refresh"
 		const hideOnLoading = loadingResetFlag || loadingResetQueue
 			return(<div className="dl-config-cnt" >
 				<SelectFmt fmt={fmt} queueStarted={queueStarted} updateSelectedFmt={e=>this.updateSelectedFmt(e)} fmtList={fmtList}/>
@@ -238,9 +269,9 @@ class DLConfig extends Component{
 				<i className="fa fa-spin fa-spinner"/> Loading ...
 			</>):""
 			}
-			<StateTbl logBarData={logBarData} 
+			{/*<StateTbl logBarData={logBarData} 
 					enableDl={enableDl} loadingDl={loadingDl}
-					downloads={downloads}
+					downloads={downloads} queueStarted={queueStarted}
 					qPercentage={qPercentage} 
 					cPercentage={cPercentage}
 					percentage={percentage} 
@@ -252,7 +283,7 @@ class DLConfig extends Component{
 					rqIconCls={rqIconCls}
 					cInProgress={cInProgress}
 					cSuccessCount={cSuccessCount}
-					cInteruptCount={cInteruptCount}/>
+					cInteruptCount={cInteruptCount}/>*/}
 		  </div>)
 	}
 

@@ -1,16 +1,26 @@
 import Store from "../models/Store"
-import {timeout} from "../components/fn"
+import {timeout,getDownloadFilenames,queryDownloadProgress,validateUrl} from "../components/fn"
 const MsgEvt = (name, data = null) => {
     return {name, data}
 }
 const sendMessage = (eventName, data, target='popup', callback = f => f) => {
     const evt = MsgEvt(eventName, data)
-    chrome.runtime.sendMessage(evt, callback)
+    try{
+        chrome.runtime.sendMessage(evt, callback)
+    }catch(e){
+        console.error(e)
+    }
+    
 }
 const onMessage = (callback) => {
-    chrome.runtime.onMessage.addListener((evt, source)=>{
-        callback(evt, source)
-    })
+    try{
+        chrome.runtime.onMessage.addListener((evt, source)=>{
+            callback(evt, source)
+        })
+    }catch(e){
+        console.error(e)
+    }
+    
 }
 class Action_queue {
 	resetOnError = true
@@ -50,9 +60,14 @@ class Action_queue {
             chrome.downloads.onErased.addListener(onErased)
             chrome.downloads.onChanged.addListener(onChanged)
 
-            chrome.downloads.download(opt, downloadId => {
-                createcb2(downloadId)
-            })
+            try{
+                chrome.downloads.download(opt, downloadId => {
+                    createcb2(downloadId)
+                })
+            }catch(e){
+                reject(e)
+            }
+            
 
         })
     }
@@ -100,22 +115,39 @@ class Action_queue {
 
         try{
             result = await this.chromeDownloadAsync(option, item =>{
+                const {downloadId} = item
+                // console.log(item)
+                if(downloadId){
+                    const cmd = 'sw.downloadState'
+                    download.downloadId = downloadId
+                    // const currentDownload =  await this.mDownload.update(download.id,download)
 
+                    sendMessage(cmd,{download})
+                    console.log(downloadId)
+                }
             }, async(downloadId) =>{
-                const cmd = 'sw.downloadState'
-                download.downloadId = downloadId
-                // const currentDownload =  await this.mDownload.update(download.id,download)
+                if(downloadId){
+                    const cmd = 'sw.downloadState'
+                    download.downloadId = downloadId
+                    // const currentDownload =  await this.mDownload.update(download.id,download)
 
-                sendMessage(cmd,{download})
-                console.log(downloadId)
+                    sendMessage(cmd,{download})
+                    console.log(downloadId)
+                }
+                
             })
 
             console.log(result)
-            await this.onDownloadComplete(result)
+            if(result){
+                await this.onDownloadComplete(result)
+            }else{
+                console.error(`result is not valid`, result)
+            }
+            
         }catch(e){
             
             await this.onDownloadError(e)
-            console.error(e)
+            console.error(`onDownloadError reacehed`,e)
         } 
     }
 }
@@ -145,6 +177,11 @@ class DownloadQueue extends Action_queue{
 
     qsuccess = []
     qfails = []
+
+    filenames = []
+    csuccess = []
+    cfails = []
+    cinprogress = []
     constructor(){
     	super()
         this.store = Store.getInstance()
@@ -203,6 +240,8 @@ class DownloadQueue extends Action_queue{
         if(this.items.length === 0){
             return false
         }
+        this.filenames = getDownloadFilenames(this.items)
+       
 		this.queues = Object.keys(this.items)
         return true
 	}
@@ -210,6 +249,7 @@ class DownloadQueue extends Action_queue{
 	 * reset queue
 	 * */
 	reset(){
+        this.filenames = []
 		this.queues = []
         this.qsuccess = []
         this.qfails = []
@@ -228,17 +268,68 @@ class DownloadQueue extends Action_queue{
         }
         return percentage
 	}
+    async getState(filename){
+        const [ elist, slist, ilist] = await queryDownloadProgress([filename]) 
+        
+        // this.csuccess = slist
+
+        
+        // this.cinprogress = ilist
+        // this.cfails = elist
+
+        const interupted = elist.length > 0
+        const success = slist.length > 0
+        const inprogress = ilist.length > 0
+
+
+        return inprogress ? 'in_progress' : success ? 'success' : interupted ? 'interupted' : 'new' 
+        // this.cPercentage = Math.ceil(Math.floor(slist.length/filenames.length * 100))
+     
+    }
 	/**
 	 * main queue entry point
 	 * */
+
+
 	async process(){
 		let qindex = 0
 		while(qindex = this.queues.shift()){
 			this.current = qindex
 			// const download = this.items[qindex]
-			// console.log(download)
-			// await timeout(500)
-			await this.dl()
+            /* check download status from db */
+            const download = this.items[this.current]
+            console.log(download)
+            if(download.status){
+                console.log(`download complete skipped`)
+                await timeout(500)
+                continue
+            }
+            const state = await this.getState(download.filename)
+			// 
+			// 
+            if(state === 'new'){
+                try{
+                    console.log('Do Download')
+                    if(!validateUrl(download.url)){
+                        console.error(`Invalid download url`, download.url)
+                    }else{
+                        await this.dl()
+                    }
+                    // 
+
+                }catch(e){
+
+                    console.error(`process loop failed`, e)
+                }
+            }else{
+                console.error(`process loop skipped state=${state}`)
+                if(state === 'success'){
+                    await timeout(500)
+                    continue
+                }
+                break
+            }
+            
 		}
 	}
 }

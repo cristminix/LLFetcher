@@ -269,7 +269,7 @@ class DLConfig extends Component{
 				<i className="fa fa-spin fa-spinner"/> Loading ...
 			</>):""
 			}
-			{/*<StateTbl logBarData={logBarData} 
+			<StateTbl logBarData={logBarData} 
 					enableDl={enableDl} loadingDl={loadingDl}
 					downloads={downloads} queueStarted={queueStarted}
 					qPercentage={qPercentage} 
@@ -283,7 +283,7 @@ class DLConfig extends Component{
 					rqIconCls={rqIconCls}
 					cInProgress={cInProgress}
 					cSuccessCount={cSuccessCount}
-					cInteruptCount={cInteruptCount}/>*/}
+					cInteruptCount={cInteruptCount}/>
 		  </div>)
 	}
 

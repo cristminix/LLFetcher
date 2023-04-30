@@ -27,7 +27,7 @@ class DB {
 		console.log(`${this.constructor.name}.initTable()`)
 
 		if(!this.table){
-			console.error(`${this.constructor.name}.initTable() empty table`)
+			// console.error(`${this.constructor.name}.initTable() empty table`)
 
 			return
 		}

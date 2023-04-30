@@ -2,7 +2,7 @@ import DB from "./DB"
 
 class DownloadState extends DB {
 	table = 'downloadState'
-	fields = ["courseId","state","total","success","fails","lastTocId","percentage"]
+	fields = ["courseId","state","total","success","fails","lastTocId","percentage","errors"]
 	type = "single"
 
 

@@ -1,7 +1,7 @@
 import {useState, useEffect, Component, createRef} from "react"
 import "./styles/DownloadPage.css"
 
-import {konsole, sendMessage, makeDelay,createDownloadFile,getDownloadFilenames, queryDownloadProgress} from "./fn"
+import {konsole, sendMessage, makeDelay,createDownloadFile,getDownloadFilenames, queryDownloadProgress,validateUrl,timeout} from "./fn"
 import ComponentWithMessaging from "./ComponentWithMessaging"
 
 import DLAux from "./downloadPage/DLAux"
@@ -229,9 +229,10 @@ class DownloadPage extends ComponentWithMessaging{
 			await this.mDownload.clear(course.id)	
 		}
 		
-		let dummy = true
+		let dummy = false
 		const downloads = []
 		const dummyBaseUrl = `http://localhost/linked-learning/${course.slug}`
+		const errors = []
 		for(let sidx in sections){
       const section = sections[sidx]
       const items = tocs[section.slug]
@@ -246,33 +247,46 @@ class DownloadPage extends ComponentWithMessaging{
               streamLoc = streamLocations[0]
               const videoUrl = dummy ? `${dummyBaseUrl}/${toc.slug}-${fmt}.mp4`: streamLoc.url
               const transcriptUrl = dummy? `${dummyBaseUrl}/${toc.slug}-${fmt}.vtt` : toc.captionUrl
-              opt.video = {
-                  url : videoUrl,
-                  filename : `${toc.slug}-${fmt}.mp4`,
-                  tocId : toc.id,
-                  courseId : course.id
+              if(validateUrl(videoUrl)){
+                opt.video = {
+                    url : videoUrl,
+                    filename : `${toc.slug}-${fmt}.mp4`,
+                    tocId : toc.id,
+                    courseId : course.id
+                }
+              }else{
+
+              	errors.push(`video url is not valid for ${toc.slug}`)
               }
-              opt.transcript = {
-                  url : transcriptUrl,
-                  filename : `${toc.slug}-${fmt}.vtt`,
-                  tocId : toc.id,
-                  courseId : course.id
+              if(validateUrl(transcriptUrl)){
+                opt.transcript = {
+                    url : transcriptUrl,
+                    filename : `${toc.slug}-${fmt}.vtt`,
+                    tocId : toc.id,
+                    courseId : course.id
+                }
+              }else{
+              	errors.push(`transcript url is not valid for ${toc.slug}`)
+
               }
 
               for(let key in opt){
 		            const dl = opt[key]
-		            let download =  this.mDownload.getByTocFname(dl.tocId,dl.filename,course.id)
-		            if(download){
-		                console.log('updateDownload')
-		                download.url = dl.url
-		                download.filename = dl.filename
-		                download.status = false
-		                download = await this.mDownload.update(download.id,download)
-		            }else{
-		                console.log('createDownload')
-		                download = await  this.mDownload.create(dl.url,dl.filename,dl.tocId,dl,fmt,course.id)
-		            } 
-		           	downloads.push(download)
+		            if(dl){
+		            	let download =  this.mDownload.getByTocFname(dl.tocId,dl.filename,course.id)
+			            if(download){
+			                console.log('updateDownload')
+			                download.url = dl.url
+			                download.filename = dl.filename
+			                download.status = false
+			                download = await this.mDownload.update(download.id,download)
+			            }else{
+			                console.log('createDownload')
+			                download = await  this.mDownload.create(dl.url,dl.filename,dl.tocId,dl,fmt,course.id)
+			            } 
+			           	downloads.push(download)
+		            }
+		            
 
 		        	}
           }
@@ -280,6 +294,11 @@ class DownloadPage extends ComponentWithMessaging{
           
 
       }
+  	}
+  	if(errors.length>0){
+  		this.setState({logBarData:{
+  			mode:1,message:errors.join(',')
+  		}})
   	}
   	return downloads
 	}

@@ -286,6 +286,10 @@ class DownloadQueue extends Action_queue{
         // this.cPercentage = Math.ceil(Math.floor(slist.length/filenames.length * 100))
      
     }
+    sendInfoMessage(mode, message){
+        const cmd = 'sw.downloadState'
+        sendMessage(cmd,{info:true,mode,message})
+    }
 	/**
 	 * main queue entry point
 	 * */
@@ -293,14 +297,18 @@ class DownloadQueue extends Action_queue{
 
 	async process(){
 		let qindex = 0
+        let mode=0,message='',filename=''
 		while(qindex = this.queues.shift()){
 			this.current = qindex
 			// const download = this.items[qindex]
             /* check download status from db */
             const download = this.items[this.current]
             console.log(download)
+            filename = download.filename
             if(download.status){
-                console.log(`download complete skipped`)
+                message = `${filename} download complete skipped`
+                console.warn(message)
+                this.sendInfoMessage(2, message)
                 await timeout(500)
                 continue
             }
@@ -311,22 +319,30 @@ class DownloadQueue extends Action_queue{
                 try{
                     console.log('Do Download')
                     if(!validateUrl(download.url)){
-                        console.error(`Invalid download url`, download.url)
+                        message = `${filename} Invalid download url ${download.url}`
+                        console.error(message)
+                        this.sendInfoMessage(1, message)
                     }else{
                         await this.dl()
                     }
                     // 
 
                 }catch(e){
+                    message = `process loop failed at ${filename}`
+                    this.sendInfoMessage(1, message)
 
-                    console.error(`process loop failed`, e)
+                    console.error(message, e)
                 }
             }else{
-                console.error(`process loop skipped state=${state}`)
+                message = `${filename} process loop skipped state=${state}`
+                console.error(message)
                 if(state === 'success'){
+                    this.sendInfoMessage(2, message)
                     await timeout(500)
                     continue
                 }
+                this.sendInfoMessage(1, message)
+
                 break
             }
             

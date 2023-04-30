@@ -83,10 +83,14 @@ class DownloadPage extends ComponentWithMessaging{
 	async updateDownloadState(data){
 		console.log(data)
 		let state = 1
-		const {percentage, download, success, delta} = data
+		const {info,percentage, download, success, delta} = data
 		const {course} = this.state
-
-		if(success){
+		if(info){
+			const {message, mode} = data
+			const logBarData = {message, mode}
+			this.setState({logBarData})
+		}
+		else if(success){
 			if(typeof percentage != 'undefined'){
 		    this.setState({percentage})
 		    if(percentage == 100){

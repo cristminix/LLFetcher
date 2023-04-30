@@ -2,7 +2,22 @@ import DB from "./DB"
 
 class DownloadState extends DB {
 	table = 'downloadState'
-	fields = ["courseId","state","total","success","fails","lastTocId","percentage","errors"]
+	fields = [
+        "courseId",
+        "state",
+        "total",
+        "success",
+
+        "qstarted",
+        "qsuccess",
+        "qfails",
+        "qprogress",
+
+        "lastTocId",
+        "lastDownloadId",
+        "percentage",
+        "errors",
+        ]
 	type = "single"
 
 
@@ -71,6 +86,16 @@ class DownloadState extends DB {
             row.percentage = percentage
             return row
         })
+    }
+
+    async update(courseId,data){
+        this.db.update(this.table,{courseId},row=>{
+            for(let k in data){
+                row[k] = data[k]
+            }
+            return row
+        })
+        await this.db.commit()
     }
 }
 

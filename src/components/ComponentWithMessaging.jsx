@@ -23,8 +23,8 @@ class ComponentWithMessaging extends Component{
 				
 		})
 	}
-	async getFromMessage(msg, data){
-		const [evt, source] = await this.sendMessageAsync(msg, data)
+	async getFromMessage(msg, data, target){
+		const [evt, source] = await this.sendMessageAsync(msg, data, target)
 		if(evt.name === msg){
 			return evt.data
 		}

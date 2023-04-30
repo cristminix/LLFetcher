@@ -1,17 +1,21 @@
 import {Component, useState, useEffect} from "react"
-import {queryDownloadProgress,
+import {queryDownloadProgress,konsole,
     getDownloadFilenames,makeDelay} from "../fn"
+import ComponentWithMessaging from "../ComponentWithMessaging"
 let pis = []
 import SelectFmt from "./SelectFmt"
 import DLButtons from "./DLButtons"
 import StateTbl from "./StateTbl"
 
-class DLConfig extends Component{
+class DLConfig extends ComponentWithMessaging{
 	pauseOnRecieveProps = false
+	mDlState = null
 	constructor(props){
 		super(props)
 		// this.pauseOnRecieveProps = false
-		const {fmt, logBarData, percentage, activeDownloadId, downloadState,queueStarted} = props
+		const {store,course,fmt, logBarData, percentage, activeDownloadId, downloadState,queueStarted} = props
+		this.mDlState = store.get('DownloadState')
+		this.course = course
 		this.state = {
 			fmt,			 // selected format
 			percentage:0,
@@ -32,6 +36,7 @@ class DLConfig extends Component{
 			loadingResetFlag : false,
 			loadingResetQueue : false,
 			logBarData,queueStarted,
+			dlstate:null
 		}
 	}
 	startDownloadVideoResource(){
@@ -114,6 +119,7 @@ class DLConfig extends Component{
 	}
 	async calculateDownloadProgress(qdresult){
 		const {cPercentage, cInteruptCount, cSuccessCount, cInProgress,elist} = qdresult
+		// const {queueStarted} = 
 		this.setState({cPercentage, cInteruptCount, cSuccessCount, cInProgress})
 		if(cPercentage === 100){ 
 			this.setState({
@@ -198,10 +204,9 @@ class DLConfig extends Component{
 		
 	 	await this.updateDownloadProgress()
 	}
-	async updateDownloadProgress(){
+	async updateDownloadProgress(callback){
 		const qdresult = await this.queryDownload()
 		console.log(qdresult)
-		await this.calculateDownloadProgress(qdresult)
 
 		const {percentage} = this.props
 		const {cPercentage} = qdresult
@@ -215,8 +220,25 @@ class DLConfig extends Component{
 			nPercentage = cPercentage
 		}
 		console.log(nPercentage,qPercentage,cPercentage)
+		const dlstate = this.mDlState.get(this.course.id)
+		this.setState({percentage:nPercentage,qPercentage,dlstate})
 
-		this.setState({percentage:nPercentage,qPercentage})
+		if(typeof callback === 'function'){
+			const data = {
+				nPercentage
+			}
+			callback(data)
+		}
+		const queueStarted = await this.getFromMessage('sw.queue.started', null, 'bg')
+		konsole.log(`downloadQueue.started = ${queueStarted}`)
+		if(queueStarted !== null){
+			this.setState({queueStarted},async()=>{
+				this.pauseOnRecieveProps = true
+				await this.calculateDownloadProgress(qdresult)
+			})
+		}
+
+			
 	}
 	pauseRecieveProps(callback){
 		this.pauseOnRecieveProps = true
@@ -227,6 +249,7 @@ class DLConfig extends Component{
 			this.delay(()=>{
 				if(!this.pauseOnRecieveProps){
 					const {logBarData,queueStarted} = props
+					this.pauseOnRecieveProps = true
 					this.setState({logBarData,queueStarted})
 					
 				}else{
@@ -235,6 +258,7 @@ class DLConfig extends Component{
 					},1000)
 				}
 				this.updateDownloadProgress()
+
 			})
 			
 
@@ -243,13 +267,18 @@ class DLConfig extends Component{
 	render(){
 		const {fmtList, downloads } = this.props
 
-		const {percentage,iconCls, fmt, logBarData, enableDl, qPercentage,cPercentage, 
-		dlText,enableResetFlag,enableResetQueue,loadingResetQueue,loadingResetFlag,loadingDl,
-		cInteruptCount,cInProgress,cSuccessCount,queueStarted} = this.state
+		const {percentage, fmt, logBarData, enableDl, qPercentage,cPercentage, 
+		dlText,loadingResetQueue,loadingResetFlag,loadingDl,
+		cInteruptCount,cInProgress,cSuccessCount,queueStarted,dlstate} = this.state
 
 		const rfIconCls = loadingResetFlag ? "fa-spin fa-spinner" : "fa-unlock"
 		const rqIconCls = loadingResetQueue ? "fa-spin fa-spinner" : "fa-refresh"
 		const hideOnLoading = loadingResetFlag || loadingResetQueue
+
+		const iconCls = queueStarted ? 'fa-spin fa-spinner' : this.state.iconCls
+		const enableResetFlag = queueStarted ? this.state.enableResetFlag : true
+		const enableResetQueue = queueStarted ? this.state.enableResetQueue : true
+
 			return(<div className="dl-config-cnt" >
 				<SelectFmt fmt={fmt} queueStarted={queueStarted} updateSelectedFmt={e=>this.updateSelectedFmt(e)} fmtList={fmtList}/>
 			{
@@ -265,7 +294,8 @@ class DLConfig extends Component{
 													enableResetQueue={enableResetQueue}
 													resetQueue={e=>this.resetQueue(e)}
 													rfIconCls={rfIconCls}
-													rqIconCls={rqIconCls}/>) : fmt ?(<>
+													rqIconCls={rqIconCls}
+													dlstate={dlstate}/>) : fmt ?(<>
 				<i className="fa fa-spin fa-spinner"/> Loading ...
 			</>):""
 			}
@@ -283,7 +313,8 @@ class DLConfig extends Component{
 					rqIconCls={rqIconCls}
 					cInProgress={cInProgress}
 					cSuccessCount={cSuccessCount}
-					cInteruptCount={cInteruptCount}/>
+					cInteruptCount={cInteruptCount}
+					dlstate={dlstate}/>
 		  </div>)
 	}
 

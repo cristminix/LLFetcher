@@ -86,6 +86,17 @@ class Action_queue {
 
 		const cmd = 'sw.downloadState'
 		sendMessage(cmd,{success,delta,download,percentage})
+        if(!this.qsuccess.includes(this.current)){
+            this.qsuccess.push(this.current)
+        }
+        const dlstate = {
+            lastDownloadId : download.id,
+            qsuccess : this.qsuccess,
+            percentage,
+            qprogress : false
+        }
+
+        await this.updateDlState(dlstate)
     }
     async onDownloadError(edelta){
         let {error,id,state,filename} = edelta
@@ -106,6 +117,15 @@ class Action_queue {
         if(this.resetOnError){
             this.reset()
         }
+
+        const dlstate = {
+            lastDownloadId : id,
+            qfails : this.qfails,
+            qprogress : false
+
+        }
+
+        await this.updateDlState(dlstate)
     }
     async dl(){
     	const download = this.items[this.current]
@@ -294,9 +314,14 @@ class DownloadQueue extends Action_queue{
 	 * main queue entry point
 	 * */
 
-
+    async updateDlState(dlstate){
+    //fields = ["courseId","state","total","success","fails","lastTocId","percentage","errors","started"]
+        //
+        const courseId = this.course.id
+        await this.mDownloadState.update(courseId, dlstate)
+    }
 	async process(){
-		let qindex = 0
+		let qindex = 0,breaked = false,dlstate
         let mode=0,message='',filename=''
 		while(qindex = this.queues.shift()){
 			this.current = qindex
@@ -309,6 +334,16 @@ class DownloadQueue extends Action_queue{
                 message = `${filename} download complete skipped`
                 console.warn(message)
                 this.sendInfoMessage(2, message)
+                if(!this.qsuccess.includes(download.id)){
+                    this.qsuccess.push(download.id)
+                }
+                dlstate = {
+                    lastDownloadId : download.id,
+                    qsuccess : this.qsuccess,
+                    qprogress : false
+
+                }
+                await this.updateDlState(dlstate)
                 await timeout(500)
                 continue
             }
@@ -322,7 +357,24 @@ class DownloadQueue extends Action_queue{
                         message = `${filename} Invalid download url ${download.url}`
                         console.error(message)
                         this.sendInfoMessage(1, message)
+                        if(!this.qfails.includes(download.id)){
+                            this.qfails.push(download.id)
+                        }
+                        dlstate = {
+                            lastDownloadId : download.id,
+                            qfails : this.qfails,
+                            qprogress : false
+
+                        }
+                        await this.updateDlState(dlstate)
                     }else{
+                        this.sendInfoMessage(2, ` Downloading ${filename} `)
+                        dlstate = {
+                            lastDownloadId : download.id,
+                            qprogress : true
+
+                        }
+                        await this.updateDlState(dlstate)
                         await this.dl()
                     }
                     // 
@@ -332,6 +384,9 @@ class DownloadQueue extends Action_queue{
                     this.sendInfoMessage(1, message)
 
                     console.error(message, e)
+                    this.started = false
+                    breaked = true
+                    break
                 }
             }else{
                 message = `${filename} process loop skipped state=${state}`
@@ -342,11 +397,16 @@ class DownloadQueue extends Action_queue{
                     continue
                 }
                 this.sendInfoMessage(1, message)
+                this.started = false
+                breaked = true
 
                 break
             }
             
 		}
+        if(!breaked){
+            this.reset()
+        }
 	}
 }
 

@@ -10,7 +10,7 @@ const StateTbl = ({logBarData,
 					rfIconCls,
 					rqIconCls,
 					cInProgress,
-					cSuccessCount,cInteruptCount,downloads,queueStarted}) => {
+					cSuccessCount,cInteruptCount,downloads,queueStarted,dlstate}) => {
 	return (<div className="state-tbl">
 		<table className="table table-bordered">
 			<thead>
@@ -28,8 +28,8 @@ const StateTbl = ({logBarData,
 				</tr>
 				<tr>
 					<td>iconCls</td><td><i className={`fa ${iconCls}`}/> {iconCls}</td>
-					<td>rfIconCls</td><td><i className={`fa ${rfIconCls}`}/>{rfIconCls}</td>
-					<td>rqIconCls</td><td><i className={`fa ${rqIconCls}`}/>{rqIconCls}</td>
+					<td>rfIconCls</td><td><i className={`fa ${rfIconCls}`}/> {rfIconCls}</td>
+					<td>rqIconCls</td><td><i className={`fa ${rqIconCls}`}/> {rqIconCls}</td>
 				</tr>
 				<tr>
 					<td>loadingDl</td><td>{loadingDl?'Y':'N'}</td>
@@ -50,6 +50,12 @@ const StateTbl = ({logBarData,
 					<td>Total</td><td>{downloads.length}</td>
 					<td>Success</td><td>{cSuccessCount}</td>
 					<td>Fails</td><td>{cInteruptCount}</td>
+					
+				</tr>
+				<tr>
+					<td>dlstate</td><td>{JSON.stringify(dlstate)}</td>
+					<td></td><td>{''}</td>
+					<td></td><td>{''}</td>
 					
 				</tr>
 			</tbody>

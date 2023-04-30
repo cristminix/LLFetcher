@@ -361,7 +361,18 @@ class DownloadPage extends ComponentWithMessaging{
 				}
 				
 				{
-					downloadConfig ? (<DLConfig queueStarted={queueStarted} activeDownloadId={activeDownloadId} onResetQueue={e=>this.onResetQueue(e)} logBarData={logBarData} downloads={downloads} downloadState={downloadState} percentage={percentage} processDownloadQueue={e=>this.processDownloadQueue(e)} fmtList={fmtList} fmt={fmt} onSelectFmt={fmt=>this.onSelectFmt(fmt)}/>):""
+					downloadConfig ? (<DLConfig course={course} store={this.store}
+						queueStarted={queueStarted} 
+						activeDownloadId={activeDownloadId} 
+						onResetQueue={e=>this.onResetQueue(e)} 
+						logBarData={logBarData} 
+						downloads={downloads} 
+						downloadState={downloadState} 
+						percentage={percentage} 
+						processDownloadQueue={e=>this.processDownloadQueue(e)} 
+						fmtList={fmtList} 
+						fmt={fmt} 
+						onSelectFmt={fmt=>this.onSelectFmt(fmt)}/>):""
 				}
 				{
 					downloadConfig ? (<DLAux course={course} fmt={fmt} downloadFile={t=>this.downloadFile(t)}/>):""

@@ -219,6 +219,10 @@ class DLConfig extends ComponentWithMessaging{
 		if(nPercentage === 0){
 			nPercentage = cPercentage
 		}
+
+		if(cPercentage > qPercentage){
+			nPercentage = cPercentage
+		}
 		console.log(nPercentage,qPercentage,cPercentage)
 		const dlstate = this.mDlState.get(this.course.id)
 		this.setState({percentage:nPercentage,qPercentage,dlstate})

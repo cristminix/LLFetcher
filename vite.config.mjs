@@ -10,7 +10,7 @@ import * as child from 'child_process';
 
 export default defineConfig({
   build: {
-    // target: 'esnext',
+    target: 'esnext',
      minify: false,
   },
   plugins: [

@@ -6,7 +6,16 @@ const MsgEvt = (name, data = null) => {
 const sendMessage = (eventName, data, target='popup', callback = f => f) => {
     const evt = MsgEvt(eventName, data)
     try{
-        chrome.runtime.sendMessage(evt, callback)
+        chrome.runtime.sendMessage(evt,   (response) => {
+            if (!chrome.runtime.lastError) {
+                // if you have any response
+                callback()
+            } else {
+                // if you don't have any response it's ok but you should actually handle
+                // it and we are doing this when we are examining chrome.runtime.lastError
+            }
+        })
+
     }catch(e){
         console.error(e)
     }

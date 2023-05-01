@@ -36,7 +36,7 @@ const StateTbl = ({logBarData,
 
 		const iv = setInterval(()=>{
 			getMessageDb()
-		},3000)
+		},1000)
 
 		ivs.push(iv)
 

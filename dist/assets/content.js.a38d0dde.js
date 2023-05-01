@@ -1,1 +1,146 @@
-const i=t=>new Promise(e=>{if(document.querySelector(t))return e(document.querySelector(t));const n=new MutationObserver(o=>{document.querySelector(t)&&(e(document.querySelector(t)),n.disconnect())});n.observe(document.body,{childList:!0,subtree:!0})}),a=(t,e=null)=>({name:t,data:e}),u=(t,e,n="popup",o=r=>r)=>{const r=a(t,e);chrome.runtime.sendMessage(r,o)},m=t=>{chrome.runtime.onMessage.addListener((e,n)=>{t(e,n)})},l=(t,e,n=r=>r,o=r=>r)=>{let r=document.getElementsByTagName(e)[0],c=document.createElement("script");c.addEventListener("load",()=>{console.log(`${c.src} loaded`),n(c)}),c.addEventListener("error",s=>{console.log("Error on loading file",s),o(s)}),c.setAttribute("type","text/javascript"),c.setAttribute("src",t),r.appendChild(c)},d=async t=>new Promise((e,n)=>{l(chrome.runtime.getURL(t),"body",o=>{e(o)},o=>{n(o)})});class p{constructor(){this.initController()}initController(){m((e,n)=>{switch(e.name){case"cmd.getCourseInfo":this.onCommand(e.name);break;case"cmd.getCourseSections":this.onCommand(e.name,e.data);break;case"cmd.getCourseToc":this.onCommand(e.name,e.data);break;case"cmd.validCoursePage":case"cmd.validCoursePageAuto":this.onCommand(e.name);break;case"console.log":e.data.map(o=>console.log(o));break}}),this.waitForCheckerElm()}getExecuteBtn(){return document.getElementById("exec-button")}getInputScriptEl(){return document.getElementById("input-script")}getOutputScriptEl(){return document.getElementById("output-script")}setInputScriptContent(e){this.getInputScriptEl().value=JSON.stringify(e)}executeScriptContent(e,n){try{this.setInputScriptContent(e),this.getExecuteBtn().click(),this.waitForScriptOutput(e.ocls,n)}catch{}}waitForScriptOutput(e,n){i(`.${e}`).then(o=>{const r=JSON.parse(o.value);n(r)})}waitForCheckerElm(){i(".course-checker-last").then(e=>{e&&(e.setAttribute("class","_blank"),setTimeout(()=>{this.onCommand("cmd.validCoursePageAuto"),this.waitForCheckerElm()},3e3))})}onCommand(e,n){const o=e.replace(/^cmd\./,""),r=`ocls-${new Date().getTime()}`,c={cmd:o,ocls:r,param:n};this.executeScriptContent(c,s=>{u(`${e}`,s)})}}const g=async()=>{const t=["lib/jquery.min.js","lib/underscore.min.js","lib/learning.js","lib/react.development.js","lib/react-dom.development.js","lib/app.js"];for(let e in t){const n=t[e];await d(n)}new p};g();
+const waitForElm = (selector) => {
+  return new Promise((resolve) => {
+    if (document.querySelector(selector)) {
+      return resolve(document.querySelector(selector));
+    }
+    const observer = new MutationObserver((mutations) => {
+      if (document.querySelector(selector)) {
+        resolve(document.querySelector(selector));
+        observer.disconnect();
+      }
+    });
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+  });
+};
+const MsgEvt = (name, data = null) => {
+  return { name, data };
+};
+const sendMessage = (eventName, data, target = "popup", callback = (f) => f) => {
+  const evt = MsgEvt(eventName, data);
+  chrome.runtime.sendMessage(evt, callback);
+};
+const onMessage = (callback) => {
+  chrome.runtime.onMessage.addListener((evt, source) => {
+    callback(evt, source);
+  });
+};
+const injectScript = (file_path, tag, callback = (f) => f, error = (f) => f) => {
+  let node = document.getElementsByTagName(tag)[0];
+  let script = document.createElement("script");
+  script.addEventListener("load", () => {
+    console.log(`${script.src} loaded`);
+    callback(script);
+  });
+  script.addEventListener("error", (ev) => {
+    console.log("Error on loading file", ev);
+    error(ev);
+  });
+  script.setAttribute("type", "text/javascript");
+  script.setAttribute("src", file_path);
+  node.appendChild(script);
+};
+const injectScriptAsync = async (src) => {
+  return new Promise((resolve, reject) => {
+    injectScript(chrome.runtime.getURL(src), "body", (el) => {
+      resolve(el);
+    }, (ev) => {
+      reject(ev);
+    });
+  });
+};
+class ContentScript {
+  constructor() {
+    this.initController();
+  }
+  initController() {
+    onMessage((evt, source) => {
+      switch (evt.name) {
+        case "cmd.getCourseInfo":
+          this.onCommand(evt.name);
+          break;
+        case "cmd.getCourseSections":
+          this.onCommand(evt.name, evt.data);
+          break;
+        case "cmd.getCourseToc":
+          this.onCommand(evt.name, evt.data);
+          break;
+        case "cmd.validCoursePage":
+        case "cmd.validCoursePageAuto":
+          this.onCommand(evt.name);
+          break;
+        case "console.log":
+          evt.data.map((item) => console.log(item));
+          break;
+      }
+    });
+    this.waitForCheckerElm();
+  }
+  getExecuteBtn() {
+    return document.getElementById("exec-button");
+  }
+  getInputScriptEl() {
+    return document.getElementById("input-script");
+  }
+  getOutputScriptEl() {
+    return document.getElementById("output-script");
+  }
+  setInputScriptContent(is) {
+    this.getInputScriptEl().value = JSON.stringify(is);
+  }
+  executeScriptContent(is, callback) {
+    try {
+      this.setInputScriptContent(is);
+      this.getExecuteBtn().click();
+      this.waitForScriptOutput(is.ocls, callback);
+    } catch (e) {
+    }
+  }
+  waitForScriptOutput(ocls, callback) {
+    waitForElm(`.${ocls}`).then((elm) => {
+      const data = JSON.parse(elm.value);
+      callback(data);
+    });
+  }
+  waitForCheckerElm() {
+    waitForElm(".course-checker-last").then((el) => {
+      if (el) {
+        el.setAttribute("class", "_blank");
+        setTimeout(() => {
+          this.onCommand("cmd.validCoursePageAuto");
+          this.waitForCheckerElm();
+        }, 3e3);
+      }
+    });
+  }
+  onCommand(command, param) {
+    const cmd = command.replace(/^cmd\./, "");
+    const ocls = `ocls-${new Date().getTime()}`;
+    const is = {
+      cmd,
+      ocls,
+      param
+    };
+    this.executeScriptContent(is, (data) => {
+      sendMessage(`${command}`, data);
+    });
+  }
+}
+const main = async () => {
+  const scripts = [
+    "lib/jquery.min.js",
+    "lib/underscore.min.js",
+    "lib/learning.js",
+    "lib/react.development.js",
+    "lib/react-dom.development.js",
+    "lib/app.js"
+  ];
+  for (let i in scripts) {
+    const src = scripts[i];
+    await injectScriptAsync(src);
+  }
+  new ContentScript();
+};
+main();

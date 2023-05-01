@@ -33,7 +33,7 @@ const timeout =(ms)=> {
 }
 const konsole = {
 	log(...args){
-		sendMessage('console.log', args)
+		// sendMessage('console.log', args)
 	}
 }
 

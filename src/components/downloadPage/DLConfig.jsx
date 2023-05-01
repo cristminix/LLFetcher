@@ -43,11 +43,12 @@ class DLConfig extends ComponentWithMessaging{
 		this.props.processDownloadQueue()
 	}
 	async updateSelectedFmt(e){
-		const {onSelectFmt} = this.props
+		const {onSelectFmt,store} = this.props
 		const fmt = e.target.value
 		this.setState({fmt})
 		onSelectFmt(fmt)
 
+		await store.get('Message').set('sw.downloadState', {reset:true}, 'popup')
 	}
 	async resetQueue(flag){
 		const {onResetQueue} = this.props
@@ -268,8 +269,12 @@ class DLConfig extends ComponentWithMessaging{
 
 		return true
 	}
+	async reloadProgress(dlstatedata){
+		console.log(dlstatedata)
+		this.updateDownloadProgress()
+	}
 	render(){
-		const {fmtList, downloads } = this.props
+		const {fmtList, downloads, store } = this.props
 
 		const {percentage, fmt, logBarData, enableDl, qPercentage,cPercentage, 
 		dlText,loadingResetQueue,loadingResetFlag,loadingDl,
@@ -303,7 +308,8 @@ class DLConfig extends ComponentWithMessaging{
 				<i className="fa fa-spin fa-spinner"/> Loading ...
 			</>):""
 			}
-			<StateTbl logBarData={logBarData} 
+			{
+				fmt && downloads.length > 0? (<StateTbl logBarData={logBarData} 
 					enableDl={enableDl} loadingDl={loadingDl}
 					downloads={downloads} queueStarted={queueStarted}
 					qPercentage={qPercentage} 
@@ -318,7 +324,8 @@ class DLConfig extends ComponentWithMessaging{
 					cInProgress={cInProgress}
 					cSuccessCount={cSuccessCount}
 					cInteruptCount={cInteruptCount}
-					dlstate={dlstate}/>
+					dlstate={dlstate} store={store} reloadProgress={e=> this.reloadProgress(e)}/>):""
+			}
 		  </div>)
 	}
 

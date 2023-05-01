@@ -11,7 +11,15 @@ const sendMessage = (eventName, data, target='popup', callback = f => f) => {
         console.error(e)
     }
     
+
 }
+
+/**
+ * 
+ *  setTimeout(function() {
+        sendResponse({status: true});
+    }, 1);
+ * */
 const onMessage = (callback) => {
     try{
         chrome.runtime.onMessage.addListener((evt, source)=>{
@@ -85,7 +93,7 @@ class Action_queue {
 		await this.mDownload.update(download.id,{status:success})
 
 		const cmd = 'sw.downloadState'
-		sendMessage(cmd,{success,delta,download,percentage})
+		await this.sendMessageDl(cmd,{success,delta,download,percentage})
         if(!this.qsuccess.includes(this.current)){
             this.qsuccess.push(this.current)
         }
@@ -110,7 +118,7 @@ class Action_queue {
         const download = this.items[this.current]
         const delta = {filename, error, state, id}
 
-        sendMessage(cmd,{delta, success, download})
+        await this.sendMessageDl(cmd,{delta, success, download})
         if(!this.qfails.includes(this.current)){
             this.qfails.push(this.current)
         }
@@ -134,7 +142,7 @@ class Action_queue {
         let result
 
         try{
-            result = await this.chromeDownloadAsync(option, item =>{
+            result = await this.chromeDownloadAsync(option, async(item) =>{
                 const {downloadId} = item
                 // console.log(item)
                 if(downloadId){
@@ -142,7 +150,7 @@ class Action_queue {
                     download.downloadId = downloadId
                     // const currentDownload =  await this.mDownload.update(download.id,download)
 
-                    sendMessage(cmd,{download})
+                    await this.sendMessageDl(cmd,{download})
                     console.log(downloadId)
                 }
             }, async(downloadId) =>{
@@ -151,7 +159,7 @@ class Action_queue {
                     download.downloadId = downloadId
                     // const currentDownload =  await this.mDownload.update(download.id,download)
 
-                    sendMessage(cmd,{download})
+                    await this.sendMessageDl(cmd,{download})
                     console.log(downloadId)
                 }
                 
@@ -170,6 +178,18 @@ class Action_queue {
             console.error(`onDownloadError reacehed`,e)
         } 
     }
+
+    async sendMessageDl(eventName, data, target='popup', callback = f => f){
+        // const evt = MsgEvt(eventName, data)
+        // try{
+        //     chrome.runtime.sendMessage(evt, callback)
+        // }catch(e){
+        //     console.error(e)
+        // }
+        console.log(eventName,data)
+        await this.mMessage.set(eventName, data, target)
+
+    }
 }
 class DownloadQueue extends Action_queue{
 	/**
@@ -179,6 +199,7 @@ class DownloadQueue extends Action_queue{
     mDownload = null
     mDownloadState = null
     mStreamloc = null
+    mMessage = null
     mDb = null
 
     /**
@@ -218,6 +239,7 @@ class DownloadQueue extends Action_queue{
             this.mDownload = this.store.get('Download')
             this.mDownloadState = this.store.get('DownloadState')
             this.mStreamloc = this.store.get('StreamLocation')
+            this.mMessage = this.store.get('Message')
         }else{
             await this.store.reload()
         }
@@ -306,9 +328,9 @@ class DownloadQueue extends Action_queue{
         // this.cPercentage = Math.ceil(Math.floor(slist.length/filenames.length * 100))
      
     }
-    sendInfoMessage(mode, message){
+    async sendInfoMessage(mode, message){
         const cmd = 'sw.downloadState'
-        sendMessage(cmd,{info:true,mode,message})
+        await this.sendMessageDl(cmd,{info:true,mode,message})
     }
 	/**
 	 * main queue entry point
@@ -344,7 +366,7 @@ class DownloadQueue extends Action_queue{
 
                 }
                 await this.updateDlState(dlstate)
-                await timeout(500)
+                // await timeout(500)
                 continue
             }
             const state = await this.getState(download.filename)
@@ -390,17 +412,21 @@ class DownloadQueue extends Action_queue{
                 }
             }else{
                 message = `${filename} process loop skipped state=${state}`
-                console.error(message)
+                
                 if(state === 'success'){
+                    console.warn(message)
                     this.sendInfoMessage(2, message)
-                    await timeout(500)
+                    // await timeout(500)
                     continue
-                }
-                this.sendInfoMessage(1, message)
-                this.started = false
-                breaked = true
+                }else{
+                    this.sendInfoMessage(1, message)
+                    this.started = false
+                    breaked = true
+                    console.error(message)
 
-                break
+                    break
+                }
+                
             }
             
 		}

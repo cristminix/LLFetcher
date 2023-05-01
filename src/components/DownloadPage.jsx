@@ -85,12 +85,8 @@ class DownloadPage extends ComponentWithMessaging{
 		let state = 1
 		const {info,percentage, download, success, delta} = data
 		const {course} = this.state
-		if(info){
-			const {message, mode} = data
-			const logBarData = {message, mode}
-			this.setState({logBarData})
-		}
-		else if(success){
+		
+		if(success){
 			if(typeof percentage != 'undefined'){
 		    this.setState({percentage})
 		    if(percentage == 100){
@@ -114,7 +110,11 @@ class DownloadPage extends ComponentWithMessaging{
 					const mode = 1
 					const logBarData = {message, mode}
 					this.setState({logBarData})
-				}
+			}else if(typeof info === 'object' ){
+			const {message, mode} = data
+			const logBarData = {message, mode}
+			this.setState({logBarData})
+		}
 		}
 		
 	}

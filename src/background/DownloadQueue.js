@@ -368,7 +368,7 @@ class DownloadQueue extends Action_queue{
                         }
                         await this.updateDlState(dlstate)
                     }else{
-                        this.sendInfoMessage(2, ` Downloading ${filename} `)
+                        this.sendInfoMessage(0, ` ${filename} `)
                         dlstate = {
                             lastDownloadId : download.id,
                             qprogress : true

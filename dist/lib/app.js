@@ -61,7 +61,8 @@ class Action_csa extends React.Component {
       validCoursePage: false,
       slug: "",
       outputScriptCls: "default",
-      outputScript: ""
+      outputScript: "",
+      display: "flex"
     };
   }
   async getCourseInfo() {
@@ -100,6 +101,11 @@ class ContentScriptApp extends Action_csa {
     console.log(chrome);
     createDataCodes(this.state.slug);
   }
+  componentDidMount() {
+    setTimeout(() => {
+      this.setState({ display: "none" });
+    }, 5e3);
+  }
   async runScript() {
     let is = {
       cmd: "getCourseInfo",
@@ -128,6 +134,7 @@ class ContentScriptApp extends Action_csa {
   onInputScriptChange(evt) {
   }
   render() {
+    const { display } = this.state;
     const inputScriptDefaultValue = JSON.stringify({
       cmd: "getCourseInfo",
       param: null,
@@ -135,8 +142,8 @@ class ContentScriptApp extends Action_csa {
     });
     return /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("div", {
       id: appContainerId,
-      style: { display: "flex", flexDirection: "column", width: "400px", position: "absolute", background: "#000", color: "#fff", zIndex: 2001, opacity: 0.7, fontFamily: "monospace", marginTop: "3.1em", marginLeft: "22%", padding: "1em" }
-    }, this.state.validCoursePage ? /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("span", null, this.state.slug)) : "", /* @__PURE__ */ React.createElement("textarea", {
+      style: { display, flexDirection: "column", width: "400px", position: "absolute", background: "#000", color: "#fff", zIndex: 2001, opacity: 0.7, fontFamily: "monospace", marginTop: "3.1em", marginLeft: "22%", padding: "1em" }
+    }, this.state.validCoursePage ? /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("span", null, this.state.slug)) : "Extension is ready", /* @__PURE__ */ React.createElement("textarea", {
       id: "input-script",
       style: { color: "#fff" },
       defaultValue: inputScriptDefaultValue,

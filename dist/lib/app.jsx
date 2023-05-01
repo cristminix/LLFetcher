@@ -79,7 +79,8 @@ class Action_csa extends React.Component{
 			slug : '',
 			outputScriptCls : 'default',
 			outputScript : '',
-			// ocls : 'default'
+			// ocls : 'default',
+			display:'flex'
 		}
 	}
 	async getCourseInfo(){
@@ -125,6 +126,11 @@ class ContentScriptApp extends Action_csa{
 		console.log(chrome)
 		createDataCodes(this.state.slug)
 	}
+	componentDidMount(){
+		setTimeout(()=>{
+			this.setState({display:'none'})
+		},5000)
+	}
 	async runScript(){
 		// is = inputScript shorthand
 		let is = {
@@ -160,17 +166,18 @@ class ContentScriptApp extends Action_csa{
 	onInputScriptChange(evt){
 	}
 	render(){
+		const {display }=this.state
 		const inputScriptDefaultValue = JSON.stringify({
 			cmd : 'getCourseInfo',
 			param : null,
 			ocls : `os-${(new Date).getTime()}`
 		} )
-		return (<><div id={appContainerId} style={{display:'flex',flexDirection:'column',width:'400px',position:'absolute', background:'#000',color:'#fff',zIndex:2001,opacity:.7,fontFamily:'monospace',marginTop:'3.1em',marginLeft:'22%',padding:'1em'}}>
+		return (<><div id={appContainerId} style={{display,flexDirection:'column',width:'400px',position:'absolute', background:'#000',color:'#fff',zIndex:2001,opacity:.7,fontFamily:'monospace',marginTop:'3.1em',marginLeft:'22%',padding:'1em'}}>
 			
 		{
 			this.state.validCoursePage ? (<>
 				<span>{this.state.slug}</span>
-				</>) : ""
+				</>) : "Extension is ready"
 				
 		}
 				<textarea id="input-script" style={{color:'#fff'}} defaultValue={inputScriptDefaultValue} onChange={evt => this.onInputScriptChange(evt)} ref={this.inputScriptRef}></textarea>

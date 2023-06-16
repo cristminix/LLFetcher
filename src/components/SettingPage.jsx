@@ -30,6 +30,10 @@ const SettingPage = ({store, pageNavigationRef}) => {
             <button onClick={e=>onClearStorage()} className="btn btn-sm btn-danger"><i className={loading?"fa fa-spin fa-spinner":"fa fa-database"}></i> Clear Storage</button>
             
         </div>
+        <div>
+            <a href={chrome.runtime.getURL('options.html')} target="_blank">Open Setting Page</a>
+            <a href={chrome.runtime.getURL('second_options.html')} target="_blank">Open 2nd Setting Page</a>
+        </div>
         <LogBar data={ logBarData}/>
     </div></>)
 }

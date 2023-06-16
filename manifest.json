@@ -21,5 +21,27 @@
   "background":{
     "service_worker" : "background.js"
   },
-  "action": { "default_popup": "index.html" }
+  "icons": {
+    "16": "images/icon-16.png",
+    "19": "images/icon-19.png",
+    "32": "images/icon-32.png",
+    "38": "images/icon-38.png",
+    "48": "images/icon-48.png",
+    "128": "images/icon-128.png"
+  },
+  "action": { 
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "images/icon-16.png",
+      "19": "images/icon-19.png",
+    "32": "images/icon-32.png",
+      "38": "images/icon-38.png",
+      "48": "images/icon-48.png",
+      "128": "images/icon-128.png"
+    }
+  },
+  "options_ui": {
+      "page": "options.html",
+      "open_in_tab": true
+    }
 }

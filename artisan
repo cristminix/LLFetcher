@@ -1,0 +1,5 @@
+#!/bin/bash
+
+export PATH=`pwd`/node_modules/.bin:$PATH
+
+node `pwd`/lib-artisan/artisan.mjs $*

@@ -1,0 +1,35 @@
+{
+	"links" : {
+		"welcome":{
+			"title" : "Welcome",
+			"path" : "/welcome",
+			"iconCls" : "bi bi-house",
+			"order": 1
+		},
+		"course":{
+			"title" : "Course",
+			"path" : "/course",
+			"iconCls" : "bi bi-bookmark",
+			"order" : 2
+		},
+		"download" : {
+			"title" : "Download",
+			"path" : "/download",
+			"iconCls" : "bi bi-download",
+			"order" : 3
+		},
+		"settings" : {
+			"title" : "Settings",
+			"path" : "/settings",
+			"iconCls" : "bi bi-gear",
+			"order" : 4
+		},
+		"bootstrap-icons" : {
+			"title" : "Bootstrap Icons",
+			"path" : "/bootstrap-icons",
+			"iconCls" : "bi bi-bootstrap",
+			"order" : 5
+		}
+
+	}
+}

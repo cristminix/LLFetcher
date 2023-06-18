@@ -1,6 +1,7 @@
+import TestPage from './TestPage'
 const OptionPage = ({store}) => {
     return (<>
-    Hello
+    <TestPage/>
     </>)
 }
 

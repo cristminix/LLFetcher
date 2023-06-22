@@ -18,9 +18,9 @@
 			"iconCls" : "bi bi-download",
 			"order" : 3
 		},
-		"settings" : {
-			"title" : "Settings",
-			"path" : "/settings",
+		"setting" : {
+			"title" : "Setting",
+			"path" : "/setting",
 			"iconCls" : "bi bi-gear",
 			"order" : 4
 		},

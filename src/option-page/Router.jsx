@@ -4,20 +4,27 @@ import {  RouterProvider,
 import Template from "./Template"
 
 import WelcomePage from "./components/WelcomePage"
+import CoursePage, {loader as courseLoader} from "./components/CoursePage"
+import DownloadPage from "./components/DownloadPage"
+import SettingPage from "./components/SettingPage"
 import BootstrapIcons,{loader as bootstrapIconLoader} from "./components/BootstrapIcons"
 
 import ErrorPage from "./ErrorPage"
 
-export default function Router({config}){
+export default function Router({config, store}){
         
     const router = createHashRouter(
             createRoutesFromElements(
             <Route path="/" errorElement={<ErrorPage />} element={<Template config={config}/>}>
 
                 {/* <Route exac path="/tts" element={<Tts config={config} />}></Route> */}
-                <Route  path="/welcome" element={<WelcomePage/>} index={true}>
+                <Route  path="/welcome" element={<WelcomePage store={store} />}/>
+                <Route  path="/course" element={<CoursePage store={store}/>} loader={courseLoader}/>
+                <Route  path="/course/:slug" element={<CoursePage store={store}/>} loader={courseLoader}/>
+                <Route  path="/download" element={<DownloadPage/>}/>
+                <Route  path="/setting" element={<SettingPage/>}/>
                     
-                </Route>
+               
                 {/* <Route  path="/book" element={<Book/>}></Route>
                 <Route  path="/puppeteer" element={<Puppeteer/>}>
                     

@@ -47,7 +47,7 @@ export default function SideBar({config, showSidebar}){
         <ul className="space-y-1.5">
         {
           Object.keys(side_menu.links).map((key,index)=>{
-            return (<li>
+            return (<li key={index}>
             <NavLink className={linkCls} to={side_menu.links[key].path}>
               <i className={side_menu.links[key].iconCls}></i> {side_menu.links[key].title}
             </NavLink>

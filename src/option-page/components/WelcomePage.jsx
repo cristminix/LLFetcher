@@ -10,11 +10,11 @@ const LatestCourse = ({store}) => {
             courses.map((course, index) => {
                 const coursePath = `/course/${course.slug}`
                 const courseIcon = "bi bi-bookmark"
-                return <>        
-                    <NavLink className={navLinkCls} to={coursePath}>
+                return <li key={index}>        
+                    <NavLink className={navLinkCls} to={coursePath} >
                         <i className={courseIcon}></i> <span>{course.title}</span>
                     </NavLink>
-                </>
+                </li>
             })
         }
         </ul>

@@ -10,7 +10,7 @@ export default function Template({config}){
 	    //   setHideSidebar(status)
 	    // },'template')
   	},[])	
-	const cls = "w-full px-4 sm:px-6 md:px-8";// pt-10	 
+	const cls = "w-full px-4 sm:px-6 md:px-8 dark:scrollbar-y dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-200";// pt-10	 
 	return(<>
 		<SideBar config={config}/>
 	  	<div id="main-content" className={cls +" px-4 "+ (hideSidebar?"":"lg:pl-72")}>

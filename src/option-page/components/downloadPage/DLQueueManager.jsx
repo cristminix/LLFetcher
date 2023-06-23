@@ -140,7 +140,7 @@ const DLQueueManager = ({downloads}) => {
                         return <tr key={index}>
                             <td className={tdCls}>{dl.filename}</td>
                             <td className={tdCls}>{dl.status}<input type="text" ref={refs[index]}/></td>
-                            <td className={tdCls}><button onClick={e=>downloadItem(dl, index)}><i className="fa fa-play"/></button></td>
+                            <td className={tdCls}><button onClick={e=>downloadItem(dl, index)}><i className="fa fa-download"/></button></td>
                         </tr>
                     })
                 }

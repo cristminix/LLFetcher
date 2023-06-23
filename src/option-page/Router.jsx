@@ -20,7 +20,6 @@ export default function Router({config, store}){
 
                 {/* <Route exac path="/tts" element={<Tts config={config} />}></Route> */}
                 <Route  path="/welcome" element={<WelcomePage store={store} />}/>
-                <Route  path="/course" element={<CoursePage store={store}/>} loader={courseLoader}/>
                 <Route  path="/course/:slug" element={<CoursePage store={store}/>} loader={courseLoader}/>
                 <Route  path="/download" element={<DownloadPage store={store}/>}/>
                 <Route  path="/setting" element={<SettingPage store={store}/>}/>

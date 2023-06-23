@@ -1,7 +1,7 @@
 import { Link, useLoaderData } from 'react-router-dom'
 
 
-import {Component,createRef} from "react"
+import {Component,createRef,useState,useEffect} from "react"
 
 import CourseTree from "./coursePage/CourseTree"
 import CourseAuthors from "./coursePage/CourseAuthors"
@@ -17,10 +17,31 @@ export async function loader({ params }) {
 
 const CoursePage = ({store}) => {
     const {slug} = useLoaderData()
-    const {course, authors, section, tocs} = store.mCourse.getCoursePageData(slug)
-    return (<><div className="course-page">
-        <MainCoursePage store={store} course={course} authors={authors} section={section} tocs={tocs}/>
-    </div></>)
+    const [activeCourseData, setActiveCourseData] = useState(null)
+ 
+ 
+    const updateCourseData = async()=>{
+      const courseData = await store.mCourse.getCoursePageData(slug)
+      setActiveCourseData(courseData)
+    }
+    useEffect(()=>{
+      if(slug){
+        updateCourseData()
+      }
+    },[slug])
+    
+    if(activeCourseData){
+      console.log(activeCourseData)
+      const {course, authors, sections, tocs}  = activeCourseData
+      return (<>
+              { course ? (<div className="course-page">
+                  <MainCoursePage store={store} course={course} authors={authors} sections={sections} tocs={tocs}/>
+              </div>):""
+              }
+              </>)
+    }else{
+      return <>No data</>
+    }
 }
 class MainCoursePage extends Component{
   

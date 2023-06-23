@@ -11,7 +11,7 @@ const LatestCourse = ({store}) => {
                 const coursePath = `/course/${course.slug}`
                 const courseIcon = "bi bi-bookmark"
                 return <li key={index}>        
-                    <NavLink className={navLinkCls} to={coursePath} >
+                    <NavLink className={navLinkCls} to={coursePath}  className="text-lg">
                         <i className={courseIcon}></i> <span>{course.title}</span>
                     </NavLink>
                 </li>
@@ -24,7 +24,7 @@ const LatestCourse = ({store}) => {
 const WelcomePage = ({store}) => {
 
     return (<><div className="welcomepage">
-        <span>This is this last courses</span>
+        <h4 className="text-xl">Latest fetched courses</h4>
         <LatestCourse store={store}/>
     </div></>)
 }

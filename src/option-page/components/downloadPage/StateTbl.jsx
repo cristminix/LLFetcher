@@ -106,100 +106,56 @@ const StateTbl = ({logBarData,
 			}
 		}
 	}
-
+	const thCls = "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+	const tdCls = "px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-gray-200"
 	return (<>
 		{ !hideInfo ? (<div className={`alert alert-${alertCls} text-center`}><i className={`fa ${iconCls2}`}/> {message}</div>):""}
-		<div className="state-tbl mx-auto w-3/4">
-		<div className="flex flex-col">
-  <div className="-m-1.5 overflow-x-auto">
-    <div className="p-1.5 min-w-full inline-block align-middle">
-      <div className="overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead>
-            <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Age</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Address</th>
-              <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Action</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-gray-200">John Brown</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">45</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">New York No. 1 Lake Park</td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <a className="text-blue-500 hover:text-blue-700" href="#">Delete</a>
-              </td>
-            </tr>
-
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-gray-200">Jim Green</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">27</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">London No. 1 Lake Park</td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <a className="text-blue-500 hover:text-blue-700" href="#">Delete</a>
-              </td>
-            </tr>
-
-            <tr>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-gray-200">Joe Black</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">31</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">Sidney No. 1 Lake Park</td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <a className="text-blue-500 hover:text-blue-700" href="#">Delete</a>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
-		<table className="table table-bordered" style={{display:'block'}}>
+		<div className="state-tbl flex flex-col mx-auto w-full">
+		
+		<table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
 			<thead>
 				<tr>
-					<th>Key</th><th>Value</th>
-					<th>Key</th><th>Value</th>
-					<th>Key</th><th>Value</th>
+					<th className={thCls}>Key</th><th className={thCls}>Value</th>
+					<th className={thCls}>Key</th><th className={thCls}>Value</th>
+					<th className={thCls}>Key</th><th className={thCls}>Value</th>
 				</tr>
 			</thead>
 			<tbody>
 				<tr>
-					<td>qPercentage</td><td>{qPercentage}</td>
-					<td>cPercentage</td><td>{cPercentage}</td>
-					<td>percentage</td><td>{percentage}</td>
+					<td className={tdCls}>qPercentage</td><td className={tdCls}>{qPercentage}</td>
+					<td className={tdCls}>cPercentage</td><td className={tdCls}>{cPercentage}</td>
+					<td className={tdCls}>percentage</td><td className={tdCls}>{percentage}</td>
 				</tr>
 				<tr>
-					<td>iconCls</td><td><i className={`fa ${iconCls}`}/> {iconCls}</td>
-					<td>rfIconCls</td><td><i className={`fa ${rfIconCls}`}/> {rfIconCls}</td>
-					<td>rqIconCls</td><td><i className={`fa ${rqIconCls}`}/> {rqIconCls}</td>
+					<td className={tdCls}>iconCls</td><td className={tdCls}><i className={`fa ${iconCls}`}/> {iconCls}</td>
+					<td className={tdCls}>rfIconCls</td><td className={tdCls}><i className={`fa ${rfIconCls}`}/> {rfIconCls}</td>
+					<td className={tdCls}>rqIconCls</td><td className={tdCls}><i className={`fa ${rqIconCls}`}/> {rqIconCls}</td>
 				</tr>
 				<tr>
-					<td>loadingDl</td><td>{loadingDl?'Y':'N'}</td>
-					<td>loadingResetFlag</td><td>{loadingResetFlag?'Y':'N'}</td>
-					<td>loadingResetQueue</td><td>{loadingResetQueue?'Y':'N'}</td>
+					<td className={tdCls}>loadingDl</td><td className={tdCls}>{loadingDl?'Y':'N'}</td>
+					<td className={tdCls}>loadingResetFlag</td><td className={tdCls}>{loadingResetFlag?'Y':'N'}</td>
+					<td className={tdCls}>loadingResetQueue</td><td className={tdCls}>{loadingResetQueue?'Y':'N'}</td>
 				</tr>
 				<tr>
-					<td>enableDl</td><td>{enableDl?'Y':'N'}</td>
-					<td>enableResetFlag</td><td>{enableResetFlag?'Y':'N'}</td>
-					<td>enableResetQueue</td><td>{enableResetQueue?'Y':'N'}</td>
+					<td className={tdCls}>enableDl</td><td className={tdCls}>{enableDl?'Y':'N'}</td>
+					<td className={tdCls}>enableResetFlag</td><td className={tdCls}>{enableResetFlag?'Y':'N'}</td>
+					<td className={tdCls}>enableResetQueue</td><td className={tdCls}>{enableResetQueue?'Y':'N'}</td>
 				</tr>
 				<tr>
-					<td>cInProgress</td><td>{cInProgress?'Y':'N'}</td>
-					<td>queueStarted</td><td>{queueStarted?'Y':'N'}</td>
-					<td></td><td>{''}</td>
+					<td className={tdCls}>cInProgress</td><td className={tdCls}>{cInProgress?'Y':'N'}</td>
+					<td className={tdCls}>queueStarted</td><td className={tdCls}>{queueStarted?'Y':'N'}</td>
+					<td className={tdCls}></td><td className={tdCls}>{''}</td>
 				</tr>
 				<tr>
-					<td>Total</td><td>{downloads.length}</td>
-					<td>Success</td><td>{cSuccessCount}</td>
-					<td>Fails</td><td>{cInteruptCount}</td>
+					<td className={tdCls}>Total</td><td className={tdCls}>{downloads.length}</td>
+					<td className={tdCls}>Success</td><td className={tdCls}>{cSuccessCount}</td>
+					<td className={tdCls}>Fails</td><td className={tdCls}>{cInteruptCount}</td>
 					
 				</tr>
 				<tr>
-					<td>dlstatedata</td><td>{''}</td>
-					<td></td><td>{''}</td>
-					<td></td><td>{''}</td>
+					<td className={tdCls}>dlstatedata</td><td className={tdCls}>{''}</td>
+					<td className={tdCls}></td><td className={tdCls}>{''}</td>
+					<td className={tdCls}></td><td className={tdCls}>{''}</td>
 					
 				</tr>
 			</tbody>

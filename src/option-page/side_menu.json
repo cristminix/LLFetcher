@@ -24,6 +24,12 @@
 			"iconCls" : "bi bi-gear",
 			"order" : 4
 		},
+		"database" : {
+			"title" : "Database",
+			"path" : "/database",
+			"iconCls" : "fa fa-database",
+			"order" : 4
+		},
 		"bootstrap-icons" : {
 			"title" : "Bootstrap Icons",
 			"path" : "/bootstrap-icons",

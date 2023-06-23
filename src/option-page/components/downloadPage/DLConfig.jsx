@@ -2,6 +2,7 @@ import {Component, useState, useEffect} from "react"
 import {queryDownloadProgress,
     getDownloadFilenames,makeDelay} from "../../../components/fn"
 // import ComponentWithMessaging from "../ComponentWithMessaging"
+import DLQueueManager from "./DLQueueManager"
 let pis = []
 import SelectFmt from "./SelectFmt"
 import DLButtons from "./DLButtons"
@@ -295,7 +296,7 @@ class DLConfig extends Component{
 			return(<div className="dl-config-cnt" >
 				<SelectFmt fmt={fmt} queueStarted={queueStarted} updateSelectedFmt={label=>this.updateSelectedFmt(label)} fmtList={fmtList}/>
 			{
-				fmt && downloads.length > 0? (<DLButtons startDownloadVideoResource={e=>this.startDownloadVideoResource(e)}
+				fmt? (<DLButtons startDownloadVideoResource={e=>this.startDownloadVideoResource(e)}
 													logBarData={logBarData} queueStarted={queueStarted}
 													enableDl={enableDl} 
 													qPercentage={qPercentage} 
@@ -308,9 +309,10 @@ class DLConfig extends Component{
 													resetQueue={e=>this.resetQueue(e)}
 													rfIconCls={rfIconCls}
 													rqIconCls={rqIconCls}
-													dlstate={dlstate}/>) : fmt ?(<>
-				<i className="fa fa-spin fa-spinner"/> Loading ...
-			</>):""
+													dlstate={dlstate}/>) : ""
+			}
+			{
+				fmt && downloads.length ? (<DLQueueManager downloads={downloads}/>):""
 			}
 			{
 				fmt && downloads.length > 0? (<StateTbl logBarData={logBarData} 
@@ -330,6 +332,9 @@ class DLConfig extends Component{
 					cInteruptCount={cInteruptCount}
 					dlstate={dlstate} store={store} reloadProgress={e=> this.reloadProgress(e)}/>):""
 			}
+			
+			
+
 		  </div>)
 	}
 

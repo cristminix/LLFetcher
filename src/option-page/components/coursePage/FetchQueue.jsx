@@ -38,17 +38,20 @@ class FetchQueue extends Component{
 		return(<> <div className={`${prefixCls}-bar`} style={style.qcnt}>
 	        <div className={`${prefixCls}-pb item`} style={{width:100}}>
 	        	{
-	        		!hideProgress ? (<div className="progress">
-		                <div className="progress-bar bg-info" 
-		                	 role="progressbar" 
-		                	 style={{width : `${percentage}%`}} 
-		                	 aria-valuenow={percentage} 
-		                	 aria-valuemin={0} 
-		                	 aria-valuemax={100}>
-		                </div>
-		            </div>) : ""
+	        		!hideProgress ? (<div className="progress opacity-50 mt-1 flex w-100[px] h-2.5 bg-gray-200 rounded-full overflow-hidden dark:bg-gray-700">
+									<div className="progress-bar bg-info flex flex-col justify-center overflow-hidden bg-blue-500" 
+									role="progressbar" 
+									style={{width : `${percentage}%`}}  
+									aria-valuenow={percentage} 
+									aria-valuemin={0}
+									aria-valuemax={100}>
+
+									</div>
+								</div>) : ""
 	        	}
+					
 	        </div>
+			
 	        {
 	        	!hideBtn ? (<div className={`btn-${prefixCls}-cnt item`} style={{position:'absolute'}}>
 		            <button style={Object.assign({ color : btnState === 3 ? 'white' : 'inherit' },style.btnFetch)} 

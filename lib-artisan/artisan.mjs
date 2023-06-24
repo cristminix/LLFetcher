@@ -1,5 +1,5 @@
 import createReactComponent from './actions/createReactComponent.mjs'
-
+const availableActions = ['createReactComponent']
 const argv = process.argv
 const showHelp = f => {
     console.log('Welcome to artisan')
@@ -12,6 +12,10 @@ const parseCmd = () => {
 }
 
 const processCmd = async (cmd) => {
+    if(!availableActions.includes(cmd)){
+        console.error(`${cmd} is not valid action`)
+        process.exit(1)
+    }
     if(cmd === 'createReactComponent'){
         argv.splice(0,3)
         const [name, target_dir] = argv

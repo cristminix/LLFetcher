@@ -123,7 +123,8 @@ const DLQueueManager = ({downloads}) => {
         refs[index].current.value = `${formatBytes(loaded)}/${speed}ps`
     }
     
-    return (<><div className="dlqueuemanager">
+    return (<><div className="dl-queue-manager border rounded-xl shadow-sm p-6 dark:bg-gray-800 dark:border-gray-700">
+        
         <div className="state-tbl flex flex-col mx-auto w-full">
 		
 		<table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -137,7 +138,7 @@ const DLQueueManager = ({downloads}) => {
                 {
                     downloads.map((dl,index)=>{
                         refs[index] = createRef(null)
-                        return <tr key={index}>
+                        return <tr key={index} className="odd:bg-white even:bg-gray-100 dark:odd:bg-slate-900 dark:even:bg-slate-800">
                             <td className={tdCls}>{dl.filename}</td>
                             <td className={tdCls}>{dl.status}<input type="text" ref={refs[index]}/></td>
                             <td className={tdCls}><button onClick={e=>downloadItem(dl, index)}><i className="fa fa-download"/></button></td>

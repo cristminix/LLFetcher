@@ -21,10 +21,13 @@ const CoursePage = ({store}) => {
  
  
     const updateCourseData = async()=>{
+      setActiveCourseData(null)
       const courseData = await store.mCourse.getCoursePageData(slug)
+      await store.mCourse.setLastSlug(slug)
       setActiveCourseData(courseData)
     }
     useEffect(()=>{
+      console.log(slug)
       if(slug){
         updateCourseData()
       }

@@ -3,7 +3,7 @@ import { Link, NavLink } from 'react-router-dom';
 import side_menu from "./side_menu.json"
 import appLogo from "../../images/icon-48.png"
 
-export default function SideBar({config, showSidebar}){
+export default function SideBar({store, config, showSidebar}){
 
   const cls = "hs-overlay hs-overlay-open:translate-x-0 -translate-x-full transition-all duration-300 transform fixed top-0 left-0 bottom-0 z-[60] w-64 bg-white border-r border-gray-200 pt-7 pb-10 overflow-y-auto scrollbar-y lg:block lg:translate-x-0 lg:right-auto lg:bottom-0 dark:scrollbar-y dark:bg-gray-800 dark:border-gray-700"
   const activeTabCls = "flex items-center gap-x-3.5 py-2 px-2.5 bg-gray-100 text-sm text-slate-700 rounded-md dark:bg-gray-900 dark:text-white"
@@ -47,9 +47,62 @@ export default function SideBar({config, showSidebar}){
         <ul className="space-y-1.5">
         {
           Object.keys(side_menu.links).map((key,index)=>{
+            
+            const linkItem = side_menu.links[key]
+            if(linkItem.hidden){
+              return ""
+            }
+            if(linkItem.hasChild){
+              const linkTitle = linkItem.title
+              console.log(`${linkTitle} hasChild`)
+
+              if(linkItem.useModel){
+                if(linkItem.model){
+                  const modelName = linkItem.model
+                  const modelObj = store.get(modelName)
+                  if(modelObj){
+                    if(linkItem.modelListMethod){
+                      const listMethod = linkItem.modelListMethod
+                      try{
+                        const childData =  modelObj[listMethod]()
+                        console.log(childData)
+                        console.log(`${linkTitle} useModel ${modelName}`) 
+                        const children = (<>
+                          <ul className="children-menus">
+                            {
+                              childData.map((item, itemIndex)=>{
+                                const childMenuTitle = item[linkItem.displayField]
+                                const childPath = linkItem.childRoutePath.replace(/{SLUG_VALUE}/,item[linkItem.slugField])
+                                return <li>
+                                  <NavLink className={linkCls} to={childPath}>
+                                    <i className={linkItem.childIconCls}></i> {childMenuTitle}
+                                  </NavLink>
+                                </li>
+                              })
+                            }
+                          </ul>
+                        </>)
+                        return (<li key={index}>
+                          <NavLink className={linkCls} to={linkItem.path}>
+                          <i className={linkItem.iconCls}></i> {linkItem.title}
+                          </NavLink>
+                          {children}
+
+                        </li>)
+                      }catch(e){
+                        console.error(e)
+                      }
+                      
+                    }
+                     
+                  }
+                  
+                }
+              }
+            }
             return (<li key={index}>
-            <NavLink className={linkCls} to={side_menu.links[key].path}>
-              <i className={side_menu.links[key].iconCls}></i> {side_menu.links[key].title}
+            <NavLink className={linkCls} to={linkItem.path}>
+              <i className={linkItem.iconCls}></i> {linkItem.title}
             </NavLink>
           </li>)
           })

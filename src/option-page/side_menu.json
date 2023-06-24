@@ -6,35 +6,49 @@
 			"iconCls" : "bi bi-house",
 			"order": 1
 		},
-		"course":{
-			"title" : "Course",
+		"courses":{
+			"title" : "Courses",
 			"path" : "/course",
 			"iconCls" : "bi bi-bookmark",
-			"order" : 2
+			"order" : 2,
+			"hasChild" : true,
+			"useModel" : true,
+			"model" : "Course",
+			"modelListMethod" : "getList",
+			"displayField" : "title",
+			"slugField" : "slug",
+			"childRoutePath" : "/manager/{SLUG_VALUE}",
+			"childIconCls" : "fa fa-arrow-right"
 		},
 		"download" : {
 			"title" : "Download",
 			"path" : "/download",
 			"iconCls" : "bi bi-download",
-			"order" : 3
+			"order" : 3,
+			"hidden" : true
 		},
 		"setting" : {
 			"title" : "Setting",
 			"path" : "/setting",
 			"iconCls" : "bi bi-gear",
-			"order" : 4
+			"order" : 4,
+			"hidden" : true
+
 		},
 		"database" : {
 			"title" : "Database",
 			"path" : "/database",
 			"iconCls" : "fa fa-database",
-			"order" : 4
+			"order" : 4,
+			"hidden" : true
 		},
 		"bootstrap-icons" : {
 			"title" : "Bootstrap Icons",
 			"path" : "/bootstrap-icons",
 			"iconCls" : "bi bi-bootstrap",
-			"order" : 5
+			"order" : 5,
+			"hidden" : true
+
 		}
 
 	}

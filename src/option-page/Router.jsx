@@ -6,6 +6,7 @@ import Template from "./Template"
 import WelcomePage from "./components/WelcomePage"
 import CoursePage, {loader as courseLoader} from "./components/CoursePage"
 import DownloadPage from "./components/DownloadPage"
+import DownloadManager, {loader as courseSlugLoader} from "./components/DownloadManager"
 import SettingPage from "./components/SettingPage"
 import DatabasePage from "./components/DatabasePage"
 import BootstrapIcons,{loader as bootstrapIconLoader} from "./components/BootstrapIcons"
@@ -16,11 +17,13 @@ export default function Router({config, store}){
         
     const router = createHashRouter(
             createRoutesFromElements(
-            <Route path="/" errorElement={<ErrorPage />} element={<Template config={config}/>}>
+            <Route path="/" errorElement={<ErrorPage />} element={<Template config={config} store={store}/>}>
 
                 {/* <Route exac path="/tts" element={<Tts config={config} />}></Route> */}
                 <Route  path="/welcome" element={<WelcomePage store={store} />}/>
+                <Route  path="/course" element={<CoursePage store={store}/>} loader={courseLoader}/>
                 <Route  path="/course/:slug" element={<CoursePage store={store}/>} loader={courseLoader}/>
+                <Route  path="/manager/:slug" element={<DownloadManager store={store}/>} loader={courseSlugLoader}/>
                 <Route  path="/download" element={<DownloadPage store={store}/>}/>
                 <Route  path="/setting" element={<SettingPage store={store}/>}/>
                 <Route  path="/database" element={<DatabasePage store={store}/>}/>

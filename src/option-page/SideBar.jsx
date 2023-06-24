@@ -55,8 +55,32 @@ export default function SideBar({store, config, showSidebar}){
             if(linkItem.hasChild){
               const linkTitle = linkItem.title
               console.log(`${linkTitle} hasChild`)
+              if(linkItem.childItems){
+                console.log(linkItem.childItems)
+                const children = (<>
+                  <ul className="children-menus">
+                    {
+                      Object.keys(linkItem.childItems).map((childKey, childKeyIndex)=>{
+                        const childItem = linkItem.childItems[childKey]
+                        
+                        return <li className="px-2">
+                          <NavLink className={linkCls} to={childItem.path}>
+                            <i className={childItem.iconCls}></i> {childItem.title}
+                          </NavLink>
+                        </li>
+                      })
+                    }
+                  </ul>
+                </>)
+                return (<li key={index}>
+                  <NavLink className={linkCls} to={linkItem.path}>
+                  <i className={linkItem.iconCls}></i> {linkItem.title}
+                  </NavLink>
+                  {children}
 
-              if(linkItem.useModel){
+                </li>)
+              }
+              else if(linkItem.useModel){
                 if(linkItem.model){
                   const modelName = linkItem.model
                   const modelObj = store.get(modelName)
@@ -73,7 +97,7 @@ export default function SideBar({store, config, showSidebar}){
                               childData.map((item, itemIndex)=>{
                                 const childMenuTitle = item[linkItem.displayField]
                                 const childPath = linkItem.childRoutePath.replace(/{SLUG_VALUE}/,item[linkItem.slugField])
-                                return <li>
+                                return <li className="px-2">
                                   <NavLink className={linkCls} to={childPath}>
                                     <i className={linkItem.childIconCls}></i> {childMenuTitle}
                                   </NavLink>

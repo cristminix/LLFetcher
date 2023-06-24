@@ -17,6 +17,7 @@ const DownloadManager = ({store}) => {
     const [activeCourseData, setActiveCourseData] = useState(null)
     // setup related state
     const [alreadySetup, setAlreadySetup] = useState(false)
+    const [reconfigureSetup, setReconfigureSetup] = useState(false)
     // setup ui related state
     const [displaySetupUi, setDisplaySetupUi] = useState(false)
     const updateCourseData = async()=>{
@@ -37,10 +38,19 @@ const DownloadManager = ({store}) => {
       const {course, authors, sections, tocs}  = activeCourseData
       return (<><div className="download-manager ">
         <CourseInfo store={store} course={course}/>
-        <ToolbarMan alreadySetup={alreadySetup} setAlreadySetup={setAlreadySetup}/>
-        <QueueSetup alreadySetup={alreadySetup} displaySetupUi={displaySetupUi}/>
-        <QueueMan alreadySetup={alreadySetup} />
-        <StatusBarMan store={store} course={course} alreadySetup={alreadySetup} />
+        <ToolbarMan alreadySetup={alreadySetup} 
+                    setAlreadySetup={setAlreadySetup}
+                    reconfigureSetup={reconfigureSetup}
+                    setReconfigureSetup={setReconfigureSetup}/>
+        <QueueSetup alreadySetup={alreadySetup} 
+                    reconfigureSetup={reconfigureSetup}
+                    displaySetupUi={displaySetupUi}/>
+        <QueueMan alreadySetup={alreadySetup} 
+                  reconfigureSetup={reconfigureSetup}/>
+        <StatusBarMan store={store} 
+                      course={course} 
+                      alreadySetup={alreadySetup} 
+                      reconfigureSetup={reconfigureSetup}/>
     </div></>)
     }else{
       return <>No data</>

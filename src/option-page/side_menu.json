@@ -18,7 +18,7 @@
 			"displayField" : "title",
 			"slugField" : "slug",
 			"childRoutePath" : "/manager/{SLUG_VALUE}",
-			"childIconCls" : "fa fa-arrow-right"
+			"childIconCls" : "fa fa-bookmark-o"
 		},
 		"download" : {
 			"title" : "Download",
@@ -36,11 +36,32 @@
 
 		},
 		"database" : {
-			"title" : "Database",
+			"title" : "Database Explorer",
 			"path" : "/database",
 			"iconCls" : "fa fa-database",
 			"order" : 4,
-			"hidden" : true
+			"hidden" : false,
+			"hasChild" : true,
+			"childItems" : {
+				"queueState" : {
+					"title" : "QueueState",
+					"path" : "/database/queueState",
+					"iconCls" : "fa fa-database",
+					"order" : 0
+				},
+				"course" : {
+					"title" : "Course",
+					"path" : "/database/course",
+					"iconCls" : "fa fa-database",
+					"order" : 0
+				},
+				"download" : {
+					"title" : "Download",
+					"path" : "/database/download",
+					"iconCls" : "fa fa-database",
+					"order" : 0
+				}
+			}
 		},
 		"bootstrap-icons" : {
 			"title" : "Bootstrap Icons",

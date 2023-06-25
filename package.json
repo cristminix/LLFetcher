@@ -22,6 +22,7 @@
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.13.0",
     "underscore": "^1.13.6",
+    "uuid": "^9.0.0",
     "watch": "^0.13.0"
   },
   "devDependencies": {

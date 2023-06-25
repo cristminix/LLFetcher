@@ -1,0 +1,11 @@
+{
+    "tables" : {
+        "course" : {
+            "headers" : ["Title", "Slug"],
+            "fields" : ["title", "slug"],
+            "model" : "Course",
+            "listMethod" : "getList"
+        }
+
+    }
+}

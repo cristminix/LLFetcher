@@ -7,7 +7,7 @@ export default function SideBar({store, config, showSidebar}){
 
   const cls = "hs-overlay hs-overlay-open:translate-x-0 -translate-x-full transition-all duration-300 transform fixed top-0 left-0 bottom-0 z-[60] w-64 bg-white border-r border-gray-200 pt-7 pb-10 overflow-y-auto scrollbar-y lg:block lg:translate-x-0 lg:right-auto lg:bottom-0 dark:scrollbar-y dark:bg-gray-800 dark:border-gray-700"
   const activeTabCls = "flex items-center gap-x-3.5 py-2 px-2.5 bg-gray-100 text-sm text-slate-700 rounded-md dark:bg-gray-900 dark:text-white"
-  const inactiveTabCls = "flex items-center gap-x-3.5 py-2 px-2.5  hover:bg-gray-100 text-sm text-slate-700 rounded-md hover:bg-gray-100 dark:bg-gray-900 dark:text-white"
+  const inactiveTabCls = "flex items-center gap-x-3.5 py-2 px-2.5  hover:bg-gray-100 text-sm text-slate-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700  dark:text-white"
   const [hideSidebar,setHideSidebar] = useState(false)
   const [runTwice,dontRunTwice] = useState(true)
   const toggle = ()=>{
@@ -58,12 +58,12 @@ export default function SideBar({store, config, showSidebar}){
               if(linkItem.childItems){
                 console.log(linkItem.childItems)
                 const children = (<>
-                  <ul className="children-menus">
+                  <ul className="children-menus my-2">
                     {
                       Object.keys(linkItem.childItems).map((childKey, childKeyIndex)=>{
                         const childItem = linkItem.childItems[childKey]
                         
-                        return <li className="px-2">
+                        return <li className="px-2" key={childKeyIndex}>
                           <NavLink className={linkCls} to={childItem.path}>
                             <i className={childItem.iconCls}></i> {childItem.title}
                           </NavLink>
@@ -92,12 +92,12 @@ export default function SideBar({store, config, showSidebar}){
                         console.log(childData)
                         console.log(`${linkTitle} useModel ${modelName}`) 
                         const children = (<>
-                          <ul className="children-menus">
+                          <ul className="children-menus my-2">
                             {
                               childData.map((item, itemIndex)=>{
                                 const childMenuTitle = item[linkItem.displayField]
                                 const childPath = linkItem.childRoutePath.replace(/{SLUG_VALUE}/,item[linkItem.slugField])
-                                return <li className="px-2">
+                                return <li className="px-2" key={itemIndex}>
                                   <NavLink className={linkCls} to={childPath}>
                                     <i className={linkItem.childIconCls}></i> {childMenuTitle}
                                   </NavLink>

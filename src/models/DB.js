@@ -68,6 +68,10 @@ class DB {
 		}
 		return this.db.queryAll(this.table,params)
 	}
+	getList(){
+        const results =  this.db.queryAll(this.table);
+        return results
+    }
 	/**
 	 * get singleton instance */
 	static async getInstance(){
@@ -76,6 +80,15 @@ class DB {
 			this.instance = this.factory()
 			await this.instance.initDB()
 
+			DB.instances.push(this.instance)
+		}	
+
+		return this.instance;
+	}
+	static gotInstance(){
+		if(this.instance instanceof this){
+		}else{
+			this.instance = this.factory()
 			DB.instances.push(this.instance)
 		}	
 

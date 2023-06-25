@@ -1,11 +1,19 @@
 import DB from "./DB"
-
+import Course from "./Course"
 class DownloadConfig extends DB {
 	table = 'downloadConfig'
 	fields = ["courseId","fmtList","selectedFmtList"]
 	type = "collection"
 
-
+    getListWithCourse(){
+        const mCourse = Course.gotInstance()
+        let results =  this.db.queryAll(this.table)
+        results = results.map(item => {
+            try{item.course = mCourse.getById(item.courseId).title}catch(e){}
+            return item
+        })
+        return results
+    }
     get(courseId){
         return this.singleQuery({query: {courseId}})
     }

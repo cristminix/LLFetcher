@@ -5,7 +5,28 @@
             "fields" : ["title", "slug"],
             "model" : "Course",
             "listMethod" : "getList"
+        },
+        "download" : {
+            "headers" : ["Filename", "Status"],
+            "fields" : ["filename", "status"],
+            "model" : "Download",
+            "listMethod" : "getList"
+            
+        },
+        "download-state" : {
+            "headers" : ["courseId", "Status"],
+            "fields" : ["course", "status"],
+            "model" : "DownloadState",
+            "listMethod" : "getListWithCourse"
+        },
+        "download-config" : {
+            "headers" : ["courseId", "fmtList","selectedFmtList"],
+            "fields" : ["course", "fmtList","selectedFmtList"],
+            "model" : "DownloadConfig",
+            "listMethod" : "getListWithCourse"
+            
         }
+        
 
     }
 }

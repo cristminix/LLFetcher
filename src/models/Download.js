@@ -13,6 +13,10 @@ class Download extends DB {
         }
         return this.query({query:{courseId}})
     }
+    getList(){
+        const results =  this.db.queryAll(this.table);
+        return results
+    }
     getById(id){
         return this.singleQuery({query:{id}})
     }

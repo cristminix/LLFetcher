@@ -43,9 +43,15 @@
 			"hidden" : false,
 			"hasChild" : true,
 			"childItems" : {
-				"queueState" : {
-					"title" : "QueueState",
-					"path" : "/database/queueState",
+				"download-state" : {
+					"title" : "DownloadState",
+					"path" : "/database/download-state",
+					"iconCls" : "fa fa-database",
+					"order" : 0
+				},
+				"download-config" : {
+					"title" : "DownloadConfig",
+					"path" : "/database/download-config",
 					"iconCls" : "fa fa-database",
 					"order" : 0
 				},

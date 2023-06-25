@@ -1,5 +1,5 @@
 import DB from "./DB"
-
+import Course from "./Course"
 class DownloadState extends DB {
 	table = 'downloadState'
 	fields = [
@@ -20,7 +20,15 @@ class DownloadState extends DB {
         ]
 	type = "single"
 
-
+     getListWithCourse(){
+        const mCourse = Course.gotInstance()
+        let results =  this.db.queryAll(this.table)
+        results = results.map(item => {
+            try{item.course = mCourse.getById(item.courseId).title}catch(e){}
+            return item
+        })
+        return results
+    }
     async get(courseId){
         let downloadState = this.singleQuery({query:{courseId}})
         if(!downloadState){

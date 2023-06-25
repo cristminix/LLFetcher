@@ -27,6 +27,7 @@ const delay = makeDelay(512)
 const DBExplorer = ({store, table, page })=>{
 	const [model, setModel] = useState(null)
 	const [conf, setConf] = useState(null)
+	const [errorMessage, setErrorMessage] = useState("")
 	// const {page} = useLoaderData()
 	// const store = new Store(config)
 	const [projectList,setProjectList] = useState([]);
@@ -74,6 +75,8 @@ const DBExplorer = ({store, table, page })=>{
 			console.log(pageNumber)
 
 			updateList(pageNumber)
+		}else{
+			setErrorMessage("No Model Set")
 		}
 			
 	},[page, model])
@@ -83,11 +86,16 @@ const DBExplorer = ({store, table, page })=>{
 			setModel(null)
 			setConf(null)
 			const conf = config.tables[table]
-			const modelName = conf.model
-			const modelSet = store.get(modelName)
-			console.log(conf, modelName, modelSet)
-			setConf(conf)
-			setModel(modelSet)
+			if(conf){
+				const modelName = conf.model
+				const modelSet = store.get(modelName)
+				console.log(conf, modelName, modelSet)
+				setConf(conf)
+				setModel(modelSet)
+			}else{
+				setErrorMessage(`No config set for ${table} table`)
+			}
+			
 			// updateList(1)
 		}			
 	},[table])
@@ -195,7 +203,7 @@ const DBExplorer = ({store, table, page })=>{
 				</div>		
 			</div>)
 	}else{
-		return <>No Model Set</>
+		return <>{errorMessage}</>
 	}
 				
 }

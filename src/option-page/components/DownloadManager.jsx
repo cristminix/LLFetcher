@@ -45,11 +45,15 @@ const DownloadManager = ({store}) => {
                     reconfigureSetup={reconfigureSetup}
                     setReconfigureSetup={setReconfigureSetup}
                     setRunSetup={setRunSetup}
-                    runSetup={runSetup}/>
+                    runSetup={runSetup}
+                    course={course}/>
         <QueueSetup alreadySetup={alreadySetup} 
                     reconfigureSetup={reconfigureSetup}
                     displaySetupUi={displaySetupUi}
-                    runSetup={runSetup}/>
+                    runSetup={runSetup}
+                    course={course}
+                    sections={sections}
+                    tocs={tocs}/>
         <QueueMan alreadySetup={alreadySetup} 
                   reconfigureSetup={reconfigureSetup}/>
         <StatusBarMan store={store} 

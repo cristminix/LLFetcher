@@ -1,5 +1,5 @@
 
-const ToolbarMan = ({alreadySetup, setAlreadySetup, setRunSetup, runSetup}) => {
+const ToolbarMan = ({dmsetup, alreadySetup, setAlreadySetup, setRunSetup, runSetup}) => {
     return (<><div className="toolbar-man">
         <div className="toolbar-man-container">
         {/* <button type="button" class="inline-flex flex-shrink-0 justify-center items-center gap-2 h-[2.875rem] w-[2.875rem] rounded-md border border-transparent font-semibold bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all text-sm  dark:focus:ring-offset-gray-800">

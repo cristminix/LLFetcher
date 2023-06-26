@@ -39,6 +39,28 @@ class DMSetup extends DB{
 
         return row
     }
+    async update(id,row_){
+        let record = this.getById(id)
+        if(record){
+            this.db.update(this.table,{id},(row)=>{
+                for(let k in row_){
+                    row[k] = row_[k]
+                    record[k] = row_[k]
+                }
+                return row
+            })
+            await this.db.commit()
+        }
+        
+        return record
+    }
+    async updateByCourseId(courseId, row_){
+        let record = this.getByCourseId(courseId)
+        if(record){
+            record = await this.update(record.id, row_)
+        }
+        return record
+    }
 }
 
 export default DMSetup

@@ -21,12 +21,23 @@ const DownloadManager = ({store}) => {
     const [reconfigureSetup, setReconfigureSetup] = useState(false)
     // setup ui related state
     const [displaySetupUi, setDisplaySetupUi] = useState(false)
+    // dmsetup database
+    const [dmsetup, setDmsetup] = useState(null)
+    const mDMSetup = store.get("DMSetup")
+
     const updateCourseData = async()=>{
       setActiveCourseData(null)
       setRunSetup(false)
       const courseData = await store.mCourse.getCoursePageData(slug)
       await store.mCourse.setLastSlug(slug)
       setActiveCourseData(courseData)
+
+      setDmsetup(null)
+      const {course} = courseData
+      const savedDmsetup = mDMSetup.getByCourseId(course.id)
+      if(savedDmsetup){
+          setDmsetup(savedDmsetup)
+      }
     }
     useEffect(()=>{
       console.log(slug)
@@ -46,14 +57,17 @@ const DownloadManager = ({store}) => {
                     setReconfigureSetup={setReconfigureSetup}
                     setRunSetup={setRunSetup}
                     runSetup={runSetup}
-                    course={course}/>
+                    course={course}
+                    dmsetup={dmsetup}/>
         <QueueSetup alreadySetup={alreadySetup} 
                     reconfigureSetup={reconfigureSetup}
                     displaySetupUi={displaySetupUi}
                     runSetup={runSetup}
                     course={course}
                     sections={sections}
-                    tocs={tocs}/>
+                    tocs={tocs}
+                    store={store}
+                    dmsetup={dmsetup}/>
         <QueueMan alreadySetup={alreadySetup} 
                   reconfigureSetup={reconfigureSetup}/>
         <StatusBarMan store={store} 

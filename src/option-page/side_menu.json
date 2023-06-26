@@ -66,6 +66,12 @@
 					"path" : "/database/download",
 					"iconCls" : "fa fa-database",
 					"order" : 0
+				},
+				"dm-setup" : {
+					"title" : "DMSetup",
+					"path" : "/database/dm-setup",
+					"iconCls" : "fa fa-database",
+					"order" : 0
 				}
 			}
 		},

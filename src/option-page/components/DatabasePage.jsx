@@ -1,6 +1,7 @@
 import { Link, useLoaderData } from 'react-router-dom'
 import {Component,createRef,useState,useEffect} from "react"
 import DBExplorer from "./dbExplorer/DBExplorer"
+import schema from "./dbExplorer/schema.json"
 
 
 export async function loader({ params }) {
@@ -17,7 +18,18 @@ const DatabasePage = ({store}) => {
         {
             table ? <>
                 <DBExplorer store={store} table={table} page={page}/>
-            </> : "You have no select table"
+            </> : <>
+            You have no select table
+            <ul>
+		{
+			schema.availables.map((tableName, schemaIndex)=>{
+				return <li key={schemaIndex}>
+					{tableName}
+				</li>
+			})
+		}
+		</ul>
+            </>
         }
     </div></>)
 }

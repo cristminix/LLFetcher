@@ -26,6 +26,7 @@ export default function Router({config, store}){
                 <Route  path="/manager/:slug" element={<DownloadManager store={store}/>} loader={courseSlugLoader}/>
                 <Route  path="/download" element={<DownloadPage store={store}/>}/>
                 <Route  path="/setting" element={<SettingPage store={store}/>}/>
+                <Route  path="/database" element={<DatabasePage store={store} />} loader={databaseLoader}/>
                 <Route  path="/database/:table" element={<DatabasePage store={store} />} loader={databaseLoader}/>
                 <Route  path="/database/:table/:page" element={<DatabasePage store={store} />} loader={databaseLoader}/>
                 <Route  path="/database" element={<DatabasePage store={store} />}/>

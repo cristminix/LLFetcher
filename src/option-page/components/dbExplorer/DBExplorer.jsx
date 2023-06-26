@@ -203,7 +203,10 @@ const DBExplorer = ({store, table, page })=>{
 				</div>		
 			</div>)
 	}else{
-		return <>{errorMessage}</>
+		return <>
+		{errorMessage}
+		
+		</>
 	}
 				
 }

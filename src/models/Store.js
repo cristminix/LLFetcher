@@ -10,6 +10,7 @@ import Section from "./Section"
 import StreamLocation from "./StreamLocation"
 import Toc from "./Toc"
 import Message from "./Message"
+import DMSetup from "./DMSetup"
 
 class Store {
 	mApp = null
@@ -24,6 +25,7 @@ class Store {
 	mToc = null
 	mDB = null
 	mMessage = null
+	mDMsetup = null
 	static instance = null
 	constructor(){
 
@@ -42,6 +44,7 @@ class Store {
 		this.mStreamLocation = await StreamLocation.getInstance()
 		this.mToc = await Toc.getInstance()
 		this.mMessage = await Message.getInstance()
+		this.mDMSetup = await DMSetup.getInstance()
 
 		await this.mApp.init()
 		callback()
@@ -58,7 +61,7 @@ class Store {
 		await DB.connection.reload()
 	}
 	get(model){
-		const availables = ['DB','App','Author','Course', 'Download', 'DownloadConfig', 'DownloadState','ExerciseFile','Section','StreamLocation','Toc','Message']
+		const availables = ['DB','App','Author','Course', 'Download', 'DownloadConfig', 'DownloadState','ExerciseFile','Section','StreamLocation','Toc','Message','DMSetup']
 		if(availables.includes(model)){
 			const prop = `m${model}`
 			return this[prop]

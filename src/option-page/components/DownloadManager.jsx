@@ -16,12 +16,14 @@ const DownloadManager = ({store}) => {
     const {slug} = useLoaderData()
     const [activeCourseData, setActiveCourseData] = useState(null)
     // setup related state
+    const [runSetup, setRunSetup] = useState(false)
     const [alreadySetup, setAlreadySetup] = useState(false)
     const [reconfigureSetup, setReconfigureSetup] = useState(false)
     // setup ui related state
     const [displaySetupUi, setDisplaySetupUi] = useState(false)
     const updateCourseData = async()=>{
       setActiveCourseData(null)
+      setRunSetup(false)
       const courseData = await store.mCourse.getCoursePageData(slug)
       await store.mCourse.setLastSlug(slug)
       setActiveCourseData(courseData)
@@ -41,10 +43,13 @@ const DownloadManager = ({store}) => {
         <ToolbarMan alreadySetup={alreadySetup} 
                     setAlreadySetup={setAlreadySetup}
                     reconfigureSetup={reconfigureSetup}
-                    setReconfigureSetup={setReconfigureSetup}/>
+                    setReconfigureSetup={setReconfigureSetup}
+                    setRunSetup={setRunSetup}
+                    runSetup={runSetup}/>
         <QueueSetup alreadySetup={alreadySetup} 
                     reconfigureSetup={reconfigureSetup}
-                    displaySetupUi={displaySetupUi}/>
+                    displaySetupUi={displaySetupUi}
+                    runSetup={runSetup}/>
         <QueueMan alreadySetup={alreadySetup} 
                   reconfigureSetup={reconfigureSetup}/>
         <StatusBarMan store={store} 

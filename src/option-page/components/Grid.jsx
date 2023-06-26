@@ -3,17 +3,16 @@ import ReactDOM from "react-dom"
 // import Helper from "../Helper"
 import {Link} from "react-router-dom"
 import {v4} from "uuid"
-const GridItemEmpty = ({spanCls, limit}) => {
+const GridItemEmpty = ({spanCls, limit,  options}) => {
+	console.log(options)
+	const colSpan = options.fields.length + 2
 	// const arrLength = lastLength ? lastLength : limit
-	const dummyRecords =Array(limit).fill(0)
+	const dummyRecords =[0]
 	return(<>
 		{
 			dummyRecords.map((value,index)=>{
-				return (<tr className="animate-pulse" key={index}>
-		          			<td><span className={spanCls}></span></td>
-		          			<td><span className={spanCls}></span></td>
-		          			<td><span className={spanCls}></span></td>
-		          			<td><span className={spanCls}></span></td>
+				return (<tr className="" key={index}>
+		          			<td colSpan={colSpan}><span className="">No records</span></td>
 		          		</tr>)
 			})
 		}
@@ -91,7 +90,7 @@ class GridItems extends React.Component{
 		const {empty, records, page, limit, options} = this.props
 		return (<>
 		{
-			empty ? (<GridItemEmpty spanCls={this.spanCls} limit={limit}/>) : records.map((item,index)=>{
+			empty ? (<GridItemEmpty options={options} spanCls={this.spanCls} limit={limit}/>) : records.map((item,index)=>{
 	      		return(
 	      			<tr key={index} className={this.trCls}>
 		              <td className={this.tdCls}>
@@ -180,6 +179,7 @@ class Grid extends React.Component{
 		// this.state = {
 		// 	records : []
 		// }
+		// console.log(props)
 	}
 	// shouldComponentUpdate(newProps, newState){
 	// 	console.log('shouldComponentUpdate is triggered')

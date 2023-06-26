@@ -1,9 +1,12 @@
 
-const QueueSetup = ({alreadySetup, displaySetupUi, reconfigure = false}) => {
+const QueueSetup = ({alreadySetup, displaySetupUi, reconfigure = false, runSetup}) => {
     return (<><div className="queue-setup">
         <div className="border rounded p-2">
             <h4 className="font-bold">Setup UI</h4>
         {
+            runSetup ? <>
+            SETup
+            </>:
             alreadySetup ? reconfigure ? <>
                 <span>Already setted up Reconfigure</span>
             </> : <>

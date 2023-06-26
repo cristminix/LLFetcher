@@ -3,7 +3,7 @@ import QueueTable from "./QueueTable"
 
 const ERROR_NOT_SETUP_QUEUE = "You must run setup queue first"
 
-const QueueMan = ({store, alreadySetup}) => {
+const QueueMan = ({store,course,sections,tocs, alreadySetup}) => {
     // console.log(runSetup)
     return (<><div className="queueman">
         
@@ -13,7 +13,7 @@ const QueueMan = ({store, alreadySetup}) => {
                 
                 alreadySetup ? <>
                     <QueueInfo/>
-                    <QueueTable/>
+                    <QueueTable course={course} sections={sections} tocs={tocs} store={store}/>
                 </> : ERROR_NOT_SETUP_QUEUE
             }
             

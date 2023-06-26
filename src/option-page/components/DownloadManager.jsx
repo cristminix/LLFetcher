@@ -73,7 +73,11 @@ const DownloadManager = ({store}) => {
                     store={store}
                     dmsetup={dmsetup}/>
         <QueueMan alreadySetup={alreadySetup} 
-                  reconfigureSetup={reconfigureSetup}/>
+                  reconfigureSetup={reconfigureSetup}
+                  course={course}
+                  sections={sections}
+                  tocs={tocs}
+                  store={store}/>
         <StatusBarMan store={store} 
                       course={course} 
                       alreadySetup={alreadySetup} 

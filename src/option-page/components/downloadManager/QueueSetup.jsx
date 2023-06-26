@@ -3,9 +3,10 @@ import {parseToc} from "../learning_fn"
 import Button from "../Button"
 import DropdownSelect from "../DropdownSelect"
 const btnCls = "py-3 px-4 inline-flex justify-center items-center gap-2 -mt-px -ml-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-l-lg sm:mt-0 sm:first:ml-0 sm:first:rounded-tr-none sm:last:rounded-bl-none sm:last:rounded-r-lg border font-medium bg-white text-gray-700 align-middle hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all text-sm dark:bg-gray-800 dark:hover:bg-slate-800 dark:border-gray-700 dark:text-gray-400"
-const QueueSetup = ({dmsetup, store,course,sections,tocs, alreadySetup, displaySetupUi, reconfigure = false, runSetup}) => {
+const QueueSetup = ({dmsetup, store,course,sections,tocs, alreadySetup,setAlreadySetup, displaySetupUi, reconfigure = false, runSetup}) => {
     const [availableFmt, setAvailableFmt] = useState([])
     const [loadingFetchToc, setLoadingFetchToc] = useState(false) 
+    const [selectedFmt, setSelectedFmt] = useState("Select Format")
     const mDMSetup = store.get("DMSetup")
 
     const fetchToc = async(courseSlug,tocSlug)=> {
@@ -70,9 +71,23 @@ const QueueSetup = ({dmsetup, store,course,sections,tocs, alreadySetup, displayS
     useEffect(()=>{
         if(dmsetup){
             const savedFmtList = dmsetup.availableFmt
+            const savedSelectedFmt = dmsetup.selectedFmt
+            if(savedSelectedFmt){
+                setSelectedFmt(savedSelectedFmt)
+            }
             setAvailableFmt(savedFmtList)
         }
     },[dmsetup])
+    const finishSetup = async(userSelectedFmt) =>{
+        console.log(userSelectedFmt)
+        setSelectedFmt(userSelectedFmt)
+        const row = {
+            status: 2,
+            selectedFmt : userSelectedFmt
+        }
+        await mDMSetup.updateByCourseId(course.id, row)
+        setAlreadySetup(true)
+    }
     return (<><div className="queue-setup">
         <div className="border rounded p-2">
             <h4 className="font-bold">Setup UI</h4>
@@ -84,7 +99,7 @@ const QueueSetup = ({dmsetup, store,course,sections,tocs, alreadySetup, displayS
                         !availableFmt.length?  <>
                         <Button loading={loadingFetchToc} icon="fa fa-cog" onClick={e=> getAvailableFmt(e)} caption="Get Available Fmt"/>
                         </>: <>
-                            <DropdownSelect data={availableFmt} selected={"Select Format"}/>
+                            <DropdownSelect data={availableFmt} selected={selectedFmt} onSelect={e=>finishSetup(e)}/>
                         </>  
                     }
                     </> : ""
@@ -99,7 +114,7 @@ const QueueSetup = ({dmsetup, store,course,sections,tocs, alreadySetup, displayS
                     !availableFmt.length?  <>
                     <Button loading={loadingFetchToc} icon="fa fa-cog" onClick={e=> getAvailableFmt(e)} caption="Get Available Fmt"/>
                     </>: <>
-                        <DropdownSelect data={availableFmt} selected={"Select Format"}/>
+                        <DropdownSelect data={availableFmt} selected={selectedFmt} onSelect={e=>finishSetup(e)}/>
                     </>  
                 }
                 </> : ""

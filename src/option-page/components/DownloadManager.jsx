@@ -37,6 +37,9 @@ const DownloadManager = ({store}) => {
       const savedDmsetup = mDMSetup.getByCourseId(course.id)
       if(savedDmsetup){
           setDmsetup(savedDmsetup)
+          if(savedDmsetup.status == 2){
+            setAlreadySetup(true)
+          }
       }
     }
     useEffect(()=>{
@@ -60,6 +63,7 @@ const DownloadManager = ({store}) => {
                     course={course}
                     dmsetup={dmsetup}/>
         <QueueSetup alreadySetup={alreadySetup} 
+                    setAlreadySetup={setAlreadySetup}
                     reconfigureSetup={reconfigureSetup}
                     displaySetupUi={displaySetupUi}
                     runSetup={runSetup}

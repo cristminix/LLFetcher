@@ -131,7 +131,18 @@ class DB {
         // Store.db().setFresh(true);
 
     }
-    
+    async dropTable(){
+
+		this.db.dropTable(this.table)
+		await this.db.commit()
+		for(let i in DB.instances){
+			const instance = DB.instances[i]
+			await instance.initDB()
+			if(instance.table === 'app'){
+				await instance.init()
+			}
+		}
+	}
     static async isFresh(){
         // chrome.storage.local.get('db_learning',(db)=>{
         //     console.log(db);

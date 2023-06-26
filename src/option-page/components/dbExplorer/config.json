@@ -28,8 +28,8 @@
             
         },
         "dm-setup" : {
-            "headers" : ["CourseId", "Status"],
-            "fields" : ["course", "status"],
+            "headers" : ["CourseId", "Status","Available Fmt", "Selected Fmt", "Exercise File", "Source Repo"],
+            "fields" : ["course", "status", "availableFmt", "selectedFmt", "exerciseFile", "sourceRepo"],
             "model" : "DMSetup",
             "listMethod" : "getListWithCourse"
         }

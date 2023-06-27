@@ -30,7 +30,7 @@ const FmtSelector = ({  renderState = false,
     </>
 }
 
-const QueueSetup = ({dmsetup, store,course,sections,tocs, alreadySetup,setAlreadySetup, displaySetupUi, reconfigure = false, runSetup}) => {
+const QueueSetup = ({dmsetup, store,course,sections,tocs, alreadySetup,setAlreadySetup, displaySetupUi, reconfigureSetup = false, setReconfigureSetup, runSetup}) => {
     const [availableFmt, setAvailableFmt] = useState([])
     const [loadingFetchToc, setLoadingFetchToc] = useState(false) 
     const selectFmt = "Select Format"
@@ -113,6 +113,9 @@ const QueueSetup = ({dmsetup, store,course,sections,tocs, alreadySetup,setAlread
             selectedFmt 
         }
         await mDMSetup.updateByCourseId(course.id, row)
+        if(reconfigureSetup){
+            setReconfigureSetup(false)
+        }
         setAlreadySetup(true)}
     }
     const fmtSelectorProps = {
@@ -126,12 +129,12 @@ const QueueSetup = ({dmsetup, store,course,sections,tocs, alreadySetup,setAlread
         finishSetup
                     
     }
-    return (<><div className="queue-setup">
+    return (<><div className="queue-setup my-2">
         <div className="border rounded p-2 flex flex-col">
             <h4 className="font-bold">Setup UI</h4>
         {
             alreadySetup ? <>
-                <FmtSelector renderState={reconfigure} {...fmtSelectorProps}/>
+                <FmtSelector renderState={reconfigureSetup} {...fmtSelectorProps}/>
                
                 <span>Already setted up</span>
                 

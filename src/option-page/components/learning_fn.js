@@ -182,5 +182,29 @@ function findItems(searchTerm, source){
       
       return [validResource, toc, exerciseFile, streamLocations]
   }
+ 
+const fetchCourseTocMeta = async(courseSlug,tocSlug)=> {
+	const {hasError, responseText} = await fetchCourseTocPage(courseSlug, tocSlug)
+    if(!hasError){
+        return parseToc(responseText)
+    }
     
-  export {findDS, findItems, parseToc}
+    return [false, null, null, null]
+}
+const fetchCourseTocPage = async(courseSlug, tocSlug)=>{
+    const url =  `https://www.linkedin.com/learning/${courseSlug}/${tocSlug}`
+    let hasError = false
+    let responseText = ""
+    let error
+    try{
+        const res = await fetch(`${url}?rand=${(new Date).getTime()}`)
+        responseText = await res.text()
+    }catch(e){
+        hasError = true
+        error = e
+        console.log(e)
+    }
+    return {hasError, responseText, error}
+}
+
+export {findDS, findItems, parseToc, fetchCourseTocMeta}

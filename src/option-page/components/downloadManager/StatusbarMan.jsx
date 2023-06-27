@@ -1,7 +1,7 @@
 import { useState } from "react"
 const StatusbarMan = ({store, course, message="Hello Status Bar Manager", mode=0}) => {
 
-    return (<><div className="statusbar-man absolute bottom-0 w-full -mx-8 ">
+    return (<><div className="statusbar-man fixed bottom-0 w-full -mx-8 bg-white">
         <div className="status-bar-man-container rounded border p-2.5">
             {
                 mode===0 ? <div className="success text-green-600">

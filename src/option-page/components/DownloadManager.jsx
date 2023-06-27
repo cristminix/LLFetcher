@@ -28,6 +28,7 @@ const DownloadManager = ({store}) => {
 
     // queueRelatedState
     const [queueStarted, setQueueStarted] = useState(false)
+    const [queueFinished, setQueueFinished] = useState(false)
 
     const updateCourseData = async()=>{
       setActiveCourseData(null)
@@ -77,26 +78,32 @@ const DownloadManager = ({store}) => {
                     queueStarted={queueStarted}
                     startDownloadQueue={startDownloadQueue}
                     stopDownloadQueue={stopDownloadQueue}
+                    queueFinished={queueFinished}
+                    setQueueFinished={setQueueFinished}
                     queueManRef={queueManRef}/>
         <QueueSetup alreadySetup={alreadySetup} 
                     setAlreadySetup={setAlreadySetup}
                     reconfigureSetup={reconfigureSetup}
                     setReconfigureSetup={setReconfigureSetup}
-
                     displaySetupUi={displaySetupUi}
                     runSetup={runSetup}
                     course={course}
                     sections={sections}
                     tocs={tocs}
                     store={store}
-                    dmsetup={dmsetup}/>
+                    dmsetup={dmsetup}
+                    />
         <QueueMan alreadySetup={alreadySetup} 
                   reconfigureSetup={reconfigureSetup}
                   course={course}
                   sections={sections}
                   tocs={tocs}
                   store={store}
-                  queueStarted={queueStarted} ref={queueManRef}/>
+                  queueStarted={queueStarted} 
+                  stopDownloadQueue={stopDownloadQueue}
+                  queueFinished={queueFinished}
+                  setQueueFinished={setQueueFinished}
+                  ref={queueManRef}/>
         <StatusBarMan store={store} 
                       course={course} 
                       alreadySetup={alreadySetup} 

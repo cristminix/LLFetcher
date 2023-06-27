@@ -206,5 +206,93 @@ const fetchCourseTocPage = async(courseSlug, tocSlug)=>{
     }
     return {hasError, responseText, error}
 }
+function calculateSpeed(loaded,startTime,endTime) {
+    //Time taken in seconds
+    let timeDuration = (endTime - startTime) / 1000;
+    //total bots
+    let loadedBits = loaded;
+    let speedInBps = (loadedBits / timeDuration).toFixed(2);
+    // let speedInKbps = (speedInBps / 1024).toFixed(2);
+    // let speedInMbps = (speedInKbps / 1024).toFixed(2);
+  
+    // bitOutput.innerHTML += `${speedInBps}`;
+    // kboutput.innerHTML += `${speedInKbps}`;
+    // mboutput.innerHTML += `${speedInMbps}`;
 
-export {findDS, findItems, parseToc, fetchCourseTocMeta}
+    return speedInBps
+}
+function formatBytes(bytes) {
+    if (bytes === 0) {
+      return '0 Bytes';
+    }
+  
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    const formattedValue = parseFloat((bytes / Math.pow(1024, i)).toFixed(2));
+  
+    return `${formattedValue} ${sizes[i]}`;
+  }
+async function fetchDownload(url, outputFilename, mime, progressCallback, index) {
+    return new Promise((resolve, reject)=>{
+        let contentType
+        fetch(url)
+        .then(response => {
+
+            const contentEncoding = response.headers.get('content-encoding')
+            let contentLength = response.headers.get(contentEncoding ? 'x-file-size' : 'content-length')
+            contentType = response.headers.get('content-type') || mime
+            if (contentLength === null) {
+                contentLength = 0
+                // throw Error('Response size header unavailable');
+            }
+
+            const total = parseInt(contentLength, 10);
+            let loaded = 0;
+            return new Response(
+                new ReadableStream({
+                    start(controller) {
+                        let lastReadDate = new Date
+
+                        const reader = response.body.getReader();
+
+                        read();
+                        
+                        function read() {
+                            reader.read().then(({done, value}) => {
+                                if (done) {
+                                    controller.close();
+                                    return;
+                                }
+                                loaded += value.byteLength;
+                                const lastLoaded = value.byteLength
+                                progressCallback({loaded, total, index, lastReadDate, lastLoaded})
+                                lastReadDate = new Date
+                                controller.enqueue(value);
+                                read();
+                            }).catch(error => {
+                                console.error(error);
+                                controller.error(error)
+                            })
+                        }
+                    }
+                })
+            );
+        })
+        .then(response => response.blob())
+        .then(blob => {
+            // let blobUrl = URL.createObjectURL(blob)
+            resolve(blob)
+            // player.style.display = 'block';
+            // player.type = contentType;
+            // player.src = vid;
+            // elProgress.innerHTML += "<br /> Press play!";
+        })
+        .catch(error => {
+            reject(error)
+            console.error(error)
+        })
+    })
+    
+}
+
+export {findDS, findItems, parseToc, fetchCourseTocMeta, calculateSpeed, formatBytes,fetchDownload}

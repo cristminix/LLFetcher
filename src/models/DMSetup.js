@@ -6,6 +6,7 @@ class DMSetup extends DB{
 	fields = [
         "courseId",
         "status",
+        "finished",
         "availableFmt", "selectedFmt", "exerciseFile", "sourceRepo"
         ]
 	type = "collection"
@@ -25,11 +26,11 @@ class DMSetup extends DB{
     getById(id){
         return this.singleQuery({query: {id}})
     }
-    async create(courseId,availableFmt,selectedFmt,sourceRepo,exerciseFile,status){
+    async create(courseId,availableFmt,selectedFmt,sourceRepo,exerciseFile,status,finished){
         let row = this.getByCourseId(courseId)
         if(!row){
             const id = 0
-            row = {id,courseId,availableFmt,selectedFmt,sourceRepo,exerciseFile,status}
+            row = {id,courseId,availableFmt,selectedFmt,sourceRepo,exerciseFile,status,finished}
             row.id = this.db.insert(this.table,row)
             await this.db.commit()
         }else{

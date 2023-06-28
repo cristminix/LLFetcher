@@ -92,7 +92,7 @@ class QueueMan extends Component{
             this.onDlProgress(loaded, total, vIndex, lastReadDate, lastLoaded, t)
         },currentIndex,t)
         
-        dlStatus = rand([-1,2])
+        dlStatus = 2//rand([-1,2])
 
         queueItem.setDlStatus(t, currentIndex, dlStatus)
         await this.mDMStatus.setDlStatus(courseId, t, currentIndex, dlStatus)

@@ -1,4 +1,4 @@
-import DB from "./DB"
+import DB,{convertToMySQLDatetime} from "./DB"
 import Course from "./Course"
 
 class DMStatus extends DB{
@@ -40,14 +40,15 @@ class DMStatus extends DB{
     }
     async create(courseId,vIndex){
         let row = this.getByCourseId(courseId, vIndex)
+        const dt = convertToMySQLDatetime(new Date)
         if(!row){
             const id = 0
             const videoStatus = 0
             const captionStatus = 0
-            const dtVideoStart = new Date
-            const dtCaptionStart = new Date
-            const dtVideoEnd = new Date
-            const dtCaptionEnd = new Date
+            const dtVideoStart = dt
+            const dtCaptionStart = dt     
+            const dtVideoEnd = dt
+            const dtCaptionEnd = dt
             const dlCaptionRetryCount = 0
             const dlVideoRetryCount = 0
             const finished = false
@@ -99,7 +100,7 @@ class DMStatus extends DB{
     }
 
     async setDlStatus(courseId, t, vIndex, dlStatus){
-        const dt = new Date
+        const dt = convertToMySQLDatetime(new Date)
 
         let current = this.getByCourseId(courseId, vIndex)
         if(!current){

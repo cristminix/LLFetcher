@@ -98,7 +98,8 @@ class GridItems extends React.Component{
 		              </td>
 		              {
 		              	options.fields.map((field, fieldIndex)=>{
-		              		const value = item[field].toString()
+		              		let value = item[field]
+		              		try{ value = value.toString()}catch(e){}
 		              		let fieldText = value
 		              		if(options.callbackFields){
 		              			if(options.callbackFields[field]){

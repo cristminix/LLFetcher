@@ -105,14 +105,52 @@ class QueueMan extends Component{
         const {queueItemRef} = this
 
         const {currentIndex} = this.state
+        const {course} = this.props
         const queueItem = queueItemRef.current
+        
+        const dmstatus = this.mDMStatus.getByCourseId(course.id, currentIndex)
+
+        let captionStatus = 0
+        let videoStatus = 0
+        let finished = false
+        let interupted = false
+
+        if(dmstatus){
+            captionStatus = dmstatus.captionStatus
+            videoStatus = dmstatus.videoStatus
+            finished = dmstatus.finished
+            interupted = dmstatus.interupted
+        }
+
         if(queueItem){
-            queueItem.setLoading(currentIndex, true)
+            if(!finished){
+                queueItem.setLoading(currentIndex, true)
+                if(interupted){
+                    if(captionStatus != 2){
+                        await this.fetchDlItem("caption", queueItem)
 
-            await this.fetchDlItem("caption", queueItem)
-            await this.fetchDlItem("video", queueItem)
+                    }else{
+                        this.setState({infoMessage:`${currentIndex} caption skipped`})
 
-            queueItem.setLoading(currentIndex, false)
+                    }
+                    if(videoStatus != 2){
+                        await this.fetchDlItem("video", queueItem)
+                        
+                    }else{
+                        this.setState({infoMessage:`${currentIndex} video skipped`})
+
+                    }
+                }else{
+                    await this.fetchDlItem("caption", queueItem)
+                    await this.fetchDlItem("video", queueItem)
+                }
+                
+
+                queueItem.setLoading(currentIndex, false)
+            }else{
+                this.setState({infoMessage:`${currentIndex} skipped`})
+            }
+            
 
         }
 

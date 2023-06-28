@@ -72,6 +72,12 @@
 					"path" : "/database/dm-setup",
 					"iconCls" : "fa fa-database",
 					"order" : 0
+				},
+				"dm-status" : {
+					"title" : "DMStatus",
+					"path" : "/database/dm-status",
+					"iconCls" : "fa fa-database",
+					"order" : 0
 				}
 			}
 		},

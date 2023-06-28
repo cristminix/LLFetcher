@@ -32,6 +32,34 @@
             "fields" : ["course", "finished","status", "availableFmt", "selectedFmt", "exerciseFile", "sourceRepo"],
             "model" : "DMSetup",
             "listMethod" : "getListWithCourse"
+        },
+        "dm-status" : {
+            "headers" : ["Course",
+        "vIndex",
+        "Video Status",
+        "Caption Status", 
+        "Dt Video Start",
+        "Dt Caption Start",
+        "Dt Video End",
+        "Dt Caption End",
+        "Dl Caption Retry Count",
+        "Dl Video Retry Count",
+        "Finished",
+        "Interupted"],
+            "fields" : ["course",
+                        "vIndex",
+                        "videoStatus",
+                        "captionStatus", 
+                        "dtVideoStart",
+                        "dtCaptionStart",
+                        "dtVideoEnd",
+                        "dtCaptionEnd",
+                        "dlCaptionRetryCount",
+                        "dlVideoRetryCount",
+                        "finished",
+                        "interupted"],
+            "model" : "DMStatus",
+            "listMethod" : "getListWithCourse"
         }
 
         

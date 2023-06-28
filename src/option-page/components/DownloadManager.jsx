@@ -33,6 +33,8 @@ const DownloadManager = ({store}) => {
     const updateCourseData = async()=>{
       setActiveCourseData(null)
       setRunSetup(false)
+      setAlreadySetup(false)
+
       const courseData = await store.mCourse.getCoursePageData(slug)
       await store.mCourse.setLastSlug(slug)
       setActiveCourseData(courseData)
@@ -62,6 +64,13 @@ const DownloadManager = ({store}) => {
       }
     },[slug])
     
+    useEffect(()=>{
+      console.log(queueFinished)
+      if(queueFinished){
+
+      }
+    },[queueFinished])
+
     if(activeCourseData){
       console.log(activeCourseData)
       const {course, authors, sections, tocs}  = activeCourseData

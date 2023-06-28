@@ -128,8 +128,8 @@ class QueueItem extends Component{
                 return <tr key={`${refKey}`}>
                     <td className={tdCls}> {number}</td>
                     <td className={tdCls}> {toc.title}</td>
-                    <td className={tdCls}> <i className="fa fa-file-text-o"/> <InputDisplay  givenRef={captionStatusRefs[refKey]}/> <DLStatus status={dlcaptionStatus[refKey]}/></td>
-                    <td className={tdCls}> <i className="fa fa-file-video-o"/> <InputDisplay  givenRef={videoStatusRefs[refKey]}/> <DLStatus status={dlvideoStatus[refKey]}/></td>
+                    <td className={tdCls}> <i className="fa fa-file-text-o"/> <InputDisplay value="n.a" givenRef={captionStatusRefs[refKey]}/> <DLStatus status={dlcaptionStatus[refKey]}/></td>
+                    <td className={tdCls}> <i className="fa fa-file-video-o"/> <InputDisplay value="n.a" givenRef={videoStatusRefs[refKey]}/> <DLStatus status={dlvideoStatus[refKey]}/></td>
                     <td className={tdCls}> <QueueItemToolbar loading={loadings[refKey]} dlStatus={[dlcaptionStatus[refKey],dlvideoStatus[refKey]]}/></td>
                 </tr>
             })

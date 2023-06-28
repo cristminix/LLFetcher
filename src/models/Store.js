@@ -11,7 +11,7 @@ import StreamLocation from "./StreamLocation"
 import Toc from "./Toc"
 import Message from "./Message"
 import DMSetup from "./DMSetup"
-import mDMStatus from "./mDMStatus"
+import DMStatus from "./DMStatus"
 
 class Store {
 	mApp = null

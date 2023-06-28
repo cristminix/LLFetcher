@@ -5,7 +5,16 @@ import {timeout} from "../../../components/fn"
 import {fetchCourseTocMeta, formatBytes, calculateSpeed} from "../../components/learning_fn"
 
 const ERROR_NOT_SETUP_QUEUE = "You must run setup queue first"
-async function fetchDownload(url, outputFilename, mime, progressCallback, vIndex){
+
+function rand(array) {
+  if (array.length === 0) {
+    throw new Error("Array must not be empty.");
+  }
+
+  const randomIndex = Math.floor(Math.random() * array.length);
+  return array[randomIndex];
+}
+async function fetchDownload(url, outputFilename, mime, progressCallback, vIndex, t){
     if(!vIndex){
         console.log(vIndex)
         return
@@ -29,7 +38,7 @@ async function fetchDownload(url, outputFilename, mime, progressCallback, vIndex
         await timeout(50)
         let lastLoaded = bufferCount * 100
         loaded += lastLoaded 
-        progressCallback(loaded, total, vIndex, lastReadDate, lastLoaded)
+        progressCallback(loaded, total, vIndex, lastReadDate, lastLoaded,t)
         lastReadDate = new Date
     }
 
@@ -52,35 +61,74 @@ class QueueMan extends Component{
         console.log(`Fetching dlMeta`)
 
     }
-    async fetchDl() {
+    async fetchDlItem(t, queueItem){
         const {currentIndex} = this.state
         const videoUrl = 'https://video.url'
         const captionUrl = 'https://caption.url'
         const videoFilename = 'video.mp4'
         const captionFilename = 'caption.vtt'
 
-        const dl = await fetchDownload(captionUrl, captionFilename, null, (loaded, total, vIndex, lastReadDate, lastLoaded)=>{
-            this.onDlProgress(loaded, total, vIndex, lastReadDate, lastLoaded)
-        },currentIndex)
+
+        let url
+
+        if(t == 'caption'){
+            url = captionUrl
+
+
+        }else{
+            url = videoUrl
+        }
+        let infoMessage = `Downloading ${url}`
+        this.setState({infoMessage})
+        queueItem.setDlStatus(t, currentIndex, 1)
+        
+        const dl = await fetchDownload(url, captionFilename, null, (loaded, total, vIndex, lastReadDate, lastLoaded, type)=>{
+            this.onDlProgress(loaded, total, vIndex, lastReadDate, lastLoaded, t)
+        },currentIndex,t)
+        
+        queueItem.setDlStatus(t, currentIndex, rand([-1,2]))
+        this.setState({infoMessage : "OK"})
+
 
     }
-    async onDlProgress(loaded, total, vIndex, lastReadDate, lastLoaded){
+    async fetchDl() {
+        const {queueItemRef} = this
+
+        const {currentIndex} = this.state
+        const queueItem = queueItemRef.current
+        if(queueItem){
+            queueItem.setLoading(currentIndex, true)
+
+            await this.fetchDlItem("caption", queueItem)
+            await this.fetchDlItem("video", queueItem)
+
+            queueItem.setLoading(currentIndex, false)
+
+        }
+
+    }
+    async onDlProgress(loaded, total, vIndex, lastReadDate, lastLoaded, t){
 
         const {queueItemRef} = this
         
         if(queueItemRef.current){
+            const queueItem = queueItemRef.current
             console.log(vIndex)
             if(vIndex){
                 const percentageView = Math.round(loaded / total * 100) + '%'
-                //console.log(formatBytes(loaded),percentageView)
-                // console.log(`lastLoaded:${lastLoaded}`)
-                // console.log(`lastReadDate:${lastReadDate}`)
-                const speed = formatBytes(calculateSpeed(lastLoaded,lastReadDate,new Date))
-                // console.log(`speed:${speed}`)
-                const {captionRef,videoRef} = queueItemRef.current.getStatusRef(vIndex)
-                // console.log(videoRef,captionRef)
 
-                captionRef.current.value = `${formatBytes(loaded)}/${speed}ps`
+                const speed = formatBytes(calculateSpeed(lastLoaded,lastReadDate,new Date))
+
+                const {captionRef,videoRef} = queueItem.getStatusRef(vIndex)
+
+                if(t=="caption"){
+                    captionRef.current.value = `${formatBytes(loaded)}/${speed}ps`
+
+                }
+                else if(t=="video"){
+                    videoRef.current.value = `${formatBytes(loaded)}/${speed}ps`
+
+                }
             }
             
         }

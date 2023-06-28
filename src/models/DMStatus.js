@@ -1,17 +1,22 @@
 import DB from "./DB"
 import Course from "./Course"
 
-class DMSetup extends DB{
-    table = 'dmSetup'
+class DMStatus extends DB{
+    table = 'dmStatus'
 	fields = [
         "courseId",
-        "status",
+        "vIndex",
+        "videoStatus",
+        "captionStatus", 
+        "dtVideoStart",
+        "dtCaptionStart",
+        "dtVideoEnd",
+        "dtCaptionEnd",
+        "dlCaptionRetryCount",
+        "dlVideoRetryCount",
         "finished",
-        "availableFmt", 
-        "selectedFmt", 
-        "exerciseFile", 
-        "sourceRepo"
-        ]
+        "interupted"
+    ]
 	type = "collection"
 
     getListWithCourse(){
@@ -29,11 +34,34 @@ class DMSetup extends DB{
     getById(id){
         return this.singleQuery({query: {id}})
     }
-    async create(courseId,availableFmt,selectedFmt,sourceRepo,exerciseFile,status,finished){
+    async create(courseId,vIndex){
         let row = this.getByCourseId(courseId)
         if(!row){
             const id = 0
-            row = {id,courseId,availableFmt,selectedFmt,sourceRepo,exerciseFile,status,finished}
+            const videoStatus = 0
+            const captionStatus = 0
+            const dtVideoStart = new Date
+            const dtCaptionStart = new Date
+            const dtVideoEnd = new Date
+            const dtCaptionEnd = new Date
+            const dlCaptionRetryCount = 0
+            const dlVideoRetryCount = 0
+            const finished = false
+            const interupted = false
+
+            row = { id, courseId, courseId,
+                    vIndex,
+                    videoStatus,
+                    captionStatus, 
+                    dtVideoStart,
+                    dtCaptionStart,
+                    dtVideoEnd,
+                    dtCaptionEnd,
+                    dlCaptionRetryCount,
+                    dlVideoRetryCount,
+                    finished,
+                    interupted}
+
             row.id = this.db.insert(this.table,row)
             await this.db.commit()
         }else{
@@ -67,4 +95,4 @@ class DMSetup extends DB{
     }
 }
 
-export default DMSetup
+export default DMStatus

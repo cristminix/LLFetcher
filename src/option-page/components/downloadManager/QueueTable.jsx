@@ -19,7 +19,7 @@ const QueueTable = ({store, course, sections, tocs, queueItemRef}) => {
                 </tr>
             </thead>
             <tbody>
-            <QueueItem ref={queueItemRef} course={course} sections={sections} tocs={tocs} />
+            <QueueItem store={store} ref={queueItemRef} course={course} sections={sections} tocs={tocs} />
             </tbody>
         </table>
         </div>

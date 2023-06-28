@@ -120,7 +120,7 @@ class QueueMan extends Component{
     async onDlProgress(loaded, total, vIndex, lastReadDate, lastLoaded, t){
 
         const {queueItemRef} = this
-        
+        const {course} = this.props
         if(queueItemRef.current){
             const queueItem = queueItemRef.current
             console.log(vIndex)
@@ -139,6 +139,9 @@ class QueueMan extends Component{
                     videoRef.current.value = `${formatBytes(loaded)}/${speed}ps`
 
                 }
+
+                await this.mDMStatus.setDlSize(course.id, t, vIndex, loaded)
+
             }
             
         }

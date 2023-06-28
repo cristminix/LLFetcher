@@ -1,4 +1,5 @@
 import {Component,createRef} from "react"
+import { formatBytes} from "../../components/learning_fn"
 import QueueItemToolbar from "./QueueItemToolbar"
 
 const InputDisplay = ({givenRef, value}) => {
@@ -35,7 +36,8 @@ class QueueItem extends Component{
         this.captionStatusRefs = {}
         this.videoStatusRefs = {}
 
-        const {sections, tocs} = props
+        const {sections, tocs, store} = props
+        this.mDMStatus = store.get("DMStatus")
         this.state = {
             loadings : {},
             dlcaptionStatus : {},
@@ -114,6 +116,16 @@ class QueueItem extends Component{
 
         this.setState(stateObj)
     }
+    async syncDMStatus(){
+        
+    }
+    getDMStatus(sIndex,tIndex){
+        const {course} = this.props
+        const vIndex = `${sIndex}${tIndex}`
+        const dmstatus = this.mDMStatus.getByCourseId(course.id, vIndex)
+
+        return dmstatus
+    }
     render(){
         const {sections, tocs} = this.props
         const {captionStatusRefs, videoStatusRefs} = this
@@ -125,12 +137,27 @@ class QueueItem extends Component{
             return tocs[s.slug].map((toc,tIndex)=>{
                 number+=1
                 const refKey = this.createRefKey(sIndex,tIndex)
-                return <tr key={`${refKey}`}>
+                const dmstatus = this.getDMStatus(sIndex,tIndex)
+                let trCls = ""
+                let videoSz="n.a",captionSz="n.a"
+                let vIndexStatus = [dlcaptionStatus[refKey],dlvideoStatus[refKey]]
+                let finished = false
+                let interupted = false
+                try{
+                    videoSz = formatBytes(dmstatus.videoSz)
+                    captionSz = formatBytes(dmstatus.captionSz)
+                    finished = dmstatus.finished
+                    interupted = dmstatus.interupted
+                    trCls = dmstatus.finished ? 'bg-green-300' : dmstatus.interupted ? 'bg-red-300' : ''
+                }catch(e){
+
+                }
+                return <tr key={`${refKey}`} className={trCls}>
                     <td className={tdCls}> {number}</td>
                     <td className={tdCls}> {toc.title}</td>
-                    <td className={tdCls}> <i className="fa fa-file-text-o"/> <InputDisplay value="n.a" givenRef={captionStatusRefs[refKey]}/> <DLStatus status={dlcaptionStatus[refKey]}/></td>
-                    <td className={tdCls}> <i className="fa fa-file-video-o"/> <InputDisplay value="n.a" givenRef={videoStatusRefs[refKey]}/> <DLStatus status={dlvideoStatus[refKey]}/></td>
-                    <td className={tdCls}> <QueueItemToolbar loading={loadings[refKey]} dlStatus={[dlcaptionStatus[refKey],dlvideoStatus[refKey]]}/></td>
+                    <td className={tdCls}> <i className="fa fa-file-text-o"/> <InputDisplay value={captionSz} givenRef={captionStatusRefs[refKey]}/> <DLStatus status={dlcaptionStatus[refKey]}/></td>
+                    <td className={tdCls}> <i className="fa fa-file-video-o"/> <InputDisplay value={videoSz} givenRef={videoStatusRefs[refKey]}/> <DLStatus status={dlvideoStatus[refKey]}/></td>
+                    <td className={tdCls}> <QueueItemToolbar loading={loadings[refKey]} dlStatus={vIndexStatus} finished={finished} interupted={interupted}/></td>
                 </tr>
             })
         })

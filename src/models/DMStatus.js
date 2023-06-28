@@ -14,6 +14,8 @@ class DMStatus extends DB{
         "dtCaptionEnd",
         "dlCaptionRetryCount",
         "dlVideoRetryCount",
+        "videoSz",
+        "captionSz",
         "finished",
         "interupted"
     ]
@@ -65,6 +67,8 @@ class DMStatus extends DB{
                     dlCaptionRetryCount,
                     dlVideoRetryCount,
                     finished,
+                    videoSz : 0,
+                    captionSz: 0,
                     interupted}
 
             row.id = this.db.insert(this.table,row)
@@ -106,9 +110,11 @@ class DMStatus extends DB{
         if(!current){
             current = await this.create(courseId, vIndex)
         }
-        let row
+
+        let row,dlStatusResult
         if(t == "caption"){
             const captionStatus = dlStatus
+            dlStatusResult = parseInt(current.videoStatus) + parseInt(dlStatus)
             row = {
                 captionStatus
             }
@@ -119,6 +125,8 @@ class DMStatus extends DB{
             }
         }else{
             const videoStatus = dlStatus
+            dlStatusResult = parseInt(current.captionStatus) + parseInt(dlStatus)
+
             row = {
                 videoStatus
             }
@@ -128,9 +136,38 @@ class DMStatus extends DB{
                 row.dtVideoEnd = dt
             }
         }
+        if(dlStatus == -1){
+            row.interupted = true
+        }
+        if(dlStatusResult == 4){
+            row.finished = true
+            row.interupted = true
+            
+        }
 
         await this.updateByCourseId(courseId,vIndex, row)
 
+    }
+
+    async setDlSize(courseId, t, vIndex, loaded){
+        console.log(`DMStatus.setDlSize(${courseId},${t},${this.createVIndex(vIndex)},${loaded})`)
+
+        let current = this.getByCourseId(courseId, vIndex)
+        if(!current){
+            return
+        }
+
+        const szField = t == "caption" ? "captionSz" : "videoSz"
+        
+        let row = {}
+        if(t == "caption"){
+            row.captionSz = loaded
+        }else{
+            row.videoSz = loaded
+        }
+        // row[szField] = loaded
+
+        await this.updateByCourseId(courseId, vIndex, row)
     }
 }
 

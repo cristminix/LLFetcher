@@ -42,34 +42,9 @@ class DMStatus extends DB{
     }
     async create(courseId,vIndex){
         let row = this.getByCourseId(courseId, vIndex)
-        const dt = convertToMySQLDatetime(new Date)
         if(!row){
-            const id = 0
-            const videoStatus = 0
-            const captionStatus = 0
-            const dtVideoStart = dt
-            const dtCaptionStart = dt     
-            const dtVideoEnd = dt
-            const dtCaptionEnd = dt
-            const dlCaptionRetryCount = 0
-            const dlVideoRetryCount = 0
-            const finished = false
-            const interupted = false
 
-            row = { id, courseId, courseId,
-                    vIndex : this.createVIndex(vIndex),
-                    videoStatus,
-                    captionStatus, 
-                    dtVideoStart,
-                    dtCaptionStart,
-                    dtVideoEnd,
-                    dtCaptionEnd,
-                    dlCaptionRetryCount,
-                    dlVideoRetryCount,
-                    finished,
-                    videoSz : 0,
-                    captionSz: 0,
-                    interupted}
+            row = this.createDefaultRow(courseId, vIndex)
 
             row.id = this.db.insert(this.table,row)
             await this.db.commit()
@@ -142,7 +117,7 @@ class DMStatus extends DB{
         if(dlStatusResult == 4){
             row.finished = true
             row.interupted = true
-            
+
         }
 
         await this.updateByCourseId(courseId,vIndex, row)
@@ -168,6 +143,42 @@ class DMStatus extends DB{
         // row[szField] = loaded
 
         await this.updateByCourseId(courseId, vIndex, row)
+    }
+
+    createDefaultRow(courseId, vIndex){
+        const dt = convertToMySQLDatetime(new Date)
+
+        const id = 0
+        const videoStatus = 0
+        const captionStatus = 0
+        const dtVideoStart = dt
+        const dtCaptionStart = dt     
+        const dtVideoEnd = dt
+        const dtCaptionEnd = dt
+        const dlCaptionRetryCount = 0
+        const dlVideoRetryCount = 0
+        const finished = false
+        const interupted = false
+        const videoSz = 0
+        const captionSz = 0
+
+        const row = { id, courseId, courseId,
+                    vIndex : this.createVIndex(vIndex),
+                    videoStatus,
+                    captionStatus, 
+                    dtVideoStart,
+                    dtCaptionStart,
+                    dtVideoEnd,
+                    dtCaptionEnd,
+                    dlCaptionRetryCount,
+                    dlVideoRetryCount,
+                    finished,
+                    videoSz,
+                    captionSz,
+                    interupted
+        }
+
+        return row
     }
 }
 

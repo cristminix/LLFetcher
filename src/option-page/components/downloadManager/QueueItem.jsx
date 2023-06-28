@@ -36,12 +36,13 @@ class QueueItem extends Component{
         this.captionStatusRefs = {}
         this.videoStatusRefs = {}
 
-        const {sections, tocs, store} = props
+        const {sections, tocs, store, course} = props
         this.mDMStatus = store.get("DMStatus")
         this.state = {
             loadings : {},
             dlcaptionStatus : {},
-            dlvideoStatus : {}
+            dlvideoStatus : {},
+            dmstatusList : {}
         }
         
         // for(let sIndex = 0;sIndex < sections.length; sIndex++){
@@ -70,8 +71,18 @@ class QueueItem extends Component{
                 this.captionStatusRefs[refKey] = createRef(null)
                 this.videoStatusRefs[refKey] = createRef(null)
                 this.state.loadings[refKey] = false
+
                 this.state.dlvideoStatus[refKey] = 0
                 this.state.dlcaptionStatus[refKey] = 0
+
+                const vIndex = [sIndex,tIndex]
+                let dmstatus = this.getDMStatus(sIndex,tIndex)
+                // console.log(dmstatus,vIndex)
+                if(!dmstatus){
+                    console.log(`creating default dmstatus`)
+                    dmstatus = this.mDMStatus.createDefaultRow(course.id, vIndex)
+                }
+                this.state.dmstatusList[refKey] = dmstatus
             })
         })
     }
@@ -89,6 +100,10 @@ class QueueItem extends Component{
     }
     createRefKey(sIndex,tIndex) {
         return `ref_${sIndex}${tIndex}`
+    }
+
+    setDmStatus(vIndex, dmstatus){
+
     }
 
     setLoading(vIndex, status){
@@ -129,35 +144,38 @@ class QueueItem extends Component{
     render(){
         const {sections, tocs} = this.props
         const {captionStatusRefs, videoStatusRefs} = this
-        const {loadings,dlvideoStatus,dlcaptionStatus} = this.state
+        const {loadings,dlvideoStatus,dlcaptionStatus, dmstatusList} = this.state
     	const tdCls = "px-1 py-1 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-gray-200"
 
         let number = 0
         return sections.map((s, sIndex)=>{
             return tocs[s.slug].map((toc,tIndex)=>{
-                number+=1
+                number += 1
                 const refKey = this.createRefKey(sIndex,tIndex)
-                const dmstatus = this.getDMStatus(sIndex,tIndex)
+                const dmstatus = dmstatusList[refKey]
                 let trCls = ""
                 let videoSz="n.a",captionSz="n.a"
                 let vIndexStatus = [dlcaptionStatus[refKey],dlvideoStatus[refKey]]
-                let finished = false
-                let interupted = false
-                try{
-                    videoSz = formatBytes(dmstatus.videoSz)
-                    captionSz = formatBytes(dmstatus.captionSz)
-                    finished = dmstatus.finished
-                    interupted = dmstatus.interupted
-                    trCls = dmstatus.finished ? 'bg-green-300' : dmstatus.interupted ? 'bg-red-300' : ''
-                }catch(e){
+             
 
+                if(dmstatus.videoSz >0){
+                    videoSz = formatBytes(dmstatus.videoSz)
                 }
+                if(dmstatus.captionSz > 0){
+                    captionSz = formatBytes(dmstatus.captionSz)
+                }
+                
+
+                trCls = dmstatus.finished ? 'bg-green-300' : dmstatus.interupted ? 'bg-red-300' : ''
+   
+
+
                 return <tr key={`${refKey}`} className={trCls}>
                     <td className={tdCls}> {number}</td>
                     <td className={tdCls}> {toc.title}</td>
                     <td className={tdCls}> <i className="fa fa-file-text-o"/> <InputDisplay value={captionSz} givenRef={captionStatusRefs[refKey]}/> <DLStatus status={dlcaptionStatus[refKey]}/></td>
                     <td className={tdCls}> <i className="fa fa-file-video-o"/> <InputDisplay value={videoSz} givenRef={videoStatusRefs[refKey]}/> <DLStatus status={dlvideoStatus[refKey]}/></td>
-                    <td className={tdCls}> <QueueItemToolbar loading={loadings[refKey]} dlStatus={vIndexStatus} finished={finished} interupted={interupted}/></td>
+                    <td className={tdCls}> <QueueItemToolbar loading={loadings[refKey]} dlStatus={vIndexStatus} finished={dmstatus.finished} interupted={dmstatus.interupted}/></td>
                 </tr>
             })
         })

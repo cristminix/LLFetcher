@@ -114,7 +114,7 @@ class QueueItem extends Component{
         newLoadings[refKey] = status
         this.setState({loadings: newLoadings})
     }
-    setDlStatus(t, vIndex,status){
+    setDlStatus_old(t, vIndex,status){
         const [sIndex,tIndex] = vIndex
         console.log(`setDlStatus([${sIndex},${tIndex},'${t}',${status}])`)
 
@@ -131,6 +131,36 @@ class QueueItem extends Component{
 
         this.setState(stateObj)
     }
+    setDlStatus(t, vIndex,status){
+        const [sIndex,tIndex] = vIndex
+        console.log(`setDlStatus([${sIndex},${tIndex},'${t}',${status}])`)
+
+        const refKey = this.createRefKey(sIndex,tIndex)
+        const dmstatusKey = t == "caption" ? "captionStatus" : "videoStatus"
+        
+        const dmstatusList= Object.assign({},this.state.dmstatusList)
+        const dmstatus = dmstatusList[refKey]
+        dmstatus[dmstatusKey] = status
+
+
+
+        let dlStatusResult = 0
+        if(t == "caption"){
+            dlStatusResult = parseInt(dmstatus.videoStatus) + parseInt(dmstatus[dmstatusKey])
+        }else{
+            dlStatusResult = parseInt(dmstatus.captionStatus) + parseInt(dmstatus[dmstatusKey])
+
+        }
+
+        if(dlStatusResult == 4){
+            dmstatus.finished = true
+            dmstatus.interupted = false
+        }else{
+            dmstatus.interupted = true            
+        }
+
+        this.setState({dmstatusList})
+    }
     async syncDMStatus(){
         
     }
@@ -146,8 +176,10 @@ class QueueItem extends Component{
         const {captionStatusRefs, videoStatusRefs} = this
         const {loadings,dlvideoStatus,dlcaptionStatus, dmstatusList} = this.state
     	const defaultTdCls = "px-1 py-1 whitespace-nowrap text-sm font-medium"
-        let tdCls = ""
+        let tdCls = "",tdClsVideoStatus = "",tdClsCaptionStatus = ""
         let number = 0
+        let tdClsSuccess = defaultTdCls + " text-green-900  dark:text-green-200 "
+        let tdClsFailed = defaultTdCls + " text-red-800  dark:text-red-200 "
         return sections.map((s, sIndex)=>{
             return tocs[s.slug].map((toc,tIndex)=>{
                 number += 1
@@ -155,7 +187,7 @@ class QueueItem extends Component{
                 const dmstatus = dmstatusList[refKey]
                 let trCls = ""
                 let videoSz="n.a",captionSz="n.a"
-                let vIndexStatus = [dlcaptionStatus[refKey],dlvideoStatus[refKey]]
+                let vIndexStatus = [dmstatus.captionStatus,dmstatus.videoStatus]
              
 
                 if(dmstatus.videoSz >0){
@@ -165,10 +197,29 @@ class QueueItem extends Component{
                     captionSz = formatBytes(dmstatus.captionSz)
                 }
                 if(dmstatus.finished){
-                    tdCls = defaultTdCls + " text-green-900  dark:text-green-200 "
-
+                    tdCls = defaultTdCls + tdClsSuccess
+                    tdClsVideoStatus = tdCls
+                    tdClsCaptionStatus = tdCls
                 }else{
-                    tdCls = defaultTdCls + " text-gray-800  dark:text-gray-200 "
+                    if(dmstatus.interupted){
+                        tdCls = defaultTdCls + tdClsFailed
+                        if(dmstatus.videoStatus == 2){
+                            tdClsVideoStatus = tdClsSuccess
+                        }else{
+                            tdClsVideoStatus = tdClsFailed
+
+                        }
+                        if(dmstatus.captionStatus == 2){
+                            tdClsCaptionStatus = tdClsSuccess
+                        }else{
+                            tdClsCaptionStatus= tdClsFailed
+                            
+                        }
+                    }else{
+                        tdCls = defaultTdCls + " text-gray-800  dark:text-gray-200 "
+                        tdClsCaptionStatus = tdCls
+                        tdClsVideoStatus = tdCls
+                    }
                 }
                 //trCls = dmstatus.finished ? 'text-green-300' : dmstatus.interupted ? 'text-red-300' : ''
    
@@ -177,8 +228,8 @@ class QueueItem extends Component{
                 return <tr key={`${refKey}`} className={trCls}>
                     <td className={tdCls}> {number}</td>
                     <td className={tdCls}> {toc.title}</td>
-                    <td className={tdCls}> <i className="fa fa-file-text-o"/> <InputDisplay value={captionSz} givenRef={captionStatusRefs[refKey]}/> <DLStatus status={dlcaptionStatus[refKey]}/></td>
-                    <td className={tdCls}> <i className="fa fa-file-video-o"/> <InputDisplay value={videoSz} givenRef={videoStatusRefs[refKey]}/> <DLStatus status={dlvideoStatus[refKey]}/></td>
+                    <td className={tdClsCaptionStatus}> <i className="fa fa-file-text-o"/> <InputDisplay value={captionSz} givenRef={captionStatusRefs[refKey]}/> <DLStatus status={dmstatus.captionStatus}/></td>
+                    <td className={tdClsVideoStatus}> <i className="fa fa-file-video-o"/> <InputDisplay value={videoSz} givenRef={videoStatusRefs[refKey]}/> <DLStatus status={dmstatus.videoStatus}/></td>
                     <td className={tdCls}> <QueueItemToolbar loading={loadings[refKey]} dlStatus={vIndexStatus} finished={dmstatus.finished} interupted={dmstatus.interupted}/></td>
                 </tr>
             })

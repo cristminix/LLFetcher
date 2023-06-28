@@ -4,7 +4,7 @@ import QueueItemToolbar from "./QueueItemToolbar"
 
 const InputDisplay = ({givenRef, value}) => {
     return <>
-        <input type="text" ref={givenRef} defaultValue={value}/>
+        <input className="bg-transparent focus:outline-none" readOnly type="text" ref={givenRef} defaultValue={value}/>
     </>
 }
 const DLStatus = ({type, status}) => {
@@ -145,8 +145,8 @@ class QueueItem extends Component{
         const {sections, tocs} = this.props
         const {captionStatusRefs, videoStatusRefs} = this
         const {loadings,dlvideoStatus,dlcaptionStatus, dmstatusList} = this.state
-    	const tdCls = "px-1 py-1 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-gray-200"
-
+    	const defaultTdCls = "px-1 py-1 whitespace-nowrap text-sm font-medium"
+        let tdCls = ""
         let number = 0
         return sections.map((s, sIndex)=>{
             return tocs[s.slug].map((toc,tIndex)=>{
@@ -164,9 +164,13 @@ class QueueItem extends Component{
                 if(dmstatus.captionSz > 0){
                     captionSz = formatBytes(dmstatus.captionSz)
                 }
-                
+                if(dmstatus.finished){
+                    tdCls = defaultTdCls + " text-green-900  dark:text-green-200 "
 
-                trCls = dmstatus.finished ? 'bg-green-300' : dmstatus.interupted ? 'bg-red-300' : ''
+                }else{
+                    tdCls = defaultTdCls + " text-gray-800  dark:text-gray-200 "
+                }
+                //trCls = dmstatus.finished ? 'text-green-300' : dmstatus.interupted ? 'text-red-300' : ''
    
 
 

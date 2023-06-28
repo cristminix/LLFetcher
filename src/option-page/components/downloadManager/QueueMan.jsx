@@ -55,6 +55,8 @@ class QueueMan extends Component{
             queueRunning : false,
             queueFinished : false
         }
+        const {store} = props
+        this.mDMStatus = store.get("DMStatus")
         this.queueItemRef = createRef(null)
     }
     async fetchDlMeta(){
@@ -80,13 +82,21 @@ class QueueMan extends Component{
         }
         let infoMessage = `Downloading ${url}`
         this.setState({infoMessage})
-        queueItem.setDlStatus(t, currentIndex, 1)
+        let dlStatus = 1
+        const {course} = this.props
+        const courseId = course.id
+        queueItem.setDlStatus(t, currentIndex, dlStatus)
+        await this.mDMStatus.setDlStatus(courseId, t, currentIndex, dlStatus)
         
         const dl = await fetchDownload(url, captionFilename, null, (loaded, total, vIndex, lastReadDate, lastLoaded, type)=>{
             this.onDlProgress(loaded, total, vIndex, lastReadDate, lastLoaded, t)
         },currentIndex,t)
         
-        queueItem.setDlStatus(t, currentIndex, rand([-1,2]))
+        dlStatus = rand([-1,2])
+
+        queueItem.setDlStatus(t, currentIndex, dlStatus)
+        await this.mDMStatus.setDlStatus(courseId, t, currentIndex, dlStatus)
+
         this.setState({infoMessage : "OK"})
 
 

@@ -28,14 +28,18 @@ class DMStatus extends DB{
         })
         return results
     }
-    getByCourseId(courseId){
-        return this.singleQuery({query: {courseId}})
+    getByCourseId(courseId, vIndex){
+        return this.singleQuery({query: {courseId, vIndex: this.createVIndex(vIndex)}})
     }
     getById(id){
         return this.singleQuery({query: {id}})
     }
+    createVIndex(vIndex){
+        const [sIndex,tIndex] = vIndex
+        return `${sIndex}${tIndex}`
+    }
     async create(courseId,vIndex){
-        let row = this.getByCourseId(courseId)
+        let row = this.getByCourseId(courseId, vIndex)
         if(!row){
             const id = 0
             const videoStatus = 0
@@ -50,7 +54,7 @@ class DMStatus extends DB{
             const interupted = false
 
             row = { id, courseId, courseId,
-                    vIndex,
+                    vIndex : this.createVIndex(vIndex),
                     videoStatus,
                     captionStatus, 
                     dtVideoStart,
@@ -86,12 +90,46 @@ class DMStatus extends DB{
         
         return record
     }
-    async updateByCourseId(courseId, row_){
-        let record = this.getByCourseId(courseId)
+    async updateByCourseId(courseId,vIndex, row){
+        let record = this.getByCourseId(courseId, vIndex)
         if(record){
-            record = await this.update(record.id, row_)
+            record = await this.update(record.id, row)
         }
         return record
+    }
+
+    async setDlStatus(courseId, t, vIndex, dlStatus){
+        const dt = new Date
+
+        let current = this.getByCourseId(courseId, vIndex)
+        if(!current){
+            current = await this.create(courseId, vIndex)
+        }
+        let row
+        if(t == "caption"){
+            const captionStatus = dlStatus
+            row = {
+                captionStatus
+            }
+            if(dlStatus == 1){
+                row.dtCaptionStart = dt
+            }else{
+                row.dtCaptionEnd = dt
+            }
+        }else{
+            const videoStatus = dlStatus
+            row = {
+                videoStatus
+            }
+            if(dlStatus == 1){
+                row.dtVideoStart = dt
+            }else{
+                row.dtVideoEnd = dt
+            }
+        }
+
+        await this.updateByCourseId(courseId,vIndex, row)
+
     }
 }
 

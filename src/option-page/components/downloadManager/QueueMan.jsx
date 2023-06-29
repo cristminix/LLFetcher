@@ -44,6 +44,7 @@ async function fetchDownload(url, outputFilename, mime, progressCallback, vIndex
 
     return null
 } 
+
 class QueueMan extends Component{
     constructor(props){
         super(props)
@@ -57,6 +58,7 @@ class QueueMan extends Component{
         }
         const {store} = props
         this.mDMStatus = store.get("DMStatus")
+        this.mDMSetup = store.get("DMSetup")
         this.queueItemRef = createRef(null)
     }
     async fetchDlMeta(){
@@ -190,8 +192,21 @@ class QueueMan extends Component{
     async fetchDlDummy(){
 
     }
-    async triggerFetchDl(){
+   
+    async onQueueComplete(){
+        const queueItem = this.queueItemRef.current
         const {stopDownloadQueue, setQueueFinished} = this.props
+        const finished = queueItem.checkDmStatusFinished()
+
+        if(finished){
+            setQueueFinished(true)
+            stopDownloadQueue()
+        }else{
+            console.log(`queue stil have unfinished item`)
+        }
+        
+    }
+    async triggerFetchDl(){
         const {queueRunning} = this.state
         console.log(`triggerFetchDl called`)
         if(!queueRunning){
@@ -206,8 +221,7 @@ class QueueMan extends Component{
         if(sIndex === null && tIndex === null){
             console.log(`${sIndex}, ${tIndex}`)
             console.log(`Queue Complete`)
-            setQueueFinished(true)
-            stopDownloadQueue()
+            this.onQueueComplete()
             return
         }
         if(sIndex == -1 && tIndex == -1){
@@ -251,10 +265,13 @@ class QueueMan extends Component{
         })
         
     }
-    triggerResetQueue(){
-        const {setQueueFinished} = this.props
+    async triggerResetQueue(){
+        const {resetDownloadQueue} = this.props
+        const queueItem = this.queueItemRef.current
+        await queueItem.clearDMStatus()
         this.setState({currentIndex:null},()=>{
-            setQueueFinished(false)
+
+            resetDownloadQueue(false)
         })
     }
     getNextIndex(){

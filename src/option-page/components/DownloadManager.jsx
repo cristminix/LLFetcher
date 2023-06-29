@@ -47,6 +47,9 @@ const DownloadManager = ({store}) => {
           if(savedDmsetup.status == 2){
             setAlreadySetup(true)
           }
+          if(savedDmsetup.finished){
+            setQueueFinished(true)
+          }
       }
     }
 
@@ -55,6 +58,21 @@ const DownloadManager = ({store}) => {
     }
     const startDownloadQueue = async()=>{
       setQueueStarted(true)
+
+    }
+    const resetDownloadQueue = async() =>{
+      setQueueFinished(false)
+      // setRunSetup(false)
+      // setAlreadySetup(false)
+      if(dmsetup){
+        const finished = false
+        dmsetup.finished = finished
+        setDmsetup(dmsetup)
+        const {course} = activeCourseData
+        await mDMSetup.updateByCourseId(course.id,{finished})
+
+      }
+
 
     }
     useEffect(()=>{
@@ -66,8 +84,12 @@ const DownloadManager = ({store}) => {
     
     useEffect(()=>{
       console.log(queueFinished)
-      if(queueFinished){
 
+      if(queueFinished){
+        console.log(`Updating dmsetup.finished to ${queueFinished}`)
+        const {course} = activeCourseData
+        const finished = true
+        mDMSetup.updateByCourseId(course.id, {finished})
       }
     },[queueFinished])
 
@@ -112,6 +134,7 @@ const DownloadManager = ({store}) => {
                   stopDownloadQueue={stopDownloadQueue}
                   queueFinished={queueFinished}
                   setQueueFinished={setQueueFinished}
+                  resetDownloadQueue={resetDownloadQueue}
                   ref={queueManRef}/>
         <StatusBarMan store={store} 
                       course={course} 

@@ -138,7 +138,9 @@ class QueueItem extends Component{
         const refKey = this.createRefKey(sIndex,tIndex)
         const dmstatusKey = t == "caption" ? "captionStatus" : "videoStatus"
         
-        const dmstatusList= Object.assign({},this.state.dmstatusList)
+        const {dmstatusList}= this.state//Object.assign({},this.state.dmstatusList)
+
+        
         const dmstatus = dmstatusList[refKey]
         dmstatus[dmstatusKey] = status
 
@@ -161,15 +163,60 @@ class QueueItem extends Component{
 
         this.setState({dmstatusList})
     }
-    async syncDMStatus(){
-        
-    }
+    
     getDMStatus(sIndex,tIndex){
         const {course} = this.props
         const vIndex = `${sIndex}${tIndex}`
         const dmstatus = this.mDMStatus.getByCourseId(course.id, vIndex)
 
         return dmstatus
+    }
+    checkDmStatusFinished(){
+        const {dmstatusList} = this.state
+        let finished = true
+
+        for(let refKey in dmstatusList){
+            const dmstatus = dmstatusList[refKey]
+            if(!dmstatus.finished){
+                console.log(dmstatus)
+                finished = false
+                break
+            }
+        }
+        return finished
+    }
+    async updateDmStatusRow(courseId,vIndex){ 
+        const row = {
+            videoStatus:0,
+            captionStatus:0, 
+            dlCaptionRetryCount : 0,
+            dlVideoRetryCount: 0,
+            finished :false,
+            videoSz : 0,
+            captionSz : 0,
+            interupted : false
+        }
+        const dmstatus = await this.mDMStatus.updateByCourseId(courseId, vIndex,row)
+        return dmstatus
+    }
+    async clearDMStatus(){
+        const {sections, tocs, course} = this.props
+        const {dmstatusList, loadings} = this.state 
+        for(let sIndex = 0; sIndex < sections.length; sIndex++){
+            const s = sections[sIndex] 
+            const tocItems = tocs[s.slug]
+            for(let tIndex = 0; tIndex < tocItems.length; tIndex++){
+                const toc = tocItems[tIndex] 
+                const refKey = this.createRefKey(sIndex,tIndex)
+                const vIndex = [sIndex,tIndex]
+    
+                
+                dmstatusList[refKey] = await this.updateDmStatusRow(course.id, vIndex)
+                loadings[refKey] = false
+                
+            }
+        }
+        this.setState({dmstatusList, loadings}) 
     }
     render(){
         const {sections, tocs} = this.props
@@ -180,6 +227,8 @@ class QueueItem extends Component{
         let number = 0
         let tdClsSuccess = defaultTdCls + " text-green-900  dark:text-green-200 "
         let tdClsFailed = defaultTdCls + " text-red-800  dark:text-red-200 "
+        if(!dmstatusList)
+            return <tr><td colSpan={5}><i className="fa fa-spin fa-spinner"/></td></tr>
         return sections.map((s, sIndex)=>{
             return tocs[s.slug].map((toc,tIndex)=>{
                 number += 1

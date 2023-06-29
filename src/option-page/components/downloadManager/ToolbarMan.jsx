@@ -27,7 +27,8 @@ const ToolbarMan = ({queueFinished, dmsetup,queueManRef, alreadySetup, setAlread
     const onResetQueue = async () => {
       console.log("onResetQueue")
       if(confirm("Are you sure want to reset Queue ?")){
-        queueManRef.current.triggerResetQueue()
+        const queueMan = queueManRef.current
+        queueMan.triggerResetQueue()
 
       }
 

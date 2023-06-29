@@ -43,6 +43,9 @@ const DownloadManager = ({store}) => {
       setDmsetup(null)
       setQueueResume(false)
       setQueueFinished(false)
+      setReconfigureSetup(false)
+      setAvailableFmt([])
+      setSelectedFmt(selectFmt)
 
 
       const courseData = await store.mCourse.getCoursePageData(slug)

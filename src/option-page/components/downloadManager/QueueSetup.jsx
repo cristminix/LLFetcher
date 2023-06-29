@@ -128,23 +128,27 @@ const QueueSetup = ({
     const fmtAlreadyAvailable = availableFmt.length > 0
 
     if(!fmtAlreadyAvailable){
-        showGetAvailableFmt = true
+        if(runSetup){
+            showGetAvailableFmt = true
+        }
     }
     if(alreadySetup){
         if(reconfigureSetup){
             showQueueSetup = true
         }
     }else{
-        showQueueSetup = true
+        if(runSetup){
+            showQueueSetup = true
+        }
     }
 
     if(!showGetAvailableFmt){
         showConfigSetup = true
     }
     return (<>
-    <div>Show Queue Setup : {showQueueSetup ? "Y":"N" }</div>
+    {/* <div>Show Queue Setup : {showQueueSetup ? "Y":"N" }</div>
     <div>Show Get Availble Fmt : {showGetAvailableFmt ? "Y":"N" }</div>
-    <div>Show Config Setup : {showConfigSetup ? "Y":"N" }</div>
+    <div>Show Config Setup : {showConfigSetup ? "Y":"N" }</div> */}
     {
         showQueueSetup ? <div className="queue-setup my-2 border p-2 rounded">
         {

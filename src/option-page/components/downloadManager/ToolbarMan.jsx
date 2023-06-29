@@ -35,7 +35,7 @@ const ToolbarMan = ({queueResume,queueFinished, dmsetup,queueManRef, alreadySetu
 
 
     }
-    return (<><div className="toolbar-man">
+    return (<><div className="toolbar-man pr-2 pt-4 pb-1">
         <div className="toolbar-man-container">
         
 

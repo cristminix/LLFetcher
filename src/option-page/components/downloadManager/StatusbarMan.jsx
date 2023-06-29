@@ -1,7 +1,17 @@
-import { useState } from "react"
-const StatusbarMan = ({store, course, message="Hello Status Bar Manager", mode=0}) => {
+import { Component, useState } from "react"
+class StatusbarMan extends Component{
+    state = {
+        message : "",
+        mode:3
+    }
+    setMessage(message,mode){
+        this.setState({message, mode})
+    }
+    render(){
+    const {store, course} = this.props
+    const {message,mode} = this.state
 
-    return (<><div className="statusbar-man fixed bottom-0 w-full -mx-8 bg-white dark:bg-gray-800 dark:text-gray-200">
+    return <><div className="statusbar-man fixed bottom-0 w-full -mx-8 bg-white dark:bg-gray-800 dark:text-gray-200">
         <div className="status-bar-man-container rounded border p-2.5">
             {
                 mode===0 ? <div className="success text-green-600">
@@ -21,7 +31,8 @@ const StatusbarMan = ({store, course, message="Hello Status Bar Manager", mode=0
             
             
         </div>
-    </div></>)
+    </div></>
+    }
 }
 
 export default StatusbarMan

@@ -5,14 +5,19 @@ import {timeout} from "../../../components/fn"
 import {fetchCourseTocMeta, formatBytes, calculateSpeed} from "../../components/learning_fn"
 
 const ERROR_NOT_SETUP_QUEUE = "You must run setup queue first"
+let SAVED_RAND_ARRAY = {}
+function rand(vIndex) {
+    const [sIndex,tIndex] = vIndex
+    const inputArray = [-1,2]
+    const randomIndex = Math.floor(Math.random() * inputArray.length)
 
-function rand(array) {
-  if (array.length === 0) {
-    throw new Error("Array must not be empty.");
-  }
+    const randKey =`${sIndex}${tIndex}`
+    if(SAVED_RAND_ARRAY[randKey]){
+        return 2
+    }
 
-  const randomIndex = Math.floor(Math.random() * array.length);
-  return array[randomIndex];
+    SAVED_RAND_ARRAY[randKey]= 1
+    return inputArray[randomIndex]
 }
 async function fetchDownload(url, outputFilename, mime, progressCallback, vIndex, t){
     if(!vIndex){
@@ -32,7 +37,7 @@ async function fetchDownload(url, outputFilename, mime, progressCallback, vIndex
     let lastReadDate = new Date
     let total =0
 
-    while(bufferCount <= 10){
+    while(bufferCount <= 5){
 
         bufferCount += 1
         await timeout(50)
@@ -94,7 +99,7 @@ class QueueMan extends Component{
             this.onDlProgress(loaded, total, vIndex, lastReadDate, lastLoaded, t)
         },currentIndex,t)
         
-        dlStatus = 2//rand([-1,2])
+        dlStatus = rand(currentIndex)
 
         queueItem.setDlStatus(t, currentIndex, dlStatus)
         await this.mDMStatus.setDlStatus(courseId, t, currentIndex, dlStatus)
@@ -172,11 +177,11 @@ class QueueMan extends Component{
                 const {captionRef,videoRef} = queueItem.getStatusRef(vIndex)
 
                 if(t=="caption"){
-                    captionRef.current.value = `${formatBytes(loaded)}/${speed}ps`
+                    captionRef.current.setValue(`${formatBytes(loaded)}/${speed}ps`)
 
                 }
                 else if(t=="video"){
-                    videoRef.current.value = `${formatBytes(loaded)}/${speed}ps`
+                    videoRef.current.setValue(`${formatBytes(loaded)}/${speed}ps`)
 
                 }
 
@@ -195,15 +200,17 @@ class QueueMan extends Component{
    
     async onQueueComplete(){
         const queueItem = this.queueItemRef.current
-        const {stopDownloadQueue, setQueueFinished} = this.props
+        const {stopDownloadQueue, setQueueFinished, setQueueResume} = this.props
         const finished = queueItem.checkDmStatusFinished()
 
         if(finished){
             setQueueFinished(true)
-            stopDownloadQueue()
         }else{
             console.log(`queue stil have unfinished item`)
+            this.setState({currentIndex:[0,0]})
+            setQueueResume(true)
         }
+        stopDownloadQueue()
         
     }
     async triggerFetchDl(){
@@ -272,6 +279,7 @@ class QueueMan extends Component{
         this.setState({currentIndex:null},()=>{
 
             resetDownloadQueue(false)
+            
         })
     }
     getNextIndex(){

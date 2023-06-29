@@ -29,6 +29,7 @@ const DownloadManager = ({store}) => {
     // queueRelatedState
     const [queueStarted, setQueueStarted] = useState(false)
     const [queueFinished, setQueueFinished] = useState(false)
+    const [queueResume, setQueueResume] = useState(false)
 
     const updateCourseData = async()=>{
       setActiveCourseData(null)
@@ -40,6 +41,7 @@ const DownloadManager = ({store}) => {
       setActiveCourseData(courseData)
 
       setDmsetup(null)
+      setQueueResume(false)
       const {course} = courseData
       const savedDmsetup = mDMSetup.getByCourseId(course.id)
       if(savedDmsetup){
@@ -62,16 +64,18 @@ const DownloadManager = ({store}) => {
     }
     const resetDownloadQueue = async() =>{
       setQueueFinished(false)
+      setQueueResume(false)
+
       // setRunSetup(false)
       // setAlreadySetup(false)
-      if(dmsetup){
+      // if(dmsetup){
         const finished = false
         dmsetup.finished = finished
         setDmsetup(dmsetup)
         const {course} = activeCourseData
         await mDMSetup.updateByCourseId(course.id,{finished})
 
-      }
+      // }
 
 
     }
@@ -111,13 +115,15 @@ const DownloadManager = ({store}) => {
                     stopDownloadQueue={stopDownloadQueue}
                     queueFinished={queueFinished}
                     setQueueFinished={setQueueFinished}
-                    queueManRef={queueManRef}/>
+                    queueManRef={queueManRef}
+                    queueResume={queueResume}/>
         <QueueSetup alreadySetup={alreadySetup} 
                     setAlreadySetup={setAlreadySetup}
                     reconfigureSetup={reconfigureSetup}
                     setReconfigureSetup={setReconfigureSetup}
                     displaySetupUi={displaySetupUi}
                     runSetup={runSetup}
+                    setRunSetup={setRunSetup}
                     course={course}
                     sections={sections}
                     tocs={tocs}
@@ -135,7 +141,8 @@ const DownloadManager = ({store}) => {
                   queueFinished={queueFinished}
                   setQueueFinished={setQueueFinished}
                   resetDownloadQueue={resetDownloadQueue}
-                  ref={queueManRef}/>
+                  ref={queueManRef}
+                  setQueueResume={setQueueResume}/>
         <StatusBarMan store={store} 
                       course={course} 
                       alreadySetup={alreadySetup} 

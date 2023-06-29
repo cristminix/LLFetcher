@@ -1,8 +1,9 @@
 import { useState } from "react"
 import Button from "../Button"
 const btnCls = "py-3 px-4 inline-flex justify-center items-center gap-2 -mt-px -ml-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-l-lg sm:mt-0 sm:first:ml-0 sm:first:rounded-tr-none sm:last:rounded-bl-none sm:last:rounded-r-lg border font-medium bg-white text-gray-700 align-middle hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all text-sm dark:bg-gray-800 dark:hover:bg-slate-800 dark:border-gray-700 dark:text-gray-400"
-const ToolbarMan = ({queueFinished, dmsetup,queueManRef, alreadySetup, setAlreadySetup,reconfigureSetup, setRunSetup, runSetup, setReconfigureSetup, queueStarted = false, startDownloadQueue, stopDownloadQueue}) => {
-    // const [loadingStartQueue, setLoadingStartQueue] = useState(false)
+const ToolbarMan = ({queueResume,queueFinished, dmsetup,queueManRef, alreadySetup, setAlreadySetup,reconfigureSetup, setRunSetup, runSetup, setReconfigureSetup, queueStarted = false, startDownloadQueue, stopDownloadQueue}) => {
+    console.log(`queueResume:${queueResume}`)  
+  // const [loadingStartQueue, setLoadingStartQueue] = useState(false)
     const onStartQueue = async(e)=>{
       // setLoadingStartQueue(true)
       startDownloadQueue()
@@ -46,7 +47,7 @@ const ToolbarMan = ({queueFinished, dmsetup,queueManRef, alreadySetup, setAlread
       !reconfigureSetup ? <>
       {
         !queueFinished ? <>
-          <Button loading={queueStarted} className="mr-1" disabled={queueStarted} caption="Start Queue" icon="fa fa-play" onClick={e=>onStartQueue(e)}/>
+          <Button loading={queueStarted} className="mr-1" disabled={queueStarted} caption={queueResume?"Resume":"Start Queue"} icon="fa fa-play" onClick={e=>onStartQueue(e)}/>
 
           {
             !queueStarted ? <>
@@ -68,9 +69,7 @@ const ToolbarMan = ({queueFinished, dmsetup,queueManRef, alreadySetup, setAlread
         
     </> : <>
     {
-      !runSetup ?<button onClick={e=>setRunSetup(true)} type="button" className={btnCls}>
-      <i className="fa fa-cog"/> <span>Run Setup Queue</span>
-  </button> : ""
+      !runSetup ?<Button onClick={e=>setRunSetup(true)} icon="fa fa-cog" caption="Run Setup Queue"/> : ""
     }
         
     </>

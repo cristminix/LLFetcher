@@ -1,14 +1,45 @@
-import {Component,createRef} from "react"
+import {Component,createRef, useEffect,useState} from "react"
 import { formatBytes} from "../../components/learning_fn"
 import QueueItemToolbar from "./QueueItemToolbar"
+import { render } from "react-dom"
 
-const InputDisplay = ({givenRef, value}) => {
-    return <>
-        <input className="bg-transparent focus:outline-none" readOnly type="text" ref={givenRef} defaultValue={value}/>
-    </>
+// const InputDisplay = ({givenRef, value}) => {
+//     const [defaultValue] = useState(value)
+//     useEffect(()=>{
+//         console.log(defaultValue)
+//         givenRef.current.value = defaultValue
+//     },[])
+//     return <>
+//         <input className="bg-transparent focus:outline-none" readOnly type="text" ref={givenRef} />
+//     </>
+// }
+class InputDisplay extends Component{
+    constructor(props){
+        super(props)
+        const {value} = props
+        this.state = {
+            value
+        }
+    }
+    // const [defaultValue] = useState(value)
+    // useEffect(()=>{
+    //     console.log(defaultValue)
+    //     givenRef.current.value = defaultValue
+    // },[])
+    setValue(value){
+        this.setState({value})
+    }
+    render(){
+        // const {givenRef} = this.props
+        const {value} = this.state
+        return <>
+            <div className="w-30 mx-2" >{value}</div>
+        </>
+    }
+    
 }
 const DLStatus = ({type, status}) => {
-    return <>
+    return <div className="">
     {
         status == 2 ? <>
             <i className="fa fa-check text-green-500"/>
@@ -28,7 +59,7 @@ const DLStatus = ({type, status}) => {
             }
         </>    
     } 
-   </>
+   </div>
 }
 class QueueItem extends Component{
     constructor(props){
@@ -200,6 +231,8 @@ class QueueItem extends Component{
         return dmstatus
     }
     async clearDMStatus(){
+        const {captionStatusRefs, videoStatusRefs} = this
+
         const {sections, tocs, course} = this.props
         const {dmstatusList, loadings} = this.state 
         for(let sIndex = 0; sIndex < sections.length; sIndex++){
@@ -210,7 +243,8 @@ class QueueItem extends Component{
                 const refKey = this.createRefKey(sIndex,tIndex)
                 const vIndex = [sIndex,tIndex]
     
-                
+                captionStatusRefs[refKey].current.setValue('n.a')
+                videoStatusRefs[refKey].current.setValue('n.a')
                 dmstatusList[refKey] = await this.updateDmStatusRow(course.id, vIndex)
                 loadings[refKey] = false
                 
@@ -277,8 +311,8 @@ class QueueItem extends Component{
                 return <tr key={`${refKey}`} className={trCls}>
                     <td className={tdCls}> {number}</td>
                     <td className={tdCls}> {toc.title}</td>
-                    <td className={tdClsCaptionStatus}> <i className="fa fa-file-text-o"/> <InputDisplay value={captionSz} givenRef={captionStatusRefs[refKey]}/> <DLStatus status={dmstatus.captionStatus}/></td>
-                    <td className={tdClsVideoStatus}> <i className="fa fa-file-video-o"/> <InputDisplay value={videoSz} givenRef={videoStatusRefs[refKey]}/> <DLStatus status={dmstatus.videoStatus}/></td>
+                    <td className={tdClsCaptionStatus}> <div className="flex"><i className="mt-1 fa fa-file-text-o"/> <InputDisplay value={captionSz} ref={captionStatusRefs[refKey]}/> <DLStatus status={dmstatus.captionStatus}/></div></td>
+                    <td className={tdClsVideoStatus}> <div className="flex"><i className="mt-1 fa fa-file-video-o"/> <InputDisplay value={videoSz} ref={videoStatusRefs[refKey]}/> <DLStatus status={dmstatus.videoStatus}/></div></td>
                     <td className={tdCls}> <QueueItemToolbar loading={loadings[refKey]} dlStatus={vIndexStatus} finished={dmstatus.finished} interupted={dmstatus.interupted}/></td>
                 </tr>
             })

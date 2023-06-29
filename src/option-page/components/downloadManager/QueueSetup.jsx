@@ -29,11 +29,14 @@ const FmtSelector = ({  renderState = false,
         
 }
 
-const QueueSetup = ({dmsetup, store,course,sections,tocs, alreadySetup,setAlreadySetup, displaySetupUi, reconfigureSetup = false, setReconfigureSetup, runSetup, setRunSetup}) => {
-    const [availableFmt, setAvailableFmt] = useState([])
+const QueueSetup = ({
+    availableFmt, setAvailableFmt,
+    selectedFmt, setSelectedFmt,
+    selectFmt,
+    dmsetup, store,course,sections,tocs, alreadySetup,setAlreadySetup, displaySetupUi, reconfigureSetup = false, setReconfigureSetup, runSetup, setRunSetup}) => {
+  
+
     const [loadingFetchToc, setLoadingFetchToc] = useState(false) 
-    const selectFmt = "Select Format"
-    const [selectedFmt, setSelectedFmt] = useState(selectFmt)
     const mDMSetup = store.get("DMSetup")
 
     const fetchToc = async(courseSlug,tocSlug)=> {
@@ -116,53 +119,57 @@ const QueueSetup = ({dmsetup, store,course,sections,tocs, alreadySetup,setAlread
     const selectFmtMessage = selectedFmt == selectFmt ? 'Please select desired video format' : `Selected format ${selectedFmt}`
     const chgSelectFmtMessage = selectedFmt == selectFmt ? "Not Already setted up" : `You select ${selectedFmt}`
     const message = alreadySetup ? `Selected video format is ${selectedFmt}` : chgSelectFmtMessage
-        
-    return (<><div className="queue-setup my-2">
-        <div className="border p-2 rounded">
-            <div className="flex flex-col">
-                {
-                        alreadySetup ? <FmtSelector renderState={reconfigureSetup} {...fmtSelectorProps}/> : 
-                                        <FmtSelector renderState={runSetup} {...fmtSelectorProps} />
-            
-                    }
-                    {
-                        alreadySetup ? <>
-                            {
-                                reconfigureSetup ? 
-                                subRenderState?  "" : <>
-                <div className="flex p-2 gap-2">
+    
+    let showQueueSetup = false
+    let showGetAvailableFmt = false
+    let showConfigSetup = false
+    
 
-                                <Button caption="Cancel" icon="fa fa-times" onClick={e=>cancelSetup(e)}/>
-                                <Button disabled={selectedFmt==selectFmt} icon="fa fa-save" onClick={e=> finishSetup(e)} caption="Finish Setup"/>
-                                </div>
-                                <div className="flex p-2">
-                    {message}
-                </div>
-                                </> : ""
-                            }
-                        </> :<>
-                            {
-                                runSetup ? 
-                                subRenderState?  "" : <>
-                <div className="flex p-2 gap-2">
+    const fmtAlreadyAvailable = availableFmt.length > 0
 
-                                <Button caption="Cancel" icon="fa fa-times" onClick={e=>cancelSetup(e)}/>
+    if(!fmtAlreadyAvailable){
+        showGetAvailableFmt = true
+    }
+    if(alreadySetup){
+        if(reconfigureSetup){
+            showQueueSetup = true
+        }
+    }else{
+        showQueueSetup = true
+    }
 
-                                <Button disabled={selectedFmt==selectFmt} icon="fa fa-save" onClick={e=> finishSetup(e)} caption="Finish Setup"/>
-                                </div>
-                                <div className="flex p-2">
-                    {message}
-                </div>
-                                </> : ""
-                            }
-                        </>
-                        
-                    }
-
-                
+    if(!showGetAvailableFmt){
+        showConfigSetup = true
+    }
+    return (<>
+    <div>Show Queue Setup : {showQueueSetup ? "Y":"N" }</div>
+    <div>Show Get Availble Fmt : {showGetAvailableFmt ? "Y":"N" }</div>
+    <div>Show Config Setup : {showConfigSetup ? "Y":"N" }</div>
+    {
+        showQueueSetup ? <div className="queue-setup my-2 border p-2 rounded">
+        {
+            showGetAvailableFmt ? <div className="flex p-2 px-2">
+                <Button loading={loadingFetchToc} icon="fa fa-cog" onClick={e=> getAvailableFmt(e)} caption="Get Available Fmt"/>
+            </div> : ''
+        }
+        {
+            showConfigSetup ? <>
+            <div className="flex p-2 px-2">
+                <label className={lblCls}>Select Format</label>
+                <DropdownSelect data={availableFmt} selected={selectedFmt} onSelect={fmt=>setSelectedFmt(fmt)}/>
             </div>
-        </div>
-    </div></>)
+            <div className="flex p-2 gap-2">
+                <Button caption="Cancel" icon="fa fa-times" onClick={e=>cancelSetup(e)}/>
+                <Button disabled={selectedFmt==selectFmt} icon="fa fa-save" onClick={e=> finishSetup(e)} caption="Finish Setup"/>
+            </div>
+            <div className="flex p-2">
+                {message}
+            </div>
+            </>:''
+        }    
+        </div>:''
+    }
+    </>)
 }
 
 export default QueueSetup

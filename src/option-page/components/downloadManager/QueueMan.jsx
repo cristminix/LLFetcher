@@ -331,7 +331,7 @@ class QueueMan extends Component{
     // }
     render(){
         const {infoMessage, currentIndex} = this.state
-        const {queueStarted, sections, course, tocs, store, alreadySetup, queueFinished} = this.props
+        const {selectedFmt, queueStarted, sections, course, tocs, store, alreadySetup, queueFinished} = this.props
         return (<><div className="queueman mb-12 mt-2">
         
         <div className="queue-man-container">
@@ -339,7 +339,7 @@ class QueueMan extends Component{
             {
                 
                 alreadySetup ? <>
-                    <QueueInfo queueFinished={queueFinished} message={infoMessage} queueStarted={queueStarted} currentIndex={currentIndex}/>
+                    <QueueInfo selectedFmt={selectedFmt} queueFinished={queueFinished} message={infoMessage} queueStarted={queueStarted} currentIndex={currentIndex}/>
                     <QueueTable queueItemRef={this.queueItemRef} course={course} sections={sections} tocs={tocs} store={store}/>
                 </> : ERROR_NOT_SETUP_QUEUE
             }

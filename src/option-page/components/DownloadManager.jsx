@@ -31,6 +31,11 @@ const DownloadManager = ({store}) => {
     const [queueFinished, setQueueFinished] = useState(false)
     const [queueResume, setQueueResume] = useState(false)
 
+    // setupRelatedState
+    const selectFmt = "Select Format"
+    const [availableFmt, setAvailableFmt] = useState([])
+    const [selectedFmt, setSelectedFmt] = useState(selectFmt)
+
     const updateCourseData = async()=>{
       setActiveCourseData(null)
       setRunSetup(false)
@@ -137,6 +142,11 @@ const DownloadManager = ({store}) => {
                     tocs={tocs}
                     store={store}
                     dmsetup={dmsetup}
+                    availableFmt={availableFmt} 
+                    setAvailableFmt={setAvailableFmt}
+                    selectedFmt={selectedFmt} 
+                    setSelectedFmt={setSelectedFmt}
+                    selectFmt={selectFmt}
                     />
         <QueueMan alreadySetup={alreadySetup} 
                   reconfigureSetup={reconfigureSetup}
@@ -150,7 +160,8 @@ const DownloadManager = ({store}) => {
                   setQueueFinished={setQueueFinished}
                   resetDownloadQueue={resetDownloadQueue}
                   ref={queueManRef}
-                  setQueueResume={setQueueResume}/>
+                  setQueueResume={setQueueResume}
+                  selectedFmt={selectedFmt} />
         <StatusBarMan store={store} 
                       course={course} 
                       alreadySetup={alreadySetup} 

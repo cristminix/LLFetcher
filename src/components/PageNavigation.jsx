@@ -52,7 +52,7 @@ class PageNavigation extends Component{
 	}
 	render(){
 		const {activeNav, lastCourseSlug,enableDownloadPage,enableOptionPage} = this.state
-	
+		return ""
 		return(<div className="page-navigation text-center">
 			<div className="btn-group">
 				<button disabled={activeNav==='welcome'} onClick={evt => this.onNavClick('welcome')} className={this.getBtnCls('welcome')}><i className="fa fa-home"/> Welcome</button>

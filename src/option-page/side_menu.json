@@ -4,7 +4,8 @@
 			"title" : "Welcome",
 			"path" : "/welcome",
 			"iconCls" : "bi bi-house",
-			"order": 1
+			"order": 1,
+			"hidden":true
 		},
 		"courses":{
 			"title" : "Courses",
@@ -40,7 +41,7 @@
 			"path" : "/database",
 			"iconCls" : "fa fa-database",
 			"order" : 4,
-			"hidden" : false,
+			"hidden" : true,
 			"hasChild" : true,
 			"childItems" : {
 				"download-state" : {

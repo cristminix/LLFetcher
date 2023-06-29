@@ -35,24 +35,32 @@ const DownloadManager = ({store}) => {
       setActiveCourseData(null)
       setRunSetup(false)
       setAlreadySetup(false)
+      setDmsetup(null)
+      setQueueResume(false)
+      setQueueFinished(false)
+
 
       const courseData = await store.mCourse.getCoursePageData(slug)
       await store.mCourse.setLastSlug(slug)
-      setActiveCourseData(courseData)
 
-      setDmsetup(null)
-      setQueueResume(false)
-      const {course} = courseData
-      const savedDmsetup = mDMSetup.getByCourseId(course.id)
-      if(savedDmsetup){
-          setDmsetup(savedDmsetup)
-          if(savedDmsetup.status == 2){
-            setAlreadySetup(true)
-          }
-          if(savedDmsetup.finished){
-            setQueueFinished(true)
-          }
-      }
+      // setTimeout(()=>{
+        setActiveCourseData(courseData)
+
+      
+        const {course} = courseData
+        const savedDmsetup = mDMSetup.getByCourseId(course.id)
+        if(savedDmsetup){
+            console.log(savedDmsetup)
+            setDmsetup(savedDmsetup)
+            if(savedDmsetup.status == 2){
+              setAlreadySetup(true)
+            }
+            if(savedDmsetup.finished){
+              setQueueFinished(true)
+            }
+        }
+      // },3000)
+      
     }
 
     const stopDownloadQueue = async()=>{

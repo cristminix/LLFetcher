@@ -1,5 +1,5 @@
 #popup {
-    width : 680px;
+    width : 480px;
 /*    min-height: 480px;*/
     padding: 1em 0;
     border: solid 1px #ddd;
@@ -51,11 +51,11 @@
  }
 
 .welcome-page .action-cnt{
-  text-align:center;
+  /* text-align:center; */
   padding:.5em;
 }
 .welcome-page .btn-cnt{
-  margin:1em;
+  margin-top:1em;
 }
 .welcome-page{
   color: red;

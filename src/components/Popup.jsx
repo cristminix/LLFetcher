@@ -127,6 +127,8 @@ class PopupAction extends ComponentWithMessaging{
 					konsole.log(course,sections, tocs)
 				})
 				this.pageNavigationRef.current.setNav('course')
+				const url = chrome.runtime.getURL('options.html#/manager/'+this.state.course.slug)
+				chrome.tabs.create({ url })
 			}
 		})
 	}

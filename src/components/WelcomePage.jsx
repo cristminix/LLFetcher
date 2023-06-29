@@ -123,7 +123,7 @@ class WelcomePage extends ComponentWithMessaging {
 
 		return(<>
 			<div className="welcome-page page">
-				<p className="text-center" style={{fontFamily:"Monoton, cursive"}}>{greeting}</p>
+				<p className="" style={{fontFamily:"Monoton, cursive"}}>{greeting}</p>
 				<div className="action-cnt">
 				{
 					lastCourseListKeys.length > 0 ? (<>

@@ -114,7 +114,7 @@ const DownloadManager = ({store}) => {
       console.log(activeCourseData)
       const {course, authors, sections, tocs}  = activeCourseData
       return (<><div className="download-manager ">
-        <CourseInfo store={store} course={course}/>
+        <CourseInfo store={store} course={course} authors={authors}/>
         <ToolbarMan alreadySetup={alreadySetup} 
                     setAlreadySetup={setAlreadySetup}
                     reconfigureSetup={reconfigureSetup}

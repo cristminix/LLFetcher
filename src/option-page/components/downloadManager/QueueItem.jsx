@@ -3,16 +3,7 @@ import { formatBytes} from "../../components/learning_fn"
 import QueueItemToolbar from "./QueueItemToolbar"
 import { render } from "react-dom"
 
-// const InputDisplay = ({givenRef, value}) => {
-//     const [defaultValue] = useState(value)
-//     useEffect(()=>{
-//         console.log(defaultValue)
-//         givenRef.current.value = defaultValue
-//     },[])
-//     return <>
-//         <input className="bg-transparent focus:outline-none" readOnly type="text" ref={givenRef} />
-//     </>
-// }
+
 class InputDisplay extends Component{
     constructor(props){
         super(props)
@@ -21,16 +12,10 @@ class InputDisplay extends Component{
             value
         }
     }
-    // const [defaultValue] = useState(value)
-    // useEffect(()=>{
-    //     console.log(defaultValue)
-    //     givenRef.current.value = defaultValue
-    // },[])
     setValue(value){
         this.setState({value})
     }
     render(){
-        // const {givenRef} = this.props
         const {value} = this.state
         return <>
             <div className="w-30 mx-2" >{value}</div>
@@ -71,30 +56,10 @@ class QueueItem extends Component{
         this.mDMStatus = store.get("DMStatus")
         this.state = {
             loadings : {},
-            dlcaptionStatus : {},
-            dlvideoStatus : {},
+            dlcaptionStatus : {}, // deprecated
+            dlvideoStatus : {}, // deprecated
             dmstatusList : {}
         }
-        
-        // for(let sIndex = 0;sIndex < sections.length; sIndex++){
-        //     const sSlug = sections[sIndex].slug
-        //     const tocItems = tocs[sSlug]
-        //     for(let tIndex = 0;tIndex < tocItems.length;tIndex++){
-        //         const refKey = createRefKey(sIndex,tIndex)
-        //         this.captionStatusRefs[refKey] = createRef(null)
-        //         this.videoStatusRefs[refKey] = createRef(null)
-        //     }
-        // }
-
-        // const sectionKeys = Object.keys(tocs)
-        // sectionKeys.map((sKey, sIndex)=>{
-        //     tocs[sKey].map((toc,tIndex)=>{
-        //         const refKey = createRefKey(sIndex,tIndex)
-        //         this.captionStatusRefs[refKey] = createRef(null)
-        //         this.videoStatusRefs[refKey] = createRef(null)
-        //     })
-        // })
-
         sections.map((s,sIndex)=>{
             const tocItems = tocs[s.slug]
             tocItems.map((toc,tIndex)=>{
@@ -133,8 +98,18 @@ class QueueItem extends Component{
         return `ref_${sIndex}${tIndex}`
     }
 
-    setDmStatus(vIndex, dmstatus){
+    setDlStatusMeta(vIndex, status, retryCount=0){
+        const [sIndex,tIndex] = vIndex
+        console.log(`setDlStatusMeta([${sIndex},${tIndex},'${t}',${status}])`)
+        const refKey = this.createRefKey(sIndex,tIndex)
+        const {dmstatusList}= this.state 
+        const dmstatus = dmstatusList[refKey]
+        dmstatus.metaStatus = status
 
+        if(retryCount){
+            dmstatus.dlMetaRetryCount = retryCount
+        }
+        this.setState({dmstatusList})
     }
 
     setLoading(vIndex, status){
@@ -145,35 +120,24 @@ class QueueItem extends Component{
         newLoadings[refKey] = status
         this.setState({loadings: newLoadings})
     }
-    setDlStatus_old(t, vIndex,status){
-        const [sIndex,tIndex] = vIndex
-        console.log(`setDlStatus([${sIndex},${tIndex},'${t}',${status}])`)
-
-        const refKey = this.createRefKey(sIndex,tIndex)
-        const stateKey = t == "caption" ? "dlcaptionStatus" : "dlvideoStatus"
-        
-        const dlStatus = Object.assign({},this.state[stateKey])
-        
-        dlStatus[refKey] = status
-        
-        const stateObj = {}
-        
-        stateObj[stateKey] = dlStatus
-
-        this.setState(stateObj)
-    }
-    setDlStatus(t, vIndex,status){
+    
+    setDlStatus(t, vIndex,status, retryCount=0){
         const [sIndex,tIndex] = vIndex
         console.log(`setDlStatus([${sIndex},${tIndex},'${t}',${status}])`)
 
         const refKey = this.createRefKey(sIndex,tIndex)
         const dmstatusKey = t == "caption" ? "captionStatus" : "videoStatus"
+        const dmstatusRetryKey = t == "caption" ? "dlCaptionRetryCount" : "dlVideoRetryCount"
         
         const {dmstatusList}= this.state//Object.assign({},this.state.dmstatusList)
 
         
         const dmstatus = dmstatusList[refKey]
         dmstatus[dmstatusKey] = status
+
+        if(retryCount){
+            dmstatus[dmstatusRetryKey] = retryCount
+        }
 
 
 
@@ -218,6 +182,7 @@ class QueueItem extends Component{
     }
     async updateDmStatusRow(courseId,vIndex){ 
         const row = {
+            metaStatus:0,
             videoStatus:0,
             captionStatus:0, 
             dlCaptionRetryCount : 0,
@@ -253,7 +218,7 @@ class QueueItem extends Component{
         this.setState({dmstatusList, loadings}) 
     }
     render(){
-        const {sections, tocs} = this.props
+        const {sections, tocs, startQueueItem} = this.props
         const {captionStatusRefs, videoStatusRefs} = this
         const {loadings,dlvideoStatus,dlcaptionStatus, dmstatusList} = this.state
     	const defaultTdCls = "px-1 py-1 whitespace-nowrap text-sm font-medium"
@@ -267,6 +232,7 @@ class QueueItem extends Component{
             return tocs[s.slug].map((toc,tIndex)=>{
                 number += 1
                 const refKey = this.createRefKey(sIndex,tIndex)
+                const vIndex = [sIndex,tIndex]
                 const dmstatus = dmstatusList[refKey]
                 let trCls = ""
                 let videoSz="n.a",captionSz="n.a"
@@ -313,7 +279,7 @@ class QueueItem extends Component{
                     <td className={tdCls}> {toc.title}</td>
                     <td className={tdClsCaptionStatus}> <div className="flex"><i className="mt-1 fa fa-file-text-o"/> <InputDisplay value={captionSz} ref={captionStatusRefs[refKey]}/> <DLStatus status={dmstatus.captionStatus}/></div></td>
                     <td className={tdClsVideoStatus}> <div className="flex"><i className="mt-1 fa fa-file-video-o"/> <InputDisplay value={videoSz} ref={videoStatusRefs[refKey]}/> <DLStatus status={dmstatus.videoStatus}/></div></td>
-                    <td className={tdCls}> <QueueItemToolbar loading={loadings[refKey]} dlStatus={vIndexStatus} finished={dmstatus.finished} interupted={dmstatus.interupted}/></td>
+                    <td className={tdCls}> <QueueItemToolbar vIndex={vIndex} startQueueItem={startQueueItem} loading={loadings[refKey]} dlStatus={vIndexStatus} finished={dmstatus.finished} interupted={dmstatus.interupted}/></td>
                 </tr>
             })
         })

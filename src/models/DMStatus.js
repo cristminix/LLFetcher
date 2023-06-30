@@ -6,12 +6,16 @@ class DMStatus extends DB{
 	fields = [
         "courseId",
         "vIndex",
+        "metaStatus",
         "videoStatus",
         "captionStatus", 
+        "dtMetaStart",
         "dtVideoStart",
         "dtCaptionStart",
+        "dtMetaEnd",
         "dtVideoEnd",
         "dtCaptionEnd",
+        "dlMetaRetryCount",
         "dlCaptionRetryCount",
         "dlVideoRetryCount",
         "videoSz",
@@ -78,7 +82,7 @@ class DMStatus extends DB{
         return record
     }
 
-    async setDlStatus(courseId, t, vIndex, dlStatus){
+    async setDlStatus(courseId, t, vIndex, dlStatus, retryCount=0){
         const dt = convertToMySQLDatetime(new Date)
 
         let current = this.getByCourseId(courseId, vIndex)
@@ -98,6 +102,9 @@ class DMStatus extends DB{
             }else{
                 row.dtCaptionEnd = dt
             }
+            if(retryCount >= 0){
+                row.dlCaptionRetryCount = retryCount
+            }
         }else{
             const videoStatus = dlStatus
             dlStatusResult = parseInt(current.captionStatus) + parseInt(dlStatus)
@@ -110,6 +117,9 @@ class DMStatus extends DB{
             }else{
                 row.dtVideoEnd = dt
             }
+            if(retryCount >= 0){
+                row.dlVideoRetryCount = retryCount
+            }
         }
         if(dlStatus == -1){
             row.interupted = true
@@ -120,10 +130,35 @@ class DMStatus extends DB{
 
         }
 
-        await this.updateByCourseId(courseId,vIndex, row)
-
+        current = await this.updateByCourseId(courseId,vIndex, row)
+        return current
     }
 
+    async setDlStatusMeta(courseId,vIndex, dlStatus, retryCount = 0){
+        const dt = convertToMySQLDatetime(new Date)
+
+        let current = this.getByCourseId(courseId, vIndex)
+        if(!current){
+            current = await this.create(courseId, vIndex)
+        }
+
+        const metaStatus = dlStatus
+        let row = {
+            metaStatus
+        }
+        if(dlStatus == 1){
+            row.dtMetaStart = dt
+        }else{
+            row.dtMetaEnd = dt
+        }
+        if(retryCount >= 0){
+            row.dlMetaRetryCount = retryCount
+        }
+
+        current = await this.updateByCourseId(courseId,vIndex, row)
+        return current
+
+    }
     async setDlSize(courseId, t, vIndex, loaded){
         console.log(`DMStatus.setDlSize(${courseId},${t},${this.createVIndex(vIndex)},${loaded})`)
 
@@ -149,12 +184,16 @@ class DMStatus extends DB{
         const dt = convertToMySQLDatetime(new Date)
 
         const id = 0
+        const metaStatus = 0
         const videoStatus = 0
         const captionStatus = 0
+        const dtMetaStart = dt
         const dtVideoStart = dt
         const dtCaptionStart = dt     
+        const dtMetaEnd = dt
         const dtVideoEnd = dt
         const dtCaptionEnd = dt
+        const dlMetaRetryCount = 0
         const dlCaptionRetryCount = 0
         const dlVideoRetryCount = 0
         const finished = false
@@ -164,10 +203,13 @@ class DMStatus extends DB{
 
         const row = { id, courseId, courseId,
                     vIndex : this.createVIndex(vIndex),
+                    metaStatus,
                     videoStatus,
                     captionStatus, 
+                    dtMetaStart,
                     dtVideoStart,
                     dtCaptionStart,
+                    dtMetaEnd,
                     dtVideoEnd,
                     dtCaptionEnd,
                     dlCaptionRetryCount,

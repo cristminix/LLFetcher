@@ -5,6 +5,8 @@ import {timeout} from "../../../components/fn"
 import {fetchCourseTocMeta, formatBytes, calculateSpeed} from "../../components/learning_fn"
 
 const ERROR_NOT_SETUP_QUEUE = "You must run setup queue first"
+const FETCH_TEST_MODE = false
+const FETCH_FAILED_MAX_COUNT = 3
 let SAVED_RAND_ARRAY = {}
 function rand(vIndex) {
     const [sIndex,tIndex] = vIndex
@@ -66,17 +68,20 @@ class QueueMan extends Component{
         this.mDMSetup = store.get("DMSetup")
         this.queueItemRef = createRef(null)
     }
-    async fetchDlMeta(){
-        console.log(`Fetching dlMeta`)
-
-    }
+    
     async fetchDlItem(t, queueItem){
         const {currentIndex} = this.state
-        const videoUrl = 'https://video.url'
-        const captionUrl = 'https://caption.url'
-        const videoFilename = 'video.mp4'
-        const captionFilename = 'caption.vtt'
+        let videoUrl
+        let captionUrl
+        let videoFilename
+        let captionFilename 
 
+        if(FETCH_TEST_MODE){
+            videoUrl = 'https://video.url'
+            captionUrl = 'https://caption.url'
+            videoFilename = 'video.mp4'
+            captionFilename = 'caption.vtt'
+        }
 
         let url
 
@@ -108,7 +113,73 @@ class QueueMan extends Component{
 
 
     }
+    async fetchDlMeta(){
+        console.log(`Fetching dlMeta`)
+        const {currentIndex} = this.state
+        const {course, tocs, sections} = this.props
+        const [sIndex, tIndex] = currentIndex
+        const sSlug = sections[sIndex].slug
+        const toc = tocs[sSlug][tIndex]
+        const result = await fetchCourseTocMeta(course.slug, toc.slug)
+
+        console.log(result)
+
+        return result
+
+
+    }
+    async startQueueItem(vIndex){
+        const [sIndex,tIndex] = vIndex
+        console.log(`startQueueItem staterted ${vIndex}`)
+        const {queueItemRef} = this
+        const {currentIndex} = this.state
+        const {course} = this.props
+        const queueItem = queueItemRef.current
+        const courseId = course.id
+        // get dmstatus fro db
+        let dmstatus = this.mDMStatus.getByCourseId(courseId, vIndex)
+        if(!dmstatus){
+            dmstatus = this.mDMStatus.setDlStatusMeta(courseId,vIndex, 0)
+        }
+        if(!FETCH_TEST_MODE){
+            // get meta status from state
+            // const dmstatus = queueItem.getDMStatus(sIndex,tIndex)
+            let fetchSuccess = false
+            if(dmstatus.dlMetaRetryCount <= FETCH_FAILED_MAX_COUNT){
+                queueItem.setLoading(vIndex, true)
+
+                for(let retryCount = dmstatus.dlMetaRetryCount; retryCount <= FETCH_FAILED_MAX_COUNT; retryCount++){
+                    if(retryCount >0){
+                        console.log(`retry fetchMeta ${retryCount}`)
+                    }
+
+                    const [validResource, toc, exerciseFile, streamLocations] = await this.fetchDlMeta()
+                    fetchSuccess = validResource
+                    const status = validResource ? 2 : -1
+                    if(fetchSuccess){
+                        // update dmstatus meta
+                        break
+                    }else{
+                        // update dmstatus meta retryCount
+                    }
+                    queueItem.setDlStatusMeta(vIndex, status, retryCount=0)
+                    await this.mDMStatus.setDlStatusMeta(courseId,vIndex, status, retryCount)
+       
+                }
+                queueItem.setLoading(vIndex, false)
+
+            }else{
+                console.log(`fetchDlMeta reach max  FETCH_FAILED_MAX_COUNT`)
+
+            }
+
+
+        }else{
+            console.log(`FETCH_TEST_MODE currently not do anythings`)
+        }
+    }
     async fetchDl() {
+        
         const {queueItemRef} = this
 
         const {currentIndex} = this.state
@@ -116,6 +187,13 @@ class QueueMan extends Component{
         const queueItem = queueItemRef.current
         
         const dmstatus = this.mDMStatus.getByCourseId(course.id, currentIndex)
+
+        let dlMeta 
+        
+        if(!FETCH_TEST_MODE){
+            dlMeta = await this.fetchDlMeta(dmstatus)
+
+        }
 
         let captionStatus = 0
         let videoStatus = 0
@@ -194,9 +272,7 @@ class QueueMan extends Component{
         
         // refs[index].current.value = `${formatBytes(loaded)}/${speed}ps`
     }
-    async fetchDlDummy(){
-
-    }
+  
    
     async onQueueComplete(){
         const queueItem = this.queueItemRef.current
@@ -247,7 +323,7 @@ class QueueMan extends Component{
             this.setState({dlRunning:true, currentIndex : qIndex},async()=>{
                 await this.fetchDl()
                 if(queueRunning){
-                    this.triggerFetchDl()
+                    //this.triggerFetchDl()
                 }
             })
         }
@@ -340,7 +416,7 @@ class QueueMan extends Component{
                 
                 alreadySetup ? <>
                     <QueueInfo selectedFmt={selectedFmt} queueFinished={queueFinished} message={infoMessage} queueStarted={queueStarted} currentIndex={currentIndex}/>
-                    <QueueTable queueItemRef={this.queueItemRef} course={course} sections={sections} tocs={tocs} store={store}/>
+                    <QueueTable startQueueItem={vIndex=>this.startQueueItem(vIndex)} queueItemRef={this.queueItemRef} course={course} sections={sections} tocs={tocs} store={store}/>
                 </> : ERROR_NOT_SETUP_QUEUE
             }
             

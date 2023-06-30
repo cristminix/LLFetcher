@@ -1,6 +1,6 @@
 
 import Button from "../Button"
-const QueueItemToolbar = ({loading,dlStatus,finished, interupted}) => {
+const QueueItemToolbar = ({startQueueItem,loading,dlStatus,finished, interupted, vIndex}) => {
     const [dlcaptionStatus, dlvideoStatus] = dlStatus
     const dlStatusResult = parseInt(dlcaptionStatus) + parseInt(dlvideoStatus)
     const icon =  dlStatusResult == 0 ? 'download' : dlStatusResult != 4 ? 'refresh' : 'check' 
@@ -13,10 +13,10 @@ const QueueItemToolbar = ({loading,dlStatus,finished, interupted}) => {
         {
 
             interupted ? <>
-                <Button caption={dlStatusResult} disabled={disabled} loading={loading} icon={`fa fa-refresh`}/>
+                <Button onClick={e=>startQueueItem(vIndex)} caption={dlStatusResult} disabled={disabled} loading={loading} icon={`fa fa-refresh`}/>
                 
             </>:<>
-        <Button caption={dlStatusResult} disabled={disabled} loading={loading} icon={`fa fa-${icon}`}/>
+        <Button onClick={e=>startQueueItem(vIndex)} caption={dlStatusResult} disabled={disabled} loading={loading} icon={`fa fa-${icon}`}/>
 
             </>
         }

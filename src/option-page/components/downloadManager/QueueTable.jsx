@@ -1,5 +1,5 @@
 import QueueItem from "./QueueItem"
-const QueueTable = ({store, course, sections, tocs, queueItemRef}) => {
+const QueueTable = ({startQueueItem,store, course, sections, tocs, queueItemRef}) => {
     const thCls = "px-1 py-1 text-left text-xs font-medium text-gray-500 uppercase"
 	
     return (<><div className="queue-table border rounded-xl shadow-sm p-6 dark:bg-gray-800 dark:border-gray-700">
@@ -19,7 +19,7 @@ const QueueTable = ({store, course, sections, tocs, queueItemRef}) => {
                 </tr>
             </thead>
             <tbody>
-            <QueueItem store={store} ref={queueItemRef} course={course} sections={sections} tocs={tocs} />
+            <QueueItem startQueueItem={startQueueItem} store={store} ref={queueItemRef} course={course} sections={sections} tocs={tocs} />
             </tbody>
         </table>
         </div>

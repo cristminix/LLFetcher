@@ -79,6 +79,12 @@
 					"path" : "/database/dm-status",
 					"iconCls" : "fa fa-database",
 					"order" : 0
+				},
+				"cookie" : {
+					"title" : "Cookie",
+					"path" : "/database/cookie",
+					"iconCls" : "fa fa-database",
+					"order" : 0
 				}
 			}
 		},

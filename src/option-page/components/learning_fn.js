@@ -121,8 +121,23 @@ function findItems(searchTerm, source){
     return str;
   }
   function parseToc(responseText){
+    jQuery.expr[':'].containsRegex = jQuery.expr.createPseudo(function (pattern) {
+        var regex = new RegExp(pattern, 'i')
+        return function (elem) {
+            return regex.test($(elem).text())
+        }
+    })
+      let errorMessage = null
+
       let validResource = false;
-      const elDiv  = jQuery(`<div>${responseText}</div>`);
+      const elDiv  = jQuery(`<div>${responseText}</div>`)
+      
+      
+      const signInBtns = elDiv.find('a:containsRegex("sign in")')
+
+      if(signInBtns.length > 0){
+        errorMessage = "ERR_NO_LOGIN"
+      }
       const elCodes = elDiv.find('code');
       let dataCodes = [];
       
@@ -179,8 +194,7 @@ function findItems(searchTerm, source){
       if( streamLocations.length > 0){
           validResource = true
       }
-      
-      return [validResource, toc, exerciseFile, streamLocations]
+      return [validResource, toc, exerciseFile, streamLocations, errorMessage]
   }
  
 const fetchCourseTocMeta = async(courseSlug,tocSlug)=> {
@@ -189,7 +203,7 @@ const fetchCourseTocMeta = async(courseSlug,tocSlug)=> {
         return parseToc(responseText)
     }
     
-    return [false, null, null, null]
+    return [false, null, null, null, "n00b"]
 }
 const fetchCourseTocPage = async(courseSlug, tocSlug)=>{
     const url =  `https://www.linkedin.com/learning/${courseSlug}/${tocSlug}`

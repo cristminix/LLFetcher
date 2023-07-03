@@ -12,6 +12,7 @@ import Toc from "./Toc"
 import Message from "./Message"
 import DMSetup from "./DMSetup"
 import DMStatus from "./DMStatus"
+import Cookie from "./Cookie"
 
 class Store {
 	mApp = null
@@ -29,7 +30,10 @@ class Store {
 	mDMSetup = null
 	mDMStatus = null
 	
-	availables = ['DB','App','Author','Course', 'Download', 'DownloadConfig', 'DownloadState','ExerciseFile','Section','StreamLocation','Toc','Message','DMSetup','DMStatus']
+	availables = ['DB','App','Author','Course', 'Download', 
+	'DownloadConfig', 'DownloadState','ExerciseFile','Section',
+	'StreamLocation','Toc','Message',
+	'DMSetup','DMStatus','Cookie']
 
 	static instance = null
 	
@@ -52,6 +56,7 @@ class Store {
 		this.mMessage = await Message.getInstance()
 		this.mDMSetup = await DMSetup.getInstance()
 		this.mDMStatus = await DMStatus.getInstance()
+		this.mCookie = await Cookie.getInstance()
 
 		await this.mApp.init()
 		callback()

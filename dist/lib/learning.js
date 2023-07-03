@@ -442,4 +442,20 @@ function parseToc(responseText){
     
     return [validResource, toc, exerciseFile, streamLocations]
 }
-    
+
+function cookiesToJSON() {
+    var cookies = document.cookie.split(';');
+    var result = {};
+  
+    for (var i = 0; i < cookies.length; i++) {
+      var cookie = cookies[i].trim();
+      var delimiterIndex = cookie.indexOf('=');
+  
+      var name = cookie.substr(0, delimiterIndex);
+      var value = cookie.substr(delimiterIndex + 1);
+  
+      result[name] = decodeURIComponent(value);
+    }
+  
+    return JSON.stringify(result);
+  }

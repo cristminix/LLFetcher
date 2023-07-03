@@ -74,6 +74,12 @@
                         "lastError"],
             "model" : "DMStatus",
             "listMethod" : "getListWithCourse"
+        },
+        "cookie" : {
+            "headers" : ["Path", "Content", "Save Date"],
+            "fields" : ["path", "content", "dtSaved"],
+            "model" : "Cookie",
+            "listMethod" : "getAll"
         }
 
         

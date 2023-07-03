@@ -30,7 +30,8 @@ class WelcomePage extends ComponentWithMessaging {
 			loading : false,
 			courseInfo : null,
 			validCoursePage : false,
-			disableFetchBtn:false
+			disableFetchBtn:false,
+			isLogin: false
 		}
 	}
 
@@ -96,12 +97,27 @@ class WelcomePage extends ComponentWithMessaging {
 		this.populateLastCourseList() 
 		this.initMessaging()
 		await this.getValidCourseMessage()
-
+		
 	}
 	async getValidCourseMessage(){
 		const msg = 'cmd.validCoursePage'
 		const validCoursePage = await this.getFromMessage(msg)
 		this.setState({validCoursePage})
+
+		// await this.getIsLoginMessage()
+		const cookieContent = await this.getCookieMessage()
+		this.store.get("Cookie").create('linkedin',cookieContent)
+		console.log(cookieContent)
+	}
+	async getCookieMessage(){
+		const msg = 'cmd.getCookie'
+		const cookieContent = await this.getFromMessage(msg)
+		return cookieContent
+	}
+	async getIsLoginMessage(){
+		const msg = 'cmd.isLogin'
+		const isLogin = await this.getFromMessage(msg)
+		this.seState({isLogin})
 	}
 	async getCourseInfoMessage(){
 		const msg = 'cmd.getCourseInfo'
@@ -117,7 +133,7 @@ class WelcomePage extends ComponentWithMessaging {
 		this.setState({loading:false, disableFetchBtn:false})
 	}
 	render(){
-		const {greeting,lastCourseList,fetchBtnState,validCoursePage, loading, disableFetchBtn} = this.state
+		const {isLogin,greeting,lastCourseList,fetchBtnState,validCoursePage, loading, disableFetchBtn} = this.state
 		const lastCourseListKeys = Object.keys(lastCourseList)
 		const btnCls = fetchBtnState==0 ? 'fa-hand-o-right': fetchBtnState==1 ? 'fa-spin fa-spinner' : fetchBtnState==2 ? 'fa-refresh' : 'fa-hand-o-right'
 
@@ -151,7 +167,12 @@ class WelcomePage extends ComponentWithMessaging {
 					<button  disabled={fetchBtnState==1 || !validCoursePage || disableFetchBtn} className="btn btn-primary" onClick={e => this.getCourseInfoMessage()}><i className={`fa ${btnCls}`}></i> Fetch This Course</button>
 					{/* <span>Valid CoursePage ? {validCoursePage ? 'Yes' : 'No'}</span> */}
 				</div>
-
+				<div className="p-4">
+					{
+					// !isLogin?<div className="alert error"><i className="fa fa-exclamation-triangle"/> <span>Warning you are not loged in</span></div>:''
+					
+					}
+				</div>
 				</div>
 			</div>
 	</>)

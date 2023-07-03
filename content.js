@@ -79,6 +79,12 @@ class ContentScript {
                 case 'cmd.getCourseToc':
                     this.onCommand(evt.name, evt.data)
                 break
+                case 'cmd.getCookie':
+                    this.onCommand(evt.name, evt.data)
+                break
+                case 'cmd.isLogin':
+                    this.onCommand(evt.name, evt.data)
+                break
                 case 'cmd.validCoursePage':
                 case 'cmd.validCoursePageAuto':
                     this.onCommand(evt.name)

@@ -6,6 +6,12 @@ const appRef = React.createRef(null);
 let appInstance = null;
 let publicRoutePath = null;
 const { useState, useEffect } = React;
+$.expr[":"].containsRegex = $.expr.createPseudo(function(pattern) {
+  var regex = new RegExp(pattern, "i");
+  return function(elem) {
+    return regex.test($(elem).text());
+  };
+});
 const CheckerTag = ({ children, hasChildren }) => {
   const cls = hasChildren ? "course-checker" : "course-checker-last";
   return /* @__PURE__ */ React.createElement("span", {
@@ -70,6 +76,20 @@ class Action_csa extends React.Component {
   }
   async validCoursePage() {
     return this.state.validCoursePage;
+  }
+  async isLogin() {
+    const signInBtnsDetect = $('a:containsRegex("sign in")');
+    if (signInBtnsDetect.length > 0) {
+      return false;
+    }
+    const meBtnDetect = $("div.nav-bar__item-text:contains(Me)");
+    if (meBtnDetect.length > 0) {
+      return true;
+    }
+    return true;
+  }
+  async getCookie() {
+    return cookiesToJSON();
   }
   async validCoursePageAuto() {
     return this.state.validCoursePage;

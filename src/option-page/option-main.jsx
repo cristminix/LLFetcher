@@ -4,6 +4,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import OptionPage from './components/OptionPage'
 import '../index.css'
+import './option-page.css'
 import Store from "../models/Store"
 import Router from "./Router"
 import "bootstrap-icons/font/bootstrap-icons.css"

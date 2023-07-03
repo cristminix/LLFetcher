@@ -13,19 +13,21 @@ export async function loader({ params }) {
 const DatabasePage = ({store}) => {
     const {table, page} = useLoaderData()
 
-    
-    return (<><div className="database-page">
-        {
-            table ? <>
-                <DBExplorer store={store} table={table} page={page}/>
-            </> : <>
-            You have no select table
+    const viewMode = table ? 'explorer' : 'manager'
 
-            <DBTableManager store={store}/>
-            
-            </>
+    
+    return <div className="database-page">
+        {
+            viewMode === 'explorer' ? <DBExplorer store={store} table={table} page={page}/> : ''
         }
-    </div></>)
+        {
+            viewMode === 'manager' ? <>
+            {/* You have no select table */}
+
+                <DBTableManager store={store}/>
+            </>: ''
+        } 
+    </div>
 }
 
 

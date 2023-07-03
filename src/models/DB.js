@@ -84,6 +84,10 @@ class DB {
         const results =  this.db.queryAll(this.table);
         return results
     }
+	getAll(){
+        const results =  this.db.queryAll(this.table);
+        return results
+    }
 	/**
 	 * get singleton instance */
 	static async getInstance(){

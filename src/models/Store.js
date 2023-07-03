@@ -28,6 +28,8 @@ class Store {
 	mMessage = null
 	mDMSetup = null
 	mDMStatus = null
+	
+	availables = ['DB','App','Author','Course', 'Download', 'DownloadConfig', 'DownloadState','ExerciseFile','Section','StreamLocation','Toc','Message','DMSetup','DMStatus']
 
 	static instance = null
 	
@@ -66,8 +68,7 @@ class Store {
 		await DB.connection.reload()
 	}
 	get(model){
-		const availables = ['DB','App','Author','Course', 'Download', 'DownloadConfig', 'DownloadState','ExerciseFile','Section','StreamLocation','Toc','Message','DMSetup','DMStatus']
-		if(availables.includes(model)){
+		if(this.availables.includes(model)){
 			const prop = `m${model}`
 			return this[prop]
 		}

@@ -113,9 +113,10 @@ class QueueMan extends Component{
 
 
     }
-    async fetchDlMeta(){
+    async fetchDlMeta(vIndex){
         console.log(`Fetching dlMeta`)
-        const {currentIndex} = this.state
+        let currentIndex = vIndex
+        // const {currentIndex} = this.state
         const {course, tocs, sections} = this.props
         const [sIndex, tIndex] = currentIndex
         const sSlug = sections[sIndex].slug
@@ -132,7 +133,8 @@ class QueueMan extends Component{
         const [sIndex,tIndex] = vIndex
         console.log(`startQueueItem staterted ${vIndex}`)
         const {queueItemRef} = this
-        const {currentIndex} = this.state
+        // const {currentIndex} = this.state
+        // this.setState({currentIndex:vIndex})
         const {course} = this.props
         const queueItem = queueItemRef.current
         const courseId = course.id
@@ -153,13 +155,19 @@ class QueueMan extends Component{
                         console.log(`retry fetchMeta ${retryCount}`)
                     }
 
-                    const [validResource, toc, exerciseFile, streamLocations] = await this.fetchDlMeta()
+                    const [validResource, toc, exerciseFile, streamLocations, errorMsg] = await this.fetchDlMeta(vIndex)
                     fetchSuccess = validResource
                     const status = validResource ? 2 : -1
                     if(fetchSuccess){
                         // update dmstatus meta
                         break
                     }else{
+                        console.log(errorMsg)
+                        if(errorMsg == "ERR_NO_LOGIN"){
+                            alert("You must login to linkedin learning website")
+                            break
+                        
+                        }
                         // update dmstatus meta retryCount
                     }
                     queueItem.setDlStatusMeta(vIndex, status, retryCount=0)

@@ -41,12 +41,16 @@ const QueueSetup = ({
 
     const fetchToc = async(courseSlug,tocSlug)=> {
 		
-		const [validResource, tocUp, exFile, streamLocations] = await fetchCourseTocMeta(courseSlug,tocSlug)
+		const [validResource, tocUp, exFile, streamLocations,errorMsg] = await fetchCourseTocMeta(courseSlug,tocSlug)
         let availableFmtList = []
 
 		if(validResource){
             availableFmtList = streamLocations.map(item => item.fmt)
-		}
+		}else{
+            if(errorMsg == "ERR_NO_LOGIN"){
+                alert("You must login to linkedin learning website")
+            }
+        }
 		return [validResource, availableFmtList]
 		
 	}
@@ -65,7 +69,7 @@ const QueueSetup = ({
         setLoadingFetchToc(true)
         setAvailableFmt([])
 
-        const [validResource, availableFmtList, exerciseFile] = await fetchToc(course.slug, tocSlug)
+        const [validResource, availableFmtList] = await fetchToc(course.slug, tocSlug)
         if(validResource){
             setAvailableFmt(availableFmtList)
             await mDMSetup.create(course.id,availableFmtList,"",course.sourceCodeRepository,exerciseFile,1, false)

@@ -124,7 +124,7 @@ function findItems(searchTerm, source){
     jQuery.expr[':'].containsRegex = jQuery.expr.createPseudo(function (pattern) {
         var regex = new RegExp(pattern, 'i')
         return function (elem) {
-            return regex.test($(elem).text())
+            return regex.test(jQuery(elem).text())
         }
     })
       let errorMessage = null

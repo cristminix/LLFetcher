@@ -100,7 +100,7 @@ class QueueItem extends Component{
 
     setDlStatusMeta(vIndex, status, retryCount=0){
         const [sIndex,tIndex] = vIndex
-        console.log(`setDlStatusMeta([${sIndex},${tIndex},'${t}',${status}])`)
+        console.log(`setDlStatusMeta([${sIndex},${tIndex},${status}])`)
         const refKey = this.createRefKey(sIndex,tIndex)
         const {dmstatusList}= this.state 
         const dmstatus = dmstatusList[refKey]

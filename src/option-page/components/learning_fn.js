@@ -71,7 +71,7 @@ function findItems(searchTerm, source){
   }
   
   function getFmt(url){
-      console.log(url)
+    //   console.log(url)
       let str = ""
   
       try{

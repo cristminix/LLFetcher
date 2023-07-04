@@ -21,35 +21,106 @@ function rand(vIndex) {
     SAVED_RAND_ARRAY[randKey]= 1
     return inputArray[randomIndex]
 }
+async function fetchDownloadReal(url, outputFilename, mime, progressCallback, vIndex, t) {
+    return new Promise((resolve, reject)=>{
+        let contentType
+        fetch(url)
+        .then(response => {
+
+            const contentEncoding = response.headers.get('content-encoding')
+            let contentLength = response.headers.get(contentEncoding ? 'x-file-size' : 'content-length')
+            contentType = response.headers.get('content-type') || mime
+            if (contentLength === null) {
+                contentLength = 0
+                // throw Error('Response size header unavailable');
+            }
+
+            const total = parseInt(contentLength, 10);
+            let loaded = 0;
+            return new Response(
+                new ReadableStream({
+                    start(controller) {
+                        let lastReadDate = new Date
+
+                        const reader = response.body.getReader();
+
+                        read();
+                        
+                        function read() {
+                            reader.read().then(({done, value}) => {
+                                if (done) {
+                                    controller.close();
+                                    return;
+                                }
+                                loaded += value.byteLength;
+                                const lastLoaded = value.byteLength
+                                //loaded, total, vIndex, lastReadDate, lastLoaded,t
+                                progressCallback(loaded, total, vIndex, lastReadDate, lastLoaded,t)
+
+                                //progressCallback({loaded, total, vIndex, lastReadDate, lastLoaded, t})
+                                lastReadDate = new Date
+                                controller.enqueue(value);
+                                read();
+                            }).catch(error => {
+                                console.error(error);
+                                controller.error(error)
+                            })
+                        }
+                    }
+                })
+            );
+        })
+        .then(response => response.blob())
+        .then(blob => {
+            // let blobUrl = URL.createObjectURL(blob)
+            resolve(blob)
+            // player.style.display = 'block';
+            // player.type = contentType;
+            // player.src = vid;
+            // elProgress.innerHTML += "<br /> Press play!";
+        })
+        .catch(error => {
+            reject(error)
+            console.error(error)
+        })
+    })
+    
+}
 async function fetchDownload(url, outputFilename, mime, progressCallback, vIndex, t){
-    if(!vIndex){
-        console.log(vIndex)
-        return
+    if(FETCH_TEST_MODE){
+        if(!vIndex){
+            console.log(vIndex)
+            return
+        }
+        console.log(`
+            Dummy download
+            url=${url}
+            outputFilename=${outputFilename}
+            mime=${mime}
+            vIndex=${vIndex}
+        `)
+
+        let bufferCount = 0
+        let loaded = 0
+        let lastReadDate = new Date
+        let total =0
+
+        while(bufferCount <= 5){
+
+            bufferCount += 1
+            await timeout(50)
+            let lastLoaded = bufferCount * 100
+            loaded += lastLoaded 
+            progressCallback(loaded, total, vIndex, lastReadDate, lastLoaded,t)
+            lastReadDate = new Date
+        }
+
+    }else{
+        const blob = await fetchDownloadReal(url, outputFilename, mime, progressCallback, vIndex, t)
+        return blob
     }
-    console.log(`
-        Dummy download
-        url=${url}
-        outputFilename=${outputFilename}
-        mime=${mime}
-        vIndex=${vIndex}
-    `)
-
-    let bufferCount = 0
-    let loaded = 0
-    let lastReadDate = new Date
-    let total =0
-
-    while(bufferCount <= 5){
-
-        bufferCount += 1
-        await timeout(50)
-        let lastLoaded = bufferCount * 100
-        loaded += lastLoaded 
-        progressCallback(loaded, total, vIndex, lastReadDate, lastLoaded,t)
-        lastReadDate = new Date
-    }
-
     return null
+
 } 
 
 class QueueMan extends Component{
@@ -68,14 +139,17 @@ class QueueMan extends Component{
         this.mDMSetup = store.get("DMSetup")
         this.queueItemRef = createRef(null)
     }
-    
-    async fetchDlItem(t, queueItem){
-        const {currentIndex} = this.state
-        let videoUrl
-        let captionUrl
-        let videoFilename
-        let captionFilename 
+    /**
+     * this is the main fetch method to download the caption and video file
+    */
+    async fetchDlItem(vIndex_, t, queueItem, captionUrl="", videoUrl="", captionFilename="", videoFilename=""){
+        // const {currentIndex} = this.state
 
+        // let videoUrl
+        // let captionUrl
+        // let videoFilename
+        // let captionFilename 
+        let outputFilename = captionFilename
         if(FETCH_TEST_MODE){
             videoUrl = 'https://video.url'
             captionUrl = 'https://caption.url'
@@ -91,57 +165,166 @@ class QueueMan extends Component{
 
         }else{
             url = videoUrl
+            outputFilename = videoFilename
         }
-        let infoMessage = `Downloading ${url}`
+        let infoMessage = `Downloading ${outputFilename}`
         this.setState({infoMessage})
         let dlStatus = 1
         const {course} = this.props
         const courseId = course.id
-        queueItem.setDlStatus(t, currentIndex, dlStatus)
-        await this.mDMStatus.setDlStatus(courseId, t, currentIndex, dlStatus)
+        queueItem.setDlStatus(t, vIndex_, dlStatus)
+        await this.mDMStatus.setDlStatus(courseId, t, vIndex_, dlStatus)
         
-        const dl = await fetchDownload(url, captionFilename, null, (loaded, total, vIndex, lastReadDate, lastLoaded, type)=>{
+        const blob = await fetchDownload(url, outputFilename, null, (loaded, total, vIndex, lastReadDate, lastLoaded, t)=>{
             this.onDlProgress(loaded, total, vIndex, lastReadDate, lastLoaded, t)
-        },currentIndex,t)
-        
-        dlStatus = rand(currentIndex)
+        },vIndex_,t)
+        if(FETCH_TEST_MODE){
+            dlStatus = rand(vIndex_)
 
-        queueItem.setDlStatus(t, currentIndex, dlStatus)
-        await this.mDMStatus.setDlStatus(courseId, t, currentIndex, dlStatus)
+        }
+        if(blob){
+            dlStatus = 2
+        }
+        queueItem.setDlStatus(t, vIndex_, dlStatus)
+        await this.mDMStatus.setDlStatus(courseId, t, vIndex_, dlStatus)
 
-        this.setState({infoMessage : "OK"})
-
-
+        this.setState({infoMessage : `Download ${outputFilename} ${dlStatus == -1 ? 'Failed' : 'Success'}`})
+       
+        try{
+            
+          
+            const anchor = document.createElement('a')
+            const objectURL = window.URL.createObjectURL(blob)
+            anchor.download = outputFilename
+            anchor.href = objectURL
+            anchor.click()
+            
+        }catch(e){
+            console.error(e)
+        }
     }
-    async fetchDlMeta(vIndex){
-        console.log(`Fetching dlMeta`)
-        let currentIndex = vIndex
-        // const {currentIndex} = this.state
+    /**
+     * This is the main runner fetch to download caption and video file
+     * mode = single meant this method invoked via button in queue item toolbar
+     * mode = queue meant this method invoked via queue loops
+     * 
+     * @returns void
+    */
+    async fetchDlQueueItem(vIndex, captionUrl, videoUrl, mode="single"){
+        console.log(`fetchDlQueueItem runing in ${mode} mode`,captionUrl, videoUrl)
+        // const {}
+        const queueIsRunning = this.props.queueStarted
+        const [courseSlug, tocSlug] = this.getCourseTocSlug(vIndex)
+        const {selectedFmt} = this.props
+        const queueItem = this.queueItemRef.current
+        const {captionStatus, videoStatus, finished, interupted} = this.getDmStatus(vIndex)
+
+        if(mode){
+            let runQueue = false 
+            if(mode == "single"){
+                if(!queueIsRunning){
+                    runQueue = true
+                }
+            }else{
+                if(queueIsRunning){
+                    runQueue = true
+                }
+            }
+            if(!runQueue){
+                let alertMessage = mode == "single" ? "Cant download this item in single mode because Queue is running" : "Cant download this item in queue mode because Queue is not running"
+                alert(alertMessage)
+                return null
+            }
+          
+            if(runQueue){
+                const filenameBase = `${tocSlug}-${selectedFmt}`
+                const videoFilename = `${filenameBase}.mp4`
+                const captionFilename = `${filenameBase}.vtt`
+                //fetchDlItem(vIndex, t, queueItem, captionUrl="", videoUrl="", captionFilename="", videoFilename="")
+                let dlCaptionStatus
+                let dlVideoStatus
+                //--------------------------------------------------------------------------------------------------------
+                if(!finished){
+                    if(interupted){
+                        if(captionStatus != 2){
+                            dlCaptionStatus = await this.fetchDlItem(vIndex, "caption", queueItem, captionUrl, videoUrl, captionFilename, videoFilename)
+                        }else{
+                            if(confirm(`${outputFilename} already downloaded do you wanna redownload again ${outputFilename}?`)){
+                                dlCaptionStatus = await this.fetchDlItem(vIndex, "caption", queueItem, captionUrl, videoUrl, captionFilename, videoFilename)
+
+                            }else{
+                                this.setState({infoMessage:`${outputFilename} Skipped`})
+                            }    
+                        }
+                        if(videoStatus != 2){
+                            dlVideoStatus = await this.fetchDlItem(vIndex, "video", queueItem, captionUrl, videoUrl, captionFilename, videoFilename)
+                            
+                        }else{
+                            if(confirm(`${outputFilename} already downloaded do you wanna redownload again ${outputFilename}?`)){
+                                dlVideoStatus = await this.fetchDlItem(vIndex, "video", queueItem, captionUrl, videoUrl, captionFilename, videoFilename)
+                                
+                            }    
+                            else{
+                                this.setState({infoMessage:`${outputFilename}  skipped`})
+                            }
+                        }
+                    }else{
+                        dlCaptionStatus = await this.fetchDlItem(vIndex, "caption", queueItem, captionUrl, videoUrl, captionFilename, videoFilename)
+                        dlVideoStatus = await this.fetchDlItem(vIndex, "video", queueItem, captionUrl, videoUrl, captionFilename, videoFilename)
+
+                    }
+                    
+    
+                }else{
+                    this.setState({infoMessage:`${vIndex} skipped`})
+                }
+
+                //--------------------------------------------------------------------------------------------------------
+
+                console.log(dlCaptionStatus, dlVideoStatus)
+            }
+        } 
+        
+    }
+    /**
+     * retrive course.slug and toc.slug by current vector index
+     * @returns [courseSlug, tocSlug]
+    */
+    getCourseTocSlug(vIndex){
         const {course, tocs, sections} = this.props
-        const [sIndex, tIndex] = currentIndex
+        const [sIndex, tIndex] = vIndex
         const sSlug = sections[sIndex].slug
         const toc = tocs[sSlug][tIndex]
-        const result = await fetchCourseTocMeta(course.slug, toc.slug)
 
-        console.log(result)
-
-        return result
-
-
+        return [course.slug, toc.slug]
     }
-    async startQueueItem(vIndex){
+    /**
+     * Retrieve meta data for current toc by vector index
+     * @returns [validResource, toc, exerciseFile, streamLocations, errorMessage]
+    */
+    async fetchDlMeta(vIndex){
+        console.log(`Fetching dlMeta`)
+        const [courseSlug, tocSlug] = this.getCourseTocSlug(vIndex)
+        const result = await fetchCourseTocMeta(courseSlug, tocSlug)
+        return result
+    }
+    /**
+     * Starting current queue process by vector index
+     * @returns void
+    */
+    async startQueueItem(vIndex, mode="single"){
         const [sIndex,tIndex] = vIndex
         console.log(`startQueueItem staterted ${vIndex}`)
         const {queueItemRef} = this
         // const {currentIndex} = this.state
         // this.setState({currentIndex:vIndex})
-        const {course} = this.props
+        const {course,selectedFmt} = this.props
         const queueItem = queueItemRef.current
         const courseId = course.id
         // get dmstatus fro db
         let dmstatus = this.mDMStatus.getByCourseId(courseId, vIndex)
         if(!dmstatus){
-            dmstatus = this.mDMStatus.setDlStatusMeta(courseId,vIndex, 0)
+            dmstatus = await this.mDMStatus.setDlStatusMeta(courseId,vIndex, 0)
         }
         if(!FETCH_TEST_MODE){
             // get meta status from state
@@ -158,9 +341,25 @@ class QueueMan extends Component{
                     const [validResource, toc, exerciseFile, streamLocations, errorMsg] = await this.fetchDlMeta(vIndex)
                     fetchSuccess = validResource
                     const status = validResource ? 2 : -1
+                    let mustBreak = false
                     if(fetchSuccess){
                         // update dmstatus meta
-                        break
+                        const captionUrl = toc.captionUrl
+                        const streamLocs = streamLocations.filter(sl=>sl.fmt==selectedFmt)
+
+                        console.log(captionUrl, streamLocs)
+                        let videoUrl = null 
+                        try{
+                            const [streamLoc] = streamLocs
+
+                            videoUrl = streamLoc.url
+                        }catch(e){
+                            console.error(e)
+                        }
+                        await this.fetchDlQueueItem(vIndex, captionUrl, videoUrl, mode)
+                        // return [captionUrl,streamLocs]
+
+                        mustBreak = true
                     }else{
                         console.log(errorMsg)
                         if(errorMsg == "ERR_NO_LOGIN"){
@@ -168,25 +367,52 @@ class QueueMan extends Component{
                             break
                         
                         }
+                        mustBreak = true
+
                         // update dmstatus meta retryCount
                     }
-                    queueItem.setDlStatusMeta(vIndex, status, retryCount=0)
+                    queueItem.setDlStatusMeta(vIndex, status, retryCount)
                     await this.mDMStatus.setDlStatusMeta(courseId,vIndex, status, retryCount)
+                    if(mustBreak){
+                        break
+                    }
        
                 }
                 queueItem.setLoading(vIndex, false)
-
             }else{
                 console.log(`fetchDlMeta reach max  FETCH_FAILED_MAX_COUNT`)
 
             }
-
-
         }else{
             console.log(`FETCH_TEST_MODE currently not do anythings`)
         }
     }
-    async fetchDl() {
+    /**
+     * get current dmstatus in database with default value
+    */
+    getDmStatus(vIndex){
+        const {course} = this.props
+        const dmstatus = this.mDMStatus.getByCourseId(course.id, vIndex)
+
+        let captionStatus = 0
+        let videoStatus = 0
+        let finished = false
+        let interupted = false
+
+        if(dmstatus){
+            captionStatus = dmstatus.captionStatus
+            videoStatus = dmstatus.videoStatus
+            finished = dmstatus.finished
+            interupted = dmstatus.interupted
+        }
+
+        return {captionStatus, videoStatus, finished, interupted}
+    }
+    async fetchDl(){
+        const vIndex = this.state.currentIndex
+        await this.startQueueItem(vIndex, "queue")
+    }
+    async fetchDl_deprecated() {
         
         const {queueItemRef} = this
 
@@ -202,7 +428,7 @@ class QueueMan extends Component{
             dlMeta = await this.fetchDlMeta(dmstatus)
 
         }
-
+        console.log(dlMeta)
         let captionStatus = 0
         let videoStatus = 0
         let finished = false
@@ -331,7 +557,7 @@ class QueueMan extends Component{
             this.setState({dlRunning:true, currentIndex : qIndex},async()=>{
                 await this.fetchDl()
                 if(queueRunning){
-                    //this.triggerFetchDl()
+                    this.triggerFetchDl()
                 }
             })
         }

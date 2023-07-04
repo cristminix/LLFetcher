@@ -164,7 +164,8 @@ const DownloadManager = ({store}) => {
                   resetDownloadQueue={resetDownloadQueue}
                   ref={queueManRef}
                   setQueueResume={setQueueResume}
-                  selectedFmt={selectedFmt} />
+                  selectedFmt={selectedFmt} 
+                  selectedFmt={selectedFmt}/>
         <StatusBarMan store={store} 
                       course={course} 
                       alreadySetup={alreadySetup} 

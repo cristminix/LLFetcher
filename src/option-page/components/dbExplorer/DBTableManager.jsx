@@ -72,7 +72,7 @@ const DBTableManager = ({store}) => {
 			// }
             edit : (item, index, options, linkCls, gridAction) => {
 				return <>
-                <Button loading={reinitLoading[index]} icon="fa fa-cog" caption="Reinit" onClick={e => onReinit(item, index)}/>
+                <Button loading={reinitLoading[index]} icon="fa fa-cog" caption="Reinit/Truncate" onClick={e => onReinit(item, index)}/>
                 </>
 	   
 			}

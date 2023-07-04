@@ -1,6 +1,7 @@
 
 import Button from "../Button"
-const QueueItemToolbar = ({startQueueItem,loading,dlStatus,finished, interupted, vIndex}) => {
+
+const QueueItemToolbar = ({clearStatusBar,logStatusBar,startQueueItem,loading,dlStatus,finished, interupted, vIndex,toc}) => {
     const [dlcaptionStatus, dlvideoStatus] = dlStatus
     const dlStatusResult = parseInt(dlcaptionStatus) + parseInt(dlvideoStatus)
     const icon =  dlStatusResult == 0 ? 'download' : dlStatusResult != 4 ? 'refresh' : 'check' 
@@ -13,10 +14,10 @@ const QueueItemToolbar = ({startQueueItem,loading,dlStatus,finished, interupted,
         {
 
             interupted ? <>
-                <Button onClick={e=>startQueueItem(vIndex)} caption={dlStatusResult} disabled={disabled} loading={loading} icon={`fa fa-refresh`}/>
+                <Button  onMouseOut={e=>clearStatusBar()} onMouseOver={e=>logStatusBar('QueueItemToolbar.startQueue',`Resume ${toc.title}`)} onClick={e=>startQueueItem(vIndex)} caption={''} disabled={disabled} loading={loading} icon={`fa fa-refresh`}/>
                 
             </>:<>
-        <Button onClick={e=>startQueueItem(vIndex)} caption={dlStatusResult} disabled={disabled} loading={loading} icon={`fa fa-${icon}`}/>
+        <Button onMouseOut={e=>clearStatusBar()} onMouseOver={e=>logStatusBar('QueueItemToolbar.startQueue',`Download ${toc.title}`)}  onClick={e=>startQueueItem(vIndex)} caption={''} disabled={disabled} loading={loading} icon={`fa fa-${icon}`}/>
 
             </>
         }

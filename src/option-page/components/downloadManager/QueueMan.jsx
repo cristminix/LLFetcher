@@ -489,11 +489,11 @@ class QueueMan extends Component{
                 const {captionRef,videoRef} = queueItem.getStatusRef(vIndex)
 
                 if(t=="caption"){
-                    captionRef.current.setValue(`${formatBytes(loaded)}/${speed}ps`)
+                    captionRef.current.setValue(`${formatBytes(loaded)}`)
 
                 }
                 else if(t=="video"){
-                    videoRef.current.setValue(`${formatBytes(loaded)}/${speed}ps`)
+                    videoRef.current.setValue(`${formatBytes(loaded)}`)
 
                 }
 
@@ -641,7 +641,7 @@ class QueueMan extends Component{
     // }
     render(){
         const {infoMessage, currentIndex} = this.state
-        const {selectedFmt, queueStarted, sections, course, tocs, store, alreadySetup, queueFinished} = this.props
+        const {clearStatusBar,logStatusBar,selectedFmt, queueStarted, sections, course, tocs, store, alreadySetup, queueFinished} = this.props
         return (<><div className="queueman mb-12 mt-2">
         
         <div className="queue-man-container">
@@ -649,8 +649,8 @@ class QueueMan extends Component{
             {
                 
                 alreadySetup ? <>
-                    <QueueInfo selectedFmt={selectedFmt} queueFinished={queueFinished} message={infoMessage} queueStarted={queueStarted} currentIndex={currentIndex}/>
-                    <QueueTable startQueueItem={vIndex=>this.startQueueItem(vIndex)} queueItemRef={this.queueItemRef} course={course} sections={sections} tocs={tocs} store={store}/>
+                    <QueueInfo clearStatusBar={clearStatusBar} logStatusBar={logStatusBar} selectedFmt={selectedFmt} queueFinished={queueFinished} message={infoMessage} queueStarted={queueStarted} currentIndex={currentIndex}/>
+                    <QueueTable clearStatusBar={clearStatusBar} logStatusBar={logStatusBar} startQueueItem={vIndex=>this.startQueueItem(vIndex)} queueItemRef={this.queueItemRef} course={course} sections={sections} tocs={tocs} store={store}/>
                 </> : ERROR_NOT_SETUP_QUEUE
             }
             

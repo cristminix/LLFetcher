@@ -30,6 +30,7 @@ const FmtSelector = ({  renderState = false,
 }
 
 const QueueSetup = ({
+    logStatusBar,clearStatusBar,
     availableFmt, setAvailableFmt,
     selectedFmt, setSelectedFmt,
     selectFmt,
@@ -72,7 +73,7 @@ const QueueSetup = ({
         const [validResource, availableFmtList] = await fetchToc(course.slug, tocSlug)
         if(validResource){
             setAvailableFmt(availableFmtList)
-            await mDMSetup.create(course.id,availableFmtList,"",course.sourceCodeRepository,exerciseFile,1, false)
+            await mDMSetup.create(course.id,availableFmtList,"",course.sourceCodeRepository,'',1, false)
         }
         setLoadingFetchToc(false)
 
@@ -157,18 +158,26 @@ const QueueSetup = ({
         showQueueSetup ? <div className="queue-setup my-2 border p-2 rounded">
         {
             showGetAvailableFmt ? <div className="flex p-2 px-2">
-                <Button loading={loadingFetchToc} icon="fa fa-cog" onClick={e=> getAvailableFmt(e)} caption="Get Available Fmt"/>
+                <Button onMouseOut={e=>clearStatusBar()} 
+                  onMouseOver={e=>logStatusBar('QueueSetup',`Click to retrieve available video format or size`)}
+                loading={loadingFetchToc} icon="fa fa-cog" onClick={e=> getAvailableFmt(e)} caption="Get Available Fmt"/>
             </div> : ''
         }
         {
             showConfigSetup ? <>
             <div className="flex p-2 px-2">
                 <label className={lblCls}>Select Format</label>
-                <DropdownSelect data={availableFmt} selected={selectedFmt} onSelect={fmt=>setSelectedFmt(fmt)}/>
+                <DropdownSelect onMouseOut={e=>clearStatusBar()} 
+                  onMouseOver={e=>logStatusBar('QueueSetup',`Select video size or format`)}
+                 data={availableFmt} selected={selectedFmt} onSelect={fmt=>setSelectedFmt(fmt)}/>
             </div>
             <div className="flex p-2 gap-2">
-                <Button caption="Cancel" icon="fa fa-times" onClick={e=>cancelSetup(e)}/>
-                <Button disabled={selectedFmt==selectFmt} icon="fa fa-save" onClick={e=> finishSetup(e)} caption="Finish Setup"/>
+                <Button onMouseOut={e=>clearStatusBar()} 
+                  onMouseOver={e=>logStatusBar('QueueSetup',`Cancel this setup and back to main queue`)}
+                caption="Cancel" icon="fa fa-times" onClick={e=>cancelSetup(e)}/>
+                <Button onMouseOut={e=>clearStatusBar()} 
+                  onMouseOver={e=>logStatusBar('QueueSetup',`Finish this setup and back to main queue`)}
+                disabled={selectedFmt==selectFmt} icon="fa fa-save" onClick={e=> finishSetup(e)} caption="Finish Setup"/>
             </div>
             <div className="flex p-2">
                 {message}

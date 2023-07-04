@@ -218,7 +218,7 @@ class QueueItem extends Component{
         this.setState({dmstatusList, loadings}) 
     }
     render(){
-        const {sections, tocs, startQueueItem} = this.props
+        const {sections, tocs, startQueueItem,logStatusBar,clearStatusBar} = this.props
         const {captionStatusRefs, videoStatusRefs} = this
         const {loadings,dlvideoStatus,dlcaptionStatus, dmstatusList} = this.state
     	const defaultTdCls = "px-1 py-1 whitespace-nowrap text-sm font-medium"
@@ -276,10 +276,10 @@ class QueueItem extends Component{
 
                 return <tr key={`${refKey}`} className={trCls}>
                     <td className={tdCls}> {number}</td>
-                    <td className={tdCls}> {toc.title}</td>
+                    <td className={tdCls}> <div className="cursor-pointer" onMouseOut={e=>clearStatusBar()} onMouseOver={e=>logStatusBar('QueueItem.toc.title',toc.title)}>{toc.title}</div></td>
                     <td className={tdClsCaptionStatus}> <div className="flex"><i className="mt-1 fa fa-file-text-o"/> <InputDisplay value={captionSz} ref={captionStatusRefs[refKey]}/> <DLStatus status={dmstatus.captionStatus}/></div></td>
                     <td className={tdClsVideoStatus}> <div className="flex"><i className="mt-1 fa fa-file-video-o"/> <InputDisplay value={videoSz} ref={videoStatusRefs[refKey]}/> <DLStatus status={dmstatus.videoStatus}/></div></td>
-                    <td className={tdCls}> <QueueItemToolbar vIndex={vIndex} startQueueItem={startQueueItem} loading={loadings[refKey]} dlStatus={vIndexStatus} finished={dmstatus.finished} interupted={dmstatus.interupted}/></td>
+                    <td className={tdCls}> <QueueItemToolbar toc={toc} logStatusBar={logStatusBar} clearStatusBar={clearStatusBar} vIndex={vIndex} startQueueItem={startQueueItem} loading={loadings[refKey]} dlStatus={vIndexStatus} finished={dmstatus.finished} interupted={dmstatus.interupted}/></td>
                 </tr>
             })
         })

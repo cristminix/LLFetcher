@@ -6,14 +6,16 @@ import ToolbarMan from "./downloadManager/ToolbarMan"
 import StatusBarMan from "./downloadManager/StatusbarMan"
 import CourseInfo from "./downloadManager/CourseInfo"
 import QueueSetup from "./downloadManager/QueueSetup"
-
+import {makeDelay} from "../../components/fn"
 export async function loader({ params }) {
     const { slug } = params
     return { slug }
   }
 
+const delay = makeDelay(7000)
 const DownloadManager = ({store}) => {
     const queueManRef = useRef(null)
+    const statusBarManRef = useRef(null)
     const {slug} = useLoaderData()
     const [activeCourseData, setActiveCourseData] = useState(null)
     // setup related state
@@ -36,6 +38,16 @@ const DownloadManager = ({store}) => {
     const [availableFmt, setAvailableFmt] = useState([])
     const [selectedFmt, setSelectedFmt] = useState(selectFmt)
 
+
+    const logStatusBar = async(t,data,p1,p2,p3) => {
+      statusBarManRef.current.log(t,data)
+    }
+    const clearStatusBar = async() => {
+      delay(()=>{
+        statusBarManRef.current.clear()
+
+      })
+    }
     const updateCourseData = async()=>{
       setActiveCourseData(null)
       setRunSetup(false)
@@ -57,6 +69,9 @@ const DownloadManager = ({store}) => {
       
         const {course} = courseData
         const savedDmsetup = mDMSetup.getByCourseId(course.id)
+
+        document.title =  `${course.title} - LLFetcher Download Manager`
+
         if(savedDmsetup){
             console.log(savedDmsetup)
             setDmsetup(savedDmsetup)
@@ -132,7 +147,9 @@ const DownloadManager = ({store}) => {
                     queueFinished={queueFinished}
                     setQueueFinished={setQueueFinished}
                     queueManRef={queueManRef}
-                    queueResume={queueResume}/>
+                    queueResume={queueResume}
+                    logStatusBar={logStatusBar}
+                    clearStatusBar={clearStatusBar}/>
         <QueueSetup alreadySetup={alreadySetup} 
                     setAlreadySetup={setAlreadySetup}
                     reconfigureSetup={reconfigureSetup}
@@ -150,6 +167,8 @@ const DownloadManager = ({store}) => {
                     selectedFmt={selectedFmt} 
                     setSelectedFmt={setSelectedFmt}
                     selectFmt={selectFmt}
+                    logStatusBar={logStatusBar}
+                    clearStatusBar={clearStatusBar}
                     />
         <QueueMan alreadySetup={alreadySetup} 
                   reconfigureSetup={reconfigureSetup}
@@ -165,11 +184,14 @@ const DownloadManager = ({store}) => {
                   ref={queueManRef}
                   setQueueResume={setQueueResume}
                   selectedFmt={selectedFmt} 
-                  selectedFmt={selectedFmt}/>
+                  selectedFmt={selectedFmt}
+                  logStatusBar={logStatusBar}
+                  clearStatusBar={clearStatusBar}/>
         <StatusBarMan store={store} 
                       course={course} 
                       alreadySetup={alreadySetup} 
-                      reconfigureSetup={reconfigureSetup}/>
+                      reconfigureSetup={reconfigureSetup}
+                      ref={statusBarManRef}/>
     </div></>)
     }else{
       return <>No data</>

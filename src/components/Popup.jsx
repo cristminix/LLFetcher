@@ -114,6 +114,17 @@ class PopupAction extends ComponentWithMessaging{
 		
 				
 	}
+	async activateOptionTab(slug){
+		const url = chrome.runtime.getURL(`options.html#/manager/${slug}`)
+		const tabs = await chrome.tabs.query({ url: `${chrome.runtime.getURL('options.html')}*` })
+		if(tabs.length > 0){
+			chrome.runtime.sendMessage({ action: 'activateTab', url })
+		}else{
+			chrome.tabs.create({ url })
+		}
+
+		setTimeout(f=>window.close(),100)
+	}
 	async updateCourseData(sections, tocs){
 		const courseSectionStr = JSON.stringify(sections)
 		const courseTocsStr = JSON.stringify(tocs)
@@ -126,9 +137,10 @@ class PopupAction extends ComponentWithMessaging{
 					const {course,sections, tocs} = this.state
 					konsole.log(course,sections, tocs)
 				})
-				this.pageNavigationRef.current.setNav('course')
-				const url = chrome.runtime.getURL('options.html#/manager/'+this.state.course.slug)
-				chrome.tabs.create({ url })
+				// this.pageNavigationRef.current.setNav('course')
+
+				this.activateOptionTab(this.state.course.slug)
+				
 			}
 		})
 	}

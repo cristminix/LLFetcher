@@ -132,6 +132,7 @@ class WelcomePage extends ComponentWithMessaging {
 		await this.props.onSelectCourse(course,null,true)
 		this.setState({loading:false, disableFetchBtn:false})
 	}
+	
 	render(){
 		const {isLogin,greeting,lastCourseList,fetchBtnState,validCoursePage, loading, disableFetchBtn} = this.state
 		const lastCourseListKeys = Object.keys(lastCourseList)

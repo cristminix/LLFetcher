@@ -41,7 +41,7 @@
 			"path" : "/database",
 			"iconCls" : "fa fa-database",
 			"order" : 4,
-			"hidden" : false,
+			"hidden" : true,
 			"hasChild" : true,
 			"childItems" : {
 				"download-state" : {

@@ -52,7 +52,7 @@ const QueueSetup = ({
                 alert("You must login to linkedin learning website")
             }
         }
-		return [validResource, availableFmtList]
+		return [validResource, availableFmtList,exFile]
 		
 	}
 
@@ -70,10 +70,11 @@ const QueueSetup = ({
         setLoadingFetchToc(true)
         setAvailableFmt([])
 
-        const [validResource, availableFmtList] = await fetchToc(course.slug, tocSlug)
+        const [validResource, availableFmtList,exerciseFile] = await fetchToc(course.slug, tocSlug)
         if(validResource){
             setAvailableFmt(availableFmtList)
-            await mDMSetup.create(course.id,availableFmtList,"",course.sourceCodeRepository,'',1, false)
+            console.log(exerciseFile)
+            await mDMSetup.create(course.id,availableFmtList,"",course.sourceCodeRepository,exerciseFile,1, false)
         }
         setLoadingFetchToc(false)
 

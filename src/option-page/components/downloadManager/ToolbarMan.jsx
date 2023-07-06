@@ -74,7 +74,14 @@ const ToolbarMan = ({clearStatusBar,logStatusBar,queueResume,queueFinished, dmse
       }
       </>: <></>
     }
-        
+    {
+      dmsetup.exerciseFile ? <><Button className="ml-1" label="Exercise File:" caption={dmsetup.exerciseFile.name} icon="fa fa-file-archive-o"/></> : ''
+    } 
+    {
+      dmsetup.sourceRepo ? <><Button className="ml-1" label="Source Repo:" caption={dmsetup.exerciseFile.sourceRepo} icon="fa fa-file-archive-o"/></> : ''
+    } 
+    <Button className="ml-1" caption="Playlist" icon="fa fa-file-text-o"/>
+    <Button className="ml-1" caption="Helper" icon="fa fa-file-text-o"/>
     </> : <>
     {
       !runSetup ?<Button onMouseOut={e=>clearStatusBar()} 

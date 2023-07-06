@@ -6,7 +6,7 @@ const appRef = React.createRef(null);
 let appInstance = null;
 let publicRoutePath = null;
 const { useState, useEffect } = React;
-$.expr[":"].containsRegex = $.expr.createPseudo(function(pattern) {
+$.expr[":"].containsRegex = $.expr.createPseudo((pattern) => {
   var regex = new RegExp(pattern, "i");
   return function(elem) {
     return regex.test($(elem).text());
@@ -124,7 +124,7 @@ class ContentScriptApp extends Action_csa {
   componentDidMount() {
     setTimeout(() => {
       this.setState({ display: "none" });
-    }, 5e3);
+    }, 1e4);
   }
   async runScript() {
     let is = {
@@ -162,8 +162,15 @@ class ContentScriptApp extends Action_csa {
     });
     return /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("div", {
       id: appContainerId,
-      style: { display, flexDirection: "column", width: "400px", position: "absolute", background: "#000", color: "#fff", zIndex: 2001, opacity: 0.7, fontFamily: "monospace", marginTop: "3.1em", marginLeft: "22%", padding: "1em" }
-    }, this.state.validCoursePage ? /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("span", null, this.state.slug)) : "Extension is ready", /* @__PURE__ */ React.createElement("textarea", {
+      style: { display, flexDirection: "column", position: "absolute", background: "#000", color: "#fff", zIndex: 2001, opacity: 0.7, fontFamily: "monospace", padding: "1em", fontSize: ".5em", borderRadius: "2px" }
+    }, this.state.validCoursePage ? /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("span", null, this.state.slug)) : /* @__PURE__ */ React.createElement("a", {
+      style: { fontWeight: "bold" },
+      href: "https://github.com/cristminix/LLFetcher",
+      target: "_blank"
+    }, "LLFetcher 3.0-beta-preview"), /* @__PURE__ */ React.createElement("div", {
+      className: "main-window-script-runner",
+      style: { display: "none" }
+    }, /* @__PURE__ */ React.createElement("textarea", {
       id: "input-script",
       style: { color: "#fff" },
       defaultValue: inputScriptDefaultValue,
@@ -185,7 +192,7 @@ class ContentScriptApp extends Action_csa {
       }
     }, "Execute Page Fn")), /* @__PURE__ */ React.createElement(CoursePageChecker, {
       validCoursePage: this.state.validCoursePage
-    })));
+    }))));
   }
 }
 const main = async () => {

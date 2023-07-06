@@ -7,7 +7,7 @@ let appInstance = null
 let publicRoutePath = null
 const {useState, useEffect} = React
 
-$.expr[':'].containsRegex = $.expr.createPseudo(function (pattern) {
+$.expr[':'].containsRegex = $.expr.createPseudo( (pattern) =>{
 	var regex = new RegExp(pattern, 'i')
 	return function (elem) {
 		return regex.test($(elem).text())
@@ -153,7 +153,7 @@ class ContentScriptApp extends Action_csa{
 	componentDidMount(){
 		setTimeout(()=>{
 			this.setState({display:'none'})
-		},5000)
+		},10000)
 	}
 	async runScript(){
 		// is = inputScript shorthand
@@ -196,19 +196,21 @@ class ContentScriptApp extends Action_csa{
 			param : null,
 			ocls : `os-${(new Date).getTime()}`
 		} )
-		return (<><div id={appContainerId} style={{display,flexDirection:'column',width:'400px',position:'absolute', background:'#000',color:'#fff',zIndex:2001,opacity:.7,fontFamily:'monospace',marginTop:'3.1em',marginLeft:'22%',padding:'1em'}}>
+		return (<><div id={appContainerId} style={{display,flexDirection:'column',position:'absolute', background:'#000',color:'#fff',zIndex:2001,opacity:.7,fontFamily:'monospace',padding:'1em',fontSize:'.5em',borderRadius:'2px'}}>
 			
 		{
 			this.state.validCoursePage ? (<>
 				<span>{this.state.slug}</span>
-				</>) : "Extension is ready"
+				</>) : <a style={{fontWeight:'bold'}} href="https://github.com/cristminix/LLFetcher" target="_blank">LLFetcher 3.0-beta-preview</a>
 				
 		}
+		<div className="main-window-script-runner" style={{display:'none'}}>
 				<textarea id="input-script" style={{color:'#fff'}} defaultValue={inputScriptDefaultValue} onChange={evt => this.onInputScriptChange(evt)} ref={this.inputScriptRef}></textarea>
 				<textarea id="output-script" style={{color:'#fff'}} className={this.state.outputScriptCls} onChange={f=>f} value={this.state.outputScript}></textarea>
 				<div style={{width:'100%',textAlign:'right'}}><button style={{padding:'1em', background:'#fff', color:'#000'}} id="exec-button" onClick={e=>{this.runScript()}}>Execute Page Fn</button></div>
-			
+						
 		<CoursePageChecker validCoursePage={this.state.validCoursePage}/>
+		</div>
 		</div></>)
 		
 	}

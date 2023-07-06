@@ -99,7 +99,7 @@ class GridItems extends React.Component{
 		              {
 		              	options.fields.map((field, fieldIndex)=>{
 		              		let value = item[field]
-		              		try{ value = value.toString()}catch(e){}
+		              		try{ value = typeof value == 'object' ? JSON.stringify(value) : value.toString()}catch(e){}
 		              		let fieldText = value
 		              		if(options.callbackFields){
 		              			if(options.callbackFields[field]){

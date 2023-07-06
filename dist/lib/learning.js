@@ -4,7 +4,7 @@ function isEqual (obj1, obj2) {
 }
 /***************************/
 function createReactRootElement() {
-    $(document.body).prepend(`<div id="app-container"><div id="content-script-root">ROOT</div></div>`)
+    $(document.body).prepend(`<div id="app-container"><div id="content-script-root"></div></div>`)
 }
 
 function waitForElm(selector) {

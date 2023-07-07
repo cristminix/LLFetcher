@@ -134,7 +134,9 @@ const QueueSetup = ({
     const fmtAlreadyAvailable = availableFmt.length > 0
 
     if(!fmtAlreadyAvailable){
-        if(runSetup){
+        if(reconfigureSetup){
+            showGetAvailableFmt = true
+        }else if(runSetup){
             showGetAvailableFmt = true
         }
     }

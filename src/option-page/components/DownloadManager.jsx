@@ -140,7 +140,13 @@ const DownloadManager = ({store}) => {
                     setRunSetup={setRunSetup}
                     runSetup={runSetup}
                     course={course}
+                    sections={sections}
+                    tocs={tocs}
                     dmsetup={dmsetup}
+                    setAvailableFmt={setAvailableFmt}
+                    setDmsetup={setDmsetup}
+                    selectedFmt={selectedFmt}
+                    setSelectedFmt={setSelectedFmt}
                     queueStarted={queueStarted}
                     startDownloadQueue={startDownloadQueue}
                     stopDownloadQueue={stopDownloadQueue}
@@ -184,7 +190,6 @@ const DownloadManager = ({store}) => {
                   ref={queueManRef}
                   setQueueResume={setQueueResume}
                   selectedFmt={selectedFmt} 
-                  selectedFmt={selectedFmt}
                   logStatusBar={logStatusBar}
                   clearStatusBar={clearStatusBar}/>
         <StatusBarMan store={store} 

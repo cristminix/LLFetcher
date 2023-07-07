@@ -280,10 +280,16 @@ function createDownloadFile(kind,config){
         objectURL = window.URL.createObjectURL(new Blob([fileObject.buffer]))
         anchor.download = fileObject.filename
     }
-    else if(kind == 'exercise_file'){
-        objectURL = config.exerciseFile.url   
-        anchor.download = config.exerciseFile.name
-    }
+    // else if(kind == 'exercise_file'){
+    //     objectURL = config.exerciseFile.url   
+    //     anchor.download = config.exerciseFile.name
+    //     anchor.target="_blank"
+
+    // }
+    // else if(kind == 'sourse_repo'){
+    //     objectURL = config.sourceRepo   
+    //     anchor.download = config.sourceRepo 
+    // }
     
     
     anchor.href = objectURL

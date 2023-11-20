@@ -160,7 +160,7 @@ class DMStatus extends DB{
 
     }
     async setDlSize(courseId, t, vIndex, loaded){
-        console.log(`DMStatus.setDlSize(${courseId},${t},${this.createVIndex(vIndex)},${loaded})`)
+        // console.log(`DMStatus.setDlSize(${courseId},${t},${this.createVIndex(vIndex)},${loaded})`)
 
         let current = this.getByCourseId(courseId, vIndex)
         if(!current){

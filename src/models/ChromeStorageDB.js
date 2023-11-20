@@ -399,7 +399,7 @@ export default class ChromeStorageDB{
     async commit() {
         // console.log(this.initiator,this.db)
         if(this.stype === 0) {
-            console.log(this.db)
+            // console.log(this.db)
             await this.setItem(this.db_id, this.db)
             
         } else {

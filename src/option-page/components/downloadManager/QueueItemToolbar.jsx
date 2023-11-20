@@ -24,10 +24,11 @@ const QueueItemToolbar = ({clearStatusBar,logStatusBar,startQueueItem,loading,dl
             
         </>:<>
             Complete
+        {/* <Button onMouseOut={e=>clearStatusBar()} onMouseOver={e=>logStatusBar('QueueItemToolbar.resetQueueItemmmm',`Reset ${toc.title}`)}  onClick={e=>startQueueItem(vIndex)} caption={''} disabled={disabled} loading={loading} icon={`fa fa-trash`}/> */}
+
         </>
     }
     </div></>)
 }
 
 export default QueueItemToolbar
-    

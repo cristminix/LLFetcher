@@ -1,3 +1,5 @@
+import isNetworkError from 'is-network-error';
+
 import jQuery from "jquery"
 import _ from "underscore"
 function isEqual (obj1, obj2) {
@@ -217,6 +219,8 @@ const fetchCourseTocPage = async(courseSlug, tocSlug)=>{
         hasError = true
         error = e
         console.log(e)
+        if(isNetworkError(e))
+            alert("Network error. Please check your internet connection and try again.")
     }
     return {hasError, responseText, error}
 }

@@ -119,12 +119,17 @@ const DownloadManager = ({store}) => {
     
     useEffect(()=>{
       console.log(queueFinished)
-
+      const updateDMSetup = async (course)=>{
+        const finished = true
+        const dmsetup = await mDMSetup.updateByCourseId(course.id, {finished})
+        
+        dmsetup.finished = finished
+        setDmsetup(dmsetup)
+      }
       if(queueFinished){
         console.log(`Updating dmsetup.finished to ${queueFinished}`)
         const {course} = activeCourseData
-        const finished = true
-        mDMSetup.updateByCourseId(course.id, {finished})
+        updateDMSetup(course)
       }
     },[queueFinished])
 

@@ -44,6 +44,7 @@ const DLStatus = ({type, status}) => {
             }
         </>    
     } 
+    {/* <div>{status}</div> */}
    </div>
 }
 class QueueItem extends Component{
@@ -119,6 +120,7 @@ class QueueItem extends Component{
         const refKey = this.createRefKey(sIndex,tIndex)
         newLoadings[refKey] = status
         this.setState({loadings: newLoadings})
+        console.log(`QueueItem.setLoading([${sIndex},${tIndex},${status}])`)
     }
     
     setDlStatus(t, vIndex,status, retryCount=0){
@@ -270,7 +272,7 @@ class QueueItem extends Component{
                         tdClsVideoStatus = tdCls
                     }
                 }
-                //trCls = dmstatus.finished ? 'text-green-300' : dmstatus.interupted ? 'text-red-300' : ''
+                trCls = dmstatus.finished ? 'text-green-300' : dmstatus.interupted ? 'text-red-300' : ''
    
 
 

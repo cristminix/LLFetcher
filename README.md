@@ -9,4 +9,6 @@ You can use it as Linkedin Learning Video Downloader for offline use.
 # **How to install this extension to your Chrome browser**
 To install this chrome extension manually we recommend you download zip file in from the release page, since this page created.
 
-Starting version 2.0
+Starting version 3.0
+
+

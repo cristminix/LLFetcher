@@ -30,7 +30,7 @@ async function fetchDownload(url, outputFilename, mime, progressCallback, index)
         let contentType
         fetch(url)
         .then(response => {
-
+            console.log(response)
             const contentEncoding = response.headers.get('content-encoding')
             let contentLength = response.headers.get(contentEncoding ? 'x-file-size' : 'content-length')
             contentType = response.headers.get('content-type') || mime

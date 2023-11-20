@@ -8,17 +8,17 @@ import './option-page.css'
 import Store from "../models/Store"
 import Router from "./Router"
 import "bootstrap-icons/font/bootstrap-icons.css"
-
+import AppConfig from "../config/AppConfig"
 // import 'bootstrap/dist/css/bootstrap.css';
 import 'fontawesome-4.7/css/font-awesome.min.css'
 // import 'bootstrap/dist/js/bootstrap.esm'
 import "./override"
 const store = Store.getInstance()
-
+const config = AppConfig.getInstance();
 store.ready(()=>{
   ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
-      <Router store={store}/>
+      <Router store={store} config={config}/>
     </React.StrictMode>)
 
 })

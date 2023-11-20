@@ -3,6 +3,7 @@ import QueueInfo from "./QueueInfo"
 import QueueTable from "./QueueTable"
 import {timeout} from "../../../components/fn"
 import {fetchCourseTocMeta, formatBytes, calculateSpeed} from "../../components/learning_fn"
+import isNetworkError from 'is-network-error';
 
 const ERROR_NOT_SETUP_QUEUE = "You must run setup queue first"
 const FETCH_TEST_MODE = false
@@ -21,12 +22,81 @@ function rand(vIndex) {
     SAVED_RAND_ARRAY[randKey]= 1
     return inputArray[randomIndex]
 }
+/*
+Temporal Fetch
+const fetch = createFetchMock({
+  "/some-code": ["abcde", "fghij", "klmno", "pqrst"],
+  "/abcde": 12345,
+  "/fghij": 67891,
+  "/klmno": 23456,
+  "/pqrst": 78912,
+});
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+(async function () {
+  try {
+    const url = "https://my-url/some-code";
+    console.log("fetching url", url);
+    const response = await fetch(url);
+    const codes = await response.json();
+    console.log("got", codes);
+    
+    const codesObj = {};
+    for (const code of codes) {
+      await sleep(2000);
+      
+      const url = `https://my-url/${code}`;
+      console.log("fetching url", url);
+      const response = await fetch(url);
+      const value = await response.json();
+      console.log("got", value);
+      
+      codesObj[code] = value;
+    }
+    
+    console.log("codesObj =", codesObj);
+  } catch (error) {
+    console.error(error);
+  }
+})();
+
+
+// fetch mocker factory
+function createFetchMock(dataByPath = {}) {
+  const empty = new Blob([], {type: "text/plain"});
+  
+  const status = {
+    ok:       { status: 200, statusText: "OK"        },
+    notFound: { status: 404, statusText: "Not Found" },
+  };
+  
+  const blobByPath = Object.create(null);
+  for (const path in dataByPath) {
+    const json = JSON.stringify(dataByPath[path]);
+    blobByPath[path] = new Blob([json], { type: "application/json" });
+  }
+  
+  return function (url) {
+    const path = new URL(url).pathname;
+    const response = (path in blobByPath)
+      ? new Response(blobByPath[path], status.ok)
+      : new Response(empty, status.notFound);
+    return Promise.resolve(response);
+  };
+}
+*/
 async function fetchDownloadReal(url, outputFilename, mime, progressCallback, vIndex, t) {
     return new Promise((resolve, reject)=>{
         let contentType
+
+        
         fetch(url)
         .then(response => {
-
+            console.log(response)
+            if(response.status != 200){
+                reject({status: response.status, blob:null})
+                return
+            } 
             const contentEncoding = response.headers.get('content-encoding')
             let contentLength = response.headers.get(contentEncoding ? 'x-file-size' : 'content-length')
             contentType = response.headers.get('content-type') || mime
@@ -70,19 +140,31 @@ async function fetchDownloadReal(url, outputFilename, mime, progressCallback, vI
                 })
             );
         })
-        .then(response => response.blob())
-        .then(blob => {
+        .then(async(response) => {
+            let data={status:500,blob:null}
+            try{
+                data = {status:response.status,blob: await response.blob()}
+            }catch(e){}
+            return data
+        })
+        .then(data => {
             // let blobUrl = URL.createObjectURL(blob)
-            resolve(blob)
+            if(data.status){
+                resolve(data)
+            }else[
+                reject(data)
+            ]
             // player.style.display = 'block';
             // player.type = contentType;
             // player.src = vid;
             // elProgress.innerHTML += "<br /> Press play!";
         })
         .catch(error => {
-            reject(error)
+            reject({status:500,blob:null})
             console.error(error)
         })
+
+       
     })
     
 }
@@ -116,10 +198,20 @@ async function fetchDownload(url, outputFilename, mime, progressCallback, vIndex
         }
 
     }else{
-        const blob = await fetchDownloadReal(url, outputFilename, mime, progressCallback, vIndex, t)
-        return blob
+        try{
+            const data = await fetchDownloadReal(url, outputFilename, mime, progressCallback, vIndex, t)
+        // if
+        return data
+        }catch(e){
+            // console.error(e)
+            // return {status:500, blob:null}
+            if (isNetworkError(e)){
+                alert("Network error. Please check your internet connection.")
+            }
+            return e
+        }
     }
-    return null
+    return {status:500, blob:null}
 
 } 
 
@@ -174,25 +266,35 @@ class QueueMan extends Component{
         const courseId = course.id
         queueItem.setDlStatus(t, vIndex_, dlStatus)
         await this.mDMStatus.setDlStatus(courseId, t, vIndex_, dlStatus)
-        
-        const blob = await fetchDownload(url, outputFilename, null, (loaded, total, vIndex, lastReadDate, lastLoaded, t)=>{
+        await timeout(5)
+        const data = await fetchDownload(url, outputFilename, null, (loaded, total, vIndex, lastReadDate, lastLoaded, t)=>{
             this.onDlProgress(loaded, total, vIndex, lastReadDate, lastLoaded, t)
         },vIndex_,t)
         if(FETCH_TEST_MODE){
             dlStatus = rand(vIndex_)
 
         }
-        if(blob){
+        const blob = data.blob
+        const rStatus = data.status
+        if(data.status == 200){
             dlStatus = 2
+        }else{
+            dlStatus = -1
         }
         queueItem.setDlStatus(t, vIndex_, dlStatus)
         await this.mDMStatus.setDlStatus(courseId, t, vIndex_, dlStatus)
 
         this.setState({infoMessage : `Download ${outputFilename} ${dlStatus == -1 ? 'Failed' : 'Success'}`})
-       
+        
+        if(rStatus==200){
+            await this.downloadFileFromBlob(blob, outputFilename)
+        }
+    }
+
+    async downloadFileFromBlob(blob, outputFilename){
         try{
-            
-          
+        
+        
             const anchor = document.createElement('a')
             const objectURL = window.URL.createObjectURL(blob)
             anchor.download = outputFilename
@@ -201,7 +303,9 @@ class QueueMan extends Component{
             
         }catch(e){
             console.error(e)
+            alert(`HTTP ERROR: ${e.toString()}`)
         }
+        
     }
     /**
      * This is the main runner fetch to download caption and video file
@@ -249,23 +353,23 @@ class QueueMan extends Component{
                         if(captionStatus != 2){
                             dlCaptionStatus = await this.fetchDlItem(vIndex, "caption", queueItem, captionUrl, videoUrl, captionFilename, videoFilename)
                         }else{
-                            if(confirm(`${outputFilename} already downloaded do you wanna redownload again ${outputFilename}?`)){
+                            if(confirm(`${captionFilename} already downloaded do you wanna redownload again ${captionFilename}?`)){
                                 dlCaptionStatus = await this.fetchDlItem(vIndex, "caption", queueItem, captionUrl, videoUrl, captionFilename, videoFilename)
 
                             }else{
-                                this.setState({infoMessage:`${outputFilename} Skipped`})
+                                this.setState({infoMessage:`${captionFilename} Skipped`})
                             }    
                         }
                         if(videoStatus != 2){
                             dlVideoStatus = await this.fetchDlItem(vIndex, "video", queueItem, captionUrl, videoUrl, captionFilename, videoFilename)
                             
                         }else{
-                            if(confirm(`${outputFilename} already downloaded do you wanna redownload again ${outputFilename}?`)){
+                            if(confirm(`${videoFilename} already downloaded do you wanna redownload again ${videoFilename}?`)){
                                 dlVideoStatus = await this.fetchDlItem(vIndex, "video", queueItem, captionUrl, videoUrl, captionFilename, videoFilename)
                                 
                             }    
                             else{
-                                this.setState({infoMessage:`${outputFilename}  skipped`})
+                                this.setState({infoMessage:`${videoFilename}  skipped`})
                             }
                         }
                     }else{
@@ -357,6 +461,7 @@ class QueueMan extends Component{
                             console.error(e)
                         }
                         await this.fetchDlQueueItem(vIndex, captionUrl, videoUrl, mode)
+
                         // return [captionUrl,streamLocs]
 
                         mustBreak = true
@@ -480,7 +585,7 @@ class QueueMan extends Component{
         const {course} = this.props
         if(queueItemRef.current){
             const queueItem = queueItemRef.current
-            console.log(vIndex)
+            // console.log(vIndex)
             if(vIndex){
                 const percentageView = Math.round(loaded / total * 100) + '%'
 

@@ -136,7 +136,9 @@ const DownloadManager = ({store}) => {
     // setAlreadySetup(false)
       // if(dmsetup){
         const finished = false
+        const status= 0
         dmsetup.finished = finished
+        // dmsetup.status=status
         setDmsetup(dmsetup)
         const {course} = activeCourseData
         await mDMSetup.updateByCourseId(course.id,{finished})

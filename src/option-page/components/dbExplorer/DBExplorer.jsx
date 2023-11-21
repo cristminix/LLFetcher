@@ -125,16 +125,19 @@ const DBExplorer = ({store, table, page })=>{
 		return component
 	}
  	const onCancelRow = async(item, index, options, linkCls, gridAction) => {
- 		const editor = editorFactoryRefs[index].current
- 		
- 		 editor.setGridAction(gridAction)
- 		 editor.cancelRow(true)
+		options.fields.map((field, fieldIndex)=>{
+			const editor = editorFactoryRefs[`${index}-${fieldIndex}-${field}`].current
+			
+			editor.cancelRow()
+
+		})
+ 		gridAction.setState({editMode: false})
  	}
  	const onEditRow = async(item, index, options, linkCls, gridAction) => {
 		options.fields.map((field, fieldIndex)=>{
 			const editor = editorFactoryRefs[`${index}-${fieldIndex}-${field}`].current
 			const editMode = editor.state.editMode
-			// editor.setGridAction(gridAction)
+			
 			if(!editMode){
 				editor.editRow()
 				// console.log(editor)
@@ -144,8 +147,10 @@ const DBExplorer = ({store, table, page })=>{
 
 			}
 		})
- 		
- 		// gridAction.setState({editMode: !editMode})
+
+		// editor.setGridAction(gridAction)
+ 		const editMode = gridAction.state.editMode
+ 		gridAction.setState({editMode: !editMode})	
  	}
  	const getLinkButton = ()=>{
 		return <button className={''} onClick={evt => onEditRow()}>

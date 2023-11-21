@@ -3,10 +3,10 @@
 import React ,{useEffect,useState,useRef}from "react";
 // import axios from "axios"
 import { Link, useLoaderData } from 'react-router-dom';
-import {DBEditorBoolean,
-	DBEditorInteger,
-	DBEditorObject,
-	DBEditorString} from "./DBEditor";
+import DBEditorBoolean from './db-editor/DBEditorBoolean'
+import DBEditorInteger from './db-editor/DBEditorInteger'
+import DBEditorObject from './db-editor/DBEditorObject'
+import DBEditorString from './db-editor/DBEditorString'
 
 import Pager from "../Pager"
 // import AppConfig from "../../lib/AppConfig"
@@ -108,19 +108,20 @@ const DBExplorer = ({store, table, page })=>{
 		await updateList(grid.page);
 		setLoading(false)
 	}
-	const editorFactory = (item, index) => {
-		if(!editorFactoryRefs[index]){
-			editorFactoryRefs[index] = React.createRef(null)
+	const editorFactory = (editor,field, value, item, index,fieldIndex) => {
+		if(!editorFactoryRefs[`${index}-${fieldIndex}-${field}`]){
+			editorFactoryRefs[`${index}-${fieldIndex}-${field}`] = React.createRef(null)
 		}
-		const ref = editorFactoryRefs[index]
+		const ref = editorFactoryRefs[`${index}-${fieldIndex}-${field}`]
 		const components = {
-			boolean : <DBEditorBoolean item={item} ref={ref}/>,
-			string : <DBEditorString item={item} ref={ref}/>,
-			object : <DBEditorObject item={item} ref={ref}/>,
-			integer : <DBEditorInteger item={item} ref={ref}/>
+			boolean : <DBEditorBoolean item={item} field={field} value={value} ref={ref}/>,
+			string : <DBEditorString item={item} field={field} value={value} ref={ref}/>,
+			object : <DBEditorObject item={item} field={field} value={value} ref={ref}/>,
+			integer : <DBEditorInteger item={item} field={field} value={value} ref={ref}/>
 		}
 		// setEditorFactoryRefs(editorFactoryRefs)
-		const component = components[item.editor];
+		// const editor = item.editor || "string"
+		const component = components[editor]
 		return component
 	}
  	const onCancelRow = async(item, index, options, linkCls, gridAction) => {
@@ -130,17 +131,20 @@ const DBExplorer = ({store, table, page })=>{
  		 editor.cancelRow(true)
  	}
  	const onEditRow = async(item, index, options, linkCls, gridAction) => {
- 		const editor = editorFactoryRefs[index].current
- 		const editMode = gridAction.state.editMode
- 		editor.setGridAction(gridAction)
- 		if(!editMode){
- 			editor.editRow()
- 			// console.log(editor)
+		options.fields.map((field, fieldIndex)=>{
+			const editor = editorFactoryRefs[`${index}-${fieldIndex}-${field}`].current
+			const editMode = editor.state.editMode
+			// editor.setGridAction(gridAction)
+			if(!editMode){
+				editor.editRow()
+				// console.log(editor)
 
- 		}else{
- 			editor.saveRow()
+			}else{
+				editor.saveRow()
 
- 		}
+			}
+		})
+ 		
  		// gridAction.setState({editMode: !editMode})
  	}
  	const getLinkButton = ()=>{
@@ -154,18 +158,20 @@ const DBExplorer = ({store, table, page })=>{
 		headers : ['Setting', 'Value'],
 		fields : ['key','value'],
 		enableEdit : true,
-		editUrl : (item) =>{ return `/DBerences/tts-server/${item.key}`},
-		remoteUrl : (item) => `${config.getApiEndpoint()}/api/tts/DBerence?key=${item.key}`,
-		callbackFieldsXX : {
-			key : (field, value ,item) => {
-				return item.desc.length == 0 ? Helper.titleCase(value) : item.desc
-			}, 
-			value : (field, value, item, index) => {
-				return editorFactory(item, index)
-			}
-		},
+		// editUrl : (item) =>{ return `/DBerences/tts-server/${item.key}`},
+		// remoteUrl : (item) => `${config.getApiEndpoint()}/api/tts/DBerence?key=${item.key}`,
+		// callbackFields : {
+		// 	key : (field, value ,item) => {
+		// 		return item.desc.length == 0 ? Helper.titleCase(value) : item.desc
+		// 	}, 
+		// 	course : (field, value, item, index) => {
+		// 		console.log(field, value, item, index)
+		// 		return editorFactory(item, index)
+		// 	}
+		// },
+		useAutoEditor: true,
 
-		callbackActionsXX : {
+		callbackActions : {
 			edit : (item, index, options, linkCls, gridAction) => {
 				return(<> <button className={linkCls} onClick={evt => onEditRow(item, index, options, linkCls, gridAction)}>
 					            	<i className="bi bi-pencil-square"></i> {gridAction.state.editMode ? 'Save' : 'Edit'}
@@ -183,6 +189,8 @@ const DBExplorer = ({store, table, page })=>{
 	if(model){
 		gridOptions.headers = conf.headers
 		gridOptions.fields = conf.fields
+		gridOptions.editors = conf.editors
+		gridOptions.editorFactory = editorFactory
 		return(<div className={containerCls}>		
 				<div className="flex flex-col">
 	  				<div className="-m-1.5 overflow-x-auto">

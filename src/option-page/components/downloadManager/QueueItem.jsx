@@ -4,49 +4,9 @@ import QueueItemToolbar from "./QueueItemToolbar"
 import { render } from "react-dom"
 
 
-class InputDisplay extends Component{
-    constructor(props){
-        super(props)
-        const {value} = props
-        this.state = {
-            value
-        }
-    }
-    setValue(value){
-        this.setState({value})
-    }
-    render(){
-        const {value} = this.state
-        return <>
-            <div className="w-30 mx-2" >{value}</div>
-        </>
-    }
-    
-}
-const DLStatus = ({type, status}) => {
-    return <div className="">
-    {
-        status == 2 ? <>
-            <i className="fa fa-check text-green-500"/>
-        </> : <>
-            {
-                status == 1 ? <>
-                    <i className="fa fa-spin fa-spinner"/>
-                    
-                </>:<>
-                    {
-                        status == -1 ? <>
-                            <i className="fa fa-exclamation-circle text-red-500"/>
-                            
-                        </>:<>{''}</>
-                    }
-                </>
-            }
-        </>    
-    } 
-    {/* <div>{status}</div> */}
-   </div>
-}
+import InputDisplay from "./queue-item/InputDisplay"
+import DLStatus from "./queue-item/DLStatus"
+
 class QueueItem extends Component{
     constructor(props){
         super(props)

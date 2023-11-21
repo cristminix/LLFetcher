@@ -47,8 +47,8 @@ const DBTableManager = ({store}) => {
 		headers : ['Table'],
 		fields : ['table'],
 		enableEdit : true,
-		editUrl : (item) =>{ return `/DBerences/tts-server/${item.key}`},
-		remoteUrl : (item) => `${config.getApiEndpoint()}/api/tts/DBerence?key=${item.key}`,
+		// editUrl : (item) =>{ return `/DBerences/tts-server/${item.key}`},
+		// remoteUrl : (item) => `${config.getApiEndpoint()}/api/tts/DBerence?key=${item.key}`,
 		callbackFieldsXX : {
 			key : (field, value ,item) => {
 				return item.desc.length == 0 ? Helper.titleCase(value) : item.desc

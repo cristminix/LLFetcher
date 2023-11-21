@@ -2,32 +2,11 @@ import { useEffect, useState } from "react"
 import { fetchCourseTocMeta } from "../learning_fn"
 import Button from "../Button"
 import DropdownSelect from "../DropdownSelect"
+import FmtSelector from "./queue-setup/FmtSelector"
+
 const btnCls = "py-2 px-2 inline-flex justify-center items-center gap-2 -mt-px -ml-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-l-lg sm:mt-0 sm:first:ml-0 sm:first:rounded-tr-none sm:last:rounded-bl-none sm:last:rounded-r-lg border font-medium bg-white text-gray-700 align-middle hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all text-sm dark:bg-gray-800 dark:hover:bg-slate-800 dark:border-gray-700 dark:text-gray-400"
 const lblCls = "mr-1 mt-1 font-medium  text-sm dark:bg-slate-900 dark:text-gray-400 "    
 
-const FmtSelector = ({  renderState = false, 
-                        subRenderState = true,
-                        loadingFetchToc = false,
-                        getAvailableFmt = f => f,
-                        availableFmt = [], 
-                        selectFmt = "",
-                        selectedFmt ="",
-                        setSelectedFmt = f => f,
-                        finishSetup = f => f}) => {
-    return renderState ? 
-            subRenderState?  <>
-            <div className="flex p-2 px-2">
-
-            <Button loading={loadingFetchToc} icon="fa fa-cog" onClick={e=> getAvailableFmt(e)} caption="Get Available Fmt"/>
-            </div>            </>: <>
-            <div className="flex p-2 px-2">
-            <label className={lblCls}>Select Format</label>
-                <DropdownSelect data={availableFmt} selected={selectedFmt} onSelect={fmt=>setSelectedFmt(fmt)}/>
-                {/* <Button disabled={selectedFmt==selectFmt} icon="fa fa-save" onClick={e=> finishSetup(e)} caption="Finish Setup"/> */}
-                </div></>  
-        : ""
-        
-}
 
 const QueueSetup = ({
     logStatusBar,clearStatusBar,

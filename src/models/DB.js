@@ -36,7 +36,7 @@ class DB {
 	}
 
 	async initTable(){
-		console.log(`${this.constructor.name}.initTable()`)
+		// console.log(`${this.constructor.name}.initTable()`)
 
 		if(!this.table){
 			// console.error(`${this.constructor.name}.initTable() empty table`)

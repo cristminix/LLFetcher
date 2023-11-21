@@ -31,6 +31,7 @@
             "headers" : ["Course","Finished", "Status","Available Fmt", "Selected Fmt", "Exercise File", "Source Repo"],
             "fields" : ["course", "finished","status", "availableFmt", "selectedFmt", "exerciseFile", "sourceRepo"],
             "model" : "DMSetup",
+            "editors":["string","boolean","integer","string","string","string","string"],
             "listMethod" : "getListWithCourse"
         },
         "dm-status" : {

@@ -16,6 +16,7 @@
     "bootstrap": "^5.2.3",
     "bootstrap-icons": "^1.10.5",
     "fontawesome-4.7": "^4.7.0",
+    "is-network-error": "^1.0.0",
     "jquery": "^3.6.4",
     "jsdom": "^22.1.0",
     "localforage": "^1.10.0",
@@ -26,7 +27,7 @@
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.13.0",
     "underscore": "^1.13.6",
-    "uuid": "^9.0.0",
+    "uuid": "^9.0.1",
     "watch": "^0.13.0"
   },
   "devDependencies": {

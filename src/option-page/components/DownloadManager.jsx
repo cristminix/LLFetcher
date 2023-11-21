@@ -39,25 +39,47 @@ const DownloadManager = ({store}) => {
     const [selectedFmt, setSelectedFmt] = useState(selectFmt)
 
 
-    const logStatusBar = async(t,data,p1,p2,p3) => {
-      statusBarManRef.current.log(t,data)
-    }
-    const clearStatusBar = async() => {
-      delay(()=>{
-        statusBarManRef.current.clear()
+    /**
+     * Logs a message to the status bar.
+     * 
+     * @param {string} t - The message text 
+     * @param {any} data - Optional data to log with the message
+     */
+  const logStatusBar = async (t, data, p1, p2, p3) => {
+    statusBarManRef.current.log(t, data)
+  }
+  /**
+   * Clears the status bar message after a short delay.
+   * 
+   * This allows the message to remain visible for a brief time before being cleared.
+   */
+  const clearStatusBar = async () => {
+    delay(() => {
+      statusBarManRef.current.clear()
 
-      })
-    }
-    const updateCourseData = async()=>{
-      setActiveCourseData(null)
-      setRunSetup(false)
-      setAlreadySetup(false)
-      setDmsetup(null)
-      setQueueResume(false)
-      setQueueFinished(false)
-      setReconfigureSetup(false)
-      setAvailableFmt([])
-      setSelectedFmt(selectFmt)
+    })
+  }
+    /**
+     * updateCourseData fetches the latest course data for the given course slug, including sections, TOCs, etc.
+     * It initializes and updates component state with the latest data.
+     * 
+     * This includes resetting some state values like runSetup, alreadySetup, etc.
+     * It will also check for any existing download manager setup for this course.
+     * 
+     * If a setup exists, it will update state with that data like setting alreadySetup, queueFinished, etc.
+     * 
+     * This allows the component to show the latest status when navigating between courses.
+    */
+  const updateCourseData = async () => {
+    setActiveCourseData(null)
+    setRunSetup(false)
+    setAlreadySetup(false)
+    setDmsetup(null)
+    setQueueResume(false)
+    setQueueFinished(false)
+    setReconfigureSetup(false)
+    setAvailableFmt([])
+    setSelectedFmt(selectFmt)
 
 
       const courseData = await store.mCourse.getCoursePageData(slug)
@@ -86,19 +108,32 @@ const DownloadManager = ({store}) => {
       
     }
 
-    const stopDownloadQueue = async()=>{
-      setQueueStarted(false)
-    }
-    const startDownloadQueue = async()=>{
-      setQueueStarted(true)
+    /**
+     * Stops the download queue by setting the queueStarted state to false.
+     * This will pause the queue if it is running.
+    */
+  const stopDownloadQueue = async () => {
+    setQueueStarted(false)
+  }
+  /**
+   * Starts the download queue by setting the queueStarted state to true.
+   * This will begin downloading videos if the queue is not already running.
+   */
+  const startDownloadQueue = async () => {
+    setQueueStarted(true)
 
-    }
-    const resetDownloadQueue = async() =>{
-      setQueueFinished(false)
-      setQueueResume(false)
+  }
+  /**
+   * Resets the download queue by setting queueFinished and queueResume to false, 
+   * updating the dmsetup finished flag to false, and saving to storage.
+   * This will clear the finished state and allow the queue to be started again.
+  */
+  const resetDownloadQueue = async () => {
+    setQueueFinished(false)
+    setQueueResume(false)
 
-      // setRunSetup(false)
-      // setAlreadySetup(false)
+    // setRunSetup(false)
+    // setAlreadySetup(false)
       // if(dmsetup){
         const finished = false
         dmsetup.finished = finished
@@ -110,15 +145,18 @@ const DownloadManager = ({store}) => {
 
 
     }
-    useEffect(()=>{
+    const onCourseslugChange =  (slug) => {
       console.log(slug)
       if(slug){
         updateCourseData()
       }
+    }
+    useEffect(()=>{
+      onCourseslugChange(slug)
     },[slug])
     
-    useEffect(()=>{
-      console.log(queueFinished)
+    const onQueueFinished = (queueFinished_l) => {
+      console.log(queueFinished_l)
       const updateDMSetup = async (course)=>{
         const finished = true
         const dmsetup = await mDMSetup.updateByCourseId(course.id, {finished})
@@ -126,11 +164,15 @@ const DownloadManager = ({store}) => {
         dmsetup.finished = finished
         setDmsetup(dmsetup)
       }
-      if(queueFinished){
-        console.log(`Updating dmsetup.finished to ${queueFinished}`)
+      if(queueFinished_l){
+        console.log(`Updating dmsetup.finished to ${queueFinished_l}`)
         const {course} = activeCourseData
         updateDMSetup(course)
       }
+    }
+
+    useEffect(()=>{
+      onQueueFinished(queueFinished)
     },[queueFinished])
 
     if(activeCourseData){

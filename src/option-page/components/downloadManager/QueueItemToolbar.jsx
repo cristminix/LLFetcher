@@ -1,7 +1,7 @@
 
 import Button from "../Button"
 
-const QueueItemToolbar = ({clearStatusBar,logStatusBar,startQueueItem,loading,dlStatus,finished, interupted, vIndex,toc}) => {
+const QueueItemToolbar = ({clearStatusBar,logStatusBar,startQueueItem,loading,dlStatus,finished, interupted, vIndex,toc,resetQueueItem}) => {
     const [dlcaptionStatus, dlvideoStatus] = dlStatus
     const dlStatusResult = parseInt(dlcaptionStatus) + parseInt(dlvideoStatus)
     const icon =  dlStatusResult == 0 ? 'download' : dlStatusResult != 4 ? 'refresh' : 'check' 
@@ -23,8 +23,8 @@ const QueueItemToolbar = ({clearStatusBar,logStatusBar,startQueueItem,loading,dl
         }
             
         </>:<>
-            Complete
-        {/* <Button onMouseOut={e=>clearStatusBar()} onMouseOver={e=>logStatusBar('QueueItemToolbar.resetQueueItemmmm',`Reset ${toc.title}`)}  onClick={e=>startQueueItem(vIndex)} caption={''} disabled={disabled} loading={loading} icon={`fa fa-trash`}/> */}
+            
+         <Button className={"dark:hover:text-red-600"} onMouseOut={e=>clearStatusBar()} onMouseOver={e=>logStatusBar('QueueItemToolbar.resetQueueItem',`Reset ${toc.title}`)}  onClick={e=>resetQueueItem(vIndex)} caption={''} disabled={false} loading={loading} icon={`fa fa-trash`}/> 
 
         </>
     }

@@ -54,8 +54,13 @@ class GridItems extends React.Component{
 		              			}
 		              		}
 							if(options.useAutoEditor){
-								const editor = options.editors[fieldIndex]
-								// console.log(item)
+								let editor = "string"
+								try{
+									options.editors[fieldIndex]
+								}catch(e){
+									
+								}
+									// console.log(item)
 								fieldText = options.editorFactory(editor, field, value, item, index,fieldIndex)
 							}
 		              		return (<td key={fieldIndex} className={this.tdCls}>{fieldText}</td>)

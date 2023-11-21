@@ -68,6 +68,15 @@ class StatusbarMan extends Component{
             
             
         }  
+        {
+            t == 'QueueItemToolbar.resetQueueItem' ? <>
+            <div className="success text-red-600">
+                <i className="fa fa-trash"/> <span>{customMessage}</span>
+            </div> 
+            </> : ''
+            
+            
+        }  
          {
             t == 'ToolbarMan' ? <>
             <div className="success text-green-600">

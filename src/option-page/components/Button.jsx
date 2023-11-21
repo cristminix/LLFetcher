@@ -4,7 +4,7 @@ const Button = ({label=null,onMouseOver=f=>f,onMouseOut=f=>f,disabled=false,load
         {
             // label ? <label>{label}</label>:''
         }
-        <button onMouseOver={e=>onMouseOver(e)} onMouseOut={e=>onMouseOut(e)} disabled={loading || disabled} onClick={e=>onClick(e)} type="button" className={`${className} ${btnCls}`}>
+        <button onMouseOver={e=>onMouseOver(e)} onMouseOut={e=>onMouseOut(e)} disabled={loading || disabled} onClick={e=>onClick(e)} type="button" className={` ${btnCls} ${className}`}>
         {
             loading ? <span className="animate-spin inline-block w-4 h-4 border-[3px] border-current border-t-transparent text-blue-600 rounded-full" role="status" aria-label="loading">
             <span className="sr-only">Loading...</span>

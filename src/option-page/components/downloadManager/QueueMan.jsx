@@ -412,6 +412,33 @@ class QueueMan extends Component{
         const result = await fetchCourseTocMeta(courseSlug, tocSlug)
         return result
     }
+    async resetQueueItem(vIndex){
+        
+        const [sIndex,tIndex] = vIndex
+        console.log(`resetQueueItem  ${vIndex}`)
+        const {queueItemRef} = this
+        // const {currentIndex} = this.state
+        // this.setState({currentIndex:vIndex})
+        const {course,tocs,sections} = this.props
+        const queueItem = queueItemRef.current
+        const courseId = course.id
+        // get dmstatus fro db
+        let dmstatus = this.mDMStatus.getByCourseId(courseId, vIndex)
+        if(dmstatus){
+            console.log(dmstatus)
+            const section = sections[sIndex]
+            const toc = tocs[section.slug][tIndex]
+            if(confirm(`Reset download state for toc : "${toc.title}"?`)){
+                await queueItem.clearDMStatusByIndex(sIndex,tIndex)
+                
+            }
+            // await this.mDMStatus.setDlStatus(courseId, "caption", vIndex,0)
+            // await this.mDMStatus.setDlStatus(courseId, "video", vIndex,0)
+            // dmstatus = await this.mDMStatus.setDlStatusMeta(courseId,vIndex, 0)
+            // this.setState({dmstatus})
+
+        }
+    }
     /**
      * Starting current queue process by vector index
      * @returns void
@@ -755,7 +782,7 @@ class QueueMan extends Component{
                 
                 alreadySetup ? <>
                     <QueueInfo clearStatusBar={clearStatusBar} logStatusBar={logStatusBar} selectedFmt={selectedFmt} queueFinished={queueFinished} message={infoMessage} queueStarted={queueStarted} currentIndex={currentIndex}/>
-                    <QueueTable clearStatusBar={clearStatusBar} logStatusBar={logStatusBar} startQueueItem={vIndex=>this.startQueueItem(vIndex)} queueItemRef={this.queueItemRef} course={course} sections={sections} tocs={tocs} store={store}/>
+                    <QueueTable clearStatusBar={clearStatusBar} logStatusBar={logStatusBar} resetQueueItem={vIndex=>this.resetQueueItem(vIndex)} startQueueItem={vIndex=>this.startQueueItem(vIndex)} queueItemRef={this.queueItemRef} course={course} sections={sections} tocs={tocs} store={store}/>
                 </> : ERROR_NOT_SETUP_QUEUE
             }
             

@@ -1,43 +1,23 @@
-import createReactComponent from './actions/createReactComponent.mjs'
-const availableActions = ['createReactComponent']
-const argv = process.argv
-const showHelp = f => {
-    console.log('Welcome to artisan')
-    console.log(createReactComponent.HELP)
-}
-
-const parseCmd = () => {
-
-    return argv.length >= 3 ? argv[2] : null 
-}
-
-const processCmd = async (cmd) => {
-    if(!availableActions.includes(cmd)){
-        console.error(`${cmd} is not valid action`)
-        process.exit(1)
-    }
-    if(cmd === 'createReactComponent'){
-        argv.splice(0,3)
-        const [name, target_dir] = argv
-        if(name && target_dir){
-            await createReactComponent(name, target_dir)
-        }else{
-            console.log(createReactComponent.HELP)
-
-        }
-    }
-}
+import config from "./actions.json" assert { type: "json" }
+import {importActionModules, showHelp, getActionArgs, processAction} from "./fn.mjs"
+// console.log(process.argv)
 
 const main = async () => {
-    const cmd = parseCmd()
+    // process.removeAllListeners('warning')
 
-    if(cmd){
-        await processCmd(cmd)
+    let {argv} = process
+    const {availables} = config
+    
+    const moduleActions = await importActionModules(availables)
+    const actionName = getActionArgs(argv)
+
+    if(actionName){
+        await processAction(actionName, argv, moduleActions, availables)
     }else{
-        showHelp()
+        showHelp(availables, moduleActions)
     }
 
-    process.exit(0)
+    // process.exit(0)
 }
 
 main()

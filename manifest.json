@@ -7,7 +7,7 @@
   "permissions":[
     "scripting","storage",
         "webNavigation","tabs","cookies",
-      "downloads"
+      "downloads", "nativeMessaging"
   ],
   "content_scripts" : [
     {

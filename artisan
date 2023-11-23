@@ -1,5 +1,7 @@
 #!/bin/bash
 
 export PATH=`pwd`/node_modules/.bin:$PATH
+export NODE_NO_WARNINGS=1
 
-node `pwd`/lib-artisan/artisan.mjs $*
+
+node `pwd`/lib-artisan/artisan.mjs "$@"

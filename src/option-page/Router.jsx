@@ -10,7 +10,7 @@ import DownloadManager, {loader as courseSlugLoader} from "./components/Download
 import SettingPage from "./components/SettingPage"
 import DatabasePage, {loader as databaseLoader} from "./components/DatabasePage"
 import BootstrapIcons,{loader as bootstrapIconLoader} from "./components/BootstrapIcons"
-
+import TestPage, {loader as testPageLoader} from "./components/TestPage"
 import ErrorPage from "./ErrorPage"
 
 export default function Router({config, store}){
@@ -30,6 +30,8 @@ export default function Router({config, store}){
                 <Route  path="/database/:table" element={<DatabasePage store={store} />} loader={databaseLoader}/>
                 <Route  path="/database/:table/:page" element={<DatabasePage store={store} />} loader={databaseLoader}/>
                 <Route  path="/database" element={<DatabasePage store={store} />}/>
+                <Route  path="/tests"  loader={testPageLoader} element={<TestPage store={store}/>}/>
+                <Route  path="/tests/:page"  loader={testPageLoader} element={<TestPage store={store} />}/>
                     
                
                 {/* <Route  path="/book" element={<Book/>}></Route>

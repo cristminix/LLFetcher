@@ -130,8 +130,34 @@ const ToolbarMan = ({setSelectedFmt,setAvailableFmt,setDmsetup,selectedFmt, cour
     }
     createDownloadFile('shell_script', config)
   }
-    
 
+  const downloadHelperCmd = async () => {
+    const { exerciseFile } = dmsetup
+
+    const slug = course.slug
+    const fmt = selectedFmt
+    const config = {
+      slug, fmt, sections, tocs, exerciseFile
+    }
+    createDownloadFile('batch_script', config)
+  }
+    
+  const isValidExerciseFile = (exerciseFile)=>{
+    let validFile = false 
+    if(Array.isArray(exerciseFile)){
+      if(exerciseFile.length > 0){
+        const exFile = exerciseFile[0]
+        console.log(exFile)
+      }
+    }else{
+      if("object" === typeof exerciseFile){
+        if("undefined" !== typeof exerciseFile.name && "undefined" !== typeof exerciseFile.url){
+          validFile = true
+        }
+      }
+    }
+    return validFile
+  }
     return (<><div className="toolbar-man pr-2 pt-4 pb-1">
         <div className="toolbar-man-container">
         
@@ -177,13 +203,14 @@ const ToolbarMan = ({setSelectedFmt,setAvailableFmt,setDmsetup,selectedFmt, cour
        
          
            {
-              dmsetup.exerciseFile ? <><Button onClick={e=>openExerciseFile(e)} className="ml-1" label="Exercise File:" caption={dmsetup.exerciseFile.name} icon="fa fa-file-archive-o"/></> : ''
+              isValidExerciseFile(dmsetup.exerciseFile) ? <><Button onClick={e=>openExerciseFile(e)} className="ml-1" label="Exercise File:" caption={dmsetup.exerciseFile.name} icon="fa fa-file-archive-o"/></> : ''
             } 
             {
               dmsetup.sourceRepo ? <><Button onClick={e=>openSourceRepo(e)} className="ml-1" label="Source Repo:" caption={dmsetup.exerciseFile.sourceRepo} icon="fa fa-file-archive-o"/></> : ''
             }
-          <Button onClick={e=>downloadPlaylist(e)}  className="ml-1" caption="Playlist" icon="fa fa-file-text-o"/>
-            <Button onClick={e=>downloadHelper(e)} className="ml-1" caption="Helper" icon="fa fa-file-text-o"/>
+          <Button onClick={e=>downloadPlaylist(e)}  className="ml-1" caption="Playlist.m3u" icon="bi bi-collection-play"/>
+            <Button onClick={e=>downloadHelper(e)} className="ml-1" caption="Helper.sh" icon="bi bi-terminal-fill"/>
+            <Button onClick={e=>downloadHelperCmd(e)} className="ml-1" caption="Helper.cmd" icon="bi bi-terminal"/>
           
         
       </>:''

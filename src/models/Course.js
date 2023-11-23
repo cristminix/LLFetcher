@@ -10,23 +10,44 @@ class Course extends DB {
 	fields = ["title", "slug", "duration", "sourceCodeRepository", "description",'authorIds','urn']
 
 
-	getBySlug(slug){
-	    const results =  this.db.queryAll(this.table,{query: {slug}});
+ /**
+  * Gets a single course by its slug property.
+  * Queries the database for courses matching the given slug, 
+  * and returns the first result.
+  * @param {string} slug - The slug property to search for.
+  * @returns {Object|null} The matching course, or null if not found.
+ */
+    getBySlug(slug) {
+        const results = this.db.queryAll(this.table, { query: { slug } });
         return this.singleResult(results)
-	}
-    async getLastSlug(){
+    }
+    /**
+     * Gets the last used course slug from the App model.
+     * 
+     * Gets the App model instance and retrieves the stored document.
+     * Returns the lastCourseSlug property from the document if found,
+     * otherwise returns an empty string.
+     */
+    async getLastSlug() {
         const mApp = await App.getInstance()
 
         const app = mApp.get()
-        if(app){
+        if (app) {
             return app.lastCourseSlug
         }
         return ''
     }
-    async setLastSlug(slug){
+    /**
+     * Sets the last used course slug in the App model.
+     * Gets the singleton App model instance. 
+     * If the slug parameter is not empty, it logs a message and updates the 
+     * lastCourseSlug property in the App document to the given slug value.
+     * @param {string} slug - The course slug to set as last used.
+     */
+    async setLastSlug(slug) {
         const mApp = await App.getInstance()
 
-        if(slug !== ''){
+        if (slug !== '') {
             console.log(`App.init() update courseSlug=${slug}`)
 
             await mApp.update(row => {
@@ -35,16 +56,28 @@ class Course extends DB {
             })
         }
     }
-    async getCoursePageData(slug){
-        if(!slug){
+    /**
+     * Fetches all data needed to display a course page, including the course itself, authors, 
+     * sections, and table of contents.
+     * 
+     * Takes a course slug. Gets the course by that slug. Also gets the authors, 
+     * sections, and TOCs related to that course from their respective models.
+     * 
+     * Returns an object containing the course data, authors array, sections array,
+     * and TOCs object mapping section slugs to array of TOC items.
+     * 
+     * Returns null if no course found for the given slug.
+    */
+    async getCoursePageData(slug) {
+        if (!slug) {
             return null
         }
         const mAuthor = await Author.getInstance()
         const mSection = await Section.getInstance()
         const mToc = await Toc.getInstance()
-        let course = null, authors=[], sections=[], tocs={}
+        let course = null, authors = [], sections = [], tocs = {}
         course = this.getBySlug(slug)
-        if(course){
+        if (course) {
             authors = mAuthor.getListByCourse(course)
             sections = mSection.getList(course.id)
 

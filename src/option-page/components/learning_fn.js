@@ -313,4 +313,4 @@ async function fetchDownload(url, outputFilename, mime, progressCallback, index)
     
 }
 
-export {findDS, findItems, parseToc, fetchCourseTocMeta, calculateSpeed, formatBytes,fetchDownload}
+export {findDS, findItems, parseToc, fetchCourseTocMeta, calculateSpeed, formatBytes,fetchDownload,fetchCourseTocPage}

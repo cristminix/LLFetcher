@@ -36,11 +36,34 @@
 			"hidden" : true
 
 		},
+		"test" : {
+			"title" : "Tests",
+			"path" : "/tests",
+			"iconCls" : "bi bi-building-gear",
+			"order" : 4,
+			"hidden" : false,
+			"hasChild" : true,
+
+			"childItems":{
+				"find-ds" : {
+					"title" : "findDS",
+					"path" : "/tests/find-ds",
+					"iconCls" : "bi bi-search",
+					"order" : 0
+				},
+				"native-client" : {
+					"title" : "nativeClient",
+					"path" : "/tests/native-client",
+					"iconCls" : "bi bi-node",
+					"order" : 0
+				}
+			}
+		},
 		"database" : {
 			"title" : "Database Explorer",
 			"path" : "/database",
 			"iconCls" : "fa fa-database",
-			"order" : 4,
+			"order" : 5,
 			"hidden" : false,
 			"hasChild" : true,
 			"childItems" : {

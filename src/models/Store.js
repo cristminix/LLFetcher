@@ -105,6 +105,13 @@ class Store {
 		console.error(`Store.get() ${model} is not available`)
 		return null
 	}
+
+	async getStorageSize(){
+		return new Promise((resolve,reject)=>{
+			DB.connection.getDataSize(size=>resolve(size))
+		})
+		
+	}
 }
 
 export default Store

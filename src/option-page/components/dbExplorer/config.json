@@ -1,9 +1,23 @@
 {
     
     "tables" : {
+        "section" : {
+            "headers" : ["Course","Slug","Title", "TOC IDS","Urn"],
+            "fields" : ["courseId","slug","title","tocIds","itemStars"],
+            "model" : "Section",
+            
+            "listMethod" : "getList"
+        },
+        "toc" : {
+            "headers" : ["Section ID","Title","Slug","URL","DURATION", "STREAMLOCS IDs","Item Star","V Status Urn"],
+            "fields" : ["sectionId","title","slug","url","duration","streamLocationIds","itemStar","vStatusUrn"],
+            "model" : "Toc",
+            
+            "listMethod" : "getList"
+        },
         "course" : {
-            "headers" : ["Title", "Slug"],
-            "fields" : ["title", "slug"],
+            "headers" : ["Title", "Slug","Urn"],
+            "fields" : ["title", "slug","urn"],
             "model" : "Course",
             "listMethod" : "getList"
         },

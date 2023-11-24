@@ -66,11 +66,11 @@ class PopupAction extends ComponentWithMessaging{
 		const tocs = []
 		const tocIds = []
 		for(let i in items){
-			const {title, slug, duration} = items[i]
+			const {title, slug, duration, itemStar, vStatusUrn} = items[i]
 			const captionFmt = ""
 			const captionUrl = ""
 			const url = ""
-			const toc = await this.mToc.create(title, slug, url, duration, captionUrl, captionFmt, section.id)
+			const toc = await this.mToc.create(title, slug, url, duration, captionUrl, captionFmt, section.id,itemStar,vStatusUrn)
 			tocs.push(toc)
 			tocIds.push(toc.id)
 		}
@@ -99,8 +99,8 @@ class PopupAction extends ComponentWithMessaging{
 			let tocs = {}
 			if( csi.length > 0){
 				for(let i in csi){
-					const {title,items} = csi[i]
-					const section = await this.mSection.create(title, slugify(title), this.state.course.id)
+					const {title,items,itemStars} = csi[i]
+					const section = await this.mSection.create(title, slugify(title), this.state.course.id,itemStars)
 					// console.log(section)
 					const [newSection, newTocs] = await this.createCourseTocs(items, section)
 					// console.log(newSection)
@@ -202,15 +202,17 @@ class Popup extends PopupAction{
 		// this.setState({validCoursePage})
 	}
 
-	// componentDidMount(){
-	// 	if(!onMessageAttached){
-	// 		onMessage((evt, source)=>{
-	// 			this.onCommand(evt, source)
-	// 	    })
-	// 	    onMessageAttached = true
-	// 		this.onPopupOpen()
-	// 	}
-	// }
+	componentDidMount(){
+		// if(!onMessageAttached){
+		// 	onMessage((evt, source)=>{
+		// 		this.onCommand(evt, source)
+		//     })
+		//     onMessageAttached = true
+		// 	this.onPopupOpen()
+		// }
+		const {store} = this
+		store.reload()
+	}
 	render(){
 		const {store} = this
 		return (<div className="app-container">

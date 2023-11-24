@@ -2,7 +2,7 @@ import DB from "./DB"
 
 class Section extends DB {
 	table = 'section'
-	fields = ["courseId","slug","title","tocIds"]
+	fields = ["courseId","slug","title","tocIds","itemStars"]
 
     getBySlug(slug, courseId){
         return this.singleQuery({query: {slug,courseId}})
@@ -10,16 +10,17 @@ class Section extends DB {
     get(id){
         return this.singleQuery({query: {id}})
     }
-    getList(courseId){
-        return this.query({query: {courseId}})
+    getList(){
+        const results =  this.db.queryAll(this.table);
+        return results
     }
-    async create(title, slug, courseId){
+    async create(title, slug, courseId,itemStars=[]){
         let section = this.getBySlug(slug,courseId)
 
         if(!section){
             const id = 0
             const tocIds=[]
-            section = {id,courseId,title,slug,tocIds}
+            section = {id,courseId,title,slug,tocIds,itemStars}
             section.id = this.db.insert(this.table,section)
             await this.db.commit()
 

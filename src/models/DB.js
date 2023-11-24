@@ -30,7 +30,7 @@ class DB {
 		}
 		this.db = DB.connection
 	}
-
+	
 	async getCount(){
 
 	}
@@ -158,6 +158,11 @@ class DB {
 				await instance.init()
 			}
 		}
+	}
+
+	async truncate(){
+		this.db.deleteRows(this.table)
+		await this.db.commit()
 	}
     static async isFresh(){
         // chrome.storage.local.get('db_learning',(db)=>{

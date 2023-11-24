@@ -2,7 +2,7 @@ import DB from "./DB"
 
 class Toc extends DB {
 	table = 'toc'
-	fields = ["sectionId","title","slug","url","duration","captionUrl","captionFmt","streamLocationIds"]
+	fields = ["sectionId","title","slug","url","duration","captionUrl","captionFmt","streamLocationIds","itemStar","vStatusUrn"]
 
 
     getListBySectionId(sectionId){
@@ -33,13 +33,13 @@ class Toc extends DB {
         return toc
     }
 
-    async create(title, slug, url, duration, captionUrl, captionFmt, sectionId){
+    async create(title, slug, url, duration, captionUrl, captionFmt, sectionId,itemStar,vStatusUrn){
         let toc = this.getBySlug(slug,sectionId)
 
         if(!toc){
             const id = 0
             const streamLocationIds = []
-            toc = {id,sectionId,title,slug,url,duration,captionUrl,captionFmt,streamLocationIds}
+            toc = {id,sectionId,title,slug,url,duration,captionUrl,captionFmt,streamLocationIds,itemStar,vStatusUrn}
             toc.id = this.db.insert('toc',toc)
             await this.db.commit()
 

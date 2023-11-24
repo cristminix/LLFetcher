@@ -3,6 +3,8 @@ import Grid from "../Grid"
 import { useEffect, useState } from "react";
 import Pager from "../Pager"
 import Button from "../Button";
+import {formatBytes} from "../learning_fn"
+
 const DBTableManager = ({store}) => {
     const [grid,setGrid] = useState({
         records : [],
@@ -14,6 +16,7 @@ const DBTableManager = ({store}) => {
         order_dir:'asc'
     });
     const [reinitLoading, setReinitLoading] = useState([])
+    const [storageSz,setStorageSz] = useState(0)
     const onRefresh = f => f
     const onReinit = async (item, index) => {
         
@@ -26,13 +29,14 @@ const DBTableManager = ({store}) => {
 
             const model = store.get(item.table)
             if(model){
-                await model.dropTable()
+                await model.truncate()
             }
             // setTimeout(()=>{
                 reinitLoadingState = Object.assign([], reinitLoading)
                 reinitLoadingState[index] = false
                 setReinitLoading(reinitLoadingState)
             // },2000)
+            updateStorageSize()
         }
         
 
@@ -78,6 +82,11 @@ const DBTableManager = ({store}) => {
 			}
 		}
 	}
+    const updateStorageSize = async() => {
+        const ssize = await store.getStorageSize()
+        setStorageSz(ssize)
+        // console.log(ssize)
+    }    
     const updateList = () => {
         const newGrid = Object.assign({}, grid)
         setGrid(null)
@@ -92,6 +101,7 @@ const DBTableManager = ({store}) => {
 
         newGrid.records = records
         setGrid(newGrid)
+        updateStorageSize()
     }
     useEffect(()=>{
         updateList()        
@@ -121,8 +131,10 @@ const DBTableManager = ({store}) => {
 	return(<div className={containerCls}>
         <div className="explorer-toolbar">
             <div className="button-group">
-                <Button onClick={e=>exportDb(e)} caption="export" icon="fa fa-file-text"/>
+                <Button onClick={e=>exportDb(e)} caption="Export to json" icon="fa fa-file-text"/>
+                <Button onClick={f=>f} icon="fa fa-save" caption={'Storage Size : '+formatBytes(storageSz)}/>
             </div>
+            
         </div>		
         <div className="flex flex-col">
               <div className="-m-1.5 overflow-x-auto">

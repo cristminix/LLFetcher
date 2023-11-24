@@ -2,8 +2,9 @@
 import { Link, useLoaderData } from 'react-router-dom'
 import {Component,createRef,useState,useEffect} from "react"
 
-import FindDsTest from "./testPage/FindDsTest"
+import FindDsTest  from "./testPage/FindDsTest"
 import NativeClientTest from "./testPage/NativeClientTest"
+import CourseApiTest from './testPage/CourseApiTest'
 function dashToCamelCase(str) {
   return str.replace(/-([a-z])/g, function(match, letter) {
     return letter.toUpperCase();
@@ -21,7 +22,8 @@ const TestPage = ({store}) => {
   const {page} = useLoaderData()
   const getComponenentPage = page => {
     const components = {
-      'find-ds': <FindDsTest store={store}/>,
+      'course-api': <CourseApiTest store={store} page={page}/>,
+      'find-ds': <FindDsTest store={store} page={page}/>,
       'native-client' : <NativeClientTest store={store}/>
     }    
     return components[page]

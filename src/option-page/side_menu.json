@@ -56,7 +56,14 @@
 					"path" : "/tests/native-client",
 					"iconCls" : "bi bi-node",
 					"order" : 0
+				},
+				"course-api-new" : {
+					"title" : "New CourseApi",
+					"path" : "/tests/course-api",
+					"iconCls" : "bi bi-bookmark",
+					"order" : 0
 				}
+				
 			}
 		},
 		"database" : {
@@ -76,6 +83,18 @@
 				"download-config" : {
 					"title" : "DownloadConfig",
 					"path" : "/database/download-config",
+					"iconCls" : "fa fa-database",
+					"order" : 0
+				},
+				"section" : {
+					"title" : "Section",
+					"path" : "/database/section",
+					"iconCls" : "fa fa-database",
+					"order" : 0
+				},
+				"toc" : {
+					"title" : "Toc",
+					"path" : "/database/toc",
 					"iconCls" : "fa fa-database",
 					"order" : 0
 				},

@@ -126,7 +126,33 @@ class WelcomePage extends ComponentWithMessaging {
 		const course = await this.getFromMessage(msg)
 		await this.addToLastCourseList(course)
 	}
-	
+	async getCurrentTabUrl(){
+		return new Promise((resolve,reject)=>{
+			chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+				let currentTab = tabs[0]
+				let tabUrl = currentTab.url
+				resolve(tabUrl)
+			})
+			// reject('error')
+		})
+	}
+	async activateAddCourseOptionTab(slug){
+		const url = chrome.runtime.getURL(`options.html#/course/add/${slug}`)
+		const tabs = await chrome.tabs.query({ url: `${chrome.runtime.getURL('options.html')}*` })
+		if(tabs.length > 0){
+			chrome.runtime.sendMessage({ action: 'activateTab', url })
+		}else{
+			chrome.tabs.create({ url })
+		}
+
+		// setTimeout(f=>window.close(),100)
+	}
+	async addCourseFromCurrentUrl(){
+		const url = await this.getCurrentTabUrl()
+		const courseSlug = url.replace("https://www.linkedin.com/learning/","").split("/")[0]
+		this.activateAddCourseOptionTab(courseSlug)
+	}
+		
 	async onSelectCourse(course){
 	 	this.setState({loading:true, disableFetchBtn:true})
 		await this.props.onSelectCourse(course,null,true)
@@ -166,6 +192,7 @@ class WelcomePage extends ComponentWithMessaging {
 
 				<div className="btn-cnt">
 					<button  disabled={fetchBtnState==1 || !validCoursePage || disableFetchBtn} className="btn btn-primary" onClick={e => this.getCourseInfoMessage()}><i className={`fa ${btnCls}`}></i> Fetch This Course</button>
+					<button  disabled={fetchBtnState==1 || !validCoursePage || disableFetchBtn} className="btn btn-primary" onClick={e => this.addCourseFromCurrentUrl()}><i className={`fa ${btnCls}`}></i> Add Course</button>
 					{/* <span>Valid CoursePage ? {validCoursePage ? 'Yes' : 'No'}</span> */}
 				</div>
 				<div className="p-4">

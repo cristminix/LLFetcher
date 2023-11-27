@@ -1,178 +1,107 @@
 import { Link, useLoaderData } from 'react-router-dom'
-
-
 import {Component,createRef,useState,useEffect} from "react"
-
-import CourseTree from "./coursePage/CourseTree"
-import CourseAuthors from "./coursePage/CourseAuthors"
-import CourseDetail from "./coursePage/CourseDetail"
-// import {console} from "../../components/fn"
-import "./coursePage/course-page.css"
-
+import CourseApi from "../../course-api/CourseApi.js"
+import {courseUrlFromSlug} from "../../course-api/course_fn.js"
 
 export async function loader({ params }) {
-    const { slug } = params
-    return { slug }
+    const { ctl,slug } = params
+    return { ctl,slug }
   }
+
+const AddCoursePage=({slug, store, onOk})=>{
+
+	const doFetchCourse = (courseSlug) => {
+		// const courseSlug = slug
+		const courseApi = new CourseApi(store)
+		const course = courseApi.getCourseInfo(courseSlug,true)
+		const courseUrl = courseUrlFromSlug(courseSlug)
+
+		if(course){
+			console.log("Fetch course OK")
+
+			const authors = courseApi.getAuthors(courseSlug)
+
+			if(authors){
+        		console.log("Fetch course authors ok")
+
+			}else{
+				console.error(`Failed to fetch course authors course : ${course.title}`)
+			}
+
+			const sections = courseApi.getCourseSections(courseSlug)
+
+		    if (sections){
+		        console.log(`Fetch course sections ok ${sections.length}`)
+		    }
+		    else{
+		        console.error(`Failed to fetch course sections course : ${course.title}`)
+		    }
+
+    		const tocs = courseApi.getCourseTocs(courseSlug)
+
+    		if(tocs){
+    			 for (let section in sections){
+    			 	const toc_list = tocs[section.slug]
+			        //  setream_locations = api_course.getStreamLocs(toc.item_star)
+			        for (toc in toc_list){
+			        	const stream_locations = courseApi.getStreamLocs(toc)
+			            if(stream_locations){
+			                console.log(`Fetch stream locations [${Object.keys(stream_locations).join(',')}]`)
+
+			            }
+			            else{
+			                console.error(`Failed to fetch stream locations toc : ${toc.title}`)
+
+			            }
+			            const transcripts = courseApi.getTranscripts(toc)
+			            if(transcripts){
+			                console.log(`Fetch transcripts [{ [${Object.keys(transcripts).join(',')}]`)
+			            }
+			            else{
+			                console.error(`Failed to fetch transcripts toc : ${toc.title}`)
+			            }
+			        }
+			            
+    			 }
+			        
+    		}else{
+        		console.error(`Failed to fetch course tocs course : ${course.title}`)
+    		}
+
+
+		}else{
+			console.error(`Failed to fetch course slug : ${courseUrl}`)
+		}
+
+	}
+	useEffect(()=>{
+		if(slug)
+		doFetchCourse(slug)
+	},[])
+	return <>
+		add : {slug}
+	</>
+}
 
 const CoursePage = ({store}) => {
-    const {slug} = useLoaderData()
-    const [activeCourseData, setActiveCourseData] = useState(null)
- 
- 
-    const updateCourseData = async()=>{
-      setActiveCourseData(null)
-      const courseData = await store.mCourse.getCoursePageData(slug)
-      await store.mCourse.setLastSlug(slug)
-      setActiveCourseData(courseData)
+    const {ctl,slug} = useLoaderData()
+    const [renderedPage,setRenderedPage] = useState("")
+    const middleware = async(ctl,slug)=>{
+    	const components = {
+    		'add' : <AddCoursePage slug={slug} onOk={f=>f}/>
+    	}
+    	// console.log(ctl,slug)
+    	setRenderedPage(components[ctl])
     }
     useEffect(()=>{
-      console.log(slug)
-      if(slug){
-        updateCourseData()
-      }
-    },[slug])
-    
-    if(activeCourseData){
-      console.log(activeCourseData)
-      const {course, authors, sections, tocs}  = activeCourseData
-      return (<>
-              { course ? (<div className="course-page">
-                  <MainCoursePage store={store} course={course} authors={authors} sections={sections} tocs={tocs}/>
-              </div>):""
-              }
-              </>)
-    }else{
-      return <>No data</>
-    }
-}
-class MainCoursePage extends Component{
-  
-  mainQueueRef = null
-  sectionToolBarRefs = []
-  tocToolBarRefs = {}
-  mCourse = null
-  store = null
-  constructor(props){
-    super(props)
-    const {course, authors, sections, tocs, store} = props
-    this.store = store
-    this.mCourse = store.get('Course')
-    this.state = {
-      course, authors, sections, tocs,
-      qsidx : 0,
-      qtidx : 0,
-    }
-    this.initRefs(sections, tocs)
-  }
+    	if(ctl && slug){
+    		middleware(ctl,slug)
+    	}
+    },[ctl,slug])
 
-  initRefs(sections, tocs){
-    this.mainQueueRef = createRef(null)
-    this.sectionToolBarRefs = []
-    for(let sidx in sections){
-      this.sectionToolBarRefs.push(createRef(null))
-    }
-
-    for(let key in tocs){
-      this.tocToolBarRefs[key] = []
-
-      for(let tidx in tocs[key]){
-        this.tocToolBarRefs[key].push(createRef(null))
-      }
-    }
-
-    // console.log(this.sectionToolBarRefs)
-    // console.log(this.tocToolBarRefs)
-  }
-  async componentDidMount(){
-    const {course} = this.state
-    if(!course){
-      const slug = await this.mCourse.getLastSlug()
-      // console.log(slug)
-      if(slug){
-        if(slug !== ''){
-          const {course, authors, sections, tocs} = await this.mCourse.getCoursePageData(slug)
-          this.initRefs(sections, tocs)
-          this.setState({course, authors, sections, tocs},()=>{
-            
-
-          })
-        }
-      }
-    }
-  }
-  async runSectionQueue(sidx){
-    console.log(sidx)
-    this.setState({ qsidx:sidx })
-
-    // this.fetchSectionQueueRef.current.startQueue()
-    // console.log(this.mainQueueRef)
-    const sectionToolBarRef = this.sectionToolBarRefs[sidx]
-    const result = await sectionToolBarRef.current.processQueue()
-
-    return result
-    // console.log()
-    // console.log(this.tocToolBarRefs[this.state.sections[sidx].slug])
-  }
-  runTocsQueue(tidx){
-    // this.fetchQueueBarRef[this.state.qsidx].current.startQueue()
-
-    this.setState({ qtidx:tidx }) 
-
-    console.log(this.mainQueueRef)
-
-  }
-  onUpdateQueueProgress(src, data){
-    // console.log(src, data)
-    // console.log(this.mainQueueRef.current)
-   // const {pageNavigationRef} = this.props
-
-    if(src === 'FetchQueueBar'){
-      const {section, percentage} = data
-      const result = this.mainQueueRef.current.updateProgressView(section, percentage)
-
-      
-      //pageNavigationRef.current.enableDownload(result === 100)
-      
-    }
-  }
-  render(){
-    const {course, authors, sections, tocs, qsidx, qtidx} = this.state
-    const {pageNavigationRef,store} = this.props
-    return(<>
-    {
-      course ? (<div className="course-page page">
-      <CourseDetail course={course} 
-                    sections={sections} 
-                    tocs={tocs} 
-                    qsidx={qsidx} 
-                    qtidx={qtidx} 
-                    runSectionQueue={sidx=>this.runSectionQueue(sidx)} 
-                    runTocsQueue={tidx=>this.runTocsQueue(tidx)}
-                    mainQueueRef={this.mainQueueRef}
-                    pageNavigationRef={pageNavigationRef}>
-        <CourseAuthors authors={authors} key={course.id}/>
-      </CourseDetail>
-
-      <CourseTree store={store} course={course} sections={sections} 
-                  tocs={tocs} 
-                  qsidx={qsidx} 
-                  qtidx={qtidx} 
-                  runSectionQueue={sidx=>this.runSectionQueue(sidx)} 
-                  runTocsQueue={tidx=>this.runTocsQueue(tidx)}
-                  sectionToolBarRefs={this.sectionToolBarRefs}
-                  tocToolBarRefs={this.tocToolBarRefs}
-                  onUpdateQueueProgress={(src, data)=>this.onUpdateQueueProgress(src, data)}
-                  />  
-    </div>):(<div className="course-page page">
-      No data available !  
-    </div>)
-    }
-    </>)
-  }
+    return <>
+    	{renderedPage}
+    </>
 }
 
-
-// export default CoursePage
 export default CoursePage
-    

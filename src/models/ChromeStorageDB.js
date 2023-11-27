@@ -36,18 +36,22 @@ export default class ChromeStorageDB{
 	getDataSize(callback) {
 		// Get the serialized data from chrome.storage.local
         const {db_id} = this
-		chrome.storage.local.get([db_id], function(result) {
+		chrome.storage.local.get(null, function(result) {
             // Check if the data is present in chrome.storage
-            if (result[db_id]) {
-                // Calculate the size of the serialized data
-                var dataSize = new TextEncoder().encode(JSON.stringify(result[db_id])).length
-
-                // Call the callback with the size
-                callback(dataSize)
-            } else {
-                // Data not found in chrome.storage
-                callback(null)
+            let dataSize = 0
+            for(let key in result) {
+                if (result[key]) {
+                    // Calculate the size of the serialized data
+                    dataSize += new TextEncoder().encode(JSON.stringify(result[db_id])).length
+    
+                    // Call the callback with the size
+                    // callback(dataSize)
+                } else {
+                    // Data not found in chrome.storage
+                    // callback(null)
+                }
             }
+            callback(dataSize)
 		})
 	}
     async init(){

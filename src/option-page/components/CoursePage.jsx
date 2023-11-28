@@ -14,6 +14,7 @@ const AddCoursePage=({slug, store, onOk})=>{
 	const [course,setCourse] = useState(null)
 	const [authors,setAuthors] = useState(null)
 	const [sections,setSections] = useState(null)
+	const [tocs,setTocs]=useState(null)
 	const doFetchCourse = async(courseSlug) => {
 		// const courseSlug = slug
 		const courseApi = new CourseApi(store)
@@ -49,29 +50,38 @@ const AddCoursePage=({slug, store, onOk})=>{
 		    }
 
     		const tocs = await courseApi.getCourseTocs(courseSlug)
-
+			let fetchStreamLocTransOncePassed = false
     		if(tocs){
 				console.log(tocs)
+				setTocs(tocs)
 				for (const section of sections){
-				const tocList = tocs[section.slug]
-				//  setream_locations = api_course.getStreamLocs(toc.item_star)
-				for (const toc of tocList){
-					const streamLocations = courseApi.getStreamLocs(toc)
-					if(streamLocations){
-						console.log(`Fetch stream locations [${Object.keys(streamLocations).join(',')}]`)
+					if(fetchStreamLocTransOncePassed){
+						break
 					}
-					else{
-						console.error(`Failed to fetch stream locations toc : ${toc.title}`)
+					const tocList = tocs[section.slug]
+					//  setream_locations = api_course.getStreamLocs(toc.item_star)
+					for (const toc of tocList){
+						if(fetchStreamLocTransOncePassed){
+							break
+						}
+						console.log("try to fetch StreamLoc Trans Once")
+						const streamLocations = await courseApi.getStreamLocs(toc)
+						if(streamLocations){
+							console.log(`Fetch stream locations [${Object.keys(streamLocations).join(',')}]`)
+						}
+						else{
+							console.error(`Failed to fetch stream locations toc : ${toc.title}`)
 
+						}
+						const transcripts = await courseApi.getTranscripts(toc)
+						if(transcripts){
+							console.log(`Fetch transcripts [${Object.keys(transcripts).join(',')}]`)
+						}
+						else{
+							console.error(`Failed to fetch transcripts toc : ${toc.title}`)
+						}
+						fetchStreamLocTransOncePassed = true
 					}
-					const transcripts = courseApi.getTranscripts(toc)
-					if(transcripts){
-						console.log(`Fetch transcripts [{ [${Object.keys(transcripts).join(',')}]`)
-					}
-					else{
-						console.error(`Failed to fetch transcripts toc : ${toc.title}`)
-					}
-				}
 					
 				}      
     		}else{
@@ -105,6 +115,9 @@ const AddCoursePage=({slug, store, onOk})=>{
 	</div>
 	<div className='w-full my-2 p-4 rounded-md border bg-gray-200'>
 		<JsonView src={sections} />
+	</div>
+	<div className='w-full my-2 p-4 rounded-md border bg-gray-200'>
+		<JsonView src={tocs} />
 	</div>
 	</>
 }

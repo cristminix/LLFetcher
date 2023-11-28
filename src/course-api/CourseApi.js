@@ -5,6 +5,8 @@ import {
 	getCourseSections,
 	getCourseToc,
 	getTranscripts,
+	getStreamLocations,
+	getVideoMetaNd,
 	convertJsonToXml,
 	parseJsonSchema,crc32,lsSet,lsGet,
 	getCourseXmlParentElement
@@ -81,8 +83,47 @@ class CourseApi {
 
 		return xmlDoc
 	}
-	getTocXmlDoc(tocSlug,tocUrl,noCache=false){
+	async getTocXmlDoc(tocSlug,tocUrl,noCache=false){
+		
+		let xmlDoc = null
+		if(!this.tocXmlDocs[tocSlug] ){
+			const pageKeyCache = 'fetch_cache_'+crc32(tocUrl)
+			let cacheContent = null
+			try{
+				cacheContent = await lsGet(pageKeyCache)
+				console.log(`cacheContent got from localStorage`)
+			}catch{}
 
+			if(!cacheContent){
+				try{
+					let response = await fetch(tocUrl)
+					if(response.ok){
+						let responseText = await response.text()
+						
+						// console.log(responseText)
+						cacheContent = responseText
+					}
+					console.log(response)
+				}catch(e){
+					console.error(e)
+				}	
+			}
+			if(cacheContent){
+				try{
+					await lsSet(pageKeyCache, cacheContent)
+				}catch(e){
+					console.error(e)
+				}
+			}
+
+			// console.log(cacheContent)
+			const jsonSchema = parseJsonSchema(cacheContent)
+			xmlDoc = jQuery(convertJsonToXml(jsonSchema))
+			xmlDoc = jQuery(xmlDoc[2])
+			this.tocXmlDocs[tocSlug] = xmlDoc
+		}
+
+		return xmlDoc
 	}
 	async getAuthors(courseSlug){
 		let authors = []
@@ -182,7 +223,73 @@ class CourseApi {
         return tocs 
 	}
 	async getStreamLocs(toc, refresh=false){
-		
+		let streamLocations = null
+        let ok = false
+        let noCache = false
+        let retryCount = 0
+        let waitTime = 0
+
+        if (refresh) {
+            // this.mStreamLocation.deleteByTocId(toc.id)
+            noCache = true
+        }
+
+        while (!ok) {
+            if (retryCount > 0) {
+                console.log(`retry ${retryCount}`)
+            }
+
+            if (waitTime > 0) {
+                console.log(`wait for ${waitTime} second`)
+                setTimeout(() => {}, waitTime * 1000)
+            }
+
+            streamLocations = null//this.mStreamLocation.getByTocId(toc.id)
+
+            if (streamLocations) {
+                log('stream_locations_get_from_m_stream_location')
+                break
+            } else {
+                const tocXmlDoc = await this.getTocXmlDoc(toc.slug, toc.url, noCache)
+
+                if (tocXmlDoc) {
+                    const [vMetaDataNd, statuses] = getVideoMetaNd(toc.vStatusUrn, tocXmlDoc)
+
+                    if (vMetaDataNd) {
+                        streamLocations = await getStreamLocations(vMetaDataNd, tocXmlDoc, toc, this.mStreamLocation)
+                    } else {
+                        console.error('Could not get video metadata nd')
+                    }
+
+                    if (!streamLocations) {
+                        // this.mPrx.deleteByPageName(this.prx.getPageName())
+                    }
+
+                    if (jQuery.inArray(429, statuses) > 0 || jQuery.inArray(427, statuses) > 0 || statuses.length === 0) {
+                        retryCount += 1
+                        noCache = true
+                        waitTime += 5
+                    } else {
+                        ok = true
+                        waitTime = 0
+                    }
+
+                    if (retryCount > 3) {
+                        console.log(`retry counts reached max : ${retryCount}`)
+                        waitTime = 0
+                        break
+                    }
+                } else {
+                    console.error('Could not get toc xml doc')
+                    break
+                }
+            }
+        }
+
+        // const b = benchmark('ApiCourse.getStreamLocs', 'end')
+        // console.log(`ApiCourse.getStreamLocs time elapsed:${b['elapsed_time']}\n`)
+
+        return streamLocations
 	}
 	async getTranscripts(toc, refresh=false){
 		

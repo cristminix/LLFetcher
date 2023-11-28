@@ -51,30 +51,29 @@ const AddCoursePage=({slug, store, onOk})=>{
     		const tocs = await courseApi.getCourseTocs(courseSlug)
 
     		if(tocs){
-    			 for (let section in sections){
-    			 	const toc_list = tocs[section.slug]
-			        //  setream_locations = api_course.getStreamLocs(toc.item_star)
-			        for (toc in toc_list){
-			        	const stream_locations = courseApi.getStreamLocs(toc)
-			            if(stream_locations){
-			                console.log(`Fetch stream locations [${Object.keys(stream_locations).join(',')}]`)
+				console.log(tocs)
+				for (const section of sections){
+				const tocList = tocs[section.slug]
+				//  setream_locations = api_course.getStreamLocs(toc.item_star)
+				for (const toc of tocList){
+					const streamLocations = courseApi.getStreamLocs(toc)
+					if(streamLocations){
+						console.log(`Fetch stream locations [${Object.keys(streamLocations).join(',')}]`)
+					}
+					else{
+						console.error(`Failed to fetch stream locations toc : ${toc.title}`)
 
-			            }
-			            else{
-			                console.error(`Failed to fetch stream locations toc : ${toc.title}`)
-
-			            }
-			            const transcripts = courseApi.getTranscripts(toc)
-			            if(transcripts){
-			                console.log(`Fetch transcripts [{ [${Object.keys(transcripts).join(',')}]`)
-			            }
-			            else{
-			                console.error(`Failed to fetch transcripts toc : ${toc.title}`)
-			            }
-			        }
-			            
-    			 }
-			        
+					}
+					const transcripts = courseApi.getTranscripts(toc)
+					if(transcripts){
+						console.log(`Fetch transcripts [{ [${Object.keys(transcripts).join(',')}]`)
+					}
+					else{
+						console.error(`Failed to fetch transcripts toc : ${toc.title}`)
+					}
+				}
+					
+				}      
     		}else{
         		console.error(`Failed to fetch course tocs course : ${course.title}`)
     		}
@@ -94,7 +93,7 @@ const AddCoursePage=({slug, store, onOk})=>{
 		<div className="w-full">
     {
       xmlSchema ? <>
-      <textarea value={xmlSchema} className="w-full dark:bg-black h-[200px] p-2 rounded-md rounded border"></textarea>
+      <textarea defaultValue={xmlSchema} className="w-full dark:bg-black h-[200px] p-2 rounded-md rounded border"></textarea>
       </>:""
     }
     </div>

@@ -397,8 +397,74 @@ const convert2Xml = (data,pageName,cacheXmlToFile=false) => {}
 const getTranscripts = (vMetaDataNd,doc,toc,mTranscript) => {}
 const getStreamLocations = (vMetaDataNd,doc,toc,mStreamLoc) => {}
 const getVideoMeta = (vStatusUrn,doc,mConfig,defaultSelector="presentation") => {}
-const getCourseToc = (itemStar,doc,mToc,sectionId,courseSlug) => {}
-const getTocXmlParentElement = (itemStar,doc) => {}
+const getCourseToc = (itemStar,doc,mToc,sectionId,courseSlug) => {
+	let toc =null// mToc.getByItemStar(itemStar)
+    if(toc){
+        return toc
+	}
+    let entityNdP = getTocXmlParentElement(itemStar,doc)
+    if(!entityNdP){
+		return null
+	}
+    toc={
+        streamLocations : null,
+        transcripts : null
+    }
+    let tocSlugNd = entityNdP.find("slug")
+    if(tocSlugNd.length > 0){
+        let tocSlug = tocSlugNd.text()
+        toc.slug = tocSlug
+        toc.url = `https://www.linkedin.com/learning/${courseSlug}/${tocSlug}`
+	}
+
+    toc.title = entityNdP.find("title").text()
+    
+
+    toc.visibility = entityNdP.find("visibility").text() 
+    
+    toc.duration = parseInt(entityNdP.find("duration").text())
+    
+    const vStatusUrn = entityNdP.find("star_lyndaVideoViewingStatus").text().trim()
+    toc.vStatusUrn = vStatusUrn
+  
+    // toc=m_toc.create(title=title, slug=toc_slug, url=toc["url"], duration=duration , captionUrl="", captionFmt="", sectionId=sectionId,item_star=item_star, v_status_urn=v_status_urn)
+
+    return toc
+}
+const getTocXmlParentElement = (itemStar,doc) => {
+	let tocNd = doc.find(`cachingKey:contains('${itemStar}')`)
+    let entityUrn=null
+    let entityNdP=null
+    if (tocNd.length >0){
+        let tocNdP = tocNd.parent()
+        let videoUrnNd = tocNdP.find("content")
+        if (videoUrnNd.length > 0){
+            videoUrnNd = videoUrnNd.find("video")
+            if(videoUrnNd.length>0){
+                const videoUrn = videoUrnNd.text().trim()
+                let entityUrnNds = doc.find(`entityUrn:contains('${videoUrn}')`)
+                if (entityUrnNds.length>0){
+                    for(const entityUrnNd of entityUrnNds){
+						const $entityUrnNd = jQuery(entityUrnNd)
+						const text = $entityUrnNd.text().trim()
+						// console.log(text)
+						if(text == videoUrn){
+							entityNdP = $entityUrnNd.closest("included")
+						}
+					}
+				}
+			}else{
+				console.error(`could_not_find_video_urn: ${itemStar}`)
+			}
+		}else{
+            console.error(`could_not_find_video_entity_urn : ${itemStar}`)
+		}
+        
+	}else{
+        console.error(`could_not_find_toc_nd : ${itemStar}`)
+	}
+	return entityNdP
+}
 const getCourseXmlParentElement = (doc) => {
 	let p = null
 	let courseUrn = null

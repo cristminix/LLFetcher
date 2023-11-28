@@ -142,10 +142,47 @@ class CourseApi {
         return sections
 	}
 	async getCourseTocs(courseSlug){
+		const mToc = this.store.get("Toc")
+		let tocs=null
+        // let courseSlug=this.course.slug
+        let sections = this.sections
+        if (!sections){
+            sections = await this.getCourseSections(courseSlug)
+		}
+		if (sections){
+            tocs={}
+            for (const section of sections){
+                let sectionSlug = section.slug
+                tocs[sectionSlug]=[]//mToc.getListBySectionId(section.id)
 
+                if (tocs[sectionSlug].length == 0 /*|| tocs[sectionSlug].length ==0*/){
+                    const courseUrl = courseUrlFromSlug(courseSlug)
+                    let courseXmlDoc= await this.getCourseXmlDoc(courseUrl)
+                    if (courseXmlDoc){
+                        const [p,courseUrn] = getCourseXmlParentElement(courseXmlDoc)
+                        if(p){
+                            tocs[sectionSlug]=[]
+                            for (const itemStar of section.itemStars){
+                                let toc = getCourseToc(itemStar,courseXmlDoc,mToc,0/*section.id*/, courseSlug)
+                                if(toc){
+									tocs[sectionSlug].push(toc)
+								}
+							}
+						}else{
+                            	console.error("Could ! get course xml parent element")
+						}
+					}else{
+						console.error("Could ! get course xml doc")
+					}
+				}else{
+					console.log('toc[section_slug]s_get_from_m_toc')
+				}
+			}
+		} 
+        return tocs 
 	}
 	async getStreamLocs(toc, refresh=false){
-
+		
 	}
 	async getTranscripts(toc, refresh=false){
 		

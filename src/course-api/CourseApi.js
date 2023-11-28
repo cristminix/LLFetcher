@@ -121,6 +121,8 @@ class CourseApi {
 			xmlDoc = jQuery(convertJsonToXml(jsonSchema))
 			xmlDoc = jQuery(xmlDoc[2])
 			this.tocXmlDocs[tocSlug] = xmlDoc
+		}else{
+			xmlDoc = this.tocXmlDocs[tocSlug]
 		}
 
 		return xmlDoc
@@ -285,14 +287,76 @@ class CourseApi {
                 }
             }
         }
-
-        // const b = benchmark('ApiCourse.getStreamLocs', 'end')
-        // console.log(`ApiCourse.getStreamLocs time elapsed:${b['elapsed_time']}\n`)
+ 
 
         return streamLocations
 	}
 	async getTranscripts(toc, refresh=false){
-		
+		let transcripts = null
+        let ok = false
+        let noCache = false
+        let retryCount = 0
+        let waitTime = 0
+		const mTranscript = this.store.get("Transcript")
+        if (refresh) {
+            // this.mTranscript.deleteByTocId(toc.id)
+            noCache = true
+        }
+
+        while (!ok) {
+            if (retryCount > 0) {
+                console.log(`retry ${retryCount}`)
+            }
+
+            if (waitTime > 0) {
+                console.log(`wait for ${waitTime} second`)
+                setTimeout(() => {}, waitTime * 1000)
+            }
+
+            transcripts = null//this.mTranscript.getByTocId(toc.id)
+
+            if (transcripts) {
+                log('transcripts_get_from_m_transcripts')
+                break
+            } else {
+                const tocXmlDoc = await this.getTocXmlDoc(toc.slug, toc.url, noCache)
+
+                if (tocXmlDoc) {
+                    const [vMetaDataNd, statuses] = getVideoMetaNd(toc.vStatusUrn, tocXmlDoc)
+
+                    if (vMetaDataNd) {
+                        transcripts = await getTranscripts(vMetaDataNd, tocXmlDoc, toc, mTranscript)
+                    } else {
+                        console.error('Could not get video metadata nd')
+                    }
+
+                    if (!transcripts) {
+                        // this.mPrx.deleteByPageName(this.prx.getPageName())
+                    }
+
+                    if (jQuery.inArray(429, statuses) > 0 || jQuery.inArray(427, statuses) > 0 || statuses.length === 0) {
+                        retryCount += 1
+                        noCache = true
+                        waitTime += 5
+                    } else {
+                        ok = true
+                        waitTime = 0
+                    }
+
+                    if (retryCount > 3) {
+                        console.log(`retry counts reached max : ${retryCount}`)
+                        waitTime = 0
+                        break
+                    }
+                } else {
+                    console.error('Could not get toc xml doc')
+                    break
+                }
+            }
+        }
+ 
+
+        return transcripts
 	}
 }
 

@@ -80,6 +80,7 @@ const AddCoursePage=({slug, store, onOk})=>{
 						}
 						const transcripts = await courseApi.getTranscripts(toc)
 						if(transcripts){
+							setTranscripts(transcripts)
 							console.log(`Fetch transcripts [${Object.keys(transcripts).join(',')}]`)
 						}
 						else{

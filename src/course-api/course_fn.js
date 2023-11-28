@@ -67,6 +67,7 @@ const slugToTitle = (slug) => {
   	
   	return titleCaseWords.join(' ')
 }
+
 const getNText = (p,queries) => {
 	let nd=p
     let c=queries
@@ -394,8 +395,83 @@ const parseJsonSchema = (responseText) => {
     return dataCodes
 }
 const convert2Xml = (data,pageName,cacheXmlToFile=false) => {}
-const getTranscripts = (vMetaDataNd,doc,toc,mTranscript) => {}
-const getStreamLocations = (vMetaDataNd,doc,toc,mStreamLoc) => {}
+const getTranscripts = async (vMetaDataNd,doc,toc,mTranscript) => {}
+const getStreamLocations = async(vMetaDataNd,doc,toc,mStreamLoc) => {
+	let streamLocations = null//mStreamLocation.getByTocId(toc.id)
+
+    if (streamLocations) {
+        console.log('stream_locations_get_from_m_stream_location')
+        return streamLocations
+    }
+
+    let pgStreamNds = []
+    if (vMetaDataNd) {
+        pgStreamNds = vMetaDataNd.find("progressiveStreams")
+    }
+
+    // let streamLocations = null
+    const tags = ["size", "bitRate", "width", "height"]
+
+    if (pgStreamNds.length > 0) {
+        for (const pgStreamElem of pgStreamNds) {
+			const pgStreamEl = jQuery(pgStreamElem)
+            let fmt = pgStreamEl.find("height")
+
+            if (fmt.length>0) {
+                fmt = fmt.text().trim()
+
+                if (fmt === "0") {
+                    fmt = "audio"
+                }
+
+                if (!streamLocations) {
+                    streamLocations = {}
+                }
+
+                streamLocations[fmt] = {}
+                const streamLoc = pgStreamEl.find("streamingLocations")
+
+                if (streamLoc.length>0) {
+                    const url = streamLoc.find("url")
+
+                    if (url.length>0) {
+                        streamLocations[fmt].url = url.text().trim()
+                    }
+
+                    const expiresAt = streamLoc.find("expiresAt")
+
+                    if (expiresAt.length>0) {
+                        streamLocations[fmt].expiresAt = parseInt(expiresAt.text().trim()) / 1000
+                    }
+
+                    for (const tag of tags) {
+                        const tagNd = streamLoc.find(tag)
+
+                        if (tagNd.length>0) {
+                            streamLocations[fmt][tag] = parseInt(tagNd.text().trim())
+                        }
+                    }
+
+                    // streamLocations[fmt] = mStreamLocation.create({
+                    //     tocId: toc.id,
+                    //     fmt: fmt,
+                    //     url: streamLocations[fmt]["url"],
+                    //     expiresAt: streamLocations[fmt]["expiresAt"]
+                    // })
+					const sLoc = {
+						// tocId: toc.id,
+                        fmt,
+                        url: streamLocations[fmt].url,
+                        expiresAt: streamLocations[fmt].expiresAt
+					}
+					streamLocations[fmt]=sLoc
+                }
+            }
+        }
+    }
+
+    return streamLocations
+}
 const getVideoMeta = (vStatusUrn,doc,mConfig,defaultSelector="presentation") => {}
 const getCourseToc = (itemStar,doc,mToc,sectionId,courseSlug) => {
 	let toc =null// mToc.getByItemStar(itemStar)
@@ -469,7 +545,7 @@ const getCourseXmlParentElement = (doc) => {
 	let p = null
 	let courseUrn = null
 	let courseUrnNd = doc.find(`star_elements:contains('urn:li:learningApiCourse:')`)
-	console.log(courseUrnNd)
+	// console.log(courseUrnNd)
 	
 	if(courseUrnNd.length == 0){
 		courseUrnNd = doc.find("entityUrn")
@@ -481,7 +557,7 @@ const getCourseXmlParentElement = (doc) => {
 		let entityUrnNd = doc.find(`entityUrn:contains('${courseUrn}')`)
 		for(const entityUrnNdItem of entityUrnNd ){
 			if(jQuery(entityUrnNdItem).text() == courseUrn){
-				console.log(entityUrnNdItem)
+				// console.log(entityUrnNdItem)
 				p = jQuery(entityUrnNdItem).closest('included')
 				break
 			}
@@ -513,6 +589,76 @@ const lsSet = async(key,value) => {
 		})
 	})
 }
+const getVideoMetaNd = (vStatusUrn, doc) =>{
+    // benchmark('getVideoMetaNd', 'start')
+    let vMetaDataNd = null
+    const vStatusLookups = doc.find(`star_lyndaVideoViewingStatus:contains('${vStatusUrn}')`)
+    const status429 = doc.find(`status:contains('429')`)
+    const statusEls = doc.find('status')
+    const statuses = []
+
+    for (const statusEl of statusEls) {
+        statuses.push(parseInt(statusEl.text()))
+    }
+
+    if (vStatusLookups.length == 0) {
+        console.error('A')
+        console.error(`could_not_find_v_status_lookup : ${vStatusUrn}`)
+        vStatusUrn = vStatusUrn.replace('urn:li:lyndaVideoViewingStatus:', '')
+        vStatusLookups = doc.find(`trackingUrn:contains('${vStatusUrn}')`)
+    }
+
+    if (vStatusLookups.length == 0) {
+        console.error('B')
+        console.error(`could_not_find_v_status_lookup : ${vStatusUrn}`)
+    }
+
+    let streamLocations = null
+    let transcripts = null
+    let vStatusLookup = null
+    let pos = -1
+
+    if (vStatusLookups.length > 0) {
+        let breakTheLoop = false
+
+        for(const vStatusLookupEl of vStatusLookups) {
+            const elNd = jQuery(vStatusLookupEl).parent()
+            vMetaDataNd = elNd.find("presentation")
+
+            if (vMetaDataNd.length == 0) {
+                vMetaDataNd = elNd.find("presentationDerived")
+            }
+
+            pos = 0
+
+            if (vMetaDataNd.length>0) {
+                pos += 1
+                vMetaDataNd = vMetaDataNd.find("videoPlay")
+
+                if (vMetaDataNd.length > 0) {
+                    pos += 1
+                    vMetaDataNd = vMetaDataNd.find("videoPlayMetadata")
+                    breakTheLoop = true
+					statuses.push(200)
+                }
+            }
+
+            if (breakTheLoop) {
+                break
+            }
+        }
+    }
+
+    if (!vMetaDataNd) {
+        console.error(`could_not_find_v_meta_data_nd_pos : ${pos}`)
+        console.log("Try another method")
+    }
+
+    // const b = benchmark('getVideoMetaNd', 'end')
+    // console.log(`getVideoMetaNd time elapsed:${b['elapsed_time']}\n`)
+    return [vMetaDataNd, statuses]
+}
+
 export{
 	getAvgSpeed,
 	isTimeExpired,
@@ -520,7 +666,7 @@ export{
 	getAuthors,
 	getCourseInfo,
 	getCourseSections,
-	// courseUrl,
+	getVideoMetaNd,
 	getCourseSlugFromUrl,
 	isLinkedinLearningUrl,
 	convert2Xml,

@@ -1,6 +1,6 @@
 import {Component} from "react"
 
-const ToastNormal = ({message})=>{
+const ToastNormal = ({toast})=>{
   return <>
     {/* <!-- Toast --> */}
 <div className="max-w-xs bg-white border border-gray-200 rounded-xl shadow-lg dark:bg-gray-800 dark:border-gray-700" role="alert">
@@ -12,7 +12,7 @@ const ToastNormal = ({message})=>{
     </div>
     <div className="ms-3">
       <p className="text-sm text-gray-700 dark:text-gray-400">
-        {message}
+        {toast.message}
       </p>
     </div>
   </div>
@@ -20,7 +20,7 @@ const ToastNormal = ({message})=>{
 {/* <!-- End Toast --> */}
   </>
 }
-const ToastSuccess= ({message})=>{
+const ToastSuccess= ({toast})=>{
   return <>
     {/* <!-- Toast --> */}
 <div className="max-w-xs bg-white border border-gray-200 rounded-xl shadow-lg dark:bg-gray-800 dark:border-gray-700" role="alert">
@@ -32,7 +32,7 @@ const ToastSuccess= ({message})=>{
     </div>
     <div className="ms-3">
       <p className="text-sm text-gray-700 dark:text-gray-400">
-        {message}
+        {toast.message}
       </p>
     </div>
   </div>
@@ -40,7 +40,7 @@ const ToastSuccess= ({message})=>{
 {/* <!-- End Toast --> */}
   </>
 }
-const ToastError= ({message})=>{
+const ToastError= ({toast})=>{
   return <>
     {/* <!-- Toast --> */}
 <div className="max-w-xs bg-white border border-gray-200 rounded-xl shadow-lg dark:bg-gray-800 dark:border-gray-700" role="alert">
@@ -52,7 +52,7 @@ const ToastError= ({message})=>{
     </div>
     <div className="ms-3">
       <p className="text-sm text-gray-700 dark:text-gray-400">
-        {message}
+        {toast.message}
       </p>
     </div>
   </div>
@@ -60,7 +60,7 @@ const ToastError= ({message})=>{
 {/* <!-- End Toast --> */}
   </>
 }
-const ToastWarning=({message})=>{
+const ToastWarning=({toast})=>{
   return <>
     {/* <!-- Toast --> */}
 <div className="max-w-xs bg-white border border-gray-200 rounded-xl shadow-lg dark:bg-gray-800 dark:border-gray-700" role="alert">
@@ -72,7 +72,7 @@ const ToastWarning=({message})=>{
     </div>
     <div className="ms-3">
       <p className="text-sm text-gray-700 dark:text-gray-400">
-        {message}
+        {toast.message}
       </p>
     </div>
   </div>
@@ -80,12 +80,13 @@ const ToastWarning=({message})=>{
 {/* <!-- End Toast --> */}
   </>
 }
-const ToastClosable = ({message}) =>{
+const ToastClosable = ({toast}) =>{
   return <>
     <div id="dismiss-toast" className="hs-removing:translate-x-5 hs-removing:opacity-0 transition duration-300 max-w-xs bg-white border border-gray-200 rounded-xl shadow-lg dark:bg-gray-800 dark:border-gray-700" role="alert">
   <div className="flex p-4">
     <p className="text-sm text-gray-700 dark:text-gray-400">
-      {message}
+      {toast.message}
+      {toast.clock}
     </p>
 
     <div className="ms-auto">
@@ -103,29 +104,87 @@ class Toast extends Component{
   constructor(props){
     super(props)
     this.state = {
-      toastList : []
-    }
-  }
-  add(message, t="normal"){
-    const toast = {message,t}
-    const {toastList} = this.state
-    toastList.push(toast)
-    this.setState({toastList})
-  }
-  createToast(toast,idx){
-    const {message,t} = toast
-    const toastComponents = {
-      normal : <ToastNormal message={message} key={idx}/>,
-      error : <ToastError message={message} key={idx}/>,
-      warning : <ToastWarning message={message} key={idx}/>,
-      success : <ToastSuccess message={message} key={idx}/>,
-      closable : <ToastClosable message={message} key={idx}/>,
+      toastList : [],
+      // toastTimer: []
     }
 
-    return toastComponents[t]
+    // this.toastTimers = []
+    // this.toastClocks = []
+    this.toastTimeout= 10
+  }
+  add(message, t="normal"){
+    // setTimeout(f=>{
+      const toast = {message,t,iv:null,clock:0,hidden:false}
+      const {toastList} = this.state
+      toastList.push(toast)
+      this.setState({toastList})
+    // },3000)
+    
+  }
+  checkUnusedToast(){
+    const {toastList} = this.state
+    let clearAllToast = false
+    let countHidden = 0
+    
+    for(const toast of toastList){
+      if(toast.hidden){
+        countHidden += 1
+      }
+    }
+
+    if(countHidden == toastList.length){
+      this.setState({toastList:[]})
+    }
+  }
+  createToast(toast,idx){
+    // const {message,t} = toast
+    const toastComponents = {
+      normal : <ToastNormal toast={toast} key={idx}/>,
+      error : <ToastError toast={toast} key={idx}/>,
+      warning : <ToastWarning toast={toast} key={idx}/>,
+      success : <ToastSuccess toast={toast} key={idx}/>,
+      closable : <ToastClosable toast={toast} key={idx}/>,
+    }
+
+    return toastComponents[toast.t]
+  }
+  hideToast(idx){
+    const {toastList} = this.state
+    // const {toastTimers} = this
+    toastList[idx].hidden = true
+    clearInterval(toastList[idx].iv)
+
+    this.setState({toastList})
+  }
+  hideToastByTimeout(idx){
+    // const {toastTimers} = this
+    const {toastList} = this.state
+    if(! toastList[idx].iv){
+      const iv = setInterval(()=>{
+        // if(typeof this.toastClocks[idx] == "undefined"){
+        //   this.toastClocks[idx] = 0
+        // }
+        toastList[idx].clock += 1
+        // console.log(toastList[idx].clock)
+        this.setState({toastList})
+        if(toastList[idx].clock == this.toastTimeout){
+          this.hideToast(idx)
+          // clearInterval(iv)
+        }
+      },1000)
+      toastList[idx].iv = iv
+      this.setState({toastList})
+    }
+  }
+  clearToastTimer(){
+    const {toastList} = this.state
+    toastList.map((toast)=>{
+      clearInterval(toast.iv)
+    })
   }
   componentDidMount(){
     // this.add
+    this.clearToastTimer()
   }
   render(){
     const {toastList} = this.state
@@ -133,6 +192,10 @@ class Toast extends Component{
     <div className="absolute top-0 right-0 m-4">
     {
       toastList.map((toast,toastIdx)=>{
+        if(toast.hidden){
+          return ""
+        }
+        this.hideToastByTimeout(toastIdx)
         return this.createToast(toast,toastIdx)
       })
     }

@@ -8,9 +8,10 @@ import {
 	getStreamLocations,
 	getVideoMetaNd,
 	convertJsonToXml,
-	parseJsonSchema,crc32,lsSet,lsGet,
+	parseJsonSchema,lsSet,lsGet,
 	getCourseXmlParentElement
 } from "./course_fn.js"
+
 import jQuery from "jquery"
 
 class CourseApi {
@@ -19,9 +20,11 @@ class CourseApi {
 	courseXmlDoc = null
 	tocXmlDocs = {}
 	authors=[]
+	mPrxCache=null
 	
 	constructor(store){
 		this.store = store
+		this.mPrxCache = store.get('PrxCache')
 	}
 
 	getCourseSlugFromUrl(url){
@@ -41,43 +44,45 @@ class CourseApi {
 
 
 	}
+	async getXmlDoc(url,noCache=false){
+		let xmlDoc = null
+		const webCache = await this.mPrxCache.get(url)
+		let cacheContent = null
+		let statusCode = 0
+
+		if(!webCache.isEmpty()){
+			cacheContent = webCache.getCacheContent()
+			statusCode = webCache.getStatusCode()
+		}else{
+			try{
+				let response = await fetch(url)
+				console.log(response)
+				statusCode = response.status
+				if(response.ok){
+					let responseText = await response.text()
+					cacheContent = responseText
+					if(statusCode == 200){
+						this.mPrxCache.set(url,cacheContent,statusCode)
+					}
+				}
+				console.log(response)
+			}catch(e){
+				console.error(e)
+			}
+		}
+		
+
+		// console.log(cacheContent)
+		const jsonSchema = parseJsonSchema(cacheContent)
+		xmlDoc = jQuery(convertJsonToXml(jsonSchema))
+		xmlDoc = jQuery(xmlDoc[2])
+		return xmlDoc
+	}
 	async getCourseXmlDoc(courseUrl, noCache=false){
 
 		let xmlDoc = this.courseXmlDoc
 		if(!xmlDoc){
-			const pageKeyCache = 'fetch_cache_'+crc32(courseUrl)
-			let cacheContent = null
-			try{
-				cacheContent = await lsGet(pageKeyCache)
-				console.log(`cacheContent got from localStorage`)
-			}catch{}
-
-			if(!cacheContent){
-				try{
-					let response = await fetch(courseUrl)
-					if(response.ok){
-						let responseText = await response.text()
-						
-						// console.log(responseText)
-						cacheContent = responseText
-					}
-					console.log(response)
-				}catch(e){
-					console.error(e)
-				}	
-			}
-			if(cacheContent){
-				try{
-					await lsSet(pageKeyCache, cacheContent)
-				}catch(e){
-					console.error(e)
-				}
-			}
-
-			// console.log(cacheContent)
-			const jsonSchema = parseJsonSchema(cacheContent)
-			xmlDoc = jQuery(convertJsonToXml(jsonSchema))
-			xmlDoc = jQuery(xmlDoc[2])
+			xmlDoc = await this.getXmlDoc(courseUrl,noCache)
 			this.courseXmlDoc = xmlDoc
 		}
 
@@ -86,43 +91,12 @@ class CourseApi {
 	async getTocXmlDoc(tocSlug,tocUrl,noCache=false){
 		
 		let xmlDoc = null
-		if(!this.tocXmlDocs[tocSlug] ){
-			const pageKeyCache = 'fetch_cache_'+crc32(tocUrl)
-			let cacheContent = null
-			try{
-				cacheContent = await lsGet(pageKeyCache)
-				console.log(`cacheContent got from localStorage`)
-			}catch{}
-
-			if(!cacheContent){
-				try{
-					let response = await fetch(tocUrl)
-					if(response.ok){
-						let responseText = await response.text()
-						
-						// console.log(responseText)
-						cacheContent = responseText
-					}
-					console.log(response)
-				}catch(e){
-					console.error(e)
-				}	
-			}
-			if(cacheContent){
-				try{
-					await lsSet(pageKeyCache, cacheContent)
-				}catch(e){
-					console.error(e)
-				}
-			}
-
-			// console.log(cacheContent)
-			const jsonSchema = parseJsonSchema(cacheContent)
-			xmlDoc = jQuery(convertJsonToXml(jsonSchema))
-			xmlDoc = jQuery(xmlDoc[2])
-			this.tocXmlDocs[tocSlug] = xmlDoc
-		}else{
+		if(typeof this.tocXmlDocs[tocSlug] !== 'undefined'){
 			xmlDoc = this.tocXmlDocs[tocSlug]
+		}
+		if(!xmlDoc ){
+			xmlDoc = await this.getXmlDoc(tocUrl,noCache)
+			this.tocXmlDocs[tocSlug] = xmlDoc
 		}
 
 		return xmlDoc
@@ -149,7 +123,7 @@ class CourseApi {
 		let noCache = !refresh
 		const courseUrl = courseUrlFromSlug(courseSlug)
 		let xmlDoc = await this.getCourseXmlDoc(courseUrl, noCache)
-		let course = await getCourseInfo(xmlDoc,courseSlug)
+		let course = getCourseInfo(xmlDoc,courseSlug)
 
 		// console.log(courseUrl,xmlDoc,course)
 		return course
@@ -171,7 +145,7 @@ class CourseApi {
         if (xmlDoc){
             const [p,courseUrn] = getCourseXmlParentElement(xmlDoc)
             if(p){
-				sections = getCourseSections(p, xmlDoc, mSection, 0/*this.course.id*/)
+				sections = await getCourseSections(p, xmlDoc, mSection, 0/*this.course.id*/)
                 this.sections = sections
 			}else{
                 console.error("Could not get course xml parent element")
@@ -267,7 +241,7 @@ class CourseApi {
                         // this.mPrx.deleteByPageName(this.prx.getPageName())
                     }
 
-                    if (jQuery.inArray(429, statuses) > 0 || jQuery.inArray(427, statuses) > 0 || statuses.length === 0) {
+                    if (jQuery.inArray(400, statuses) > 0 || jQuery.inArray(429, statuses) > 0 || jQuery.inArray(427, statuses) > 0 || statuses.length === 0) {
                         retryCount += 1
                         noCache = true
                         waitTime += 5
@@ -334,7 +308,7 @@ class CourseApi {
                         // this.mPrx.deleteByPageName(this.prx.getPageName())
                     }
 
-                    if (jQuery.inArray(429, statuses) > 0 || jQuery.inArray(427, statuses) > 0 || statuses.length === 0) {
+                    if (jQuery.inArray(400, statuses) > 0 || jQuery.inArray(429, statuses) > 0 || jQuery.inArray(427, statuses) > 0 || statuses.length === 0) {
                         retryCount += 1
                         noCache = true
                         waitTime += 5

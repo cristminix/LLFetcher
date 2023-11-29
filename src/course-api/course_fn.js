@@ -12,27 +12,7 @@ const slugify = (text) => {
     return finalSlug.replace(/^-+|-+$/g, '');
 }
 
-const crc32 = (str) => {
-	const utf8Encoder = new TextEncoder()
-	const data = utf8Encoder.encode(str)
-	const crc32Buffer = new ArrayBuffer(4)
-	const view = new DataView(crc32Buffer)
-  	let byte = 0
-	for (let i = 0; i < data.length; i++) {
-	  byte = data[i]
-	  for (let j = 0; j < 8; j++) {
-		if ((byte & 1) !== 0) {
-		  byte = (byte >>> 1) ^ 0xEDB88320
-		} else {
-		  byte = byte >>> 1
-		}
-	  }
-	}
-  
-	view.setUint32(0, ~byte, false)
-	const crc32Hex = Array.prototype.map.call(new Uint8Array(crc32Buffer), x => ('00' + x.toString(16)).slice(-2)).join('')
-	return crc32Hex
-}
+
 
 const getAvgSpeed = (value,arrayLength=10,integerArray=[],lastIndex=0) => {
 	if(lastIndex >= arrayLength-1){
@@ -105,7 +85,7 @@ const getNText = (p,queries) => {
     
 	
 }
-const getAuthors = (doc,mAuthor,course) => {
+const getAuthors = async(doc,mAuthor,course) => {
 	const [p,courseUrn] = getCourseXmlParentElement(doc)
     let authorEls=p.find("authors")
     let authors=[]
@@ -211,7 +191,7 @@ const getCourseInfo = (doc,courseSlug) => {
 	}
 	return null
 }
-const getCourseSections = (p,doc,mSection,courseId) => {
+const getCourseSections = async(p,doc,mSection,courseId) => {
 	let sections = null //mSection.getListCourseId(courseId)
     if (sections){
         return sections
@@ -651,6 +631,13 @@ const lsGet = async(key) => {
 		})
 	})
 }
+const lsUnset = async(key) => {
+	return new Promise((resolve, reject) => {
+		chrome.storage.local.remove([key], (result) =>{
+			resolve(result[key])
+		})
+	})
+}
 const lsSet = async(key,value) => {
 	let obj = {}
 	obj[key] = value
@@ -667,13 +654,13 @@ const lsSet = async(key,value) => {
 const getVideoMetaNd = (vStatusUrn, doc) =>{
     // benchmark('getVideoMetaNd', 'start')
     let vMetaDataNd = null
-    const vStatusLookups = doc.find(`star_lyndaVideoViewingStatus:contains('${vStatusUrn}')`)
+    let vStatusLookups = doc.find(`star_lyndaVideoViewingStatus:contains('${vStatusUrn}')`)
     const status429 = doc.find(`status:contains('429')`)
     const statusEls = doc.find('status')
     const statuses = []
 
     for (const statusEl of statusEls) {
-        statuses.push(parseInt(statusEl.text()))
+        statuses.push(parseInt(jQuery(statusEl).text()))
     }
 
     if (vStatusLookups.length == 0) {
@@ -756,6 +743,6 @@ export{
 	courseUrlFromSlug,
 	convertJsonToXml,
 	parseJsonSchema,
-	crc32,
-	lsSet,lsGet
+	
+	lsSet,lsGet,lsUnset
 }

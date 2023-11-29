@@ -128,6 +128,10 @@ class DB {
 	async sync(){
 		this.db.reload()
 	}
+	async deleteRows(query){
+		await this.db.deleteRows(this.table,query)
+		await this.db.commit()
+	}
 
 	async drop(){
 

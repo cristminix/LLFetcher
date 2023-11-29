@@ -44,6 +44,48 @@ class CourseApi {
 
 
 	}
+	async fetchWithRetry(url){
+		let ok = false
+        let noCache = false
+        let retryCount = 0
+        let waitTime = 0
+        let statusCode = 0
+        let response = {ok:false,status:0,text:f=>""}
+        while (!ok) {
+            if (retryCount > 0) {
+                console.log(`retry ${retryCount}`)
+            }
+
+            if (waitTime > 0) {
+                console.log(`wait for ${waitTime} second`)
+                setTimeout(() => {}, waitTime * 1000)
+            }
+            try{
+				response = await fetch(url)
+				// console.log(response)
+				statusCode = response.status
+				
+				// console.log(response)
+			}catch(e){
+				console.error(e)
+			}
+            if (statusCode != 200) {
+                retryCount += 1
+                noCache = true
+                waitTime += 5
+            } else {
+                ok = true
+                waitTime = 0
+            }
+
+            if (retryCount > 3) {
+                console.log(`retry counts reached max : ${retryCount}`)
+                waitTime = 0
+                break
+            }
+        }
+        return response
+	}
 	async getXmlDoc(url,noCache=false){
 		let xmlDoc = null
 		const webCache = await this.mPrxCache.get(url)
@@ -54,9 +96,9 @@ class CourseApi {
 			cacheContent = webCache.getCacheContent()
 			statusCode = webCache.getStatusCode()
 		}else{
+			
 			try{
-				let response = await fetch(url)
-				console.log(response)
+				let response = await this.fetchWithRetry(url)
 				statusCode = response.status
 				if(response.ok){
 					let responseText = await response.text()
@@ -65,17 +107,21 @@ class CourseApi {
 						this.mPrxCache.set(url,cacheContent,statusCode)
 					}
 				}
-				console.log(response)
+			
 			}catch(e){
 				console.error(e)
 			}
+			
 		}
 		
 
 		// console.log(cacheContent)
-		const jsonSchema = parseJsonSchema(cacheContent)
-		xmlDoc = jQuery(convertJsonToXml(jsonSchema))
-		xmlDoc = jQuery(xmlDoc[2])
+		if(cacheContent){
+			const jsonSchema = parseJsonSchema(cacheContent)
+			xmlDoc = jQuery(convertJsonToXml(jsonSchema))
+			xmlDoc = jQuery(xmlDoc[2])
+		}
+		
 		return xmlDoc
 	}
 	async getCourseXmlDoc(courseUrl, noCache=false){
@@ -153,8 +199,6 @@ class CourseApi {
         }else{
             console.error("Could not get course xml doc")
 		}
-        // b=benchmark('ApiCourse.getCourseSections','end')
-        // print(f"ApiCourse.getCourseSections time elapsed:{b['elapsed_time']}\n")
 
         return sections
 	}
@@ -200,65 +244,39 @@ class CourseApi {
 	}
 	async getStreamLocs(toc, refresh=false){
 		let streamLocations = null
-        let ok = false
-        let noCache = false
-        let retryCount = 0
-        let waitTime = 0
+		let noCache = false
+        
 
         if (refresh) {
             // this.mStreamLocation.deleteByTocId(toc.id)
             noCache = true
         }
 
-        while (!ok) {
-            if (retryCount > 0) {
-                console.log(`retry ${retryCount}`)
-            }
+        streamLocations = null//this.mStreamLocation.getByTocId(toc.id)
 
-            if (waitTime > 0) {
-                console.log(`wait for ${waitTime} second`)
-                setTimeout(() => {}, waitTime * 1000)
-            }
+        if (streamLocations) {
+            log('stream_locations_get_from_m_stream_location')
+            // break
+        } else {
+            const tocXmlDoc = await this.getTocXmlDoc(toc.slug, toc.url, noCache)
 
-            streamLocations = null//this.mStreamLocation.getByTocId(toc.id)
+            if (tocXmlDoc) {
+                const [vMetaDataNd, statuses] = getVideoMetaNd(toc.vStatusUrn, tocXmlDoc)
 
-            if (streamLocations) {
-                log('stream_locations_get_from_m_stream_location')
-                break
-            } else {
-                const tocXmlDoc = await this.getTocXmlDoc(toc.slug, toc.url, noCache)
-
-                if (tocXmlDoc) {
-                    const [vMetaDataNd, statuses] = getVideoMetaNd(toc.vStatusUrn, tocXmlDoc)
-
-                    if (vMetaDataNd) {
-                        streamLocations = await getStreamLocations(vMetaDataNd, tocXmlDoc, toc, this.mStreamLocation)
-                    } else {
-                        console.error('Could not get video metadata nd')
-                    }
-
-                    if (!streamLocations) {
-                        // this.mPrx.deleteByPageName(this.prx.getPageName())
-                    }
-
-                    if (jQuery.inArray(400, statuses) > 0 || jQuery.inArray(429, statuses) > 0 || jQuery.inArray(427, statuses) > 0 || statuses.length === 0) {
-                        retryCount += 1
-                        noCache = true
-                        waitTime += 5
-                    } else {
-                        ok = true
-                        waitTime = 0
-                    }
-
-                    if (retryCount > 3) {
-                        console.log(`retry counts reached max : ${retryCount}`)
-                        waitTime = 0
-                        break
-                    }
+                if (vMetaDataNd) {
+                    streamLocations = await getStreamLocations(vMetaDataNd, tocXmlDoc, toc, this.mStreamLocation)
                 } else {
-                    console.error('Could not get toc xml doc')
-                    break
+                    console.error('Could not get video metadata nd')
                 }
+
+                if (!streamLocations) {
+                    // this.mPrx.deleteByPageName(this.prx.getPageName())
+                }
+
+                
+            } else {
+                console.error('Could not get toc xml doc')
+                // break
             }
         }
  
@@ -267,65 +285,41 @@ class CourseApi {
 	}
 	async getTranscripts(toc, refresh=false){
 		let transcripts = null
-        let ok = false
-        let noCache = false
-        let retryCount = 0
-        let waitTime = 0
+		let noCache = false
+        
 		const mTranscript = this.store.get("Transcript")
         if (refresh) {
             // this.mTranscript.deleteByTocId(toc.id)
             noCache = true
         }
 
-        while (!ok) {
-            if (retryCount > 0) {
-                console.log(`retry ${retryCount}`)
-            }
+       
 
-            if (waitTime > 0) {
-                console.log(`wait for ${waitTime} second`)
-                setTimeout(() => {}, waitTime * 1000)
-            }
+        transcripts = null//this.mTranscript.getByTocId(toc.id)
 
-            transcripts = null//this.mTranscript.getByTocId(toc.id)
+        if (transcripts) {
+            log('transcripts_get_from_m_transcripts')
+            // break
+        } else {
+            const tocXmlDoc = await this.getTocXmlDoc(toc.slug, toc.url, noCache)
 
-            if (transcripts) {
-                log('transcripts_get_from_m_transcripts')
-                break
-            } else {
-                const tocXmlDoc = await this.getTocXmlDoc(toc.slug, toc.url, noCache)
+            if (tocXmlDoc) {
+                const [vMetaDataNd, statuses] = getVideoMetaNd(toc.vStatusUrn, tocXmlDoc)
 
-                if (tocXmlDoc) {
-                    const [vMetaDataNd, statuses] = getVideoMetaNd(toc.vStatusUrn, tocXmlDoc)
-
-                    if (vMetaDataNd) {
-                        transcripts = await getTranscripts(vMetaDataNd, tocXmlDoc, toc, mTranscript)
-                    } else {
-                        console.error('Could not get video metadata nd')
-                    }
-
-                    if (!transcripts) {
-                        // this.mPrx.deleteByPageName(this.prx.getPageName())
-                    }
-
-                    if (jQuery.inArray(400, statuses) > 0 || jQuery.inArray(429, statuses) > 0 || jQuery.inArray(427, statuses) > 0 || statuses.length === 0) {
-                        retryCount += 1
-                        noCache = true
-                        waitTime += 5
-                    } else {
-                        ok = true
-                        waitTime = 0
-                    }
-
-                    if (retryCount > 3) {
-                        console.log(`retry counts reached max : ${retryCount}`)
-                        waitTime = 0
-                        break
-                    }
+                if (vMetaDataNd) {
+                    transcripts = await getTranscripts(vMetaDataNd, tocXmlDoc, toc, mTranscript)
                 } else {
-                    console.error('Could not get toc xml doc')
-                    break
+                    console.error('Could not get video metadata nd')
                 }
+
+                if (!transcripts) {
+                    // this.mPrx.deleteByPageName(this.prx.getPageName())
+                }
+
+                
+            } else {
+                console.error('Could not get toc xml doc')
+                // break
             }
         }
  

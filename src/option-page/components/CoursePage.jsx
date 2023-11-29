@@ -1,14 +1,15 @@
 import { Link, useLoaderData } from 'react-router-dom'
-import {Component,createRef,useState,useEffect} from "react"
+import {Component,createRef,useState,useEffect,useRef,useMemo} from "react"
 import CourseApi from "../../course-api/CourseApi.js"
 import {courseUrlFromSlug} from "../../course-api/course_fn.js"
 import JsonView from 'react18-json-view'
+import Toast from '../Toast.jsx'
 import 'react18-json-view/src/style.css'
+
 export async function loader({ params }) {
     const { ctl,slug } = params
     return { ctl,slug }
   }
-
 const AddCoursePage=({slug, store, onOk})=>{
 	const [xmlSchema,setXmlSchema] = useState(null)
 	const [course,setCourse] = useState(null)
@@ -17,6 +18,13 @@ const AddCoursePage=({slug, store, onOk})=>{
 	const [tocs,setTocs]=useState(null)
 	const [streamLocations,setStreamLocations]=useState(null)
 	const [transcripts,setTranscripts]=useState(null)
+	const toastRef = useRef(null)
+	let lastSlug = null
+
+	// const lastSlug = useMemo(slug)
+	const toast= (message,t)=>{
+		toastRef.current.add(message,t)
+	}
 
 	const doFetchCourse = async(courseSlug) => {
 		// const courseSlug = slug
@@ -26,36 +34,38 @@ const AddCoursePage=({slug, store, onOk})=>{
 		const courseUrl = courseUrlFromSlug(courseSlug)
 
 		if(course){
-			console.log("Fetch course OK")
-			console.log(course)
+			// console.log("Fetch course OK")
+			toast("Fetch course OK","success")
+			// console.log(course)
 			setCourse(course)
 
 			const authors = await courseApi.getAuthors(courseSlug)
 
 			if(authors){
-        		console.log("Fetch course authors ok")
-				console.log(authors)
+        		toast("Fetch course authors ok","success")
+				// console.log(authors)
 				setAuthors(authors)
 
 			}else{
-				console.error(`Failed to fetch course authors course : ${course.title}`)
+				toast(`Failed to fetch course authors course : ${course.title}`,"error")
 			}
 
 			const sections = await courseApi.getCourseSections(courseSlug)
 
 		    if (sections){
-		        console.log(`Fetch course sections ok ${sections.length}`)
-				console.log(sections)
+		        toast(`Fetch course sections ok ${sections.length}`,"success")
+				// console.log(sections)
 				setSections(sections)
 		    }
 		    else{
-		        console.error(`Failed to fetch course sections course : ${course.title}`)
+		        toast(`Failed to fetch course sections course : ${course.title}`,"error")
 		    }
 
     		const tocs = await courseApi.getCourseTocs(courseSlug)
 			let fetchStreamLocTransOncePassed = false
     		if(tocs){
-				console.log(tocs)
+				// console.log(tocs)
+				toast(`Fetch course tocs ok `,"success")
 				setTocs(tocs)
 				for (const section of sections){
 					if(fetchStreamLocTransOncePassed){
@@ -67,46 +77,52 @@ const AddCoursePage=({slug, store, onOk})=>{
 						if(fetchStreamLocTransOncePassed){
 							break
 						}
-						console.log("try to fetch StreamLoc Trans Once")
+						toast("try to fetch StreamLoc Trans Once","normal")
 						const streamLocations = await courseApi.getStreamLocs(toc)
 						if(streamLocations){
 							setStreamLocations(streamLocations)
-							console.log(streamLocations)
-							console.log(`Fetch stream locations [${Object.keys(streamLocations).join(',')}]`)
+							// console.log(streamLocations)
+							toast(`Fetch stream locations [${Object.keys(streamLocations).join(',')}]`,"success")
 						}
 						else{
-							console.error(`Failed to fetch stream locations toc : ${toc.title}`)
+							toast(`Failed to fetch stream locations toc : ${toc.title}`,"error")
 
 						}
 						const transcripts = await courseApi.getTranscripts(toc)
 						if(transcripts){
 							setTranscripts(transcripts)
-							console.log(`Fetch transcripts [${Object.keys(transcripts).join(',')}]`)
+							toast(`Fetch transcripts [${Object.keys(transcripts).join(',')}]`,"success")
 						}
 						else{
-							console.error(`Failed to fetch transcripts toc : ${toc.title}`)
+							toast(`Failed to fetch transcripts toc : ${toc.title}`,"error")
 						}
 						fetchStreamLocTransOncePassed = true
 					}
 					
 				}      
     		}else{
-        		console.error(`Failed to fetch course tocs course : ${course.title}`)
+        		toast(`Failed to fetch course tocs course : ${course.title}`,"error")
     		}
 
 
 		}else{
-			console.error(`Failed to fetch course slug : ${courseUrl}`)
+			toast(`Failed to fetch course slug : ${courseUrl}`,"error")
 		}
 
 	}
 	useEffect(()=>{
-		if(slug)
-		doFetchCourse(slug)
+		if(slug){
+			if(slug != lastSlug){
+				doFetchCourse(slug)
+				// setLastSlug(slug)
+				lastSlug = slug
+			}
+		}
 	},[slug])
 	return <>
 		add : {slug}
 		<div className="w-full">
+			<Toast ref={toastRef}/>
     {
       xmlSchema ? <>
       <textarea defaultValue={xmlSchema} className="w-full dark:bg-black h-[200px] p-2 rounded-md rounded border"></textarea>

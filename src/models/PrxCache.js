@@ -22,7 +22,7 @@ class WebCache{
 
     async save(){
         const {key,cacheContent,statusCode,url} = this
-        const data = {statusCode,cacheContent,url}
+        const data = {statusCode,url,cacheContent}
         const dataStr = JSON.stringify(data)
         await chrome.storage.local.set({[key]:dataStr})
     }

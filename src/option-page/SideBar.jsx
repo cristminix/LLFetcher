@@ -20,11 +20,11 @@ export default function SideBar({store, config, showSidebar}){
   const reloadSidebar=f=>{
     console.log('SideBar.reloadSidebar()')
     setSideMenuLinks({})
-    setTimeout(f=>setSideMenuLinks(side_menu.links),512)
+    setTimeout(f=>setSideMenuLinks(side_menu.links),100)
   }
   useEffect(()=>{
    config.getUiConfig().applyHiddenSidebarStatus(setHideSidebar)
-   config.getUiConfig().applyReloadSidebar(f=>f,f=>{
+   config.getUiConfig().applyReloadSidebar(f=>{
     reloadSidebar()
    },'sidebar')
   },[])

@@ -59,7 +59,7 @@ class UiConfig extends LsConfig{
 	defaultTheme = 'default-theme.css';
 
 	hiddenSidebar_callback_keys = []
-	
+	reloadSidebar_callback_keys = []
 	constructor(){
 		const config_key = 'uiTtsConfig'
 		super(config_key)
@@ -119,18 +119,19 @@ class UiConfig extends LsConfig{
 		}
 	}
 
-	applyReloadSidebar(reloadSideBarFn, callback, callback_key){
-		reloadSideBarFn()
+	applyReloadSidebar(callback, callback_key){
+		// reloadSideBarFn()
 		if(typeof callback == 'function' ){
-			if(typeof this.reloadSidebar_callback_keys == "undefined"){
-				this.reloadSidebar_callback_keys=[]
-			}
+			// if(typeof this.reloadSidebar_callback_keys == "undefined"){
+			// 	this.reloadSidebar_callback_keys=[]
+			// }
 			if(!this.reloadSidebar_callback_keys.includes(callback_key)){
 				const $main_content = jQuery('#main-content')
 				$main_content.on('reloadSidebar', ()=>{
-					callback($main_content.prop('hideSidebar'))
+					console.log(this.reloadSidebar_callback_keys)
+					callback()
 				})
-				this.reloadSidebar_callback_keys[callback_key]
+				this.reloadSidebar_callback_keys.push(callback_key)
 			}
 		}
 	}

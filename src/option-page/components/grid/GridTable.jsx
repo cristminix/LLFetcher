@@ -1,7 +1,7 @@
 import React from'react'
 import GridItems from './GridItems'
 import GridHeaders from "./GridHeaders"
-
+import _ from "underscore"
 class GridTable extends React.Component{
 	constructor(props){
 		super(props)
@@ -11,9 +11,20 @@ class GridTable extends React.Component{
 		
 	}
 
-	async componentWillReceiveProps(props){
-		const records = props.records
-		this.setState({records: []}, f => { this.setState({records}) })
+	// async componentWillReceiveProps(props){
+	// 	const records = props.records
+	// 	this.setState({records: []}, f => { this.setState({records}) })
+	// }
+	static getDerivedStateFromProps(props, state) {
+		if (!_.isEqual(props.records,state.records)) {
+			return {
+			//   isScrollingDown: props.currentRow > state.lastRow,
+			  records: props.records,
+			}
+		  }
+	  
+		  // Return null to indicate no change to state.
+		  return null
 	}
 
 	render(){

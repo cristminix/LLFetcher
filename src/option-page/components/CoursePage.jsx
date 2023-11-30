@@ -14,7 +14,7 @@ class FetchStateInfo extends Component{
 	constructor(props){
 		super(props)
 		const {name} = props
-		console.log(name)
+		// console.log(name)
 		this.state = {
 			runLevel : 0,
 			statusCode : 0,

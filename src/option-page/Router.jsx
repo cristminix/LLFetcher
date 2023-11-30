@@ -22,12 +22,12 @@ export default function Router({config, store}){
                 {/* <Route exac path="/tts" element={<Tts config={config} />}></Route> */}
                 <Route  path="/welcome" element={<WelcomePage store={store} />}/>
                 <Route  path="/course" element={<CoursePage store={store}/>} loader={courseLoader}/>
-                <Route  path="/course/:ctl/:slug" element={<CoursePage store={store}/>} loader={courseLoader}/>
+                <Route  path="/course/:ctl/:slug" element={<CoursePage store={store} config={config}/>} loader={courseLoader}/>
                 <Route  path="/manager/:slug" element={<DownloadManager store={store}/>} loader={courseSlugLoader}/>
                 <Route  path="/download" element={<DownloadPage store={store}/>}/>
                 <Route  path="/setting" element={<SettingPage store={store}/>}/>
-                <Route  path="/database" element={<DatabasePage store={store} />} loader={databaseLoader}/>
-                <Route  path="/database/:table" element={<DatabasePage store={store} />} loader={databaseLoader}/>
+                <Route  path="/database" element={<DatabasePage store={store} config={config}/>} loader={databaseLoader}/>
+                <Route  path="/database/:table" element={<DatabasePage store={store} config={config}/>} loader={databaseLoader}/>
                 <Route  path="/database/:table/:page" element={<DatabasePage store={store} />} loader={databaseLoader}/>
                 <Route  path="/database" element={<DatabasePage store={store} />}/>
                 <Route  path="/tests"  loader={testPageLoader} element={<TestPage store={store}/>}/>

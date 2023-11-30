@@ -10,15 +10,23 @@ export default function SideBar({store, config, showSidebar}){
   const inactiveTabCls = "flex items-center gap-x-3.5 py-2 px-2.5  hover:bg-gray-100 text-sm text-slate-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700  dark:text-white"
   const [hideSidebar,setHideSidebar] = useState(false)
   const [runTwice,dontRunTwice] = useState(true)
+  const [sideMenuLinks,setSideMenuLinks] = useState(side_menu.links)
   const toggle = ()=>{
     const status = !hideSidebar
     setHideSidebar(status)
-   config.getUiConfig().setHiddenSidebarStatus(status)
+    config.getUiConfig().setHiddenSidebarStatus(status)
        
   }
- 
+  const reloadSidebar=f=>{
+    console.log('SideBar.reloadSidebar()')
+    setSideMenuLinks({})
+    setTimeout(f=>setSideMenuLinks(side_menu.links),512)
+  }
   useEffect(()=>{
    config.getUiConfig().applyHiddenSidebarStatus(setHideSidebar)
+   config.getUiConfig().applyReloadSidebar(f=>f,f=>{
+    reloadSidebar()
+   },'sidebar')
   },[])
   const linkCls = ({ isActive, isPending }) => isActive ? activeTabCls :  inactiveTabCls
   // const hideSidebar = !sidebarShown.current[0]
@@ -47,7 +55,7 @@ export default function SideBar({store, config, showSidebar}){
         </div>
         <ul className="space-y-1.5">
         {
-          Object.keys(side_menu.links).map((key,index)=>{
+          Object.keys(sideMenuLinks).map((key,index)=>{
             
             const linkItem = side_menu.links[key]
             if(linkItem.hidden){
@@ -55,9 +63,9 @@ export default function SideBar({store, config, showSidebar}){
             }
             if(linkItem.hasChild){
               const linkTitle = linkItem.title
-              console.log(`${linkTitle} hasChild`)
+              // console.log(`${linkTitle} hasChild`)
               if(linkItem.childItems){
-                console.log(linkItem.childItems)
+                // console.log(linkItem.childItems)
                 const children = (<>
                   <ul className="children-menus my-2">
                     {
@@ -90,8 +98,8 @@ export default function SideBar({store, config, showSidebar}){
                       const listMethod = linkItem.modelListMethod
                       try{
                         const childData =  modelObj[listMethod]()
-                        console.log(childData)
-                        console.log(`${linkTitle} useModel ${modelName}`) 
+                        // console.log(childData)
+                        // console.log(`${linkTitle} useModel ${modelName}`) 
                         const children = (<>
                           <ul className="children-menus my-2">
                             {

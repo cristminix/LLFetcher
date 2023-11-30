@@ -1,5 +1,7 @@
 
-import { crc32 } from "../components/fn"
+import crc from 'crc'
+
+const WEBCACHE_PREFIX = 'WebCache_'
 
 class WebCache{
     key=null
@@ -8,10 +10,26 @@ class WebCache{
     url=null
 
     constructor(url){
-        this.key = `WebCache_${crc32(url)}`
-        this.url = url
+        this.setUrl(url)
     }
+    setUrl(url){
+        this.url = url
+        if(url){
+            this.key = `${WEBCACHE_PREFIX}${crc.crc32(url).toString(16)}`
 
+        }
+    }
+    static async fromKey(key){
+        const row = await chrome.storage.local.get(key)
+        if(row){
+            const data = JSON.parse(row[key])
+            const webCache = new WebCache(data.url)
+            webCache.setCacheContent(data.cacheContent)
+            webCache.setStatusCode(data.statusCode)
+            return webCache
+        }
+        return null
+    }
     setCacheContent(cacheContent){
         this.cacheContent = cacheContent
     }
@@ -29,6 +47,10 @@ class WebCache{
 
     async delete(){
         await chrome.storage.local.remove(this.key)
+    }
+
+    getKey(){
+        return this.key
     }
 
     async remove(){
@@ -67,6 +89,7 @@ class WebCache{
 }
 
 class PrxCache{
+    table = "PrxCache"
     static instance = null
     static getInstance(){
         if(!PrxCache.instance){
@@ -74,13 +97,24 @@ class PrxCache{
         }
         return PrxCache.instance
     }
+    async clearAll(){
+        Object.keys(await chrome.storage.local.get()).forEach(key=>{
+            if(key.startsWith(WEBCACHE_PREFIX)){
+                // console.log(key)
 
+                chrome.storage.local.remove(key)
+            }
+        })
+    }
     async get(url){
         const webCache = new WebCache(url)
         await webCache.load()
         return webCache
     }
-
+    async getByKey(key){
+        const webCache = await WebCache.fromKey(key)
+        return webCache
+    }
     async set(url,cacheContent,statusCode){
         const webCache = new WebCache(url)
         webCache.setCacheContent(cacheContent)
@@ -90,9 +124,17 @@ class PrxCache{
     }
 
     async unset(url){
-        const webCache = await PrxCache.get(url)
+        const webCache = await this.get(url)
         if(!webCache.isEmpty()){
             webCache.remove()
+        }
+    }
+    async unsetByKey(key){
+        const webCache = await this.getByKey(key)
+        if(webCache){
+            if(!webCache.isEmpty()){
+                webCache.remove()
+            }
         }
     }
 }

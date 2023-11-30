@@ -10,7 +10,7 @@ export async function loader({ params }) {
 }
 
 
-const DatabasePage = ({store}) => {
+const DatabasePage = ({store,config}) => {
     const {table, page} = useLoaderData()
 
     const viewMode = table ? 'explorer' : 'manager'
@@ -24,7 +24,7 @@ const DatabasePage = ({store}) => {
             viewMode === 'manager' ? <>
             {/* You have no select table */}
 
-                <DBTableManager store={store}/>
+                <DBTableManager store={store} config={config}/>
             </>: ''
         } 
     </div>

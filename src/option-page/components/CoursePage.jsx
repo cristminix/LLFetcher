@@ -18,11 +18,15 @@ class FetchStateInfo extends Component{
 		this.state = {
 			runLevel : 0,
 			statusCode : 0,
-			message : "Fetch success !",
-			// icon : "fa fa-check",
 			loading: false,
-			// name //: "Course Info"
 		}
+	}
+	resetState(){
+		this.setState({
+			runLevel : 0,
+			statusCode : 0,
+			loading: false,
+		})
 	}	
 	setMessage(message){
 		this.setState({message})
@@ -82,7 +86,7 @@ class FetchStateInfo extends Component{
 		</>
 	}
 }
-const AddCoursePage=({slug, store, onOk})=>{
+const AddCoursePage=({slug, store, config,onOk})=>{
 	const [xmlSchema,setXmlSchema] = useState(null)
 	const [course,setCourse] = useState(null)
 	const [authors,setAuthors] = useState(null)
@@ -136,6 +140,7 @@ const AddCoursePage=({slug, store, onOk})=>{
 				}
 				else{
 					toast(`Failed to fetch stream locations toc : ${selectToc.title}`,"error")
+					fetchInfoCcRef.current.setStatusCode(-1)
 
 				}
 				
@@ -146,6 +151,8 @@ const AddCoursePage=({slug, store, onOk})=>{
 				}
 				else{
 					toast(`Failed to fetch transcripts toc : ${selectToc.title}`,"error")
+					fetchInfoCcRef.current.setStatusCode(-1)
+
 				}
 				fetchInfoCcRef.current.setLoading(false)
 
@@ -154,17 +161,32 @@ const AddCoursePage=({slug, store, onOk})=>{
 		 
 	}
 	const doFetchCourse = async(courseSlug) => {
+		const mCourse = store.get("Course")
+		let course = mCourse.getBySlug(courseSlug)
 		// const courseSlug = slug
 		fetchInfoCiRef.current.setRunLevel(1)
 		fetchInfoCiRef.current.setLoading(true)
 
+		if(course){
+			toast(`Course : ${courseSlug} get from mCourse`)
+			fetchInfoCiRef.current.setStatusCode(200)
+			fetchInfoCiRef.current.setLoading(false)
+			return course
+		}
 		
-		const course = await courseApi.getCourseInfo(courseSlug,true)
-		setXmlSchema(courseApi.courseXmlDoc.html())
+		course = await courseApi.getCourseInfo(courseSlug,true)
 		const courseUrl = courseUrlFromSlug(courseSlug)
 		fetchInfoCiRef.current.setStatusCode(courseApi.courseXmlDocFetchStatus)
 
 		if(course){
+			const {title,slug,duration,sourceCodeRepository,description,urn} = course
+			course = await mCourse.create(title,slug,duration,sourceCodeRepository,description,urn)
+			config.getUiConfig().reloadSidebar()
+			try{
+				setXmlSchema(courseApi.courseXmlDoc.html())
+			}catch(e){
+				console.error(e)
+			}
 			// console.log("Fetch course OK")
 			toast("Fetch course OK","success")
 			// console.log(course)
@@ -205,6 +227,8 @@ const AddCoursePage=({slug, store, onOk})=>{
 
 		}else{
 			toast(`Failed to fetch course slug : ${courseUrl}`,"error")
+			fetchInfoCiRef.current.setStatusCode(-1)
+
 		}
 		fetchInfoCiRef.current.setLoading(false)
 
@@ -215,6 +239,19 @@ const AddCoursePage=({slug, store, onOk})=>{
 			if(slug != lastSlug){
 				// doFetchCourse(slug)
 				// setLastSlug(slug)
+				setCourse(null)
+				setAuthors(null)
+				setSections(null)
+				setTocs(null)	
+				setStreamLocations(null)
+				setTranscripts(null)
+				if(fetchInfoCcRef.current){
+					fetchInfoCcRef.current.resetState()
+				}
+				if(fetchInfoCiRef.current){
+					fetchInfoCiRef.current.resetState()
+				}
+				
 				lastSlug = slug
 			}
 		}
@@ -273,12 +310,12 @@ const AddCoursePage=({slug, store, onOk})=>{
 	</>
 }
 
-const CoursePage = ({store}) => {
+const CoursePage = ({store,config}) => {
     const {ctl,slug} = useLoaderData()
     const [renderedPage,setRenderedPage] = useState("")
     const middleware = async(ctl,slug)=>{
     	const components = {
-    		'add' : <AddCoursePage slug={slug} store={store} onOk={f=>f}/>
+    		'add' : <AddCoursePage config={config} slug={slug} store={store} onOk={f=>f}/>
     	}
     	// console.log(ctl,slug)
     	setRenderedPage(components[ctl])

@@ -372,7 +372,7 @@ const parseJsonSchema = (responseText) => {
       }
     }
 
-    return dataCodes
+    return [dataCodes,errorMessage]
 }
 const convert2Xml = (data,pageName,cacheXmlToFile=false) => {}
 const getTranscripts = async (vMetaDataNd,doc,toc,mTranscript) => {
@@ -563,6 +563,9 @@ const getCourseToc = (itemStar,doc,mToc,sectionId,courseSlug) => {
     return toc
 }
 const getTocXmlParentElement = (itemStar,doc) => {
+    if(!doc){
+        return null
+    }
 	let tocNd = doc.find(`cachingKey:contains('${itemStar}')`)
     let entityUrn=null
     let entityNdP=null
@@ -597,6 +600,9 @@ const getTocXmlParentElement = (itemStar,doc) => {
 	return entityNdP
 }
 const getCourseXmlParentElement = (doc) => {
+    if(!doc){
+        return [null,null]
+    }
 	let p = null
 	let courseUrn = null
 	let courseUrnNd = doc.find(`star_elements:contains('urn:li:learningApiCourse:')`)

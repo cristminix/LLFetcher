@@ -21,11 +21,27 @@ class CourseApi {
 	tocXmlDocs = {}
 	authors=[]
 	mPrxCache=null
+	// must be refactored with "last_" prefix
 	courseXmlDocFetchStatus = 0
 	tocXmlDocFetchStatus = 0
+
+	lastCourseXmlDocCacheKey = null
+	lastTocXmlDocCacheKey = null
+
 	constructor(store){
 		this.store = store
 		this.mPrxCache = store.get('PrxCache')
+	}
+
+	informUnauthenticatedAccess(){
+		alert("Please make sure you are logged in to LinkedIn Learning site !, This window will close in 10 second.")
+		setTimeout(()=>{
+			window.open("https://www.linkedin.com/learning/login?fromSignIn=true&trk=login-sign-in", "_blank")
+		},5000)
+
+		setTimeout(f=>{
+			window.close()
+		},10000)
 	}
 
 	getCourseSlugFromUrl(url){
@@ -39,6 +55,8 @@ class CourseApi {
 		}
 		if(course){
 			self.course = course
+		}else{
+			this.store.get('PrxCache').unsetByKey(this.lastCourseXmlDocCacheKey)
 		}
 
 		return course
@@ -118,18 +136,28 @@ class CourseApi {
 		}
 		// console.log(cacheContent)
 		if(cacheContent){
-			const jsonSchema = parseJsonSchema(cacheContent)
-			xmlDoc = jQuery(convertJsonToXml(jsonSchema))
-			xmlDoc = jQuery(xmlDoc[2])
+			const [jsonSchema,errorMessage] = parseJsonSchema(cacheContent)
+			console.log(errorMessage)
+			if(errorMessage){
+				if(errorMessage == "ERR_NO_LOGIN"){
+					this.informUnauthenticatedAccess()
+				}
+			}else{
+				xmlDoc = jQuery(convertJsonToXml(jsonSchema))
+				xmlDoc = jQuery(xmlDoc[2])
+			}
+			
 		}
 		
-		return xmlDoc
+		return [xmlDoc,webCache.getKey()]
 	}
 	async getCourseXmlDoc(courseUrl, noCache=false){
 
 		let xmlDoc = this.courseXmlDoc
 		if(!xmlDoc){
-			xmlDoc = await this.getXmlDoc(courseUrl,noCache,'courseXmlDocFetchStatus')
+			const[doc,cacheKey] = await this.getXmlDoc(courseUrl,noCache,'courseXmlDocFetchStatus')
+			this.lastCourseXmlDocCacheKey = cacheKey
+			xmlDoc = doc
 			this.courseXmlDoc = xmlDoc
 		}
 
@@ -142,7 +170,9 @@ class CourseApi {
 			xmlDoc = this.tocXmlDocs[tocSlug]
 		}
 		if(!xmlDoc ){
-			xmlDoc = await this.getXmlDoc(tocUrl,noCache,'tocXmlDocFetchStatus')
+			const [doc,cacheKey] = await this.getXmlDoc(tocUrl,noCache,'tocXmlDocFetchStatus')
+			this.lastTocXmlDocCacheKey = cacheKey
+			xmlDoc = doc
 			this.tocXmlDocs[tocSlug] = xmlDoc
 		}
 
@@ -167,6 +197,8 @@ class CourseApi {
 		return authors
 	}
 	async fetchCourseInfo(courseSlug, refresh=false){
+		
+
 		let noCache = !refresh
 		const courseUrl = courseUrlFromSlug(courseSlug)
 		let xmlDoc = await this.getCourseXmlDoc(courseUrl, noCache)
@@ -272,6 +304,8 @@ class CourseApi {
 
                 if (!streamLocations) {
                     // this.mPrx.deleteByPageName(this.prx.getPageName())
+					this.store.get('PrxCache').unsetByKey(this.lastTocXmlDocCacheKey)
+
                 }
 
                 
@@ -315,6 +349,8 @@ class CourseApi {
 
                 if (!transcripts) {
                     // this.mPrx.deleteByPageName(this.prx.getPageName())
+					this.store.get('PrxCache').unsetByKey(this.lastTocXmlDocCacheKey)
+
                 }
 
                 

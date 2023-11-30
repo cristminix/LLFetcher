@@ -1,5 +1,5 @@
 import {v4} from "uuid"
-import $ from "jquery"
+import jQuery from "jquery"
 /**
  * localStorage 
  * key value serialized Config
@@ -65,11 +65,16 @@ class UiConfig extends LsConfig{
 		super(config_key)
 		this.setData('defaultTheme', this.defaultTheme)
 	}
+	reloadSidebar(){
+		const $main_content = jQuery('#main-content')
+		$main_content.trigger('reloadSidebar')
+
+	}
 	/**
 	 * set sidebar hidden or shown
 	 * */
 	setHiddenSidebarStatus(status = true){
-		const $main_content = $('#main-content')
+		const $main_content = jQuery('#main-content')
 		
 		$main_content.prop('hideSidebar',status)
 		$main_content.trigger('hideSidebar')
@@ -103,12 +108,30 @@ class UiConfig extends LsConfig{
 		setHideSidebar(this.getHiddenSidebarStatus())
 		if(typeof callback === 'function' ){
 			if(!this.hiddenSidebar_callback_keys.includes(callback_key)){
-				const $main_content = $('#main-content')
+				const $main_content = jQuery('#main-content')
 				$main_content.on('hideSidebar', ()=>{
 					callback($main_content.prop('hideSidebar'))
 				})
+
+				this.hiddenSidebar_callback_keys.push(callback_key)
 			}
 			
+		}
+	}
+
+	applyReloadSidebar(reloadSideBarFn, callback, callback_key){
+		reloadSideBarFn()
+		if(typeof callback == 'function' ){
+			if(typeof this.reloadSidebar_callback_keys == "undefined"){
+				this.reloadSidebar_callback_keys=[]
+			}
+			if(!this.reloadSidebar_callback_keys.includes(callback_key)){
+				const $main_content = jQuery('#main-content')
+				$main_content.on('reloadSidebar', ()=>{
+					callback($main_content.prop('hideSidebar'))
+				})
+				this.reloadSidebar_callback_keys[callback_key]
+			}
 		}
 	}
 }

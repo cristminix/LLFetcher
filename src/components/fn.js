@@ -327,32 +327,11 @@ const getDownloadFilenames = (downloads) => {
 const validateUrl = (value) => {
   return /^(?:(?:(?:https?|ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:[/?#]\S*)?$/i.test(value);
 }
-const crc32 = (str) => {
-	const utf8Encoder = new TextEncoder()
-	const data = utf8Encoder.encode(str)
-	const crc32Buffer = new ArrayBuffer(4)
-	const view = new DataView(crc32Buffer)
-  	let byte = 0
-	for (let i = 0; i < data.length; i++) {
-	  byte = data[i]
-	  for (let j = 0; j < 8; j++) {
-		if ((byte & 1) !== 0) {
-		  byte = (byte >>> 1) ^ 0xEDB88320
-		} else {
-		  byte = byte >>> 1
-		}
-	  }
-	}
-  
-	view.setUint32(0, ~byte, false)
-	const crc32Hex = Array.prototype.map.call(new Uint8Array(crc32Buffer), x => ('00' + x.toString(16)).slice(-2)).join('')
-	return crc32Hex
-}
+
 export {
 	onMessage,
 	MsgEvt,
 	sendMessage,
-	crc32,
 	titleCase,
 	slugify,
 	timeout,

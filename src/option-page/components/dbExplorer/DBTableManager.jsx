@@ -5,7 +5,7 @@ import Pager from "../Pager"
 import Button from "../Button";
 import {formatBytes} from "../learning_fn"
 
-const DBTableManager = ({store}) => {
+const DBTableManager = ({store,config}) => {
     const [grid,setGrid] = useState({
         records : [],
         limit : 5,
@@ -29,14 +29,18 @@ const DBTableManager = ({store}) => {
 
             const model = store.get(item.table)
             if(model){
-                await model.truncate()
+                if(item.table == "PrxCache"){
+                    await model.clearAll()
+                }else{
+                    await model.truncate()
+
+                }
             }
-            // setTimeout(()=>{
-                reinitLoadingState = Object.assign([], reinitLoading)
-                reinitLoadingState[index] = false
-                setReinitLoading(reinitLoadingState)
-            // },2000)
+            reinitLoadingState = Object.assign([], reinitLoading)
+            reinitLoadingState[index] = false
+            setReinitLoading(reinitLoadingState)
             updateStorageSize()
+            config.getUiConfig().reloadSidebar()
         }
         
 

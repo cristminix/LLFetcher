@@ -1,5 +1,5 @@
 const GridItemEmpty = ({spanCls, limit,  options}) => {
-	console.log(options)
+	// console.log(options)
 	const colSpan = options.fields.length + 2
 	// const arrLength = lastLength ? lastLength : limit
 	const dummyRecords =[0]

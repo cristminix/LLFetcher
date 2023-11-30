@@ -14,7 +14,10 @@ class Toc extends DB {
     get(id){
         return this.singleQuery({query: {id}})
     }
+    getByItemStar(itemStar){
+        return this.singleQuery({query: {itemStar}})
 
+    }
     async update(id, tocUrl, captionUrl, captionFmt, streamlocIds){
         const toc = this.get(id)
         if(toc){

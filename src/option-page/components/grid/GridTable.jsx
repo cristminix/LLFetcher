@@ -11,10 +11,11 @@ class GridTable extends React.Component{
 		
 	}
 
-	// async componentWillReceiveProps(props){
-	// 	const records = props.records
-	// 	this.setState({records: []}, f => { this.setState({records}) })
-	// }
+	async componentWillReceiveProps(props){
+		const records = props.records
+		this.setState({records: []}, f => { this.setState({records}) })
+	}
+	/*
 	static getDerivedStateFromProps(props, state) {
 		if (!_.isEqual(props.records,state.records)) {
 			return {
@@ -25,7 +26,7 @@ class GridTable extends React.Component{
 	  
 		  // Return null to indicate no change to state.
 		  return null
-	}
+	}*/
 
 	render(){
 		const {page, limit, options, context} = this.props

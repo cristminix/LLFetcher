@@ -85,37 +85,48 @@ const getNText = (p,queries) => {
     
 	
 }
-const getAuthors = async(doc,mAuthor,course) => {
-	const [p,courseUrn] = getCourseXmlParentElement(doc)
-    let authorEls=p.find("authors")
-    let authors=[]
-    for (const authorEl of authorEls){
-		let authorUrn = jQuery(authorEl).text()
-        let authorEntityEl=doc.find(`entityUrn:contains('${authorUrn}')`)
-        if(authorEntityEl.length > 0){
-			let authorEntityElP = authorEntityEl.parent()
-            let slug = getNText(authorEntityElP,'slug')
-            let name=slugToTitle(slug)
-            let biography=getNText(authorEntityElP,['biographyV2','text'])
-            let shortBiography=getNText(authorEntityElP,['shortBiographyV2','text'])
-            // let author =m_author.create(slug=slug, name=name, biography=biography, shortBiography=shortBiography)
-            let author = {
-				slug, name, biography, shortBiography
-			}
-			authors.push(author)
-            // m_author.addCourse(author,course)
-		}
-	}
+const getAuthors = async(doc,mAuthor,mCourse,course) => {
+    let authors= mAuthor.getListByCourse(course)
+
+    if(authors.length == 0){
+        // authors=[]
+        const [p,courseUrn] = getCourseXmlParentElement(doc)
+        let authorEls=p.find("authors")
+        for (const authorEl of authorEls){
+            let authorUrn = jQuery(authorEl).text()
+            let authorEntityEl=doc.find(`entityUrn:contains('${authorUrn}')`)
+            if(authorEntityEl.length > 0){
+                let authorEntityElP = authorEntityEl.parent()
+                let slug = getNText(authorEntityElP,'slug')
+                let name=slugToTitle(slug)
+                let biography=getNText(authorEntityElP,['biographyV2','text'])
+                let shortBiography=getNText(authorEntityElP,['shortBiographyV2','text'])
+                let author = await mAuthor.create(name,slug,biography,shortBiography,course.id)
+                // let author = {
+                //     slug, name, biography, shortBiography
+                // }
+                if(author){
+                    await mCourse.addAuthorId(course.id, author.id)
+                }
+                authors.push(author)
+                // m_author.addCourse(author,course)
+            }
+        }
+    }
         
             
     return authors
 }
-const getCourseInfo = (doc,courseSlug) => {
+const getCourseInfo = async(doc,courseSlug,mCourse) => {
+    let data = mCourse.getBySlug(courseSlug)
+    if(data){
+        return data
+    }
 	const [p,courseUrn] = getCourseXmlParentElement(doc)
 	if(p){
 		let courseSlugFound = p.find('slug').text()
 		console.log(`course slug found : ${courseSlugFound}`)
-		const data = {
+		data = {
 			url : `https://www.linkedin.com/learning/${courseSlug}`,
 			slug : courseSlug,
 			exerciseFiles : null,
@@ -187,13 +198,15 @@ const getCourseInfo = (doc,courseSlug) => {
         		}
         	}
         }
-        return data
+        const {title,slug,sourceCodeRepository,description,urn} = data
+		const course = await mCourse.create(title,slug,duration,sourceCodeRepository,description,urn)
+        return course
 	}
 	return null
 }
 const getCourseSections = async(p,doc,mSection,courseId) => {
-	let sections = null //mSection.getListCourseId(courseId)
-    if (sections){
+	let sections = mSection.getListCourseId(courseId)
+    if (sections.length > 0){
         return sections
 	}
     let courseSectionStars = p.find("contents")
@@ -229,9 +242,9 @@ const getCourseSections = async(p,doc,mSection,courseId) => {
                         section.itemStars.push(itemStar)
 					}
 				}
-                    
-                // s=m_section.create(courseId, section_slug, section_title, [], section["item_stars"])
-                sections.push(section)
+                const {title, itemStars, slug} = section    
+                const row = await mSection.create(title, slug, courseId,itemStars)
+                sections.push(row)
 			}
 		}
 	}
@@ -528,8 +541,8 @@ const getStreamLocations = async(vMetaDataNd,doc,toc,mStreamLoc) => {
     return streamLocations
 }
 const getVideoMeta = (vStatusUrn,doc,mConfig,defaultSelector="presentation") => {}
-const getCourseToc = (itemStar,doc,mToc,sectionId,courseSlug) => {
-	let toc =null// mToc.getByItemStar(itemStar)
+const getCourseToc = async (itemStar,doc,mToc,mSection,section,courseSlug) => {
+	let toc = mToc.getByItemStar(itemStar)
     if(toc){
         return toc
 	}
@@ -557,10 +570,18 @@ const getCourseToc = (itemStar,doc,mToc,sectionId,courseSlug) => {
     
     const vStatusUrn = entityNdP.find("star_lyndaVideoViewingStatus").text().trim()
     toc.vStatusUrn = vStatusUrn
-  
-    // toc=m_toc.create(title=title, slug=toc_slug, url=toc["url"], duration=duration , captionUrl="", captionFmt="", sectionId=sectionId,item_star=item_star, v_status_urn=v_status_urn)
+    
+    const {title, slug, url, duration, captionUrl, captionFmt} = toc
+    const row = await mToc.create(title, slug, url, duration, captionUrl, captionFmt, section.id,itemStar,vStatusUrn)
+    if(row){
+        const {tocIds} = section
 
-    return toc
+        if(!section.tocIds.includes(row.id)){
+            tocIds.push(row.id)
+            await mSection.updateTocIds(section.id, tocIds)
+        }
+    }
+    return row
 }
 const getTocXmlParentElement = (itemStar,doc) => {
     if(!doc){

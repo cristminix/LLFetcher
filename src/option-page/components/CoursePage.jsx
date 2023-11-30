@@ -162,30 +162,40 @@ const AddCoursePage=({slug, store, config,onOk})=>{
 	}
 	const doFetchCourse = async(courseSlug) => {
 		const mCourse = store.get("Course")
-		let course = mCourse.getBySlug(courseSlug)
+		const mAuthor = store.get("Author")
+		const mSection = store.get("Section")
+		const mToc = store.get("Toc")
+		const mStreamLoc = store.get("StreamLocation")
+		const mTranscript = store.get("Transcript")
+
+		let course = null //mCourse.getBySlug(courseSlug)
 		// const courseSlug = slug
 		fetchInfoCiRef.current.setRunLevel(1)
 		fetchInfoCiRef.current.setLoading(true)
 
-		if(course){
-			toast(`Course : ${courseSlug} get from mCourse`)
-			fetchInfoCiRef.current.setStatusCode(200)
-			fetchInfoCiRef.current.setLoading(false)
-			return course
-		}
-		
-		course = await courseApi.getCourseInfo(courseSlug,true)
-		const courseUrl = courseUrlFromSlug(courseSlug)
-		fetchInfoCiRef.current.setStatusCode(courseApi.courseXmlDocFetchStatus)
+		let courseGotFromDb = false
 
 		if(course){
-			const {title,slug,duration,sourceCodeRepository,description,urn} = course
-			course = await mCourse.create(title,slug,duration,sourceCodeRepository,description,urn)
+			// toast(`Course : ${courseSlug} get from mCourse`)
+			// fetchInfoCiRef.current.setStatusCode(200)
+			// fetchInfoCiRef.current.setLoading(false)
+			// return course
+			courseGotFromDb = true
+		}else{
+			course = await courseApi.getCourseInfo(courseSlug,true)
+			
+			fetchInfoCiRef.current.setStatusCode(courseApi.courseXmlDocFetchStatus)
+		}
+		
+		
+		const courseUrl = courseUrlFromSlug(courseSlug)
+
+		if(course){
 			config.getUiConfig().reloadSidebar()
 			try{
 				setXmlSchema(courseApi.courseXmlDoc.html())
 			}catch(e){
-				console.error(e)
+				console.warn(e)
 			}
 			// console.log("Fetch course OK")
 			toast("Fetch course OK","success")
@@ -194,7 +204,7 @@ const AddCoursePage=({slug, store, config,onOk})=>{
 
 			const authors = await courseApi.getAuthors(courseSlug)
 
-			if(authors){
+			if(authors.length > 0){
         		toast("Fetch course authors ok","success")
 				// console.log(authors)
 				setAuthors(authors)

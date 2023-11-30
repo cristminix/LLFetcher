@@ -17,6 +17,7 @@ import jQuery from "jquery"
 class CourseApi {
 	store = null
 	course = null
+	sections = []
 	courseXmlDoc = null
 	tocXmlDocs = {}
 	authors=[]
@@ -54,7 +55,7 @@ class CourseApi {
 			course = await this.fetchCourseInfo(courseSlug, refresh)
 		}
 		if(course){
-			self.course = course
+			this.course = course
 		}else{
 			this.store.get('PrxCache').unsetByKey(this.lastCourseXmlDocCacheKey)
 		}
@@ -184,16 +185,15 @@ class CourseApi {
 			authors = this.authors
 			if(authors.length > 0){
 				authors = this.authors
-				
-			}else{
-
 			}
 		}
+		if(authors.length == 0){
+			const courseUrl = courseUrlFromSlug(courseSlug)
+			const xmlDoc= await this.getCourseXmlDoc(courseUrl)
+			authors = await getAuthors(xmlDoc, this.store.get('Author'),  this.store.get('Course'), this.course)
+			this.authors = authors
+		}
 		
-		const courseUrl = courseUrlFromSlug(courseSlug)
-		const xmlDoc= await this.getCourseXmlDoc(courseUrl)
-		authors = await getAuthors(xmlDoc, this.store.get('Author'), this.course)
-		this.authors = authors
 		return authors
 	}
 	async fetchCourseInfo(courseSlug, refresh=false){
@@ -202,9 +202,10 @@ class CourseApi {
 		let noCache = !refresh
 		const courseUrl = courseUrlFromSlug(courseSlug)
 		let xmlDoc = await this.getCourseXmlDoc(courseUrl, noCache)
-		let course = getCourseInfo(xmlDoc,courseSlug)
+		let course = getCourseInfo(xmlDoc,courseSlug,this.store.get('Course'))
 
 		// console.log(courseUrl,xmlDoc,course)
+		// this.course = course
 		return course
 
 	}
@@ -224,7 +225,7 @@ class CourseApi {
         if (xmlDoc){
             const [p,courseUrn] = getCourseXmlParentElement(xmlDoc)
             if(p){
-				sections = await getCourseSections(p, xmlDoc, mSection, 0/*this.course.id*/)
+				sections = await getCourseSections(p, xmlDoc, mSection, this.course.id)
                 this.sections = sections
 			}else{
                 console.error("Could not get course xml parent element")
@@ -237,13 +238,14 @@ class CourseApi {
 	}
 	async getCourseTocs(courseSlug){
 		const mToc = this.store.get("Toc")
+		const mSection = this.store.get("Section")
 		let tocs=null
         // let courseSlug=this.course.slug
         let sections = this.sections
-        if (!sections){
+        if (sections.length == 0){
             sections = await this.getCourseSections(courseSlug)
 		}
-		if (sections){
+		if (sections.length > 0){
             tocs={}
             for (const section of sections){
                 let sectionSlug = section.slug
@@ -256,8 +258,9 @@ class CourseApi {
                         const [p,courseUrn] = getCourseXmlParentElement(courseXmlDoc)
                         if(p){
                             tocs[sectionSlug]=[]
+							// console.log(section)
                             for (const itemStar of section.itemStars){
-                                let toc = getCourseToc(itemStar,courseXmlDoc,mToc,0/*section.id*/, courseSlug)
+                                let toc = await getCourseToc(itemStar,courseXmlDoc,mToc,mSection,section, courseSlug)
                                 if(toc){
 									tocs[sectionSlug].push(toc)
 								}

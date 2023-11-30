@@ -14,6 +14,10 @@ class Section extends DB {
         const results =  this.db.queryAll(this.table);
         return results
     }
+    getListCourseId(courseId){
+        const results =  this.query({query: {courseId}})
+        return results
+    }
     async create(title, slug, courseId,itemStars=[]){
         let section = this.getBySlug(slug,courseId)
 
@@ -47,26 +51,7 @@ class Section extends DB {
 
         return section
     }
-	/*
-
-
-static createSection(courseId:number,title:string):Section_tableField{
-        const db = Store.db();
-        const slug = makeSlug(title);
-        let section = Store.getSection(slug,courseId);
-
-        if(!section){
-            const ID = 0;
-            const tocIds=[];
-            section = {ID,courseId,title,slug,tocIds};
-            section.ID = db.insert('section',section);
-            db.commit();
-
-        }
-
-        return section;
-    }
-	*/
+	
 }
 
 export default Section

@@ -74,6 +74,12 @@
 			"hidden" : false,
 			"hasChild" : true,
 			"childItems" : {
+				"author" : {
+					"title" : "Author",
+					"path" : "/database/author",
+					"iconCls" : "fa fa-database",
+					"order" : 0
+				},
 				"download-state" : {
 					"title" : "DownloadState",
 					"path" : "/database/download-state",

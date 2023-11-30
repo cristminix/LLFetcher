@@ -364,6 +364,7 @@ export {
 	generateShellScript,
     queryDownloadProgress,
     getDownloadFilenames,
-    validateUrl
+    validateUrl,
+    konsole
 }
 

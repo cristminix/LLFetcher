@@ -21,7 +21,8 @@ class CourseApi {
 	tocXmlDocs = {}
 	authors=[]
 	mPrxCache=null
-	
+	courseXmlDocFetchStatus = 0
+	tocXmlDocFetchStatus = 0
 	constructor(store){
 		this.store = store
 		this.mPrxCache = store.get('PrxCache')
@@ -86,12 +87,11 @@ class CourseApi {
         }
         return response
 	}
-	async getXmlDoc(url,noCache=false){
+	async getXmlDoc(url,noCache=false,statusCodeSaveKey=null){
 		let xmlDoc = null
 		const webCache = await this.mPrxCache.get(url)
 		let cacheContent = null
 		let statusCode = 0
-
 		if(!webCache.isEmpty()){
 			cacheContent = webCache.getCacheContent()
 			statusCode = webCache.getStatusCode()
@@ -113,8 +113,9 @@ class CourseApi {
 			}
 			
 		}
-		
-
+		if(statusCodeSaveKey){
+			this[statusCodeSaveKey] = statusCode
+		}
 		// console.log(cacheContent)
 		if(cacheContent){
 			const jsonSchema = parseJsonSchema(cacheContent)
@@ -128,7 +129,7 @@ class CourseApi {
 
 		let xmlDoc = this.courseXmlDoc
 		if(!xmlDoc){
-			xmlDoc = await this.getXmlDoc(courseUrl,noCache)
+			xmlDoc = await this.getXmlDoc(courseUrl,noCache,'courseXmlDocFetchStatus')
 			this.courseXmlDoc = xmlDoc
 		}
 
@@ -141,7 +142,7 @@ class CourseApi {
 			xmlDoc = this.tocXmlDocs[tocSlug]
 		}
 		if(!xmlDoc ){
-			xmlDoc = await this.getXmlDoc(tocUrl,noCache)
+			xmlDoc = await this.getXmlDoc(tocUrl,noCache,'tocXmlDocFetchStatus')
 			this.tocXmlDocs[tocSlug] = xmlDoc
 		}
 

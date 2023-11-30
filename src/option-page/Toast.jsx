@@ -3,7 +3,7 @@ import {Component} from "react"
 const ToastNormal = ({toast})=>{
   return <>
     {/* <!-- Toast --> */}
-<div className="max-w-xs bg-white border border-gray-200 rounded-xl shadow-lg dark:bg-gray-800 dark:border-gray-700" role="alert">
+<div className="my-1 max-w-xs bg-white border border-gray-200 rounded-xl shadow-lg dark:bg-gray-800 dark:border-gray-700" role="alert">
   <div className="flex p-4">
     <div className="flex-shrink-0">
       <svg className="flex-shrink-0 h-4 w-4 text-blue-500 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -23,7 +23,7 @@ const ToastNormal = ({toast})=>{
 const ToastSuccess= ({toast})=>{
   return <>
     {/* <!-- Toast --> */}
-<div className="max-w-xs bg-white border border-gray-200 rounded-xl shadow-lg dark:bg-gray-800 dark:border-gray-700" role="alert">
+<div className="my-1 max-w-xs bg-white border border-gray-200 rounded-xl shadow-lg dark:bg-gray-800 dark:border-gray-700" role="alert">
   <div className="flex p-4">
     <div className="flex-shrink-0">
       <svg className="flex-shrink-0 h-4 w-4 text-teal-500 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -43,7 +43,7 @@ const ToastSuccess= ({toast})=>{
 const ToastError= ({toast})=>{
   return <>
     {/* <!-- Toast --> */}
-<div className="max-w-xs bg-white border border-gray-200 rounded-xl shadow-lg dark:bg-gray-800 dark:border-gray-700" role="alert">
+<div className="my-1 max-w-xs bg-white border border-gray-200 rounded-xl shadow-lg dark:bg-gray-800 dark:border-gray-700" role="alert">
   <div className="flex p-4">
     <div className="flex-shrink-0">
       <svg className="flex-shrink-0 h-4 w-4 text-red-500 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -63,7 +63,7 @@ const ToastError= ({toast})=>{
 const ToastWarning=({toast})=>{
   return <>
     {/* <!-- Toast --> */}
-<div className="max-w-xs bg-white border border-gray-200 rounded-xl shadow-lg dark:bg-gray-800 dark:border-gray-700" role="alert">
+<div className="my-1 max-w-xs bg-white border border-gray-200 rounded-xl shadow-lg dark:bg-gray-800 dark:border-gray-700" role="alert">
   <div className="flex p-4">
     <div className="flex-shrink-0">
       <svg className="flex-shrink-0 h-4 w-4 text-yellow-500 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -82,7 +82,7 @@ const ToastWarning=({toast})=>{
 }
 const ToastClosable = ({toast}) =>{
   return <>
-    <div id="dismiss-toast" className="hs-removing:translate-x-5 hs-removing:opacity-0 transition duration-300 max-w-xs bg-white border border-gray-200 rounded-xl shadow-lg dark:bg-gray-800 dark:border-gray-700" role="alert">
+    <div id="dismiss-toast" className="my-1 hs-removing:translate-x-5 hs-removing:opacity-0 transition duration-300 max-w-xs bg-white border border-gray-200 rounded-xl shadow-lg dark:bg-gray-800 dark:border-gray-700" role="alert">
   <div className="flex p-4">
     <p className="text-sm text-gray-700 dark:text-gray-400">
       {toast.message}
@@ -189,7 +189,7 @@ class Toast extends Component{
   render(){
     const {toastList} = this.state
     return <>
-    <div className="absolute top-0 right-0 m-4">
+    <div className="fixed top-0 right-4 m-4">
     {
       toastList.map((toast,toastIdx)=>{
         if(toast.hidden){

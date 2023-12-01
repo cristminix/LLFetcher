@@ -40,6 +40,7 @@ const DBTableManager = ({store,config}) => {
             reinitLoadingState[index] = false
             setReinitLoading(reinitLoadingState)
             updateStorageSize()
+            updateList()
             config.getUiConfig().reloadSidebar()
         }
         
@@ -80,7 +81,7 @@ const DBTableManager = ({store,config}) => {
 			// }
             edit : (item, index, options, linkCls, gridAction) => {
 				return <>
-                <Button loading={reinitLoading[index]} icon="fa fa-cog" caption="Reinit/Truncate" onClick={e => onReinit(item, index)}/>
+                <Button loading={reinitLoading[index]} icon="fa fa-trash" caption="Truncate" onClick={e => onReinit(item, index)}/>
                 </>
 	   
 			}

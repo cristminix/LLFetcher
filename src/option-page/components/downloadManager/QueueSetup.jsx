@@ -3,6 +3,7 @@ import { fetchCourseTocMeta } from "../learning_fn"
 import Button from "../Button"
 import DropdownSelect from "../DropdownSelect"
 import FmtSelector from "./queue-setup/FmtSelector"
+import CourseApi from "../../../course-api/CourseApi"
 
 const btnCls = "py-2 px-2 inline-flex justify-center items-center gap-2 -mt-px -ml-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-l-lg sm:mt-0 sm:first:ml-0 sm:first:rounded-tr-none sm:last:rounded-bl-none sm:last:rounded-r-lg border font-medium bg-white text-gray-700 align-middle hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all text-sm dark:bg-gray-800 dark:hover:bg-slate-800 dark:border-gray-700 dark:text-gray-400"
 const lblCls = "mr-1 mt-1 font-medium  text-sm dark:bg-slate-900 dark:text-gray-400 "    
@@ -11,14 +12,17 @@ const lblCls = "mr-1 mt-1 font-medium  text-sm dark:bg-slate-900 dark:text-gray-
 const QueueSetup = ({
     logStatusBar,clearStatusBar,
     availableFmt, setAvailableFmt,
+    availableTrans, setAvailableTrans,
     selectedFmt, setSelectedFmt,
-    selectFmt,
+    selectedTrans, setSelectedTrans,
+    selectFmt,selectTrans,
     dmsetup, store,course,sections,tocs, alreadySetup,setAlreadySetup, displaySetupUi, reconfigureSetup = false, setReconfigureSetup, runSetup, setRunSetup}) => {
   
 
     const [loadingFetchToc, setLoadingFetchToc] = useState(false) 
     const mDMSetup = store.get("DMSetup")
-
+    
+    /*
     const fetchToc = async(courseSlug,tocSlug)=> {
 		
 		const [validResource, tocUp, exFile, streamLocations,errorMsg] = await fetchCourseTocMeta(courseSlug,tocSlug)
@@ -58,12 +62,73 @@ const QueueSetup = ({
         setLoadingFetchToc(false)
 
     }
+    */
     const getAvailableFmt = async(e) => {
         if(dmsetup){
             const savedFmtList = dmsetup.availableFmt
             setAvailableFmt(savedFmtList)
             return
         }
+        setLoadingFetchToc(true)
+        setAvailableFmt([])
+        setAvailableTrans([])
+
+        const courseApi = new CourseApi(store)
+        const ncourse = courseApi.getCourseInfo(course.slug)
+        const ntocs = await courseApi.getCourseTocs(course.slug)
+        let getFirstTocPassed = false
+        let toc,tocSlug
+
+        if(ntocs){
+            const tocKeys = Object.keys(ntocs)
+            if(tocKeys.length > 0){
+                const sectionSlug = tocKeys.shift()
+                const tocList = ntocs[sectionSlug]
+                if(tocList.length > 0){
+                    toc = tocList.shift()
+                    tocSlug = toc.slug
+                    if(toc){
+                        getFirstTocPassed = true
+                    }
+                }
+                
+
+            }else{
+                console.error(`tocKeys is empty`)
+            }
+        }
+        
+        if(getFirstTocPassed){
+            console.log(tocSlug)
+            const streamLocations = await courseApi.getStreamLocs(toc)
+            const availableFmtList = streamLocations.map(row=>row.fmt)
+            console.log(streamLocations)
+            console.log(availableFmtList)
+            const transcripts = await courseApi.getTranscripts(toc)
+            const availableTransList = Object.keys(transcripts)
+            console.log(transcripts)
+            console.log(availableTransList)
+            const exerciseFile = ncourse.exerciseFile
+            console.log(exerciseFile)
+
+            const selectedFmt = null
+            const selectedTrans = null
+            const sourceRepo = ncourse.sourceCodeRepository
+            const status = 1
+            const finished = false
+            
+            setAvailableFmt(availableFmtList)
+            setAvailableTrans(availableTransList)
+
+            await mDMSetup.create(ncourse.id,availableFmtList,selectedFmt,availableTransList,selectedTrans,sourceRepo,exerciseFile,status,finished)
+
+        }else{
+            alert(`Operation Canceled : Could not get first TOC in first Course Section`)
+        }
+
+        setLoadingFetchToc(false)
+        return
+        /*
         const tocKeys = Object.keys(tocs)
         const sectionSlug = tocKeys[0]
         const tocList = tocs[sectionSlug]
@@ -75,10 +140,20 @@ const QueueSetup = ({
         const [validResource, availableFmtList,exerciseFile] = await fetchToc(course.slug, tocSlug)
         if(validResource){
             setAvailableFmt(availableFmtList)
-            console.log(exerciseFile)
-            await mDMSetup.create(course.id,availableFmtList,"",course.sourceCodeRepository,exerciseFile,1, false)
+            console.log(availableFmtList,exerciseFile)
+            / *
+            availableFmtList = ['360', '720', '540', '480'] 
+            availableTransList = ['us', 'id', 'de', 'it'] 
+            exerciseFile = {
+                name: "Ex_Files_Intro_to_Web_APIs.zip"
+                sizeInBytes: 176340
+                url:"https://"
+            }
+            * /
+            //
         }
-        setLoadingFetchToc(false)
+        */
+        
 
     }
     useEffect(()=>{
@@ -170,12 +245,28 @@ const QueueSetup = ({
         }
         {
             showConfigSetup ? <>
-            <div className="flex p-2 px-2">
-                <label className={lblCls}>Select Format</label>
-                <DropdownSelect onMouseOut={e=>clearStatusBar()} 
-                  onMouseOver={e=>logStatusBar('QueueSetup',`Select video size or format`)}
-                 data={availableFmt} selected={selectedFmt} onSelect={fmt=>setSelectedFmt(fmt)}/>
+            <div className="flex items-center p-2 px-2">
+                <div className="w-[150px]">
+                    <label className="font-bold">Select Format</label>
+                </div>
+                <div>
+                    <DropdownSelect onMouseOut={e=>clearStatusBar()} 
+                    onMouseOver={e=>logStatusBar('QueueSetup',`Select video size or format`)}
+                    data={availableFmt} selected={selectedFmt} onSelect={fmt=>setSelectedFmt(fmt)}/>
+                </div>
             </div>
+            <div className="flex items-center p-2 px-2">
+                <div className="w-[150px]">
+                    <label className="font-bold">Select Transcript Lang</label>
+                </div>
+                <div>
+
+                <DropdownSelect onMouseOut={e=>clearStatusBar()} 
+                  onMouseOver={e=>logStatusBar('QueueSetup',`Select transcript lang`)}
+                 data={availableTrans} selected={selectedTrans} onSelect={trans=>setSelectedTrans(trans)}/>
+                </div>
+            </div>
+
             <div className="flex p-2 gap-2">
                 <Button onMouseOut={e=>clearStatusBar()} 
                   onMouseOver={e=>logStatusBar('QueueSetup',`Cancel this setup and back to main queue`)}

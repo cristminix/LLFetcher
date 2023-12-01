@@ -8,7 +8,9 @@ class DMSetup extends DB{
         "status",
         "finished",
         "availableFmt", 
+        "availableTrans", 
         "selectedFmt", 
+        "selectedTrans", 
         "exerciseFile", 
         "sourceRepo"
         ]
@@ -29,7 +31,7 @@ class DMSetup extends DB{
     getById(id){
         return this.singleQuery({query: {id}})
     }
-    async create(courseId,availableFmt,selectedFmt,sourceRepo,exerciseFile,status,finished){
+    async create(courseId,availableFmt,selectedFmt,availableTrans,selectedTrans,sourceRepo,exerciseFile,status,finished){
         let row = this.getByCourseId(courseId)
         if(!row){
             const id = 0

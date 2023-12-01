@@ -588,10 +588,11 @@ const getCourseToc = async (itemStar,doc,mToc,mSection,section,courseSlug) => {
     if(row){
         const {tocIds} = section
 
-        if(!section.tocIds.includes(row.id)){
+        if(!tocIds.includes(row.id)){
             tocIds.push(row.id)
             await mSection.updateTocIds(section.id, tocIds)
         }
+        section.tocIds = tocIds
     }
     return row
 }

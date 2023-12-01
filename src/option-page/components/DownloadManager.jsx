@@ -35,8 +35,12 @@ const DownloadManager = ({store}) => {
 
     // setupRelatedState
     const selectFmt = "Select Format"
+    const selectTrans = "Select Transcript Language"
     const [availableFmt, setAvailableFmt] = useState([])
     const [selectedFmt, setSelectedFmt] = useState(selectFmt)
+
+    const [availableTrans, setAvailableTrans] = useState([])
+    const [selectedTrans, setSelectedTrans] = useState(selectTrans)
 
 
     /**
@@ -217,11 +221,21 @@ const DownloadManager = ({store}) => {
                     tocs={tocs}
                     store={store}
                     dmsetup={dmsetup}
+                    
                     availableFmt={availableFmt} 
                     setAvailableFmt={setAvailableFmt}
-                    selectedFmt={selectedFmt} 
+                    selectedFmt={selectedFmt}
+                    
+                    availableTrans={availableTrans} 
+                    setAvailableTrans={setAvailableTrans}
+                    selectedTrans={selectedTrans}
+
                     setSelectedFmt={setSelectedFmt}
+                    setSelectedTrans={setSelectedTrans}
+
                     selectFmt={selectFmt}
+                    selectTrans={selectTrans}
+
                     logStatusBar={logStatusBar}
                     clearStatusBar={clearStatusBar}
                     />

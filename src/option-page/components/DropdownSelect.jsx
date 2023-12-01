@@ -1,4 +1,4 @@
-import {useState} from "react"
+import {useEffect, useState} from "react"
 import {v4} from "uuid"
 
 const DropdownSelect = ({data=[], onSelect = f => f, selected="", onMouseOver=f=>f,onMouseOut=f=>f}) => {
@@ -12,6 +12,9 @@ const DropdownSelect = ({data=[], onSelect = f => f, selected="", onMouseOver=f=
 		
 	}
     const uid = v4()
+    useEffect(()=>{
+      console.log(data,selected)
+    },[])
     return <>
         <div className="hs-dropdown relative inline-flex [--placement:bottom-left]">
   <button onMouseOut={e=>onMouseOut(e)} onMouseOver={e=>onMouseOver(e)} id={`hs-dropdown-${uid}`} type="button" className="hs-dropdown-toggle py-1 px-2 inline-flex justify-center items-center gap-2 rounded-md border font-medium bg-white text-gray-700 shadow-sm align-middle hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-blue-600 transition-all text-sm dark:bg-slate-900 dark:hover:bg-slate-800 dark:border-gray-700 dark:text-gray-400 dark:hover:text-white dark:focus:ring-offset-gray-800">

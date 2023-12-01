@@ -212,14 +212,14 @@ class CourseApi {
 	async getCourseSections(courseSlug){
 		let sections = null
 		const mSection = this.store.get('Section')
-        if (this.course){
-            // sections = this.store.get('Section').getListCourseId(this.course.id)
-            if (sections){
-                // log('course_sections_get_from_m_sections')
-                this.sections = sections
-                return sections
-			}
+        if (!this.course){
+			this.course = await this.fetchCourseInfo(courseSlug)
 		}
+		if(this.sections){
+			if(this.sections.length > 0){
+				return this.sections
+			}
+		} 
         let courseUrl = courseUrlFromSlug(courseSlug)
         let xmlDoc= await this.getCourseXmlDoc(courseUrl)
         if (xmlDoc){

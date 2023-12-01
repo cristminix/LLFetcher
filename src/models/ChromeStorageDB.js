@@ -33,16 +33,44 @@ export default class ChromeStorageDB{
         this.initiator = initiator
     }
     // Retrieve data from chrome.storage and get the size
-	getDataSize(callback) {
+    lcfirst(str) {
+        if (typeof str !== 'string' || str.length === 0) {
+          return str;
+        }
+      
+        return str.charAt(0).toLowerCase() + str.slice(1);
+    }
+    getTableCounts(table) {
+        const tbl = this.lcfirst(table)
+        const recs = this.db.data[tbl]
+        if(recs){
+            // console.log(recs)
+            return Object.keys(recs).length
+        }
+        return 0
+    }
+	getDataSize(table,callback) {
 		// Get the serialized data from chrome.storage.local
-        const {db_id} = this
+        
+        if(table){
+            const tbl = this.lcfirst(table)
+            // console.log(tbl)
+            // console.log(this.db.data[tbl])
+            let dataSize = new TextEncoder().encode(JSON.stringify(this.db.data[tbl])).length
+            callback(dataSize)
+            return
+        }
+        // const {db_id} = this
 		chrome.storage.local.get(null, function(result) {
             // Check if the data is present in chrome.storage
             let dataSize = 0
             for(let key in result) {
                 if (result[key]) {
                     // Calculate the size of the serialized data
-                    dataSize += new TextEncoder().encode(JSON.stringify(result[db_id])).length
+                    // if(table){
+                        dataSize += new TextEncoder().encode(JSON.stringify(result[key])).length
+                    // }
+                    
     
                     // Call the callback with the size
                     // callback(dataSize)

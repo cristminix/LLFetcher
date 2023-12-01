@@ -137,6 +137,27 @@ class PrxCache{
             }
         }
     }
+    async getCounts(){
+        let data = await chrome.storage.local.get(null)
+        let count = 0
+        for(let key in data){
+            if(key.startsWith(WEBCACHE_PREFIX)){
+                count += 1
+            }
+        }
+        return count
+    }
+    async getSize(){
+        let data = await chrome.storage.local.get(null)
+        let size = 0
+        for(let key in data){
+            if(key.startsWith(WEBCACHE_PREFIX)){
+                let dataSize = new TextEncoder().encode(data[key]).length
+                size += dataSize
+            }
+        }
+        return size
+    }
 }
 export {WebCache}
 export default PrxCache

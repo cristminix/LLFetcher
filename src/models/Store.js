@@ -111,11 +111,13 @@ class Store {
 		return null
 	}
 
-	async getStorageSize(){
+	async getStorageSize(table=null){
 		return new Promise((resolve,reject)=>{
-			DB.connection.getDataSize(size=>resolve(size))
+			DB.connection.getDataSize(table, size=>resolve(size))
 		})
-		
+	}
+	getCounts(table){
+		return DB.connection.getTableCounts(table)
 	}
 }
 

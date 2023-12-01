@@ -52,8 +52,8 @@ const DBTableManager = ({store,config}) => {
 		numberWidthCls : '',
 		actionWidthCls : '',
 		widthCls : ['1/4','3/4'],
-		headers : ['Table'],
-		fields : ['table'],
+		headers : ['Table','Desc','Size','Counts'],
+		fields : ['table','desc','size','counts'],
 		enableEdit : true,
 		// editUrl : (item) =>{ return `/DBerences/tts-server/${item.key}`},
 		// remoteUrl : (item) => `${config.getApiEndpoint()}/api/tts/DBerence?key=${item.key}`,
@@ -90,16 +90,48 @@ const DBTableManager = ({store,config}) => {
         const ssize = await store.getStorageSize()
         setStorageSz(ssize)
         // console.log(ssize)
-    }    
-    const updateList = () => {
+    }
+    const getTableCounts = async(table) => {
+        let counts = 0
+        if(table == "PrxCache"){
+            counts = await store.get("PrxCache").getCounts()
+        }else{
+            counts = store.getCounts(table)
+        }
+        return counts
+    }   
+    const getTableSize = async(table) => {
+        let sSize = 0
+        if(table == "PrxCache"){
+            sSize = await store.get("PrxCache").getSize()
+        }else{
+            sSize = await store.getStorageSize(table)
+        }
+        
+        return formatBytes(sSize)
+    }
+
+    const getTableDesc = async() => {
+
+    }
+
+    const updateList = async () => {
         const newGrid = Object.assign({}, grid)
         setGrid(null)
         setReinitLoading([])
-        const records = schema.availables.map(table => {
-            return {
-                table
+        const records = []
+        for(const table of schema.availables){
+            const desc = ''
+            const size = await getTableSize(table)
+            const counts = await getTableCounts(table)
+            const record = {
+                table,
+                desc,
+                size,
+                counts
             }
-        })
+            records.push(record)
+        }
         const reinitLoadingState = schema.availables.map(table => false)
         setReinitLoading(reinitLoadingState)
 
@@ -144,14 +176,20 @@ const DBTableManager = ({store,config}) => {
               <div className="-m-1.5 overflow-x-auto">
                 <div className="p-1.5 min-w-full inline-block align-middle">
                       <div className="overflow-hidden">
-                        <Grid options={gridOptions} records={grid.records} page={grid.page} limit={grid.limit} />
+                        {
+                            grid ?<Grid options={gridOptions} records={grid.records} page={grid.page} limit={grid.limit} />:""
+                        }
+                        
                       </div>
                       <div className="pager-container mt-3">
-                          <Pager path="/database" 
+                        {
+                            grid ? <Pager path="/database" 
                                  page={grid.page} 
                                  total_pages={grid.total_pages} 
                                  limit={grid.limit}
-                                 onRefresh={onRefresh}/>
+                                 onRefresh={onRefresh}/>:""
+                        }
+                          
 
                       </div>
                 </div>

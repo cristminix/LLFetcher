@@ -8,6 +8,13 @@
             
             "listMethod" : "getList"
         },
+        "stream-location" : {
+            "headers" : ["Toc ID","Fmt","Url", "Expires At"],
+            "fields" : ["tocId","fmt","url","expiresAt"],
+            "model" : "StreamLocation",
+            
+            "listMethod" : "getList"
+        },
         "author" : {
             "headers" : ["Name","Slug","Biography", "Short Biography","Course IDS"],
             "fields" : 	["name","slug","biography", "shortBiography","courseIds"]

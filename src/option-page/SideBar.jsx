@@ -53,7 +53,7 @@ export default function SideBar({store, config, showSidebar}){
         <div style={{zIndex:15}} className="relative">
           <button className="dark:text-white absolute -right-4 my-32" onClick={toggle}><i className="bi bi-chevron-left"></i></button>
         </div>
-        <ul className="space-y-1.5">
+        <ul className="space-y-1.5 transition-transform">
         {
           Object.keys(sideMenuLinks).map((key,index)=>{
             

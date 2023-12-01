@@ -205,13 +205,13 @@ class Toast extends Component{
     // const {toastTimers} = this
     const {toastList} = this.state
     if(! toastList[idx].iv){
-      console.log(`Toast.hideToastByTimeout(${idx})`)
+      // console.log(`Toast.hideToastByTimeout(${idx})`)
       const iv = setInterval(()=>{
         // if(typeof this.toastClocks[idx] == "undefined"){
         //   this.toastClocks[idx] = 0
         // }
         toastList[idx].clock += 1
-        console.log(toastList[idx].clock)
+        // console.log(toastList[idx].clock)
         const customToast = this.toastRefs[idx].current
 
         if(customToast){

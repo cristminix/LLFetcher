@@ -2,8 +2,11 @@ import DB from "./DB"
 
 class StreamLocation extends DB {
 	table = 'streamLocation'
-	fields = ["tocId","fmt","url"]
+	fields = ["tocId","fmt","url","expiresAt"]
 
+    async deleteByTocId(tocId){
+        await this.deleteRows({query:{tocId}})
+    }
     getByTocId(tocId,fmt){
         return this.singleQuery({query: {tocId,fmt}})
         
@@ -11,7 +14,7 @@ class StreamLocation extends DB {
     getListByTocId(tocId){
         return this.query({query: {tocId}})
     }
-    async create(fmt, url, tocId){
+    async create(fmt, url, tocId,expiresAt=null){
         
         let streamloc = this.getByTocId(tocId,fmt)
         if(streamloc){
@@ -22,7 +25,7 @@ class StreamLocation extends DB {
             })
         }else{
             const id = 0
-            streamloc = {id,tocId,fmt,url}
+            streamloc = {id,tocId,fmt,url,expiresAt}
             streamloc.id = this.db.insert(this.table,streamloc)
         }
         await this.db.commit()

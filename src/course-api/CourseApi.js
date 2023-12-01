@@ -279,44 +279,39 @@ class CourseApi {
         return tocs 
 	}
 	async getStreamLocs(toc, refresh=false){
-		let streamLocations = null
+		const mStreamLocation = this.store.get('StreamLocation')
+		let streamLocations = []
 		let noCache = false
         
 
         if (refresh) {
-            // this.mStreamLocation.deleteByTocId(toc.id)
+            await mStreamLocation.deleteByTocId(toc.id)
             noCache = true
         }
 
-        streamLocations = null//this.mStreamLocation.getByTocId(toc.id)
+        
+		const tocXmlDoc = await this.getTocXmlDoc(toc.slug, toc.url, noCache)
 
-        if (streamLocations) {
-            log('stream_locations_get_from_m_stream_location')
-            // break
-        } else {
-            const tocXmlDoc = await this.getTocXmlDoc(toc.slug, toc.url, noCache)
+		if (tocXmlDoc) {
+			const [vMetaDataNd, statuses] = getVideoMetaNd(toc.vStatusUrn, tocXmlDoc)
 
-            if (tocXmlDoc) {
-                const [vMetaDataNd, statuses] = getVideoMetaNd(toc.vStatusUrn, tocXmlDoc)
+			if (vMetaDataNd) {
+				streamLocations = await getStreamLocations(vMetaDataNd, toc, mStreamLocation)
+			} else {
+				console.error('Could not get video metadata nd')
+			}
 
-                if (vMetaDataNd) {
-                    streamLocations = await getStreamLocations(vMetaDataNd, tocXmlDoc, toc, this.mStreamLocation)
-                } else {
-                    console.error('Could not get video metadata nd')
-                }
+			if (streamLocations.length == 0) {
+				this.store.get('PrxCache').unsetByKey(this.lastTocXmlDocCacheKey)
 
-                if (!streamLocations) {
-                    // this.mPrx.deleteByPageName(this.prx.getPageName())
-					this.store.get('PrxCache').unsetByKey(this.lastTocXmlDocCacheKey)
+			}
 
-                }
-
-                
-            } else {
-                console.error('Could not get toc xml doc')
-                // break
-            }
-        }
+			
+		} else {
+			console.error('Could not get toc xml doc')
+			// break
+		}
+        
  
 
         return streamLocations
@@ -327,41 +322,35 @@ class CourseApi {
         
 		const mTranscript = this.store.get("Transcript")
         if (refresh) {
-            // this.mTranscript.deleteByTocId(toc.id)
+            this.mTranscript.deleteByTocId(toc.id)
             noCache = true
         }
 
        
 
-        transcripts = null//this.mTranscript.getByTocId(toc.id)
+       
+		const tocXmlDoc = await this.getTocXmlDoc(toc.slug, toc.url, noCache)
 
-        if (transcripts) {
-            log('transcripts_get_from_m_transcripts')
-            // break
-        } else {
-            const tocXmlDoc = await this.getTocXmlDoc(toc.slug, toc.url, noCache)
+		if (tocXmlDoc) {
+			const [vMetaDataNd, statuses] = getVideoMetaNd(toc.vStatusUrn, tocXmlDoc)
 
-            if (tocXmlDoc) {
-                const [vMetaDataNd, statuses] = getVideoMetaNd(toc.vStatusUrn, tocXmlDoc)
+			if (vMetaDataNd) {
+				transcripts = await getTranscripts(vMetaDataNd, tocXmlDoc, toc, mTranscript)
+			} else {
+				console.error('Could not get video metadata nd')
+			}
 
-                if (vMetaDataNd) {
-                    transcripts = await getTranscripts(vMetaDataNd, tocXmlDoc, toc, mTranscript)
-                } else {
-                    console.error('Could not get video metadata nd')
-                }
+			if (!transcripts) {
+				// this.mPrx.deleteByPageName(this.prx.getPageName())
+				this.store.get('PrxCache').unsetByKey(this.lastTocXmlDocCacheKey)
 
-                if (!transcripts) {
-                    // this.mPrx.deleteByPageName(this.prx.getPageName())
-					this.store.get('PrxCache').unsetByKey(this.lastTocXmlDocCacheKey)
+			}
 
-                }
-
-                
-            } else {
-                console.error('Could not get toc xml doc')
-                // break
-            }
-        }
+			
+		} else {
+			console.error('Could not get toc xml doc')
+			// break
+		}
  
 
         return transcripts

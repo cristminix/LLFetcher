@@ -80,6 +80,18 @@
 					"iconCls" : "fa fa-database",
 					"order" : 0
 				},
+				"stream-location" : {
+					"title" : "StreamLocation",
+					"path" : "/database/stream-location",
+					"iconCls" : "fa fa-database",
+					"order" : 0
+				},
+				"transcript" : {
+					"title" : "Transcript",
+					"path" : "/database/transcript",
+					"iconCls" : "fa fa-database",
+					"order" : 0
+				},
 				"download-state" : {
 					"title" : "DownloadState",
 					"path" : "/database/download-state",
@@ -131,12 +143,6 @@
 				"cookie" : {
 					"title" : "Cookie",
 					"path" : "/database/cookie",
-					"iconCls" : "fa fa-database",
-					"order" : 0
-				},
-				"transcript" : {
-					"title" : "Transcript",
-					"path" : "/database/transcript",
 					"iconCls" : "fa fa-database",
 					"order" : 0
 				}

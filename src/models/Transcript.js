@@ -11,7 +11,17 @@ class Transcript extends DB {
     getListByTocId(tocId){
         return this.query({query: {tocId}})
     }
-
+    getListByTocIdAsObject(tocId){
+        const results = this.getListByTocId(tocId)
+        let transcripts = null
+        if(results.length > 0){
+            transcripts = {}
+            for(const row of results){
+                transcripts[row.lang] = row
+            }
+        }
+        return transcripts
+    }
     getByLang(lang, tocId){
         return this.singleQuery({query: {lang,tocId}})
     }

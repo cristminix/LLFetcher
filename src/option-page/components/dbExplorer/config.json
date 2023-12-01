@@ -15,6 +15,13 @@
             
             "listMethod" : "getList"
         },
+        "exercise-file" : {
+            "headers" : ["Course ID","File Name","Url", "Size in Bytes"],
+            "fields" : ["courseId","name","url","size"],
+            "model" : "ExerciseFile",
+            
+            "listMethod" : "getList"
+        },
         "author" : {
             "headers" : ["Name","Slug","Biography", "Short Biography","Course IDS"],
             "fields" : 	["name","slug","biography", "shortBiography","courseIds"]

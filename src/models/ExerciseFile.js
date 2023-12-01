@@ -18,7 +18,7 @@ class ExerciseFile extends DB {
 
         }
 
-        return exerciseFile;
+        return exerciseFile
     }
 }
 

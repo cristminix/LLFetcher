@@ -117,16 +117,19 @@ const getAuthors = async(doc,mAuthor,mCourse,course) => {
             
     return authors
 }
-const getCourseInfo = async(doc,courseSlug,mCourse) => {
-    let data = mCourse.getBySlug(courseSlug)
-    if(data){
-        return data
+const getCourseInfo = async(doc,courseSlug,mCourse,mExerciseFile) => {
+    let course = mCourse.getBySlug(courseSlug)
+    if(course){
+        course.exerciseFiles = mExerciseFile.getByCourseId(course.id)
+        // if()
+        return course
     }
+    // let course = null
 	const [p,courseUrn] = getCourseXmlParentElement(doc)
 	if(p){
 		let courseSlugFound = p.find('slug').text()
 		console.log(`course slug found : ${courseSlugFound}`)
-		data = {
+		course = {
 			url : `https://www.linkedin.com/learning/${courseSlug}`,
 			slug : courseSlug,
 			exerciseFiles : null,
@@ -134,45 +137,45 @@ const getCourseInfo = async(doc,courseSlug,mCourse) => {
 			description : null,
 			urn : courseUrn
 		}
-		data.title = p.find('title').text()
-		data.visibility = p.find('visibility').text()
+		course.title = p.find('title').text()
+		course.visibility = p.find('visibility').text()
 
 		let viewerCounts = p.find('viewerCounts')
 		if(viewerCounts.length > 0){
-			data.viewerCounts = parseInt(viewerCounts.find('total').text())
+			course.viewerCounts = parseInt(viewerCounts.find('total').text())
 		}
 
-		data.description = p.find('description').text()
-		data.descriptionV2 = p.find('descriptionV2').text()
-		if(data.descriptionV2){
-			data.description = data.descriptionV2
+		course.description = p.find('description').text()
+		course.descriptionV2 = p.find('descriptionV2').text()
+		if(course.descriptionV2){
+			course.description = course.descriptionV2
 		}
 
 		let duration = p.find('duration')
 		if(duration.length>0){
-			data.duration = parseInt(p.find('duration').text())
+			course.duration = parseInt(p.find('duration').text())
 		}
 
         
 		let dificulty = p.find('dificulty')
 		if(dificulty.length > 0){
-			data.dificulty = dificulty.find('difficultylevel').text()
+			course.dificulty = dificulty.find('difficultylevel').text()
 		}
 
         let descriptionv3 = p.find('descriptionV3')
         if(descriptionv3.length > 0){
-        	data.descriptionv3 = descriptionv3.text()
-        	if(data.descriptionV3){
-				data.description = data.descriptionV3
+        	course.descriptionv3 = descriptionv3.text()
+        	if(course.descriptionV3){
+				course.description = course.descriptionV3
 			}
         }
 
         let sourceCodeRepo=p.find('sourceCodeRepository')
         if(sourceCodeRepo.length > 0){
-        	// data.sourceCodeRepository = 
+        	// course.sourceCodeRepository = 
         	const repoUrl = sourceCodeRepo.text()
         	if(isValidUrl(repoUrl)){
-        		data.sourceCodeRepository = repoUrl
+        		course.sourceCodeRepository = repoUrl
         	}
         	// console.log(sourceCodeRepo.html())
         }
@@ -186,20 +189,33 @@ const getCourseInfo = async(doc,courseSlug,mCourse) => {
         		let exerciseFileNd = exerciseFiles.find(tag)
         		if(exerciseFileNd.length>0){
         			const text = exerciseFileNd.text()
-        			if(!data.exerciseFiles){
-        				data.exerciseFiles = {}
+        			if(!course.exerciseFiles){
+        				course.exerciseFiles = {}
         			}
 
         			if(tag == 'sizeInBytes'){
-        				data.exerciseFiles[tag] = parseInt(text)
+        				course.exerciseFiles[tag] = parseInt(text)
         			}else{
-        				data.exerciseFiles[tag] = text
+        				course.exerciseFiles[tag] = text
         			}
         		}
         	}
         }
-        const {title,slug,sourceCodeRepository,description,urn} = data
-		const course = await mCourse.create(title,slug,duration,sourceCodeRepository,description,urn)
+        const {title,slug,sourceCodeRepository,description,urn} = course
+        exerciseFiles = course.exerciseFiles
+		course = await mCourse.create(title,slug,course.duration,sourceCodeRepository,description,urn)
+        if(exerciseFiles){
+            try{
+                if(exerciseFiles.name.trim() != ""){
+                    // create(name,url,size,courseId)
+                    const {sizeInBytes,name,url} = exerciseFiles
+                    course.exerciseFiles = await mExerciseFile.create(name,url,sizeInBytes,course.id)
+                }
+            }catch(e){
+                console.error(e)
+            }
+            
+        }
         return course
 	}
 	return null

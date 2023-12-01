@@ -80,6 +80,12 @@
 					"iconCls" : "fa fa-database",
 					"order" : 0
 				},
+				"exercise-file" : {
+					"title" : "ExerciseFile",
+					"path" : "/database/exercise-file",
+					"iconCls" : "fa fa-database",
+					"order" : 0
+				},
 				"stream-location" : {
 					"title" : "StreamLocation",
 					"path" : "/database/stream-location",

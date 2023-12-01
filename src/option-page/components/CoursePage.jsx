@@ -167,6 +167,7 @@ const AddCoursePage=({slug, store, config,onOk})=>{
 		const mToc = store.get("Toc")
 		const mStreamLoc = store.get("StreamLocation")
 		const mTranscript = store.get("Transcript")
+		const mExerciseFile = store.get("ExerciseFile")
 
 		let course = null //mCourse.getBySlug(courseSlug)
 		// const courseSlug = slug

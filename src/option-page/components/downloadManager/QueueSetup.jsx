@@ -35,6 +35,29 @@ const QueueSetup = ({
 		
 	}
 
+    const getAvailableFmtOld = async(e) => {
+        if(dmsetup){
+            const savedFmtList = dmsetup.availableFmt
+            setAvailableFmt(savedFmtList)
+            return
+        }
+        const tocKeys = Object.keys(tocs)
+        const sectionSlug = tocKeys[0]
+        const tocList = tocs[sectionSlug]
+        const tocSlug = tocList[0].slug
+        console.log(tocSlug)
+        setLoadingFetchToc(true)
+        setAvailableFmt([])
+
+        const [validResource, availableFmtList,exerciseFile] = await fetchToc(course.slug, tocSlug)
+        if(validResource){
+            setAvailableFmt(availableFmtList)
+            console.log(exerciseFile)
+            await mDMSetup.create(course.id,availableFmtList,"",course.sourceCodeRepository,exerciseFile,1, false)
+        }
+        setLoadingFetchToc(false)
+
+    }
     const getAvailableFmt = async(e) => {
         if(dmsetup){
             const savedFmtList = dmsetup.availableFmt
@@ -142,7 +165,7 @@ const QueueSetup = ({
             showGetAvailableFmt ? <div className="flex p-2 px-2">
                 <Button onMouseOut={e=>clearStatusBar()} 
                   onMouseOver={e=>logStatusBar('QueueSetup',`Click to retrieve available video format or size`)}
-                loading={loadingFetchToc} icon="fa fa-cog" onClick={e=> getAvailableFmt(e)} caption="Get Available Fmt"/>
+                loading={loadingFetchToc} icon="fa fa-cog" onClick={e=> getAvailableFmt(e)} caption="Get Available Media Format & Transcripts"/>
             </div> : ''
         }
         {

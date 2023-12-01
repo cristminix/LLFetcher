@@ -150,7 +150,7 @@ const ToolbarMan = ({setSelectedFmt,setAvailableFmt,setDmsetup,selectedFmt, cour
         console.log(exFile)
       }
     }else{
-      if("object" === typeof exerciseFile){
+      if("object" === typeof exerciseFile && exerciseFile!== null){
         if("undefined" !== typeof exerciseFile.name && "undefined" !== typeof exerciseFile.url){
           validFile = true
         }
@@ -203,10 +203,10 @@ const ToolbarMan = ({setSelectedFmt,setAvailableFmt,setDmsetup,selectedFmt, cour
        
          
            {
-              isValidExerciseFile(dmsetup.exerciseFile) ? <><Button onClick={e=>openExerciseFile(e)} className="ml-1" label="Exercise File:" caption={dmsetup.exerciseFile.name} icon="fa fa-file-archive-o"/></> : ''
+              isValidExerciseFile(dmsetup.exerciseFile) ? <><Button onClick={e=>openExerciseFile(e)} className="ml-1" label="Exercise File:" title={dmsetup.exerciseFile.url} caption={dmsetup.exerciseFile.name} icon="fa fa-file-archive-o"/></> : ''
             } 
             {
-              dmsetup.sourceRepo ? <><Button onClick={e=>openSourceRepo(e)} className="ml-1" label="Source Repo:" caption={dmsetup.exerciseFile.sourceRepo} icon="fa fa-file-archive-o"/></> : ''
+              dmsetup.sourceRepo ? <><Button onClick={e=>openSourceRepo(e)} className="ml-1" label="Source Repo:" title={dmsetup.sourceRepo} caption="Source Repo" icon="fa fa-file-archive-o"/></> : ''
             }
           <Button onClick={e=>downloadPlaylist(e)}  className="ml-1" caption="Playlist.m3u" icon="bi bi-collection-play"/>
             <Button onClick={e=>downloadHelper(e)} className="ml-1" caption="Helper.sh" icon="bi bi-terminal-fill"/>

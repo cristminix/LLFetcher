@@ -71,8 +71,18 @@
             
         },
         "dm-setup" : {
-            "headers" : ["Course","Finished", "Status","Available Fmt", "Selected Fmt", "Exercise File", "Source Repo"],
-            "fields" : ["course", "finished","status", "availableFmt", "selectedFmt", "exerciseFile", "sourceRepo"],
+            "headers" : ["Course","Status","Finished", "Available Fmt","Available Trans", "Selected Fmt","Selected Trans", "Exercise File", "Source Repo"],
+            "fields" : [
+                "course",
+                "status",
+                "finished",
+                "availableFmt", 
+                "availableTrans", 
+                "selectedFmt", 
+                "selectedTrans", 
+                "exerciseFile", 
+                "sourceRepo"
+                ],
             "model" : "DMSetup",
             "editors":["string","boolean","integer","string","string","string","string"],
             "listMethod" : "getListWithCourse"

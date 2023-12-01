@@ -34,7 +34,7 @@ const DownloadManager = ({store}) => {
     const [queueResume, setQueueResume] = useState(false)
 
     // setupRelatedState
-    const selectFmt = "Select Format"
+    const selectFmt = "Select Media Format"
     const selectTrans = "Select Transcript Language"
     const [availableFmt, setAvailableFmt] = useState([])
     const [selectedFmt, setSelectedFmt] = useState(selectFmt)
@@ -185,7 +185,7 @@ const DownloadManager = ({store}) => {
       console.log(activeCourseData)
       const {course, authors, sections, tocs}  = activeCourseData
       return (<><div className="download-manager ">
-        <CourseInfo store={store} course={course} authors={authors}/>
+        <CourseInfo store={store} course={course} authors={authors} selectedFmt={selectedFmt} selectTrans={selectTrans} selectedTrans={selectedTrans} />
         <ToolbarMan alreadySetup={alreadySetup} 
                     setAlreadySetup={setAlreadySetup}
                     reconfigureSetup={reconfigureSetup}

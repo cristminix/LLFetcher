@@ -186,9 +186,12 @@ function generateBatchScript(config){
     }
 
     buffer += `move  "${dp0}${playlistFile}" "${dp0}${targetDir}"\n`
-
-    if('string' === typeof config.exerciseFile.name){
-        buffer += `move  "${dp0}${config.exerciseFile.name}" "${dp0}${targetDir}"\n`
+    try{
+        if('string' === typeof config.exerciseFile.name){
+            buffer += `move  "${dp0}${config.exerciseFile.name}" "${dp0}${targetDir}"\n`
+        }
+    }catch(e){
+        console.log(e)
     }
     buffer += `del "${dp0}${scriptFile}"\n`
 
@@ -222,10 +225,14 @@ function generateShellScript(config){
     }
 
     buffer += `mv -v ${playlistFile} ${targetDir}\n`
-
-    if('string' === typeof config.exerciseFile.name){
-        buffer += `mv -v ${config.exerciseFile.name} ${targetDir}\n`
+    try{
+        if('string' === typeof config.exerciseFile.name){
+            buffer += `mv -v ${config.exerciseFile.name} ${targetDir}\n`
+        }
+    }catch(e){
+        console.log(e)
     }
+    
     buffer += `rm -f ${scriptFile}\n`
 
     return {filename:scriptFile, buffer:buffer}

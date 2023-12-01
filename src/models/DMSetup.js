@@ -35,7 +35,7 @@ class DMSetup extends DB{
         let row = this.getByCourseId(courseId)
         if(!row){
             const id = 0
-            row = {id,courseId,availableFmt,selectedFmt,sourceRepo,exerciseFile,status,finished}
+            row = {id,courseId,availableFmt,selectedFmt,availableTrans,selectedTrans,sourceRepo,exerciseFile,status,finished}
             row.id = this.db.insert(this.table,row)
             await this.db.commit()
         }else{

@@ -203,7 +203,7 @@ function getCourseSections(urn){
         try{
             let sec_ = m3Rec[sec_urn].__data
             sec.title = sec_.title
-
+            sec.itemStars = sec_['*items']
             for(let j in sec_['*items']){
                 let si_urn = sec_['*items'][j]
                 try{
@@ -211,7 +211,9 @@ function getCourseSections(urn){
                     let si = {
                         duration : si_.duration.duration,
                         slug : m3Rec[si_.entityUrn].__data.slug,
-                        title : si_.title
+                        title : si_.title,
+                        itemStar: si_urn,
+                        vStatusUrn: si_['*lyndaVideoViewingStatus']
                     }
                     sec.items.push(si)
                 }catch(e){

@@ -9,12 +9,13 @@
     "webNavigation",
     "tabs",
     "cookies",
-    "downloads"
+    "downloads",
+    "nativeMessaging"
   ],
   "content_scripts": [
     {
       "js": [
-        "assets/content-script-loader.content.js.js"
+        "assets/content-script-loader.content.js.63797b2b.50aee84a.js"
       ],
       "matches": [
         "https://www.linkedin.com/*"
@@ -54,11 +55,11 @@
   "web_accessible_resources": [
     {
       "matches": [
-        "<all_urls>"
+        "https://www.linkedin.com/*"
       ],
       "resources": [
-        "**/*",
-        "*"
+        "assets/content.js.63797b2b.js",
+        "lib/*"
       ],
       "use_dynamic_url": true
     }

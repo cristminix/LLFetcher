@@ -41,7 +41,7 @@
 			"path" : "/tests",
 			"iconCls" : "bi bi-building-gear",
 			"order" : 4,
-			"hidden" : false,
+			"hidden" : true,
 			"hasChild" : true,
 
 			"childItems":{
@@ -71,7 +71,7 @@
 			"path" : "/database",
 			"iconCls" : "fa fa-database",
 			"order" : 5,
-			"hidden" : false,
+			"hidden" : true,
 			"hasChild" : true,
 			"childItems" : {
 				"author" : {

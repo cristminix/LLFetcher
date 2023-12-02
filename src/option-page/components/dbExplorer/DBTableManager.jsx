@@ -58,13 +58,13 @@ const DBTableManager = ({store,config}) => {
 		enableEdit : true,
 		// editUrl : (item) =>{ return `/DBerences/tts-server/${item.key}`},
 		// remoteUrl : (item) => `${config.getApiEndpoint()}/api/tts/DBerence?key=${item.key}`,
-		callbackFieldsXX : {
-			key : (field, value ,item) => {
-				return item.desc.length == 0 ? Helper.titleCase(value) : item.desc
-			}, 
-			value : (field, value, item, index) => {
-				return editorFactory(item, index)
-			}
+		callbackFields : {
+			// key : (field, value ,item) => {
+			// 	return item.desc.length == 0 ? Helper.titleCase(value) : item.desc
+			// }, 
+			// value : (field, value, item, index) => {
+			// 	return editorFactory(item, index)
+			// }
 		},
 
 		callbackActions : {
@@ -97,7 +97,9 @@ const DBTableManager = ({store,config}) => {
         if(table == "PrxCache"){
             counts = await store.get("PrxCache").getCounts()
         }else{
-            counts = store.getCounts(table)
+            const model = store.get(table)
+            const tableName = model.table
+            counts = store.getCounts(tableName)
         }
         return counts
     }   
@@ -106,7 +108,9 @@ const DBTableManager = ({store,config}) => {
         if(table == "PrxCache"){
             sSize = await store.get("PrxCache").getSize()
         }else{
-            sSize = await store.getStorageSize(table)
+            const model = store.get(table)
+            const tableName = model.table
+            sSize = await store.getStorageSize(tableName)
         }
         
         return formatBytes(sSize)

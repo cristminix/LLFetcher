@@ -35,10 +35,10 @@ export default class ChromeStorageDB{
     // Retrieve data from chrome.storage and get the size
     lcfirst(str) {
         if (typeof str !== 'string' || str.length === 0) {
-          return str;
+          return str
         }
       
-        return str.charAt(0).toLowerCase() + str.slice(1);
+        return str.charAt(0).toLowerCase() + str.slice(1)
     }
     getTableCounts(table) {
         const tbl = this.lcfirst(table)

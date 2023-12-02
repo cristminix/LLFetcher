@@ -71,17 +71,17 @@
             
         },
         "dm-setup" : {
-            "headers" : ["Course","Status","Finished", "Available Fmt","Available Trans", "Selected Fmt","Selected Trans", "Exercise File", "Source Repo"],
+            "headers" : ["Course","Status","Finished", "Available Fmt", "Selected Fmt","Selected Trans", "Exercise File", "Source Repo","Available Trans"],
             "fields" : [
                 "course",
                 "status",
                 "finished",
                 "availableFmt", 
-                "availableTrans", 
                 "selectedFmt", 
                 "selectedTrans", 
                 "exerciseFile", 
-                "sourceRepo"
+                "sourceRepo",
+                "availableTrans"
                 ],
             "model" : "DMSetup",
             "editors":["string","boolean","integer","string","string","string","string"],

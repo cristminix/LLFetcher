@@ -42,7 +42,7 @@ const DropdownSelect = ({data=[], onSelect = f => f, selected="", onMouseOver=f=
       let value = item
       let caption = `${item}${captionSuffix}`
 
-      if(typeof item == "object"){
+      if(typeof item == "object" && item !== null){
         value = item.value
         caption = `${item.text}${captionSuffix}`
       }

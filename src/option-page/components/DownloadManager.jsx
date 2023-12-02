@@ -221,6 +221,7 @@ const DownloadManager = ({store}) => {
                     tocs={tocs}
                     store={store}
                     dmsetup={dmsetup}
+                    setDmsetup={setDmsetup}
                     
                     availableFmt={availableFmt} 
                     setAvailableFmt={setAvailableFmt}

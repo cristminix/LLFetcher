@@ -165,15 +165,16 @@ const DBExplorer = ({store, table, page })=>{
 		enableEdit : true,
 		// editUrl : (item) =>{ return `/DBerences/tts-server/${item.key}`},
 		// remoteUrl : (item) => `${config.getApiEndpoint()}/api/tts/DBerence?key=${item.key}`,
-		// callbackFields : {
-		// 	key : (field, value ,item) => {
-		// 		return item.desc.length == 0 ? Helper.titleCase(value) : item.desc
-		// 	}, 
+		callbackFields : {
+
+			// value: (field, value ,item) => {
+			// 	return item.desc.length == 0 ? Helper.titleCase(value) : item.desc
+			// }, 
 		// 	course : (field, value, item, index) => {
 		// 		console.log(field, value, item, index)
 		// 		return editorFactory(item, index)
 		// 	}
-		// },
+		},
 		useAutoEditor: true,
 
 		callbackActions : {

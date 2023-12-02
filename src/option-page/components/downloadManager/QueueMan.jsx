@@ -4,6 +4,7 @@ import QueueTable from "./QueueTable"
 import {timeout} from "../../../components/fn"
 import {fetchCourseTocMeta, formatBytes, calculateSpeed} from "../../components/learning_fn"
 import isNetworkError from 'is-network-error';
+import CourseApi from "../../../course-api/CourseApi"
 
 const ERROR_NOT_SETUP_QUEUE = "You must run setup queue first"
 const FETCH_TEST_MODE = false
@@ -259,35 +260,41 @@ class QueueMan extends Component{
             url = videoUrl
             outputFilename = videoFilename
         }
-        let infoMessage = `Downloading ${outputFilename}`
-        this.setState({infoMessage})
-        let dlStatus = 1
-        const {course} = this.props
-        const courseId = course.id
-        queueItem.setDlStatus(t, vIndex_, dlStatus)
-        await this.mDMStatus.setDlStatus(courseId, t, vIndex_, dlStatus)
-        await timeout(5)
-        const data = await fetchDownload(url, outputFilename, null, (loaded, total, vIndex, lastReadDate, lastLoaded, t)=>{
-            this.onDlProgress(loaded, total, vIndex, lastReadDate, lastLoaded, t)
-        },vIndex_,t)
-        if(FETCH_TEST_MODE){
-            dlStatus = rand(vIndex_)
-
-        }
-        const blob = data.blob
-        const rStatus = data.status
-        if(data.status == 200){
-            dlStatus = 2
-        }else{
-            dlStatus = -1
-        }
-        queueItem.setDlStatus(t, vIndex_, dlStatus)
-        await this.mDMStatus.setDlStatus(courseId, t, vIndex_, dlStatus)
-
-        this.setState({infoMessage : `Download ${outputFilename} ${dlStatus == -1 ? 'Failed' : 'Success'}`})
+        if(url){
+            let infoMessage = `Downloading ${outputFilename}`
+            this.setState({infoMessage})
+            let dlStatus = 1
+            const {course} = this.props
+            const courseId = course.id
+            queueItem.setDlStatus(t, vIndex_, dlStatus)
+            await this.mDMStatus.setDlStatus(courseId, t, vIndex_, dlStatus)
+            await timeout(5)
         
-        if(rStatus==200){
-            await this.downloadFileFromBlob(blob, outputFilename)
+            
+            const data = await fetchDownload(url, outputFilename, null, (loaded, total, vIndex, lastReadDate, lastLoaded, t)=>{
+                this.onDlProgress(loaded, total, vIndex, lastReadDate, lastLoaded, t)
+            },vIndex_,t)
+            if(FETCH_TEST_MODE){
+                dlStatus = rand(vIndex_)
+
+            }
+            const blob = data.blob
+            const rStatus = data.status
+            if(data.status == 200){
+                dlStatus = 2
+            }else{
+                dlStatus = -1
+            }
+            queueItem.setDlStatus(t, vIndex_, dlStatus)
+            await this.mDMStatus.setDlStatus(courseId, t, vIndex_, dlStatus)
+
+            this.setState({infoMessage : `Download ${outputFilename} ${dlStatus == -1 ? 'Failed' : 'Success'}`})
+            
+            if(rStatus==200){
+                await this.downloadFileFromBlob(blob, outputFilename)
+            }
+        }else{
+            alert(`${t} url is empty`)
         }
     }
 
@@ -408,9 +415,58 @@ class QueueMan extends Component{
     */
     async fetchDlMeta(vIndex){
         console.log(`Fetching dlMeta`)
+        const {store,course,sections,tocs} = this.props
+        const courseApi = new CourseApi(store)
         const [courseSlug, tocSlug] = this.getCourseTocSlug(vIndex)
-        const result = await fetchCourseTocMeta(courseSlug, tocSlug)
-        return result
+        const dmsetup = this.mDMSetup.getByCourseId(course.id)
+        const {selectedFmt,selectedTrans} = dmsetup
+        //const ncourse = await courseApi.getCourseInfo(courseSlug)
+        // const sections = await courseApi.getCourseSections(courseSlug)
+        // const tocs = await courseApi.getCourseTocs(courseSlug)
+        const [sIndex, tIndex] = vIndex
+        const section = sections[sIndex]
+        const sectionSlug = section.slug
+        const toc = tocs[sectionSlug][tIndex]
+        const streamLocations = await courseApi.getStreamLocs(toc)
+        const transcripts = await courseApi.getTranscripts(toc)
+        const mPrxCache  = store.get('PrxCache')
+        await mPrxCache.unset(toc.url)
+        let selectedStreamLoc = null
+        let selectedTranscript = null
+        let validResource = false
+        if(dmsetup){
+            
+            
+            const selectedStreamLocs = streamLocations.filter(streamLoc => streamLoc.fmt == selectedFmt)
+            if(selectedStreamLocs.length > 0){
+                selectedStreamLoc = selectedStreamLocs[0]
+                validResource = true
+            }else{
+                if(streamLocations.length > 0){
+                    selectedStreamLoc = streamLocations[0]
+                    validResource = true
+                }
+            }
+            if(typeof transcripts[selectedTrans]!= "undefined"){
+                selectedTranscript = transcripts[selectedTrans]
+                validResource = true
+            }else{
+                if(typeof transcripts.us != "undefined"){
+                    selectedTranscript = transcripts.us
+                    validResource = true
+                }
+            }
+            
+            // console.log(selectedStreamLoc,selectedTranscript)
+            // console.log(dmsetup)
+            // console.log(toc)
+            // console.log(streamLocations)
+        }
+        
+        
+        // const result = await fetchCourseTocMeta(courseSlug, tocSlug)
+        // console.log(result)
+        return [validResource,selectedStreamLoc,selectedTranscript]
     }
     async resetQueueItem(vIndex){
         
@@ -469,21 +525,22 @@ class QueueMan extends Component{
                         console.log(`retry fetchMeta ${retryCount}`)
                     }
 
-                    const [validResource, toc, exerciseFile, streamLocations, errorMsg] = await this.fetchDlMeta(vIndex)
+                    // const [validResource, toc, exerciseFile, streamLocations, errorMsg] = await this.fetchDlMeta(vIndex)
+                    const [validResource,selectedStreamLoc,selectedTranscript] = await this.fetchDlMeta(vIndex)
                     fetchSuccess = validResource
                     const status = validResource ? 2 : -1
                     let mustBreak = false
                     if(fetchSuccess){
                         // update dmstatus meta
-                        const captionUrl = toc.captionUrl
-                        const streamLocs = streamLocations.filter(sl=>sl.fmt==selectedFmt)
-
-                        console.log(captionUrl, streamLocs)
+                        let captionUrl = null 
+                        try{
+                            captionUrl = selectedTranscript.url
+                        }catch(e){
+                            console.warn(e)
+                        }
                         let videoUrl = null 
                         try{
-                            const [streamLoc] = streamLocs
-
-                            videoUrl = streamLoc.url
+                            videoUrl = selectedStreamLoc.url
                         }catch(e){
                             console.error(e)
                         }

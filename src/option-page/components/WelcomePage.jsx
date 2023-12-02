@@ -11,7 +11,7 @@ const LatestCourse = ({store}) => {
                 const coursePath = `/course/${course.slug}`
                 const courseIcon = "bi bi-bookmark"
                 return <li key={index}>        
-                    <NavLink className={navLinkCls} to={coursePath}  className="text-lg">
+                    <NavLink className={navLinkCls+" text-lg"} to={coursePath}>
                         <i className={courseIcon}></i> <span>{course.title}</span>
                     </NavLink>
                 </li>

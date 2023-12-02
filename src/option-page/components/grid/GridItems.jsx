@@ -63,7 +63,7 @@ class GridItems extends React.Component{
 									// console.log(item)
 								fieldText = options.editorFactory(editor, field, value, item, index,fieldIndex)
 							}
-		              		return (<td key={fieldIndex} className={this.tdCls}>{fieldText}</td>)
+		              		return (<td key={fieldIndex} className={this.tdCls + " truncate ..."}>{fieldText}</td>)
 		              	})
 		              }
 		              

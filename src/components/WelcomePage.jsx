@@ -191,8 +191,8 @@ class WelcomePage extends ComponentWithMessaging {
 				
 
 				<div className="btn-cnt">
-					<button  disabled={fetchBtnState==1 || !validCoursePage || disableFetchBtn} className="btn btn-primary" onClick={e => this.getCourseInfoMessage()}><i className={`fa ${btnCls}`}></i> Fetch This Course</button>
-					<button  disabled={fetchBtnState==1 || !validCoursePage || disableFetchBtn} className="btn btn-primary" onClick={e => this.addCourseFromCurrentUrl()}><i className={`fa ${btnCls}`}></i> Add Course</button>
+					{/* <button  disabled={fetchBtnState==1 || !validCoursePage || disableFetchBtn} className="btn btn-primary" onClick={e => this.getCourseInfoMessage()}><i className={`fa ${btnCls}`}></i> Fetch This Course</button> */}
+					<button  disabled={fetchBtnState==1 || !validCoursePage || disableFetchBtn} className="btn btn-primary" onClick={e => this.addCourseFromCurrentUrl()}><i className={`fa ${btnCls}`}></i> Add This Course</button>
 					{/* <span>Valid CoursePage ? {validCoursePage ? 'Yes' : 'No'}</span> */}
 				</div>
 				<div className="p-4">

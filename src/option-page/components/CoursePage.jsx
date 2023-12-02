@@ -6,6 +6,8 @@ import JsonView from 'react18-json-view'
 import Toast from '../Toast.jsx'
 import 'react18-json-view/src/style.css'
 import Button from "./Button"
+import jquery from 'jquery'
+
 export async function loader({ params }) {
     const { ctl,slug } = params
     return { ctl,slug }
@@ -44,6 +46,7 @@ class FetchStateInfo extends Component{
 	render(){
 		const {runLevel,statusCode,loading} = this.state
 		const {onRetry,onFetch,name} = this.props
+		const btnClsName = name.toLowerCase().replace(/\W/g,'-')
 		let icon = "fa fa-check"
 		let message = `Fetch ${name} success`
 		let hasError = false
@@ -75,10 +78,10 @@ class FetchStateInfo extends Component{
 			<div className="p-2">{message}</div>
 			<div className="p-2">
 				{
-					hasError ? <Button onClick={e=>onRetry(e)} caption="Retry" icon="fa fa-refresh"/>:""
+					hasError ? <Button className={btnClsName} onClick={e=>onRetry(e)} caption="Retry" icon="fa fa-refresh"/>:""
 				}
 				{
-					runLevel == 0? <Button onClick={e=>onFetch(e)} caption="Fetch" icon="fa fa-download"/>:""
+					runLevel == 0? <Button  className={btnClsName} onClick={e=>onFetch(e)} caption="Fetch" icon="fa fa-download"/>:""
 				}
 				
 			</div>
@@ -230,7 +233,7 @@ const AddCoursePage=({slug, store, config,onOk})=>{
 				// console.log(tocs)
 				toast(`Fetch course tocs ok `,"success")
 				setTocs(tocs)
-				    
+				redirectToCourseManager()    
     		}else{
         		toast(`Failed to fetch course tocs course : ${course.title}`,"error")
     		}
@@ -244,6 +247,15 @@ const AddCoursePage=({slug, store, config,onOk})=>{
 		fetchInfoCiRef.current.setLoading(false)
 
 
+	}
+	const redirectToCourseManager = ()=>{
+		window.location.hash = `/manager/${slug}`
+
+	}
+	const autoClickFetchCourse = ()=>{
+		setTimeout(()=>{
+			jquery('button.course-info').click()
+		},1000)
 	}
 	useEffect(()=>{
 		if(slug){
@@ -262,7 +274,7 @@ const AddCoursePage=({slug, store, config,onOk})=>{
 				if(fetchInfoCiRef.current){
 					fetchInfoCiRef.current.resetState()
 				}
-				
+				autoClickFetchCourse()
 				lastSlug = slug
 			}
 		}

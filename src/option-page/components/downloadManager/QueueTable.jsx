@@ -14,8 +14,8 @@ const QueueTable = ({clearStatusBar, logStatusBar,startQueueItem,store, course, 
                 <th className={thCls} rowSpan={2}>Action</th>
                 </tr>
                 <tr>
-                    <th className={thCls}>Caption</th>
-                    <th className={thCls}>Video</th>
+                    <th className={thCls}>Subtitle/Transcript</th>
+                    <th className={thCls}>Media</th>
                 </tr>
             </thead>
             <tbody>

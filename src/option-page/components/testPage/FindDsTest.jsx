@@ -1,7 +1,7 @@
 import { useEffect , useState} from "react"
 import {findDS,fetchCourseTocMeta,fetchCourseTocPage} from "../../components/learning_fn"
 import $ from "jquery"
-import xmlbuilder from 'xmlbuilder'
+// import xmlbuilder from 'xml-js'
 import Button from "../Button"
 import { Link, useLoaderData } from 'react-router-dom'
 import { useParams } from 'react-router-dom';
@@ -31,35 +31,38 @@ const sanitizeKeys = (obj) => {
       }
     return sanitizedObj
   }
-  const convertJsonToXml = (jsonObj) => {
-    const root = xmlbuilder.create('root');
-    const convert = (obj, parent) => {
-      if(typeof obj === "string"){
-        parent.text(obj)
-        return
-      }  
-      for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
-          if (Array.isArray(obj[key])) {
-            obj[key].forEach((item) => {
-              const arrayElement = parent.ele(key);
-              convert(item, arrayElement);
-            });
-          } else if (typeof obj[key] === 'object') {
-            const child = parent.ele(key)
-            convert(obj[key], child)
-          } else {
-            try{
-                parent.ele(key).text(obj[key])
-            }catch(e){
-            }
-          }
-        }
-      }
-    };
+  const convertJsonToXml = (json) => {
+  //   var options = {compact: true, ignoreComment: true, spaces: 4};
+  // var result = convert.json2xml({root:json}, options);
+  // return result;
+  // const root = xmlbuilder.create('root');
+    // const convert = (obj, parent) => {
+    //   if(typeof obj === "string"){
+    //     parent.text(obj)
+    //     return
+    //   }  
+    //   for (const key in obj) {
+    //     if (obj.hasOwnProperty(key)) {
+    //       if (Array.isArray(obj[key])) {
+    //         obj[key].forEach((item) => {
+    //           const arrayElement = parent.ele(key);
+    //           convert(item, arrayElement);
+    //         });
+    //       } else if (typeof obj[key] === 'object') {
+    //         const child = parent.ele(key)
+    //         convert(obj[key], child)
+    //       } else {
+    //         try{
+    //             parent.ele(key).text(obj[key])
+    //         }catch(e){
+    //         }
+    //       }
+    //     }
+    //   }
+    // };
 
-    convert(jsonObj, root)
-    return root.end({ pretty: true })
+    // convert(jsonObj, root)
+    // return root.end({ pretty: true })
   };
 
 const FindDsTest=({store})=>{

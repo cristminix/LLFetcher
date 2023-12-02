@@ -1,4 +1,3 @@
-import xmlbuilder from 'xmlbuilder'
 import jQuery from 'jquery'
 
 const slugify = (text) => {
@@ -94,22 +93,28 @@ const getAuthors = async(doc,mAuthor,mCourse,course) => {
         let authorEls=p.find("authors")
         for (const authorEl of authorEls){
             let authorUrn = jQuery(authorEl).text()
-            let authorEntityEl=doc.find(`entityUrn:contains('${authorUrn}')`)
-            if(authorEntityEl.length > 0){
-                let authorEntityElP = authorEntityEl.parent()
-                let slug = getNText(authorEntityElP,'slug')
-                let name=slugToTitle(slug)
-                let biography=getNText(authorEntityElP,['biographyV2','text'])
-                let shortBiography=getNText(authorEntityElP,['shortBiographyV2','text'])
-                let author = await mAuthor.create(name,slug,biography,shortBiography,course.id)
-                // let author = {
-                //     slug, name, biography, shortBiography
-                // }
-                if(author){
-                    await mCourse.addAuthorId(course.id, author.id)
+            let authorEntityEls=doc.find(`entityUrn:contains('${authorUrn}')`)
+            if(authorEntityEls.length > 0){
+                for(const authorEntityElem of authorEntityEls){
+                    const authorEntityEl = jQuery(authorEntityElem)
+                    const authorEntityUrn = authorEntityEl.text().trim()
+                    if(authorEntityUrn == authorUrn){
+                        let authorEntityElP = authorEntityEl.parent()
+                        let slug = getNText(authorEntityElP,'slug')
+                        let name=slugToTitle(slug)
+                        let biography=getNText(authorEntityElP,['biographyV2','text'])
+                        let shortBiography=getNText(authorEntityElP,['shortBiographyV2','text'])
+                        let author = await mAuthor.create(name,slug,biography,shortBiography,course.id)
+                        // let author = {
+                        //     slug, name, biography, shortBiography
+                        // }
+                        if(author){
+                            await mCourse.addAuthorId(course.id, author.id)
+                        }
+                        authors.push(author)
+                        // m_author.addCourse(author,course)
+                    }
                 }
-                authors.push(author)
-                // m_author.addCourse(author,course)
             }
         }
     }
@@ -230,38 +235,48 @@ const getCourseSections = async(p,doc,mSection,courseId) => {
     let tocs={}
     for (const sectionStarEl of courseSectionStars){
 		const sectionStar = jQuery(sectionStarEl).text().trim()
-        let sectionNd = doc.find(`cachingKey:contains('${sectionStar}')`)
+        let sectionNds = doc.find(`cachingKey:contains('${sectionStar}')`)
         // # print("213:%s" % section_star)
-        if (sectionNd.length > 0){
-			let sectionNdP= sectionNd.parent()
-            let sectionTitleEl=sectionNdP.find("title")
-            if(sectionTitleEl.length > 0){
-				const sectionTitle = sectionTitleEl.text()
-                // # print(section_title)
-                const sectionSlug=slugify(sectionTitle)
-                tocs[sectionSlug] = []
-                let section = {
-                    title : sectionTitle,
-                    itemStars : [],
-                    slug : sectionSlug
+        if (sectionNds.length > 0){
+            for(const sectionNdElem of sectionNds){
+                const sectionNd = jQuery(sectionNdElem)
+                const sectionNdStar = sectionNd.text().trim()
+                if(sectionNdStar == sectionStar){
+
+                    let sectionNdP= sectionNd.parent()
+                    let sectionTitleEl=sectionNdP.find("title")
+                    if(sectionTitleEl.length > 0){
+                        const sectionTitle = sectionTitleEl.text()
+                        // # print(section_title)
+                        const sectionSlug=slugify(sectionTitle)
+                        tocs[sectionSlug] = []
+                        let section = {
+                            title : sectionTitle,
+                            itemStars : [],
+                            slug : sectionSlug
+                        }
+                        let itemStarNds = sectionNdP.find("star_items")
+                        // # item_stars=[]
+                        if (itemStarNds.length > 0){
+                            for(const itemStarEl of itemStarNds){
+                                const itemStar = jQuery(itemStarEl).text().trim()
+                                const skipPattern = "urn:li:learningApiTocItem:urn:li:learningApiAssessmen";
+                                const matchSkipPattern = itemStar.match(skipPattern)
+                                if(matchSkipPattern){
+                                    // continue
+                                }else{
+                                    if(itemStar.length > 0){
+                                        section.itemStars.push(itemStar)
+                                    }
+                                }
+                            }
+                        }
+                        const {title, itemStars, slug} = section    
+                        const row = await mSection.create(title, slug, courseId,itemStars)
+                        sections.push(row)
+                    }
                 }
-                let itemStarNds = sectionNdP.find("star_items")
-                // # item_stars=[]
-                if (itemStarNds.length > 0){
-					for(const itemStarEl of itemStarNds){
-						const itemStar = jQuery(itemStarEl).text().trim()
-                        const skipPattern = "urn:li:learningApiTocItem:urn:li:learningApiAssessmen";
-						const matchSkipPattern = itemStar.match(skipPattern)
-                        if(matchSkipPattern){
-                            continue
-						}
-                        section.itemStars.push(itemStar)
-					}
-				}
-                const {title, itemStars, slug} = section    
-                const row = await mSection.create(title, slug, courseId,itemStars)
-                sections.push(row)
-			}
+            }
 		}
 	}
     return sections
@@ -338,9 +353,39 @@ const sanitizeKeys = (obj) => {
 	  }
 	return sanitizedObj
 }
+const OBJtoXML = (obj) =>{
+    var xml = '';
+    for (var prop in obj) {
+        xml += "<" + prop + ">"
+        if(Array.isArray(obj[prop])) {
+            for (var array of obj[prop]) {
+
+                // A real botch fix here
+                xml += "</" + prop + ">"
+                xml += "<" + prop + ">"
+
+                xml += OBJtoXML(new Object(array))
+            }
+        } else if (typeof obj[prop] == "object" && typeof obj[prop] !== "string") {
+            xml += OBJtoXML(new Object(obj[prop]))
+        } else {
+            xml += obj[prop];
+        }
+        xml += "</" + prop + ">"
+    }
+    var xml = xml.replace(/<\/?[0-9]{1,}>/g,'');
+    return xml
+}
 const convertJsonToXml = (schema) => {
 	const row = sanitizeKeys({schema})
-	const root = xmlbuilder.create('root');
+    const result = OBJtoXML({root:row})
+    console.log(result)
+    return result
+    // let options = {compact: true, ignoreComment: true, spaces: 4}
+    // let result = xmlbuilder.json2xml(row, options)
+    // return result
+	/*Old Code*/
+    /*const root = xmlbuilder.create('root');
 	const convert = (obj, parent) => {
 	  if(typeof obj === "string"){
 	    parent.text(obj)
@@ -368,6 +413,7 @@ const convertJsonToXml = (schema) => {
 
 	convert(row, root)
 	return root.end({ pretty: true })
+    */
 }
 const parseJsonSchema = (responseText) => {
     jQuery.expr[':'].containsRegex = jQuery.expr.createPseudo(function (pattern) {

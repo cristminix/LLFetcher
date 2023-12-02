@@ -41,7 +41,7 @@
 			"path" : "/tests",
 			"iconCls" : "bi bi-building-gear",
 			"order" : 4,
-			"hidden" : true,
+			"hidden" : false,
 			"hasChild" : true,
 
 			"childItems":{

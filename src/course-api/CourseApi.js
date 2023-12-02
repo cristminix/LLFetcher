@@ -145,7 +145,7 @@ class CourseApi {
 				}
 			}else{
 				xmlDoc = jQuery(convertJsonToXml(jsonSchema))
-				xmlDoc = jQuery(xmlDoc[2])
+				// xmlDoc = jQuery(xmlDoc[2])
 			}
 			
 		}

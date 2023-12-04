@@ -1,8 +1,18 @@
-# React + Vite
+# **LLFetcher**
+**LLFetcher** is stand for *Linkedin Learning Fetcher* which is just a simple chrome extension purposed to enable you easily download course content resources including course video with multiple size format, video caption or transcript, exercise file from E-Learning website specially Linked In Learning.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+You can use it as Linkedin Learning Video Downloader for offline use.
 
-Currently, two official plugins are available:
+  [![HitCount](https://hits.dwyl.com/cristminix/LLFetcher.svg?style=flat)](http://hits.dwyl.com/cristminix/LLFetcher)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+
+# **How to install this extension to your Chrome browser**
+To install this chrome extension manually we recommend you download zip file in from the release page, since this page created.
+
+
+
+# DONATE
+- Paypal waybeeofficial@gmail.com
+- Buy me a coffe https://www.buymeacoffee.com/waybeeofficial
+
+Starting version 3.0+

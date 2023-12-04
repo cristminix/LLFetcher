@@ -1,0 +1,167 @@
+{
+	"links" : {
+		"welcome":{
+			"title" : "Welcome",
+			"path" : "/welcome",
+			"iconCls" : "bi bi-house",
+			"order": 1,
+			"hidden":true
+		},
+		"courses":{
+			"title" : "Courses",
+			"path" : "/course",
+			"iconCls" : "bi bi-bookmark",
+			"order" : 2,
+			"hasChild" : true,
+			"useModel" : true,
+			"model" : "Course",
+			"modelListMethod" : "getList",
+			"displayField" : "title",
+			"slugField" : "slug",
+			"childRoutePath" : "/manager/{SLUG_VALUE}",
+			"childIconCls" : "fa fa-bookmark-o"
+		},
+		"download" : {
+			"title" : "Download",
+			"path" : "/download",
+			"iconCls" : "bi bi-download",
+			"order" : 3,
+			"hidden" : true
+		},
+		"setting" : {
+			"title" : "Setting",
+			"path" : "/setting",
+			"iconCls" : "bi bi-gear",
+			"order" : 4,
+			"hidden" : true
+
+		},
+		"test" : {
+			"title" : "Tests",
+			"path" : "/tests",
+			"iconCls" : "bi bi-building-gear",
+			"order" : 4,
+			"hidden" : true,
+			"hasChild" : true,
+
+			"childItems":{
+				"find-ds" : {
+					"title" : "findDS",
+					"path" : "/tests/find-ds",
+					"iconCls" : "bi bi-search",
+					"order" : 0
+				},
+				"native-client" : {
+					"title" : "nativeClient",
+					"path" : "/tests/native-client",
+					"iconCls" : "bi bi-node",
+					"order" : 0
+				},
+				"course-api-new" : {
+					"title" : "New CourseApi",
+					"path" : "/tests/course-api",
+					"iconCls" : "bi bi-bookmark",
+					"order" : 0
+				}
+				
+			}
+		},
+		"database" : {
+			"title" : "Database Explorer",
+			"path" : "/database",
+			"iconCls" : "fa fa-database",
+			"order" : 5,
+			"hidden" : 0,
+			"hasChild" : true,
+			"childItems" : {
+				"author" : {
+					"title" : "Author",
+					"path" : "/database/author",
+					"iconCls" : "fa fa-database",
+					"order" : 0
+				},
+				"exercise-file" : {
+					"title" : "ExerciseFile",
+					"path" : "/database/exercise-file",
+					"iconCls" : "fa fa-database",
+					"order" : 0
+				},
+				"stream-location" : {
+					"title" : "StreamLocation",
+					"path" : "/database/stream-location",
+					"iconCls" : "fa fa-database",
+					"order" : 0
+				},
+				"transcript" : {
+					"title" : "Transcript",
+					"path" : "/database/transcript",
+					"iconCls" : "fa fa-database",
+					"order" : 0
+				},
+				"download-state" : {
+					"title" : "DownloadState",
+					"path" : "/database/download-state",
+					"iconCls" : "fa fa-database",
+					"order" : 0
+				},
+				"download-config" : {
+					"title" : "DownloadConfig",
+					"path" : "/database/download-config",
+					"iconCls" : "fa fa-database",
+					"order" : 0
+				},
+				"section" : {
+					"title" : "Section",
+					"path" : "/database/section",
+					"iconCls" : "fa fa-database",
+					"order" : 0
+				},
+				"toc" : {
+					"title" : "Toc",
+					"path" : "/database/toc",
+					"iconCls" : "fa fa-database",
+					"order" : 0
+				},
+				"course" : {
+					"title" : "Course",
+					"path" : "/database/course",
+					"iconCls" : "fa fa-database",
+					"order" : 0
+				},
+				"download" : {
+					"title" : "Download",
+					"path" : "/database/download",
+					"iconCls" : "fa fa-database",
+					"order" : 0
+				},
+				"dm-setup" : {
+					"title" : "DMSetup",
+					"path" : "/database/dm-setup",
+					"iconCls" : "fa fa-database",
+					"order" : 0
+				},
+				"dm-status" : {
+					"title" : "DMStatus",
+					"path" : "/database/dm-status",
+					"iconCls" : "fa fa-database",
+					"order" : 0
+				},
+				"cookie" : {
+					"title" : "Cookie",
+					"path" : "/database/cookie",
+					"iconCls" : "fa fa-database",
+					"order" : 0
+				}
+			}
+		},
+		"bootstrap-icons" : {
+			"title" : "Bootstrap Icons",
+			"path" : "/bootstrap-icons",
+			"iconCls" : "bi bi-bootstrap",
+			"order" : 5,
+			"hidden" : true
+
+		}
+
+	}
+}

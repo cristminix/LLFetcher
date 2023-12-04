@@ -2,8 +2,8 @@
 export default {
   content: [
     "./index.html",
-    "./options.html",
-    'node_modules/preline/dist/*.js',
+    "./src/option-pages/options.html",
+    "node_modules/preline/dist/*.js",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
@@ -13,3 +13,4 @@ export default {
     require('preline/plugin'),
   ],
 }
+

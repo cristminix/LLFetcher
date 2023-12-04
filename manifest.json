@@ -1,47 +1,46 @@
 {
-  "manifest_version": 3,
-  "name": "LLFetcher",
-  "version": "2.0.0",
-  "description" : "LLFetcher is stand for Linked Learning Fetcher, which just simple chrome extension that can help you download all resource in Linked learning Course",
-  
-  "permissions":[
-    "scripting","storage",
-        "webNavigation","tabs","cookies",
-      "downloads", "nativeMessaging"
-  ],
-  "content_scripts" : [
-    {
-      "matches":["https://www.linkedin.com/*"],
-      "js":["content.js"]
-    }
-  ],
-  "host_permissions":[
-    "https://www.linkedin.com/learning/*"
-  ],
-  "background":{
-    "service_worker" : "background.js"
-  },
-  "icons": {
-    "16": "images/icon-16.png",
-    "19": "images/icon-19.png",
-    "32": "images/icon-32.png",
-    "38": "images/icon-38.png",
-    "48": "images/icon-48.png",
-    "128": "images/icon-128.png"
-  },
-  "action": { 
-    "default_popup": "index.html",
-    "default_icon": {
-      "16": "images/icon-16.png",
-      "19": "images/icon-19.png",
-    "32": "images/icon-32.png",
-      "38": "images/icon-38.png",
-      "48": "images/icon-48.png",
-      "128": "images/icon-128.png"
-    }
-  },
-  "options_ui": {
-      "page": "options.html",
+    "manifest_version": 3,
+    "name": "LLFetcher",
+    "version": "3.0.0",
+    "description":"Download LinkedIn Learning videos or media files, subtitle, playlist and course assets easily !",
+    "permissions":[
+      "scripting","storage",
+          "webNavigation","tabs","cookies",
+        "downloads", "nativeMessaging"
+    ],
+    "host_permissions":[
+      "https://www.linkedin.com/learning/*"
+    ],
+    "background":{
+      "service_worker" : "src/background-scripts/background.js"
+    },
+    "content_scripts": [
+        {
+          "js": ["src/content-pages/content.jsx"],
+          "matches": ["https://www.linkedin.com/learning/*"]
+        }
+    ],
+    "options_ui": {
+      "page": "src/option-pages/options.html",
       "open_in_tab": true
+    },
+    "icons": {
+      "16": "logo/icon-16.png",
+      "19": "logo/icon-19.png",
+      "32": "logo/icon-32.png",
+      "38": "logo/icon-38.png",
+      "48": "logo/icon-48.png",
+      "128": "logo/icon-128.png"
+    },
+    "action": { 
+      "default_popup": "index.html",
+      "default_icon": {
+        "16": "logo/icon-16.png",
+        "19": "logo/icon-19.png",
+      "32": "logo/icon-32.png",
+        "38": "logo/icon-38.png",
+        "48": "logo/icon-48.png",
+        "128": "logo/icon-128.png"
+      }
     }
-}
+  }

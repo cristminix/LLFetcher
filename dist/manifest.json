@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "LLFetcher",
-  "version": "2.0.0",
-  "description": "LLFetcher is stand for Linked Learning Fetcher, which just simple chrome extension that can help you download all resource in Linked learning Course",
+  "version": "3.0.0",
+  "description": "Download LinkedIn Learning videos or media files, subtitle, playlist and course assets easily !",
   "permissions": [
     "scripting",
     "storage",
@@ -12,16 +12,6 @@
     "downloads",
     "nativeMessaging"
   ],
-  "content_scripts": [
-    {
-      "js": [
-        "assets/content-script-loader.content.js.63797b2b.50aee84a.js"
-      ],
-      "matches": [
-        "https://www.linkedin.com/*"
-      ]
-    }
-  ],
   "host_permissions": [
     "https://www.linkedin.com/learning/*"
   ],
@@ -29,28 +19,41 @@
     "service_worker": "service-worker-loader.js",
     "type": "module"
   },
+  "content_scripts": [
+    {
+      "js": [
+        "assets/content.jsx-loader-0YldQdSZ.js"
+      ],
+      "matches": [
+        "https://www.linkedin.com/learning/*"
+      ],
+      "css": [
+        "assets/fn-6PmZOoQv.css"
+      ]
+    }
+  ],
+  "options_ui": {
+    "page": "src/option-pages/options.html",
+    "open_in_tab": true
+  },
   "icons": {
-    "16": "images/icon-16.png",
-    "19": "images/icon-19.png",
-    "32": "images/icon-32.png",
-    "38": "images/icon-38.png",
-    "48": "images/icon-48.png",
-    "128": "images/icon-128.png"
+    "16": "logo/icon-16.png",
+    "19": "logo/icon-19.png",
+    "32": "logo/icon-32.png",
+    "38": "logo/icon-38.png",
+    "48": "logo/icon-48.png",
+    "128": "logo/icon-128.png"
   },
   "action": {
     "default_popup": "index.html",
     "default_icon": {
-      "16": "images/icon-16.png",
-      "19": "images/icon-19.png",
-      "32": "images/icon-32.png",
-      "38": "images/icon-38.png",
-      "48": "images/icon-48.png",
-      "128": "images/icon-128.png"
+      "16": "logo/icon-16.png",
+      "19": "logo/icon-19.png",
+      "32": "logo/icon-32.png",
+      "38": "logo/icon-38.png",
+      "48": "logo/icon-48.png",
+      "128": "logo/icon-128.png"
     }
-  },
-  "options_ui": {
-    "page": "options.html",
-    "open_in_tab": true
   },
   "web_accessible_resources": [
     {
@@ -58,8 +61,9 @@
         "https://www.linkedin.com/*"
       ],
       "resources": [
-        "assets/content.js.63797b2b.js",
-        "lib/*"
+        "assets/fn-tlBbayZr.js",
+        "assets/jquery-etZba0_3.js",
+        "assets/content.jsx-xtvy4qnW.js"
       ],
       "use_dynamic_url": true
     }

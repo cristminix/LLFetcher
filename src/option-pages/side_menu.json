@@ -33,7 +33,7 @@
 			"path" : "/setting",
 			"iconCls" : "bi bi-gear",
 			"order" : 4,
-			"hidden" : true
+			"hidden" : false
 
 		},
 		"test" : {

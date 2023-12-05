@@ -1,15 +1,11 @@
 import { useEffect, useState } from "react"
-// import { fetchCourseTocMeta } from "../learning_fn"
 import Button from "../../../components/shared/ux/Button"
 import DropdownSelect from "../../../components/shared/ux/DropdownSelect"
-// import FmtSelector from "./queue-setup/FmtSelector"
 import CourseApi from "../../../global/course-api/CourseApi"
-
-// const btnCls = "py-2 px-2 inline-flex justify-center items-center gap-2 -mt-px -ml-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-l-lg sm:mt-0 sm:first:ml-0 sm:first:rounded-tr-none sm:last:rounded-bl-none sm:last:rounded-r-lg border font-medium bg-white text-gray-700 align-middle hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all text-sm dark:bg-gray-800 dark:hover:bg-slate-800 dark:border-gray-700 dark:text-gray-400"
-// const lblCls = "mr-1 mt-1 font-medium  text-sm dark:bg-slate-900 dark:text-gray-400 "    
 
 
 const QueueSetup = ({
+    toast,
     logStatusBar,clearStatusBar,
     availableFmt, setAvailableFmt,
     availableTrans, setAvailableTrans,
@@ -22,47 +18,7 @@ const QueueSetup = ({
     const [loadingFetchToc, setLoadingFetchToc] = useState(false) 
     const mDMSetup = store.get("DMSetup")
     
-    /*
-    const fetchToc = async(courseSlug,tocSlug)=> {
-		
-		const [validResource, tocUp, exFile, streamLocations,errorMsg] = await fetchCourseTocMeta(courseSlug,tocSlug)
-        let availableFmtList = []
-
-		if(validResource){
-            availableFmtList = streamLocations.map(item => item.fmt)
-		}else{
-            if(errorMsg == "ERR_NO_LOGIN"){
-                alert("You must login to linkedin learning website")
-            }
-        }
-		return [validResource, availableFmtList,exFile]
-		
-	}
-
-    const getAvailableFmtOld = async(e) => {
-        if(dmsetup){
-            const savedFmtList = dmsetup.availableFmt
-            setAvailableFmt(savedFmtList)
-            return
-        }
-        const tocKeys = Object.keys(tocs)
-        const sectionSlug = tocKeys[0]
-        const tocList = tocs[sectionSlug]
-        const tocSlug = tocList[0].slug
-        console.log(tocSlug)
-        setLoadingFetchToc(true)
-        setAvailableFmt([])
-
-        const [validResource, availableFmtList,exerciseFile] = await fetchToc(course.slug, tocSlug)
-        if(validResource){
-            setAvailableFmt(availableFmtList)
-            console.log(exerciseFile)
-            await mDMSetup.create(course.id,availableFmtList,"",course.sourceCodeRepository,exerciseFile,1, false)
-        }
-        setLoadingFetchToc(false)
-
-    }
-    */
+    
     const getAvailableFmt = async(e) => {
         if(dmsetup){
             const {availableFmt,availableTrans} = dmsetup
@@ -98,7 +54,9 @@ const QueueSetup = ({
                 
 
             }else{
-                console.error(`tocKeys is empty`)
+                const message = `tocKeys is empty`
+                toast.add(message,'error')
+                console.error()
             }
         }
         
@@ -121,8 +79,8 @@ const QueueSetup = ({
             })
             console.log(transcripts)
             console.log(availableTransList)
-            const exerciseFile = ncourse.exerciseFiles//.map(item=>item.id)
-            console.log(exerciseFile)
+            const exerciseFiles = ncourse.exerciseFiles//.map(item=>item.id)
+            console.log(exerciseFiles)
 
             // const selectedFmt = null
             // const selectedTrans = null
@@ -133,39 +91,14 @@ const QueueSetup = ({
             setAvailableFmt(availableFmtList)
             setAvailableTrans(availableTransList)
 
-            const dmsetup = await mDMSetup.create(ncourse.id,availableFmtList,selectedFmt,availableTransList,selectedTrans,sourceRepo,exerciseFile,status,finished)
+            const dmsetup = await mDMSetup.create(ncourse.id,availableFmtList,selectedFmt,availableTransList,selectedTrans,sourceRepo,exerciseFiles,status,finished)
             setDmsetup(dmsetup)
         }else{
-            alert(`Operation Canceled : Could not get first TOC in first Course Section`)
+            const message = `Operation Canceled : Could not get first TOC in first Course Section`
+            toast.add(message,'error')
         }
 
         setLoadingFetchToc(false)
-        return
-        /*
-        const tocKeys = Object.keys(tocs)
-        const sectionSlug = tocKeys[0]
-        const tocList = tocs[sectionSlug]
-        const tocSlug = tocList[0].slug
-        console.log(tocSlug)
-        setLoadingFetchToc(true)
-        setAvailableFmt([])
-
-        const [validResource, availableFmtList,exerciseFile] = await fetchToc(course.slug, tocSlug)
-        if(validResource){
-            setAvailableFmt(availableFmtList)
-            console.log(availableFmtList,exerciseFile)
-            / *
-            availableFmtList = ['360', '720', '540', '480'] 
-            availableTransList = ['us', 'id', 'de', 'it'] 
-            exerciseFile = {
-                name: "Ex_Files_Intro_to_Web_APIs.zip"
-                sizeInBytes: 176340
-                url:"https://"
-            }
-            * /
-            //
-        }
-        */
         
 
     }

@@ -11,7 +11,7 @@ class DMSetup extends DB{
         "availableTrans", 
         "selectedFmt", 
         "selectedTrans", 
-        "exerciseFile", 
+        "exerciseFiles", 
         "sourceRepo"
         ]
 	type = "collection"
@@ -31,11 +31,11 @@ class DMSetup extends DB{
     getById(id){
         return this.singleQuery({query: {id}})
     }
-    async create(courseId,availableFmt,selectedFmt,availableTrans,selectedTrans,sourceRepo,exerciseFile,status,finished){
+    async create(courseId,availableFmt,selectedFmt,availableTrans,selectedTrans,sourceRepo,exerciseFiles,status,finished){
         let row = this.getByCourseId(courseId)
         if(!row){
             const id = 0
-            row = {id,courseId,availableFmt,selectedFmt,availableTrans,selectedTrans,sourceRepo,exerciseFile,status,finished}
+            row = {id,courseId,availableFmt,selectedFmt,availableTrans,selectedTrans,sourceRepo,exerciseFiles,status,finished}
             row.id = this.db.insert(this.table,row)
             await this.db.commit()
         }else{

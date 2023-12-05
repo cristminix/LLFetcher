@@ -7,7 +7,7 @@ import StatusBarMan from "./downloadManager/StatusbarMan"
 import CourseInfo from "./downloadManager/CourseInfo"
 import QueueSetup from "./downloadManager/QueueSetup"
 import {makeDelay} from "../../global/fn"
-
+import Toast from '../../components/shared/ux/Toast'
 export async function loader({ params }) {
     const { slug } = params
     return { slug }
@@ -15,6 +15,7 @@ export async function loader({ params }) {
 
 const delay = makeDelay(7000)
 const DownloadManager = ({store}) => {
+    const toastRef = useRef(null)
     const queueManRef = useRef(null)
     const statusBarManRef = useRef(null)
     const {slug} = useLoaderData()
@@ -43,7 +44,10 @@ const DownloadManager = ({store}) => {
     const [availableTrans, setAvailableTrans] = useState([])
     const [selectedTrans, setSelectedTrans] = useState(selectTrans)
 
-
+    const toast= (message,t)=>{
+      toastRef.current.add(message,t)
+    }
+  
     /**
      * Logs a message to the status bar.
      * 
@@ -185,9 +189,12 @@ const DownloadManager = ({store}) => {
     if(activeCourseData){
       console.log(activeCourseData)
       const {course, authors, sections, tocs}  = activeCourseData
-      return (<><div className="download-manager min-h-[1328px]">
+      return (<>
+      
+      <div className="download-manager min-h-[1328px]">
+        <Toast ref={toastRef}/>
         <CourseInfo store={store} course={course} authors={authors} selectedFmt={selectedFmt} selectTrans={selectTrans} selectedTrans={selectedTrans} />
-        <ToolbarMan alreadySetup={alreadySetup} 
+        <ToolbarMan alreadySetup={alreadySetup} toast={toast}
                     setAlreadySetup={setAlreadySetup}
                     reconfigureSetup={reconfigureSetup}
                     setReconfigureSetup={setReconfigureSetup}
@@ -210,7 +217,7 @@ const DownloadManager = ({store}) => {
                     queueResume={queueResume}
                     logStatusBar={logStatusBar}
                     clearStatusBar={clearStatusBar}/>
-        <QueueSetup alreadySetup={alreadySetup} 
+        <QueueSetup alreadySetup={alreadySetup} toast={toast}
                     setAlreadySetup={setAlreadySetup}
                     reconfigureSetup={reconfigureSetup}
                     setReconfigureSetup={setReconfigureSetup}
@@ -241,7 +248,7 @@ const DownloadManager = ({store}) => {
                     logStatusBar={logStatusBar}
                     clearStatusBar={clearStatusBar}
                     />
-        <QueueMan alreadySetup={alreadySetup} 
+        <QueueMan alreadySetup={alreadySetup} toast={toast}
                   reconfigureSetup={reconfigureSetup}
                   course={course}
                   sections={sections}
@@ -257,7 +264,7 @@ const DownloadManager = ({store}) => {
                   selectedFmt={selectedFmt} 
                   logStatusBar={logStatusBar}
                   clearStatusBar={clearStatusBar}/>
-        <StatusBarMan store={store} 
+        <StatusBarMan store={store} toast={toast}
                       course={course} 
                       alreadySetup={alreadySetup} 
                       reconfigureSetup={reconfigureSetup}

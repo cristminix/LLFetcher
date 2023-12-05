@@ -1,7 +1,8 @@
 import { useEffect } from "react"
 import Button from "../../../components/shared/ux/Button"
 import {createDownloadFile} from "../../../global/fn"
-import DropdownSelect from "../../../components/shared/ux/DropdownSelect"
+// import DropdownSelect from "../../../components/shared/ux/DropdownSelect"
+import DropdownMenu from "../../../components/shared/ux/DropdownMenu"
 
 // const btnCls = "py-3 px-4 inline-flex justify-center items-center gap-2 -mt-px -ml-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-l-lg sm:mt-0 sm:first:ml-0 sm:first:rounded-tr-none sm:last:rounded-bl-none sm:last:rounded-r-lg border font-medium bg-white text-gray-700 align-middle hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all text-sm dark:bg-gray-800 dark:hover:bg-slate-800 dark:border-gray-700 dark:text-gray-400"
 const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/selectedFmt, course, sections,tocs,clearStatusBar,logStatusBar,queueResume,queueFinished, dmsetup,queueManRef, alreadySetup, setAlreadySetup,reconfigureSetup, setRunSetup, runSetup, setReconfigureSetup, queueStarted = false, startDownloadQueue, stopDownloadQueue}) => {
@@ -208,8 +209,8 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/selectedFmt, 
        
          
            {
-              dmsetup.exerciseFile ? dmsetup.exerciseFile.length > 0 ? <>
-                <DropdownSelect className="ml-1" data={dmsetup.exerciseFile.map(item=>{return{value:item.url,text:item.name}})} onSelect={url=>openExerciseFile(url)} selected="Exercise Files"/>
+              dmsetup.exerciseFiles ? dmsetup.exerciseFiles.length > 0 ? <>
+                <DropdownMenu className="ml-1" data={dmsetup.exerciseFiles.map(item=>{return{value:item.url,text:item.name}})} onSelect={url=>openExerciseFile(url)} label="Exercise Files" itemIcon="fa fa-file-archive-o" labelIcon="fa fa-folder-o" />
               </> : '': ''
             } 
             {

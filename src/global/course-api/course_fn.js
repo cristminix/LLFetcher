@@ -91,28 +91,36 @@ const getAuthors = async(doc,mAuthor,mCourse,course) => {
         // authors=[]
         const [p,courseUrn] = getCourseXmlParentElement(doc)
         let authorEls=p.find("authors")
+        if(authorEls.length == 0){
+            authorEls= p.find("star_authorsv2")
+        }
+        
         for (const authorEl of authorEls){
             let authorUrn = jQuery(authorEl).text()
             let authorEntityEls=doc.find(`entityUrn:contains('${authorUrn}')`)
+            authorEntityEls=authorEntityEls.filter((i,item)=> jQuery(item).text().trim().match(/urn:li:learningApiAuthor:/))
             if(authorEntityEls.length > 0){
                 for(const authorEntityElem of authorEntityEls){
                     const authorEntityEl = jQuery(authorEntityElem)
                     const authorEntityUrn = authorEntityEl.text().trim()
-                    if(authorEntityUrn == authorUrn){
-                        let authorEntityElP = authorEntityEl.parent()
-                        let slug = getNText(authorEntityElP,'slug')
-                        let name=slugToTitle(slug)
-                        let biography=getNText(authorEntityElP,['biographyV2','text'])
-                        let shortBiography=getNText(authorEntityElP,['shortBiographyV2','text'])
-                        let author = await mAuthor.create(name,slug,biography,shortBiography,course.id)
-                        // let author = {
-                        //     slug, name, biography, shortBiography
-                        // }
-                        if(author){
-                            await mCourse.addAuthorId(course.id, author.id)
+                    if(authorEntityUrn.length > 0){
+                        
+                        if(authorEntityUrn == authorUrn){
+                            let authorEntityElP = authorEntityEl.parent()
+                            let slug = getNText(authorEntityElP,'slug')
+                            let name=slugToTitle(slug)
+                            let biography=getNText(authorEntityElP,['biographyV2','text'])
+                            let shortBiography=getNText(authorEntityElP,['shortBiographyV2','text'])
+                            let author = await mAuthor.create(name,slug,biography,shortBiography,course.id)
+                            // let author = {
+                            //     slug, name, biography, shortBiography
+                            // }
+                            if(author){
+                                await mCourse.addAuthorId(course.id, author.id)
+                            }
+                            authors.push(author)
+                            // m_author.addCourse(author,course)
                         }
-                        authors.push(author)
-                        // m_author.addCourse(author,course)
                     }
                 }
             }
@@ -245,6 +253,9 @@ const getCourseSections = async(p,doc,mSection,courseId) => {
         return sections
 	}
     let courseSectionStars = p.find("contents")
+    if(courseSectionStars.length == 0){
+        courseSectionStars = p.find("contentsderived")
+    }
     sections=[]
     let tocs={}
     for (const sectionStarEl of courseSectionStars){
@@ -270,6 +281,9 @@ const getCourseSections = async(p,doc,mSection,courseId) => {
                             slug : sectionSlug
                         }
                         let itemStarNds = sectionNdP.find("star_items")
+                        if (itemStarNds.length == 0){
+                            itemStarNds = sectionNdP.find("star_video")
+                        }
                         // # item_stars=[]
                         if (itemStarNds.length > 0){
                             for(const itemStarEl of itemStarNds){
@@ -301,6 +315,9 @@ const isValidUrl = url => {
 }
 const courseUrlFromSlug = (courseSlug) => {
 	return `https://www.linkedin.com/learning/${courseSlug}`
+}
+const authorUrlFromSlug = (authorSlug) => {
+    return `https://www.linkedin.com/learning/instructors/${authorSlug}`
 }
 const removeQueryString = (url) => {
   // Use URL constructor to parse the URL
@@ -640,7 +657,11 @@ const getCourseToc = async (itemStar,doc,mToc,mSection,section,courseSlug) => {
     
     toc.duration = parseInt(entityNdP.find("duration").text())
     
-    const vStatusUrn = entityNdP.find("star_lyndaVideoViewingStatus").text().trim()
+    let vStatusUrn = entityNdP.find("star_lyndaVideoViewingStatus").text().trim()
+    if(vStatusUrn.length == 0){
+        vStatusUrn = entityNdP.find("star_interactionstatusv2").text().trim()
+        
+    }
     toc.vStatusUrn = vStatusUrn
     
     const {title, slug, url, duration, captionUrl, captionFmt} = toc
@@ -663,6 +684,33 @@ const getTocXmlParentElement = (itemStar,doc) => {
 	let tocNd = doc.find(`cachingKey:contains('${itemStar}')`)
     let entityUrn=null
     let entityNdP=null
+    if(tocNd.length > 1){
+        for(const tocNdElem of tocNd){
+            const $tocNdElem = jQuery(tocNdElem)
+            // const entityUrnNd = $tocNdElem.find("entityUrn")
+            // if(entityUrnNd.length>0){
+            //     entityUrn = entityUrnNd.text().trim()
+            //     entityNdP = $tocNdElem.closest("included")
+            //     break
+            // }
+            let tocNdP = $tocNdElem.parent()
+            const urn =  $tocNdElem.text().trim()
+            if(urn === itemStar){
+                console.log(tocNdP.html())
+
+                let type = tocNdP.find(">type")
+                if(type.length>0){
+                    type = type.text().trim()
+                    if(type === "com.linkedin.learning.api.deco.content.Video"){
+                        tocNd = $tocNdElem.closest("included")
+                        return tocNd
+                    // break
+                    }
+                }
+            }
+        }
+    }
+    console.log(tocNd.html())
     if (tocNd.length >0){
         let tocNdP = tocNd.parent()
         let videoUrnNd = tocNdP.find("content")
@@ -758,7 +806,7 @@ const getVideoMetaNd = (vStatusUrn, doc) =>{
     const status429 = doc.find(`status:contains('429')`)
     const statusEls = doc.find('status')
     const statuses = []
-
+    
     for (const statusEl of statusEls) {
         statuses.push(parseInt(jQuery(statusEl).text()))
     }
@@ -773,6 +821,7 @@ const getVideoMetaNd = (vStatusUrn, doc) =>{
     if (vStatusLookups.length == 0) {
         console.error('B')
         console.error(`could_not_find_v_status_lookup : ${vStatusUrn}`)
+        vStatusLookups = doc.find(`star_interactionstatusv2:contains('${vStatusUrn}')`)
     }
 
     let streamLocations = null
@@ -844,5 +893,5 @@ export{
 	convertJsonToXml,
 	parseJsonSchema,
 	
-	lsSet,lsGet,lsUnset
+	lsSet,lsGet,lsUnset,authorUrlFromSlug
 }

@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
-    "name": "LLFetcher",
-    "version": "3.0.0",
+    "name": "LLFetcher 3.0+",
+    "version": "3.0.1",
     "description":"Download LinkedIn Learning videos or media files, subtitle, playlist and course assets easily !",
     "permissions":[
       "scripting","storage",

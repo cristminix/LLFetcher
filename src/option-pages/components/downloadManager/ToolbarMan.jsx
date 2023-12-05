@@ -208,9 +208,9 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/selectedFmt, 
        
          
            {
-              dmsetup.exerciseFile ? <>
-                <DropdownSelect data={dmsetup.exerciseFile.map(item=>{return{value:item.url,text:item.name}})} onSelect={url=>openExerciseFile(url)} selected="Exercise Files"/>
-              </> : ''
+              dmsetup.exerciseFile ? dmsetup.exerciseFile.length > 0 ? <>
+                <DropdownSelect className="ml-1" data={dmsetup.exerciseFile.map(item=>{return{value:item.url,text:item.name}})} onSelect={url=>openExerciseFile(url)} selected="Exercise Files"/>
+              </> : '': ''
             } 
             {
               dmsetup.sourceRepo ? <><Button onClick={e=>openSourceRepo(e)} className="ml-1" label="Source Repo:" title={dmsetup.sourceRepo} caption="Source Repo" icon="fa fa-file-archive-o"/></> : ''

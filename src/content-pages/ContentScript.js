@@ -1,5 +1,6 @@
 import { waitForElm } from "./content-fn"
 import { onMessage, sendMessage } from "../global/fn"
+import crc from "crc"
 class ContentScript {
     constructor(){
         this.initController()
@@ -95,10 +96,13 @@ class ContentScript {
             }
         })
     }
-
+    createRandCls(){
+		const dtStr = (new Date).getTime().toString()
+		return `os-${crc.crc32(dtStr).toString(16)}`
+	}
     onCommand(command, param){
         const cmd = command.replace(/^cmd\./,'')
-        const ocls = `ocls-${(new Date).getTime()}`
+        const ocls = this.createRandCls()
         const is = {
             cmd, 
             ocls,

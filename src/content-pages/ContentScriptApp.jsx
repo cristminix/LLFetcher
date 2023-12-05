@@ -1,7 +1,7 @@
 import {createRef } from "react"
 import ActionCSA from "./ActionCSA"
+import crc from "crc"
 import CoursePageChecker from "./CoursePageChecker"
-
 class ContentScriptApp extends ActionCSA{
 	inputScriptRef = null
 	constructor(props){
@@ -14,15 +14,19 @@ class ContentScriptApp extends ActionCSA{
 	}
 	componentDidMount(){
 		setTimeout(()=>{
-			// this.setState({display:'none'})
+			this.setState({display:'none'})
 		},5000)
+	}
+	createRandCls(){
+		const dtStr = (new Date).getTime().toString()
+		return `os-${crc.crc32(dtStr).toString(16)}`
 	}
 	async runScript(){
 		// is = inputScript shorthand
 		let is = {
 			cmd : 'getCourseInfo',
 			param : null,
-			ocls : `os-${(new Date).getTime()}`
+			ocls : this.createRandCls()
 		} 
 
 		try{
@@ -59,7 +63,7 @@ class ContentScriptApp extends ActionCSA{
 		const inputScriptDefaultValue = JSON.stringify({
 			cmd : 'getCourseInfo',
 			param : null,
-			ocls : `os-${(new Date).getTime()}`
+			ocls : this.createRandCls()
 		} )
 		return (<><div id={appContainerId} style={{display,flexDirection:'column',width:'400px',position:'absolute', background:'#000',color:'#fff',zIndex:2001,opacity:.7,fontFamily:'monospace',marginTop:'3.1em',marginLeft:'22%',padding:'1em'}}>
 			
@@ -79,5 +83,6 @@ class ContentScriptApp extends ActionCSA{
 	}
 	
 }
+import { create } from "underscore"
 
 export default ContentScriptApp

@@ -2,7 +2,7 @@
     
     "tables" : {
         "section" : {
-            "headers" : ["Course","Slug","Title", "TOC IDS","Urn"],
+            "headers" : ["Course","Slug","Title", "TOC IDS","Item Stars"],
             "fields" : ["courseId","slug","title","tocIds","itemStars"],
             "model" : "Section",
             

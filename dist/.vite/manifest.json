@@ -1,0 +1,115 @@
+{
+  "../../@crx/manifest": {
+    "file": "assets/crx-manifest.js-tfrZiW6l.js",
+    "isEntry": true,
+    "src": "../../@crx/manifest"
+  },
+  "_font-awesome.min-!~{008}~.js": {
+    "file": "assets/font-awesome-7juQPigl.css",
+    "src": "_font-awesome.min-!~{008}~.js"
+  },
+  "_font-awesome.min-TSCjFFnw.js": {
+    "assets": [
+      "assets/fontawesome-webfont-BuWBOUu1.eot",
+      "assets/fontawesome-webfont-fo5IWH5D.woff2",
+      "assets/fontawesome-webfont-gyuW7eKX.woff",
+      "assets/fontawesome-webfont-kAyvDFN2.ttf",
+      "assets/fontawesome-webfont-9d686-IE.svg"
+    ],
+    "css": [
+      "assets/font-awesome-7juQPigl.css"
+    ],
+    "file": "assets/font-awesome.min-TSCjFFnw.js",
+    "imports": [
+      "_index-H9g6PPaV.js"
+    ]
+  },
+  "_index-!~{004}~.js": {
+    "file": "assets/index-6PmZOoQv.css",
+    "src": "_index-!~{004}~.js"
+  },
+  "_index-H9g6PPaV.js": {
+    "css": [
+      "assets/index-6PmZOoQv.css"
+    ],
+    "file": "assets/index-H9g6PPaV.js"
+  },
+  "_index-default-FtYdW2tD.js": {
+    "file": "assets/index-default-FtYdW2tD.js",
+    "imports": [
+      "_index-H9g6PPaV.js"
+    ]
+  },
+  "content.jsx-loader.js": {
+    "file": "assets/content.jsx-loader-jw9NR1wv.js",
+    "src": "content.jsx-loader.js"
+  },
+  "index.html": {
+    "file": "assets/index.html-YluIKtLZ.js",
+    "imports": [
+      "_font-awesome.min-TSCjFFnw.js",
+      "_index-H9g6PPaV.js"
+    ],
+    "isEntry": true,
+    "src": "index.html"
+  },
+  "node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff": {
+    "file": "assets/bootstrap-icons-NpS-Zr3P.woff",
+    "src": "node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff"
+  },
+  "node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff2": {
+    "file": "assets/bootstrap-icons-2eO-ad8Y.woff2",
+    "src": "node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff2"
+  },
+  "node_modules/fontawesome-4.7/fonts/fontawesome-webfont.eot": {
+    "file": "assets/fontawesome-webfont-BuWBOUu1.eot",
+    "src": "node_modules/fontawesome-4.7/fonts/fontawesome-webfont.eot"
+  },
+  "node_modules/fontawesome-4.7/fonts/fontawesome-webfont.svg": {
+    "file": "assets/fontawesome-webfont-9d686-IE.svg",
+    "src": "node_modules/fontawesome-4.7/fonts/fontawesome-webfont.svg"
+  },
+  "node_modules/fontawesome-4.7/fonts/fontawesome-webfont.ttf": {
+    "file": "assets/fontawesome-webfont-kAyvDFN2.ttf",
+    "src": "node_modules/fontawesome-4.7/fonts/fontawesome-webfont.ttf"
+  },
+  "node_modules/fontawesome-4.7/fonts/fontawesome-webfont.woff": {
+    "file": "assets/fontawesome-webfont-gyuW7eKX.woff",
+    "src": "node_modules/fontawesome-4.7/fonts/fontawesome-webfont.woff"
+  },
+  "node_modules/fontawesome-4.7/fonts/fontawesome-webfont.woff2": {
+    "file": "assets/fontawesome-webfont-fo5IWH5D.woff2",
+    "src": "node_modules/fontawesome-4.7/fonts/fontawesome-webfont.woff2"
+  },
+  "src/background-scripts/background.js": {
+    "file": "assets/background.js-fzAMj5xD.js",
+    "isEntry": true,
+    "src": "src/background-scripts/background.js"
+  },
+  "src/content-pages/content.jsx": {
+    "file": "assets/content.jsx-ZpkHFnsQ.js",
+    "imports": [
+      "_index-H9g6PPaV.js",
+      "_index-default-FtYdW2tD.js"
+    ],
+    "isEntry": true,
+    "src": "src/content-pages/content.jsx"
+  },
+  "src/option-pages/options.html": {
+    "assets": [
+      "assets/bootstrap-icons-2eO-ad8Y.woff2",
+      "assets/bootstrap-icons-NpS-Zr3P.woff"
+    ],
+    "css": [
+      "assets/options-5XLIHhnw.css"
+    ],
+    "file": "assets/options.html-JS5SVnZP.js",
+    "imports": [
+      "_font-awesome.min-TSCjFFnw.js",
+      "_index-H9g6PPaV.js",
+      "_index-default-FtYdW2tD.js"
+    ],
+    "isEntry": true,
+    "src": "src/option-pages/options.html"
+  }
+}

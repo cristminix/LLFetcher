@@ -830,7 +830,7 @@ class QueueMan extends Component{
     // }
     render(){
         const {infoMessage, currentIndex} = this.state
-        const {clearStatusBar,logStatusBar,selectedFmt, queueStarted, sections, course, tocs, store, alreadySetup, queueFinished} = this.props
+        const {refreshTable,clearStatusBar,logStatusBar,selectedFmt, queueStarted, sections, course, tocs, store, alreadySetup, queueFinished,dmsetup} = this.props
         return (<><div className="queueman mb-12 mt-2">
         
         <div className="queue-man-container">
@@ -839,7 +839,7 @@ class QueueMan extends Component{
                 
                 alreadySetup ? <>
                     <QueueInfo clearStatusBar={clearStatusBar} logStatusBar={logStatusBar} selectedFmt={selectedFmt} queueFinished={queueFinished} message={infoMessage} queueStarted={queueStarted} currentIndex={currentIndex}/>
-                    <QueueTable clearStatusBar={clearStatusBar} logStatusBar={logStatusBar} resetQueueItem={vIndex=>this.resetQueueItem(vIndex)} startQueueItem={vIndex=>this.startQueueItem(vIndex)} queueItemRef={this.queueItemRef} course={course} sections={sections} tocs={tocs} store={store}/>
+                    <QueueTable refreshTable={refreshTable} dmsetup={dmsetup} clearStatusBar={clearStatusBar} logStatusBar={logStatusBar} resetQueueItem={vIndex=>this.resetQueueItem(vIndex)} startQueueItem={vIndex=>this.startQueueItem(vIndex)} queueItemRef={this.queueItemRef} course={course} sections={sections} tocs={tocs} store={store}/>
                 </> : ERROR_NOT_SETUP_QUEUE
             }
             

@@ -28,6 +28,7 @@ const DownloadManager = ({store}) => {
     const [displaySetupUi, setDisplaySetupUi] = useState(false)
     // dmsetup database
     const [dmsetup, setDmsetup] = useState(null)
+    const [refreshTable,setRefreshTable]=useState(false)
     const mDMSetup = store.get("DMSetup")
 
     // queueRelatedState
@@ -194,7 +195,7 @@ const DownloadManager = ({store}) => {
       <div className="download-manager min-h-[1328px]">
         <Toast ref={toastRef}/>
         <CourseInfo store={store} course={course} authors={authors} selectedFmt={selectedFmt} selectTrans={selectTrans} selectedTrans={selectedTrans} />
-        <ToolbarMan alreadySetup={alreadySetup} toast={toast}
+        <ToolbarMan alreadySetup={alreadySetup} toast={toast} 
                     setAlreadySetup={setAlreadySetup}
                     reconfigureSetup={reconfigureSetup}
                     setReconfigureSetup={setReconfigureSetup}
@@ -217,7 +218,7 @@ const DownloadManager = ({store}) => {
                     queueResume={queueResume}
                     logStatusBar={logStatusBar}
                     clearStatusBar={clearStatusBar}/>
-        <QueueSetup alreadySetup={alreadySetup} toast={toast}
+        <QueueSetup alreadySetup={alreadySetup} toast={toast} setRefreshTable={setRefreshTable}
                     setAlreadySetup={setAlreadySetup}
                     reconfigureSetup={reconfigureSetup}
                     setReconfigureSetup={setReconfigureSetup}
@@ -248,7 +249,7 @@ const DownloadManager = ({store}) => {
                     logStatusBar={logStatusBar}
                     clearStatusBar={clearStatusBar}
                     />
-        <QueueMan alreadySetup={alreadySetup} toast={toast}
+        <QueueMan alreadySetup={alreadySetup} toast={toast} dmsetup={dmsetup} refreshTable={refreshTable}
                   reconfigureSetup={reconfigureSetup}
                   course={course}
                   sections={sections}

@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Button from "../../../components/shared/ux/Button"
 import DropdownSelect from "../../../components/shared/ux/DropdownSelect"
 import CourseApi from "../../../global/course-api/CourseApi"
+import CheckBox from "../../../components/shared/ux/CheckBox"
 
 
 const QueueSetup = ({
-    toast,
+    toast,setRefreshTable,
     logStatusBar,clearStatusBar,
     availableFmt, setAvailableFmt,
     availableTrans, setAvailableTrans,
@@ -16,14 +17,16 @@ const QueueSetup = ({
   
 
     const [loadingFetchToc, setLoadingFetchToc] = useState(false) 
+    const [enableFilenameIndex,setEnableFilenameIndex]=useState(true)
     const mDMSetup = store.get("DMSetup")
     
     
     const getAvailableFmt = async(e) => {
         if(dmsetup){
-            const {availableFmt,availableTrans} = dmsetup
+            const {availableFmt,availableTrans,enableFilenameIndex} = dmsetup
             setAvailableFmt(availableFmt)
             setAvailableTrans(availableTrans)
+            setEnableFilenameIndex(enableFilenameIndex)
             return
         }
         setLoadingFetchToc(true)
@@ -91,7 +94,7 @@ const QueueSetup = ({
             setAvailableFmt(availableFmtList)
             setAvailableTrans(availableTransList)
 
-            const dmsetup = await mDMSetup.create(ncourse.id,availableFmtList,selectedFmt,availableTransList,selectedTrans,sourceRepo,exerciseFiles,status,finished)
+            const dmsetup = await mDMSetup.create(ncourse.id,availableFmtList,selectedFmt,availableTransList,selectedTrans,sourceRepo,exerciseFiles,status,finished,enableFilenameIndex)
             setDmsetup(dmsetup)
         }else{
             const message = `Operation Canceled : Could not get first TOC in first Course Section`
@@ -108,6 +111,7 @@ const QueueSetup = ({
             const savedSelectedFmt = dmsetup.selectedFmt
             const savedTransList = dmsetup.availableTrans
             const savedSelectedTrans = dmsetup.selectedTrans
+            const savedEnableFilenameIndex = dmsetup.enableFilenameIndex
 
             if(savedSelectedFmt){
                 setSelectedFmt(savedSelectedFmt)
@@ -115,6 +119,10 @@ const QueueSetup = ({
             if(savedSelectedTrans){
                 setSelectedTrans(savedSelectedTrans)
             }
+            if(savedEnableFilenameIndex !== null){
+                setEnableFilenameIndex(savedEnableFilenameIndex)
+            }
+
 
             setAvailableFmt(savedFmtList)
             setAvailableTrans(savedTransList)
@@ -125,13 +133,16 @@ const QueueSetup = ({
         const row = {
             status: 2,
             selectedFmt,
-            selectedTrans
+            selectedTrans,
+            enableFilenameIndex
         }
-        await mDMSetup.updateByCourseId(course.id, row)
+        const dmsetup = await mDMSetup.updateByCourseId(course.id, row)
+        setDmsetup(dmsetup)
         if(reconfigureSetup){
             setReconfigureSetup(false)
         }
         setAlreadySetup(true)
+        setRefreshTable((new Date).getTime())
         }
     }
     const cancelSetup = async() => {
@@ -142,7 +153,10 @@ const QueueSetup = ({
         }
         // setAlreadySetup(false)
     }
-    const subRenderState = !availableFmt.length
+    let subRenderState = false 
+    if(availableFmt){
+        subRenderState = !availableFmt.length
+    }
     const fmtSelectorProps = {
         subRenderState,
         loadingFetchToc,
@@ -163,7 +177,10 @@ const QueueSetup = ({
     let showConfigSetup = false
     
 
-    const fmtAlreadyAvailable = availableFmt.length > 0
+    let fmtAlreadyAvailable = false
+    if(availableFmt){
+        fmtAlreadyAvailable = availableFmt.length > 0
+    }
 
     if(!fmtAlreadyAvailable){
         if(reconfigureSetup){
@@ -222,7 +239,14 @@ const QueueSetup = ({
                  data={availableTrans} selected={selectedTrans} onSelect={trans=>setSelectedTrans(trans)}/>
                 </div>
             </div>
-
+            <div className="flex items-center p-2 px-2">
+                <div className="w-[150px]">
+                    <label className="font-bold">Enable Filename Index</label>
+                </div>
+                <div>
+                    <CheckBox label="" checked={enableFilenameIndex} onChange={checked=>setEnableFilenameIndex(checked)}/>
+                </div>
+            </div>
             <div className="flex p-2 gap-2">
                 <Button onMouseOut={e=>clearStatusBar()} 
                   onMouseOver={e=>logStatusBar('QueueSetup',`Cancel this setup and back to main queue`)}

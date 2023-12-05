@@ -23,12 +23,12 @@ class DropdownMenu extends Component{
 	}
     render(){
         const ddId = crc32((new Date).getTime().toString()).toString(16)
-        const {label,data,labelIcon,itemIcon,captionSuffix="",className} = this.props
+        const {label,data,labelicon,itemIcon,captionSuffix="",className} = this.props
         const optionItemCls = "cursor-pointer flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300 dark:focus:bg-gray-700"
         return <>
         <div className={className+" hs-dropdown relative inline-flex"}>
   <button id={`hs-dropdown-${ddId}`} type="button" className="hs-dropdown-toggle py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-white dark:hover:bg-gray-800 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600">
-    <i className={labelIcon}/>{label}
+    <i className={labelicon}/>{label}
     <svg className="hs-dropdown-open:rotate-180 w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
   </button>
 

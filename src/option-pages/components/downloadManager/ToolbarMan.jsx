@@ -210,7 +210,7 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/selectedFmt, 
          
            {
               dmsetup.exerciseFiles ? dmsetup.exerciseFiles.length > 0 ? <>
-                <DropdownMenu className="ml-1" data={dmsetup.exerciseFiles.map(item=>{return{value:item.url,text:item.name}})} onSelect={url=>openExerciseFile(url)} label="Exercise Files" itemIcon="fa fa-file-archive-o" labelIcon="fa fa-folder-o" />
+                <DropdownMenu className="ml-1" data={dmsetup.exerciseFiles.map(item=>{return{value:item.url,text:item.name}})} onSelect={url=>openExerciseFile(url)} label="Exercise Files" itemIcon="fa fa-file-archive-o" labelicon="fa fa-folder-o" />
               </> : '': ''
             } 
             {

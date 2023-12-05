@@ -71,9 +71,10 @@
             
         },
         "dm-setup" : {
-            "headers" : ["Course","Status","Finished", "Available Fmt", "Selected Fmt","Selected Trans", "Exercise Files", "Source Repo","Available Trans"],
+            "headers" : ["Course","Enable Filename Index","Status","Finished", "Available Fmt", "Selected Fmt","Selected Trans", "Exercise Files", "Source Repo","Available Trans"],
             "fields" : [
                 "course",
+                "enableFilenameIndex",
                 "status",
                 "finished",
                 "availableFmt", 

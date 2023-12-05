@@ -12,7 +12,8 @@ class DMSetup extends DB{
         "selectedFmt", 
         "selectedTrans", 
         "exerciseFiles", 
-        "sourceRepo"
+        "sourceRepo",
+        "enableFilenameIndex"
         ]
 	type = "collection"
 
@@ -31,11 +32,11 @@ class DMSetup extends DB{
     getById(id){
         return this.singleQuery({query: {id}})
     }
-    async create(courseId,availableFmt,selectedFmt,availableTrans,selectedTrans,sourceRepo,exerciseFiles,status,finished){
+    async create(courseId,availableFmt,selectedFmt,availableTrans,selectedTrans,sourceRepo,exerciseFiles,status,finished,enableFilenameIndex){
         let row = this.getByCourseId(courseId)
         if(!row){
             const id = 0
-            row = {id,courseId,availableFmt,selectedFmt,availableTrans,selectedTrans,sourceRepo,exerciseFiles,status,finished}
+            row = {id,courseId,availableFmt,selectedFmt,availableTrans,selectedTrans,sourceRepo,exerciseFiles,status,finished,enableFilenameIndex}
             row.id = this.db.insert(this.table,row)
             await this.db.commit()
         }else{

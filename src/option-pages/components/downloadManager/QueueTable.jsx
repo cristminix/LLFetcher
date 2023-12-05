@@ -1,7 +1,13 @@
+import { useEffect, useState } from "react"
 import QueueItem from "./QueueItem"
-const QueueTable = ({clearStatusBar, logStatusBar,startQueueItem,store, course, sections, tocs, queueItemRef,resetQueueItem}) => {
+const QueueTable = ({refreshTable,dmsetup,clearStatusBar, logStatusBar,startQueueItem,store, course, sections, tocs, queueItemRef,resetQueueItem}) => {
     const thCls = "px-1 py-1 text-left text-xs font-medium text-gray-500 uppercase"
-	
+	const [tmpSections,setTmpSections]=useState(Object.assign([],sections))
+    useEffect(()=>{
+        // setTmpSections([])
+        setTimeout(f=>setTmpSections(Object.assign([],sections)),512)
+        // console.log(dmsetup)
+    },[dmsetup])
     return (<><div className="queue-table border rounded-xl shadow-sm p-6 dark:bg-gray-800 dark:border-gray-700">
         <div className="state-tbl flex flex-col mx-auto w-full">
         
@@ -19,7 +25,7 @@ const QueueTable = ({clearStatusBar, logStatusBar,startQueueItem,store, course, 
                 </tr>
             </thead>
             <tbody>
-            <QueueItem clearStatusBar={clearStatusBar} logStatusBar={logStatusBar} resetQueueItem={resetQueueItem} startQueueItem={startQueueItem} store={store} ref={queueItemRef} course={course} sections={sections} tocs={tocs} />
+            <QueueItem dmsetup={dmsetup} clearStatusBar={clearStatusBar} logStatusBar={logStatusBar} resetQueueItem={resetQueueItem} startQueueItem={startQueueItem} store={store} ref={queueItemRef} course={course} sections={tmpSections} tocs={tocs} />
             </tbody>
         </table>
         </div>

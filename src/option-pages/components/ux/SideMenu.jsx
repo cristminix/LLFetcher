@@ -7,10 +7,10 @@ import { NavLink } from 'react-router-dom';
 import side_menu from "../../side_menu.json"
 import AccordionMenu from "./side-menu/AccordionMenu";
 import Menu from "./side-menu/Menu";
-const SideMenu = ({}) => {
+const SideMenu = ({store,config}) => {
     return (<>
     <nav data-hs-accordion-always-open="" className={cls13}> 
-         <Menu data={side_menu.links} />
+         <Menu data={side_menu.links} store={store} config={config} />
          {/*
          <ul className={cls14}> 
            <li> 

@@ -9,6 +9,7 @@ import SideMenu from "./SideMenu";
 
 class Sidebar extends Component{
     render(){
+      const {store,config} = this.props
         return<>
         {/*<!-- Sidebar -->*/} 
      <div id="application-sidebar" className={cls10}> 
@@ -20,7 +21,7 @@ class Sidebar extends Component{
           </div>
         </a>
        </div> 
-      <SideMenu/>
+      <SideMenu store={store} config={config}/>
         
      </div> 
      {/*<!-- End Sidebar -->*/} 

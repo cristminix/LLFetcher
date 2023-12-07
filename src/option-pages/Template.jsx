@@ -7,13 +7,13 @@ import { cls0 } from "./components/ux/cls";
 
 class Template extends Component{
     render(){
-        
+        const {store,config} = this.props
     return <>
     <div className={cls0}> 
      {/*<!-- ========== MAIN CONTENT ========== -->*/} 
      
      <SidebarToggle/>   
-     <Sidebar/>
+     <Sidebar store={store} config={config}/>
      <Content/>   
     
      {/*<!-- ========== END MAIN CONTENT ========== -->*/} 

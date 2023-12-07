@@ -36,16 +36,55 @@ const MenuItem = ({hasChild, title, path, icon,  name,childrens, index}) => {
     }
     </>
 }
-const Menu = ({data}) => {
+const Menu = ({data, store, config}) => {
+    const getChildrenByModel = (item) => {
+        let childrens = {}
+        if(item.model){
+            const modelName = item.model
+            const modelObj = store.get(modelName)
+            if(modelObj){
+              if(item.modelListMethod){
+                const listMethod = item.modelListMethod
+               
+                try{
+                  const childData =  modelObj[listMethod]()
+                  for(const cItem of childData){
+                    const title = cItem[item.displayField]
+                    const slug = cItem[item.slugField]
+                    const path = item.childRoutePath.replace(/{SLUG_VALUE}/,slug)
+                    childrens[slug] = {
+                        title,
+                        name: slug,
+                        path,
+                        iconCls: item.iconCls                        
+                    }
+                  }
+                 
+                }catch(e){
+                  console.error(e)
+                }
+                
+              }
+               
+            }
+        }
+        console.log(childrens)
+        return childrens
+    }
     return (<>
     <ul className={cls14}> 
     {
         Object.keys(data).map((key, index) => {
             const item = data[key]
-            const childrens = item.childItems || {}
+            let childrens = item.childItems || {}
             console.log(item)
             if(item.hidden){
                 return null
+            }
+            const useModel = item.useModel || false
+            if(useModel){
+                childrens = getChildrenByModel(item)
+                item.hasChild = Object.keys(childrens).length > 0
             }
             return <MenuItem childrens={childrens} name={key} index={index} hasChild={item.hasChild} title={item.title} path={item.path} icon={item.iconCls} />
         })

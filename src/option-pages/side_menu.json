@@ -74,6 +74,12 @@
 			"hidden" : 0,
 			"hasChild" : true,
 			"childItems" : {
+				"table-manager" : {
+					"title" : "Table Manager",
+					"path" : "/database",
+					"iconCls" : "fa fa-database",
+					"order" : 0
+				},
 				"author" : {
 					"title" : "Author",
 					"path" : "/database/author",

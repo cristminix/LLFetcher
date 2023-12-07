@@ -13,6 +13,7 @@ import AppConfig from "../global/config/AppConfig"
 import 'fontawesome-4.7/css/font-awesome.min.css'
 // import 'bootstrap/dist/js/bootstrap.esm'
 import "../components/shared/ux/override"
+import "./style.css"
 
 const store = Store.getInstance()
 const config = AppConfig.getInstance();

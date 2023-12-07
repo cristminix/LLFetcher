@@ -272,7 +272,7 @@ const DownloadManager = ({store}) => {
                       ref={statusBarManRef}/>
     </div></>)
     }else{
-      return <>No data</>
+      return <><i className='fa fa-spin fa-spinner'/></>
     }
     
 }

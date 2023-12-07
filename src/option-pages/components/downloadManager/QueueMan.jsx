@@ -1,7 +1,7 @@
 import { useEffect, useState, Component, createRef } from "react"
 import QueueInfo from "./QueueInfo"
 import QueueTable from "./QueueTable"
-import {timeout,formatBytes, calculateSpeed} from "../../../global/fn"
+import {timeout,formatBytes, calculateSpeed,formatLeadingZeros} from "../../../global/fn"
 // import {} from "../../components/learning_fn"
 import isNetworkError from 'is-network-error'
 import CourseApi from "../../../global/course-api/CourseApi"
@@ -323,7 +323,7 @@ class QueueMan extends Component{
     */
     async fetchDlQueueItem(vIndex, captionUrl, videoUrl, mode="single"){
         console.log(`fetchDlQueueItem runing in ${mode} mode`,captionUrl, videoUrl)
-        // const {}
+        const {dmsetup} = this.props
         const queueIsRunning = this.props.queueStarted
         const [courseSlug, tocSlug] = this.getCourseTocSlug(vIndex)
         const {selectedFmt} = this.props
@@ -348,6 +348,7 @@ class QueueMan extends Component{
             }
           
             if(runQueue){
+                const {enableFilenameIndex} = dmsetup
                 const filenameBase = `${tocSlug}-${selectedFmt}`
                 const videoFilename = `${filenameBase}.mp4`
                 const captionFilename = `${filenameBase}.vtt`

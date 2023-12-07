@@ -1,0 +1,13 @@
+@tailwind components;
+@layer components {
+    /* #main-content{
+        @apply w-full px-4 sm:px-6 md:px-8 dark:bg-gray-800 dark:border-gray-700 text-gray-800 dark:text-gray-200 	 
+    }
+    .btn {
+        @apply font-bold py-2 px-4 rounded;
+    }
+    .btn-blue {
+        @apply bg-blue-500 hover:bg-blue-700 text-white;
+    } */
+}
+

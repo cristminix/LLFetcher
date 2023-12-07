@@ -31,7 +31,7 @@ class StatusbarMan extends Component{
     const {message,mode,t,customMessage} = this.state
 
     return <><div className="statusbar-man fixed bottom-0 w-full -mx-8 bg-white dark:bg-gray-800 dark:text-gray-200">
-        <div className="status-bar-man-container rounded border p-2.5">
+        <div className="status-bar-man-container rounded  p-2.5">
         {
             t == 'default' ? <>
             {

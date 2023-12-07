@@ -23,7 +23,7 @@ const CourseInfo = ({store, course, authors,selectedFmt,selectedTrans}) => {
             <div>
                 <CourseAuthors authors={authors}/> 
             </div>
-            <div className="p-2">{displaySelectItem(selectedFmt)}</div>
+            <div className="pl-2">{displaySelectItem(selectedFmt)}</div>
             <div className="p-2">{displaySelectItem(selectedTrans)}</div>
         </div>
         

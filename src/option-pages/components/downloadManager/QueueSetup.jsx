@@ -202,12 +202,17 @@ const QueueSetup = ({
     if(!showGetAvailableFmt){
         showConfigSetup = true
     }
+    useEffect(()=>{
+        setTimeout(() => {
+            HSStaticMethods.autoInit();
+          }, 2000)
+      },[showQueueSetup])
     return (<>
     {/* <div>Show Queue Setup : {showQueueSetup ? "Y":"N" }</div>
     <div>Show Get Availble Fmt : {showGetAvailableFmt ? "Y":"N" }</div>
     <div>Show Config Setup : {showConfigSetup ? "Y":"N" }</div> */}
     {
-        showQueueSetup ? <div className="queue-setup my-2 border p-2 rounded">
+        showQueueSetup ? <div className="queue-setup w-[500px] border rounded-xl shadow-sm p-6 dark:bg-gray-800 dark:border-gray-700">
         {
             showGetAvailableFmt ? <div className="flex p-2 px-2">
                 <Button onMouseOut={e=>clearStatusBar()} 
@@ -217,7 +222,7 @@ const QueueSetup = ({
         }
         {
             showConfigSetup ? <>
-            <div className="flex items-center p-2 px-2">
+            <div className="flex  items-center p-2 px-2">
                 <div className="w-[150px]">
                     <label className="font-bold">Select Format</label>
                 </div>

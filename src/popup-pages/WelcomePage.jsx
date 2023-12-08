@@ -146,8 +146,9 @@ class WelcomePage extends ComponentWithMessaging {
 	}
 	async activateAddCourseOptionTab(slug){
 		const optionPageBaseUrl = "src/option-pages/" 
-		const url = chrome.runtime.getURL(`${optionPageBaseUrl}options.html#/course/add/${slug}`)
-		const tabs = await chrome.tabs.query({ url: `${chrome.runtime.getURL('options.html')}*` })
+		const optionUrl = chrome.runtime.getURL(`${optionPageBaseUrl}options.html`)
+		const url = `${optionUrl}#/course/add/${slug}`
+		const tabs = await chrome.tabs.query({ url: `${optionUrl}*` })
 		if(tabs.length > 0){
 			chrome.runtime.sendMessage({ action: 'activateTab', url ,optionPageBaseUrl})
 		}else{

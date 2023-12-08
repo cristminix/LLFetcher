@@ -186,13 +186,14 @@ const DownloadManager = ({store}) => {
     useEffect(()=>{
       onQueueFinished(queueFinished)
     },[queueFinished])
+    
 
     if(activeCourseData){
       console.log(activeCourseData)
       const {course, authors, sections, tocs}  = activeCourseData
       return (<>
       
-      <div className="download-manager min-h-[1328px]">
+      <div className="download-manager">
         <Toast ref={toastRef}/>
         <CourseInfo store={store} course={course} authors={authors} selectedFmt={selectedFmt} selectTrans={selectTrans} selectedTrans={selectedTrans} />
         <ToolbarMan alreadySetup={alreadySetup} toast={toast} 

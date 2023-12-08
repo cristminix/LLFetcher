@@ -66,7 +66,7 @@ class UiConfig extends LsConfig{
 		this.setData('defaultTheme', this.defaultTheme)
 	}
 	reloadSidebar(){
-		const $main_content = jQuery('#main-content')
+		const $main_content = jQuery('#root')
 		$main_content.trigger('reloadSidebar')
 
 	}
@@ -74,7 +74,7 @@ class UiConfig extends LsConfig{
 	 * set sidebar hidden or shown
 	 * */
 	setHiddenSidebarStatus(status = true){
-		const $main_content = jQuery('#main-content')
+		const $main_content = jQuery('#root')
 		
 		$main_content.prop('hideSidebar',status)
 		$main_content.trigger('hideSidebar')
@@ -108,7 +108,7 @@ class UiConfig extends LsConfig{
 		setHideSidebar(this.getHiddenSidebarStatus())
 		if(typeof callback === 'function' ){
 			if(!this.hiddenSidebar_callback_keys.includes(callback_key)){
-				const $main_content = jQuery('#main-content')
+				const $main_content = jQuery('#root')
 				$main_content.on('hideSidebar', ()=>{
 					callback($main_content.prop('hideSidebar'))
 				})
@@ -126,7 +126,7 @@ class UiConfig extends LsConfig{
 			// 	this.reloadSidebar_callback_keys=[]
 			// }
 			if(!this.reloadSidebar_callback_keys.includes(callback_key)){
-				const $main_content = jQuery('#main-content')
+				const $main_content = jQuery('#root')
 				$main_content.on('reloadSidebar', ()=>{
 					console.log(this.reloadSidebar_callback_keys)
 					callback()

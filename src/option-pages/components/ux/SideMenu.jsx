@@ -2,15 +2,33 @@ import {cls10,cls11,cls12,cls13,cls14,cls15,cls16,
     cls17,cls18,cls19,cls20,cls21,cls22,cls23,cls24,cls25,cls26,cls27
   } from "./cls";
 
-import {useState, useEffect} from "react"
+import {useState, useEffect, Component} from "react"
 import { NavLink } from 'react-router-dom';
 import side_menu from "../../side_menu.json"
 import AccordionMenu from "./side-menu/AccordionMenu";
 import Menu from "./side-menu/Menu";
-const SideMenu = ({store,config}) => {
+class SideMenu extends Component {
+  constructor(props){
+    super(props)
+    this.state = {
+      sideMenuLinks:Object.assign({},side_menu.links),
+      hideSidebar:false
+    }
+  }
+  reload(){
+    // console.log('SideBar.reloadSidebar()')
+    // this.setState({
+    //   sideMenuLinks:
+    // })
+    this.setState({
+      sideMenuLinks:Object.assign({},side_menu.links)
+    })
+  }
+  render(){
+    const {store,config} =this.props
     return (<>
     <nav data-hs-accordion-always-open="" className={cls13}> 
-         <Menu data={side_menu.links} store={store} config={config} />
+         <Menu data={this.state.sideMenuLinks} store={store} config={config} />
          {/*
          <ul className={cls14}> 
            <li> 
@@ -166,6 +184,7 @@ const SideMenu = ({store,config}) => {
            </a> </li> 
     </ul> */}
        </nav></>)
+  }
 }
 
 export default SideMenu

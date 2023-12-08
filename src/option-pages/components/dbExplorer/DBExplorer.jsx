@@ -194,7 +194,7 @@ const DBExplorer = ({store, table, page })=>{
 		gridOptions.editorFactory = editorFactory
 		return(<div className={containerCls}>		
 				<div className="flex flex-col">
-	  				<div className="-m-1.5 overflow-x-auto">
+	  				<div className="-m-1.5 overflow-x-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-slate-700 dark:[&::-webkit-scrollbar-thumb]:bg-slate-500">
 	    				<div className="p-1.5 min-w-full inline-block align-middle">
 	      					<div className="overflow-hidden">
 	        					<Grid options={gridOptions} records={grid.records} page={grid.page} limit={grid.limit} />

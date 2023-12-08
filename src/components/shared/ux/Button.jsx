@@ -1,6 +1,7 @@
 const Button = ({title="",label=null,onMouseOver=f=>f,onMouseOut=f=>f,disabled=false,loading=false, icon, className, caption, onClick}) => {
     const btnCls = "inline-flex flex-shrink-0 justify-center items-center gap-2 p-2 rounded-md border font-medium bg-white text-gray-700 shadow-sm align-middle hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 focus:ring-offset-white transition-all text-xs dark:bg-gray-800 dark:hover:bg-slate-800 dark:border-gray-700 dark:text-gray-400 dark:hover:text-white dark:focus:ring-gray-700 dark:focus:ring-offset-gray-800"
-    return <div className="flex">
+    return <>
+    {/* <div className="flex"> */}
         {
             // label ? <label>{label}</label>:''
         }
@@ -17,7 +18,9 @@ const Button = ({title="",label=null,onMouseOver=f=>f,onMouseOut=f=>f,disabled=f
             caption ? <span>{caption}</span> : ""
         }
     
-  </button></div>
+  </button>
+  </>
+  {/* </div> */}
 }
 
 export default Button

@@ -5,7 +5,7 @@ const MenuItem = ({hasChild, title, path, icon,  name,childrens, index}) => {
     return <>
     {
         hasChild?<>
-        <li id={`${name}-accordion`} className={cls17} key={name}> 
+        <li id={`${name}-accordion`} className={`${cls17}`} key={name}> 
         <button type="button" className={cls18}> 
             <i className={icon}></i>{title}
   
@@ -13,14 +13,14 @@ const MenuItem = ({hasChild, title, path, icon,  name,childrens, index}) => {
   
                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={cls20}> <path d="m6 9 6 6 6-6"> </path> </svg> 
              </button> 
-             <div id={`${name}-accordion-sub`} className={cls25}> 
-                     <ul  data-hs-accordion-always-open={true} className={cls22}> 
+             <div id={`${name}-accordion-sub`} className={`${cls25}`}> 
+                     <ul className={cls22}> 
                      {
-                        Object.keys(childrens).map((key, index) => {
+                        Object.keys(childrens).map((key, tindex) => {
                             const item_ = childrens[key]
                             const childrens_ = item_.childItems || {}
-                            console.log(item_)
-                            return <MenuItem childrens={childrens_} name={key} index={index} hasChild={item_.hasChild} title={item_.title} path={item_.path} icon={item_.iconCls} />
+                            // console.log(item_)
+                            return <MenuItem key={key} childrens={childrens_} name={key} index={index} hasChild={item_.hasChild} title={item_.title} path={item_.path} icon={item_.iconCls} />
         
                         })
                      }
@@ -68,7 +68,7 @@ const Menu = ({data, store, config}) => {
                
             }
         }
-        console.log(childrens)
+        // console.log(childrens)
         return childrens
     }
     return (<>
@@ -77,7 +77,7 @@ const Menu = ({data, store, config}) => {
         Object.keys(data).map((key, index) => {
             const item = data[key]
             let childrens = item.childItems || {}
-            console.log(item)
+            // console.log(item)
             if(item.hidden){
                 return null
             }
@@ -86,7 +86,7 @@ const Menu = ({data, store, config}) => {
                 childrens = getChildrenByModel(item)
                 item.hasChild = Object.keys(childrens).length > 0
             }
-            return <MenuItem childrens={childrens} name={key} index={index} hasChild={item.hasChild} title={item.title} path={item.path} icon={item.iconCls} />
+            return <MenuItem key={index} childrens={childrens} name={key} index={index} hasChild={item.hasChild} title={item.title} path={item.path} icon={item.iconCls} />
         })
     }
     </ul>

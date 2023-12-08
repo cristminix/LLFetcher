@@ -172,7 +172,7 @@ const DBTableManager = ({store,config}) => {
 	const containerCls = "db-table-manager border mb-2 rounded-xl shadow-sm p-6 dark:bg-gray-800 dark:border-gray-700"
 	return(<div className={containerCls}>
         <div className="explorer-toolbar">
-            <div className="button-group">
+            <div className="flex gap-2">
                 <Button onClick={e=>exportDb(e)} caption="Export to json" icon="fa fa-file-text"/>
                 <Button onClick={f=>f} icon="fa fa-save" caption={'Storage Size : '+formatBytes(storageSz)}/>
             </div>

@@ -168,7 +168,7 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/selectedFmt, 
         <div className="toolbar-man-container">
         
 
-<div className="flex flex-col md:inline-flex md:flex-row rounded-md shadow-sm">
+<div className="flex gap-2 flex-wrap">
   {
     alreadySetup ? <>
     
@@ -178,7 +178,7 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/selectedFmt, 
         !queueFinished ? <>
           <Button onMouseOut={e=>clearStatusBar()} 
                   onMouseOver={e=>logStatusBar('ToolbarMan',`${queueResume?'Resume Queue' : 'Start Queue'}`)}
-                  loading={queueStarted} className="mr-1" disabled={queueStarted} caption={queueResume?"Resume":"Start Queue"} icon="fa fa-play" onClick={e=>onStartQueue(e)}/>
+                  loading={queueStarted} className="" disabled={queueStarted} caption={queueResume?"Resume":"Start Queue"} icon="fa fa-play" onClick={e=>onStartQueue(e)}/>
 
           {
             !queueStarted ? <>
@@ -197,7 +197,7 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/selectedFmt, 
         </> : <>
           <Button  onMouseOut={e=>clearStatusBar()} 
                   onMouseOver={e=>logStatusBar('ToolbarMan',`Reset Current Queue`)}
-                  className="mr-1"  caption="Reset Queue" icon="fa fa-refresh" onClick={e=>onResetQueue(e)}/>
+                  className=""  caption="Reset Queue" icon="fa fa-refresh" onClick={e=>onResetQueue(e)}/>
           
         </>
       }
@@ -210,15 +210,15 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/selectedFmt, 
          
            {
               dmsetup.exerciseFiles ? dmsetup.exerciseFiles.length > 0 ? <>
-                <DropdownMenu className="ml-1" data={dmsetup.exerciseFiles.map(item=>{return{value:item.url,text:item.name}})} onSelect={url=>openExerciseFile(url)} label="Exercise Files" itemIcon="fa fa-file-archive-o" labelicon="fa fa-folder-o" />
+                <DropdownMenu className="" data={dmsetup.exerciseFiles.map(item=>{return{value:item.url,text:item.name}})} onSelect={url=>openExerciseFile(url)} label="Exercise Files" itemIcon="fa fa-file-archive-o" labelIcon="fa fa-folder-o" />
               </> : '': ''
             } 
             {
-              dmsetup.sourceRepo ? <><Button onClick={e=>openSourceRepo(e)} className="ml-1" label="Source Repo:" title={dmsetup.sourceRepo} caption="Source Repo" icon="fa fa-file-archive-o"/></> : ''
+              dmsetup.sourceRepo ? <><Button onClick={e=>openSourceRepo(e)} className="" label="Source Repo:" title={dmsetup.sourceRepo} caption="Source Repo" icon="fa fa-file-archive-o"/></> : ''
             }
-          <Button onClick={e=>downloadPlaylist(e)}  className="ml-1" caption="Playlist.m3u" icon="bi bi-collection-play"/>
-            <Button onClick={e=>downloadHelper(e)} className="ml-1" caption="Helper.sh" icon="bi bi-terminal-fill"/>
-            <Button onClick={e=>downloadHelperCmd(e)} className="ml-1" caption="Helper.cmd" icon="bi bi-terminal"/>
+          <Button onClick={e=>downloadPlaylist(e)}  className="" caption="Playlist.m3u" icon="bi bi-collection-play"/>
+            <Button onClick={e=>downloadHelper(e)} className="" caption="Helper.sh" icon="bi bi-terminal-fill"/>
+            <Button onClick={e=>downloadHelperCmd(e)} className="" caption="Helper.cmd" icon="bi bi-terminal"/>
           
         
       </>:''

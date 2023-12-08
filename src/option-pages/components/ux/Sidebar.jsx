@@ -1,4 +1,3 @@
-import { Component } from "react";
 import {cls10,cls11,cls12,cls13,cls14,cls15,cls16,
   cls17,cls18,cls19,cls20,cls21,cls22,cls23,cls24,cls25,cls26,cls27
 } from "./cls";
@@ -6,10 +5,28 @@ import {cls10,cls11,cls12,cls13,cls14,cls15,cls16,
 
 import appLogo from "/logo/icon-48.png"
 import SideMenu from "./SideMenu";
-
-class Sidebar extends Component{
-    render(){
-      const {store,config} = this.props
+import { useEffect,useRef } from "react";
+const Sidebar=({store,config})=>{
+  const sideMenuRef = useRef(null)
+  const toggle = ()=>{
+    // const status = !hideSidebar
+    // setHideSidebar(status)
+    // config.getUiConfig().setHiddenSidebarStatus(status)
+       
+  }
+  const reloadSidebar=f=>{
+    console.log('SideBar.reloadSidebar()')
+    if(sideMenuRef.current)
+      sideMenuRef.current.reload()
+    // setSideMenuLinks({})
+    // setTimeout(f=>setSideMenuLinks(side_menu.links),100)
+  }
+  useEffect(()=>{
+  //  config.getUiConfig().applyHiddenSidebarStatus(setHideSidebar)
+   config.getUiConfig().applyReloadSidebar(f=>{
+    reloadSidebar()
+   },'sidebar')
+  },[])
         return<>
         {/*<!-- Sidebar -->*/} 
      <div id="application-sidebar" className={cls10}> 
@@ -21,12 +38,11 @@ class Sidebar extends Component{
           </div>
         </a>
        </div> 
-      <SideMenu store={store} config={config}/>
+      <SideMenu store={store} config={config} ref={sideMenuRef}/>
         
      </div> 
      {/*<!-- End Sidebar -->*/} 
         </>
-    }
 }
 
 export default Sidebar

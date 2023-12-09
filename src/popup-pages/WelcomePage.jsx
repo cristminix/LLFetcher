@@ -6,6 +6,7 @@ import icon from "/logo/icon-48.png"
 import ComponentWithMessaging from "../components/shared/ComponentWithMessaging"
 import Button from "../components/shared/ux/Button"
 import DropdownSelect from "../components/shared/ux/DropdownSelect"
+import AdvancedSelect from "../components/shared/ux/AdvancedSelect"
 
 let onMessageAttached = false
 
@@ -184,15 +185,15 @@ class WelcomePage extends ComponentWithMessaging {
 			}
 		})
 		return(<>
-			<div className="welcome-page page gap-2 flex flex-col items-center">
+			<div className="welcome-page page gap-2 flex flex-col items-center pt-2">
 				<div className="flex gap-2">
 					<div><img src={icon}/></div>
-					<div><p className="font-bold pt-2 pb-4 text-center" style={{fontFamily:"Monoton, cursive"}}>{greeting}</p></div>
+					<div><p className="font-bold pt-2 pb-4 text-center text-lg" style={{fontFamily:"Monoton, cursive"}}>{greeting}</p></div>
 				</div>
-				<div className="action-cnt">
+				<div className="action-cnt w-full">
 					{
 						lastCourseDdData.length > 0 ? <>
-							<DropdownSelect data={lastCourseDdData} selected="Load Last Course" onSelect={course=> this.onSelectCourse(course)}/>
+							<AdvancedSelect data={lastCourseDdData} label="Load Last Course" onSelect={course=> this.onSelectCourse(course)}/>
 						</>:""
 					}
 				{
@@ -217,17 +218,10 @@ class WelcomePage extends ComponentWithMessaging {
 				}
 				
 
-				<div className="btn-cnt">
-					{/* <button  disabled={fetchBtnState==1 || !validCoursePage || disableFetchBtn} className="btn btn-primary" onClick={e => this.getCourseInfoMessage()}><i className={`fa ${btnCls}`}></i> Fetch This Course</button> */}
-					<Button  disabled={fetchBtnState==1 || !validCoursePage || disableFetchBtn} className="btn btn-primary" onClick={e => this.addCourseFromCurrentUrl()} icon={`fa ${btnCls}`} caption="Add This Course"/>
-					{/* <span>Valid CoursePage ? {validCoursePage ? 'Yes' : 'No'}</span> */}
-				</div>
-				<div className="p-4">
-					{
-					// !isLogin?<div className="alert error"><i className="fa fa-exclamation-triangle"/> <span>Warning you are not loged in</span></div>:''
-					
-					}
-				</div>
+				{validCoursePage?<div className="btn-cnt text-center  p-2">
+					<Button  disabled={fetchBtnState==1 || !validCoursePage || disableFetchBtn} className="mx-auto btn btn-primary" onClick={e => this.addCourseFromCurrentUrl()} icon={`fa ${btnCls}`} caption="Add This Course"/>
+				</div>:""}
+				
 				</div>
 			</div>
 	</>)

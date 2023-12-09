@@ -21,6 +21,11 @@ class DropdownMenu extends Component{
 		e.preventDefault()
 		
 	}
+    componentWillReceiveProps(){
+        setTimeout(() => {
+            HSStaticMethods.autoInit();
+        }, 1000)
+    }
     render(){
         const ddId = crc32((new Date).getTime().toString()).toString(16)
         const {label,data,labelIcon,itemIcon,captionSuffix="",className} = this.props

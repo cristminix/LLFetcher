@@ -97,6 +97,7 @@ const DownloadManager = ({store}) => {
 
       // setTimeout(()=>{
         setActiveCourseData(courseData)
+        setDmsetup(null)
 
       
         const {course} = courseData

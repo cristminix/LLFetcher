@@ -3,6 +3,7 @@ import Button from "../../../components/shared/ux/Button"
 import DropdownSelect from "../../../components/shared/ux/DropdownSelect"
 import CourseApi from "../../../global/course-api/CourseApi"
 import CheckBox from "../../../components/shared/ux/CheckBox"
+import AdvancedSelect from "../../../components/shared/ux/AdvancedSelect"
 
 
 const QueueSetup = ({
@@ -17,7 +18,7 @@ const QueueSetup = ({
   
 
     const [loadingFetchToc, setLoadingFetchToc] = useState(false) 
-    const [enableFilenameIndex,setEnableFilenameIndex]=useState(true)
+    const [enableFilenameIndex,setEnableFilenameIndex]=useState(false)
     const mDMSetup = store.get("DMSetup")
     
     
@@ -126,6 +127,10 @@ const QueueSetup = ({
 
             setAvailableFmt(savedFmtList)
             setAvailableTrans(savedTransList)
+        }else{
+            setSelectedFmt("Select Media Format")
+            setSelectedTrans("Select Transcript Language")
+
         }
     },[dmsetup])
     const finishSetup = async() =>{
@@ -203,10 +208,8 @@ const QueueSetup = ({
         showConfigSetup = true
     }
     useEffect(()=>{
-        setTimeout(() => {
-            HSStaticMethods.autoInit();
-          }, 2000)
-      },[showQueueSetup])
+       
+      },[showQueueSetup,availableFmt,availableTrans])
     return (<>
     {/* <div>Show Queue Setup : {showQueueSetup ? "Y":"N" }</div>
     <div>Show Get Availble Fmt : {showGetAvailableFmt ? "Y":"N" }</div>
@@ -226,10 +229,10 @@ const QueueSetup = ({
                 <div className="w-[150px]">
                     <label className="font-bold">Select Format</label>
                 </div>
-                <div>
-                    <DropdownSelect onMouseOut={e=>clearStatusBar()} 
+                <div className="flex-grow">
+                    <AdvancedSelect onMouseOut={e=>clearStatusBar()} 
                     onMouseOver={e=>logStatusBar('QueueSetup',`Select video size or format`)}
-                    data={availableFmt} selected={selectedFmt} onSelect={fmt=>setSelectedFmt(fmt)}
+                    data={availableFmt} label="Select Media Format" selected={selectedFmt} onSelect={fmt=>setSelectedFmt(fmt)}
                     captionSuffix="p"/>
                 </div>
             </div>
@@ -237,9 +240,9 @@ const QueueSetup = ({
                 <div className="w-[150px]">
                     <label className="font-bold">Select Transcript Lang</label>
                 </div>
-                <div>
+                <div className="flex-grow">
 
-                <DropdownSelect onMouseOut={e=>clearStatusBar()} 
+                <AdvancedSelect onMouseOut={e=>clearStatusBar()} label="Select Transcript Language"
                   onMouseOver={e=>logStatusBar('QueueSetup',`Select transcript lang`)}
                  data={availableTrans} selected={selectedTrans} onSelect={trans=>setSelectedTrans(trans)}/>
                 </div>

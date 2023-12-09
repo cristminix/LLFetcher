@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react"
 import DropdownMenu from "../../components/shared/ux/DropdownMenu"
+import AdvancedSelect from "../../components/shared/ux/AdvancedSelect"
 
 const SettingPage = () => {
     const testBtn = useRef(null)
@@ -21,24 +22,13 @@ const SettingPage = () => {
     },[])
     return <>
     <div className="w-full p-4">
-        <DropdownMenu data={[{value:"test",text:"Test",icon:"fa fa-check"}]} label="Test" labelIcon="fa fa-check" />
+        <AdvancedSelect data={[{value:"test",text:"Hello"}]} label="Choose"/>
     </div>
     <div className="w-full p-4">
         Setting Page
     <button id="testBtn" onClick={testFs}>Open File</button>
     </div>
-    <div className="hs-dropdown relative inline-flex">
-  <button id="hs-dropdown-unstyled" type="button" className="hs-dropdown-toggle inline-flex justify-center items-center gap-x-2">
-    Actions
-  </button>
-
-  <div className="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 w-56 hidden z-10 mt-2 min-w-[15rem] bg-white" aria-labelledby="hs-dropdown-unstyled">
-    <a className="block" href="#">Newsletter</a>
-    <a className="block" href="#">Purchases</a>
-    <a className="block" href="#">Downloads</a>
-    <a className="block" href="#">Team Account</a>
-  </div>
-</div>
+    
     </>
 }
 

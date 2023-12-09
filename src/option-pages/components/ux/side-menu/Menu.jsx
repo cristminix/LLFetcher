@@ -1,12 +1,18 @@
 import {cls14, cls15,cls16,cls22,cls23,cls24, cls25,cls17,cls18,cls19,cls20,cls27} from "../cls"
-import { Link, NavLink } from 'react-router-dom';
+import { useLocation, NavLink } from 'react-router-dom';
 
 const MenuItem = ({hasChild, title, path, icon,  name,childrens, index}) => {
+    const activeTabCls = "flex items-center gap-x-3.5 py-2 px-2.5 bg-gray-100 text-sm text-slate-700 rounded-md dark:bg-gray-900 dark:text-white"
+    const activeMenuCls = "bg-gray-100 text-sm text-slate-700 rounded-md dark:bg-gray-900 dark:text-white"
+    const inactiveTabCls = cls24  +" hover:bg-gray-100  hover:bg-gray-100 dark:hover:bg-gray-700"
+    const linkCls = ({ isActive, isPending }) => isActive ? activeTabCls :  inactiveTabCls
+    const {pathname} = useLocation()
+
     return <>
     {
         hasChild?<>
-        <li id={`${name}-accordion`} className={`${cls17}`} key={name}> 
-        <button type="button" className={cls18}> 
+        <li id={`${name}-accordion`} className={`${cls17} `} key={name}> 
+        <button type="button" className={`${cls18} ${pathname.match(path)?activeMenuCls:''}`}> 
             <i className={icon}></i>{title}
   
                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={cls19}> <path d="m18 15-6-6-6 6"> </path> </svg> 
@@ -28,8 +34,8 @@ const MenuItem = ({hasChild, title, path, icon,  name,childrens, index}) => {
                 </ul>
             </div>
         </li>        
-        </>:<><li key={name}>   
-            <NavLink to={path}  className={cls27}> 
+        </>:<><li key={name} >   
+            <NavLink to={path}  className={linkCls} > 
                 <i className={icon}></i>{title}
             </NavLink> </li> 
         </>

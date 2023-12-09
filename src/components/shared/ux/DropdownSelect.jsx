@@ -28,9 +28,9 @@ const DropdownSelect = ({data=[], className="", onSelect = f => f, selected="", 
       
     },[selected])
     useEffect(()=>{
-        // setTimeout(() => {
-            HSDropdown.autoInit();
-        // }, 1000)
+        setTimeout(() => {
+            HSDropdown.autoInit()
+        }, 1000)
     },[data])
     return <>
         <div className={"hs-dropdown relative inline-flex [--placement:bottom-left] "+className}>

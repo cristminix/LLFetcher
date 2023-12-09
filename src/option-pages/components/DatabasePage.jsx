@@ -13,8 +13,10 @@ export async function loader({ params }) {
 const DatabasePage = ({store,config}) => {
     const {table, page} = useLoaderData()
 
-    const viewMode = table ? 'explorer' : 'manager'
-
+    let viewMode = table ? 'explorer' : 'manager'
+    if(table == 'table-manager'){
+        viewMode = 'manager'
+    }
     
     return <div className="database-page">
         {

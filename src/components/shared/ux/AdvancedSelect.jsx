@@ -16,14 +16,14 @@ import { HSSelect } from "preline"
 
     useEffect(()=>{
       HSSelect.autoInit();
-      // setTimeout(() => {
+      setTimeout(() => {
           
           // HSSelect.getInstance(`dd_${slugify(label)}`).open()
           setTimeout(() => {
             // HSSelect.autoInit();
             HSSelect.getInstance(`#dd_${slugify(label)}`).on('change', onSelectChange)
         }, 512)
-      // }, 512)
+      }, 512)
   },[data])
     return <>
     {/*<!-- Select -->*/} 

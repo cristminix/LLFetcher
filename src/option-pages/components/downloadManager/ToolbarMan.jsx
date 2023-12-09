@@ -123,23 +123,23 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/selectedFmt, 
      * to generate the shell script file for downloading.
      */
   const downloadHelper = async () => {
-    const { exerciseFile } = dmsetup
+    const { exerciseFiles } = dmsetup
 
     const slug = course.slug
     const fmt = selectedFmt
     const config = {
-      slug, fmt, sections, tocs, exerciseFile
+      slug, fmt, sections, tocs, exerciseFiles
     }
     createDownloadFile('shell_script', config)
   }
 
   const downloadHelperCmd = async () => {
-    const { exerciseFile } = dmsetup
+    const { exerciseFiles } = dmsetup
 
     const slug = course.slug
     const fmt = selectedFmt
     const config = {
-      slug, fmt, sections, tocs, exerciseFile
+      slug, fmt, sections, tocs, exerciseFiles
     }
     createDownloadFile('batch_script', config)
   }

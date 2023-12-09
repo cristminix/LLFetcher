@@ -203,8 +203,8 @@ class QueueItem extends Component{
     	const defaultTdCls = "px-1 py-1 whitespace-nowrap text-sm font-medium"
         let tdCls = "",tdClsVideoStatus = "",tdClsCaptionStatus = ""
         let number = 0
-        let tdClsSuccess = defaultTdCls + " text-green-900  dark:text-green-200 "
-        let tdClsFailed = defaultTdCls + " text-red-800  dark:text-red-200 "
+        let tdClsSuccess = defaultTdCls //+ " text-green-900  dark:text-green-200 "
+        let tdClsFailed = defaultTdCls //+ " text-red-800  dark:text-red-200 "
         if(!dmstatusList)
             return <tr><td colSpan={5}><i className="fa fa-spin fa-spinner"/></td></tr>
         return sections.map((s, sIndex)=>{
@@ -249,7 +249,7 @@ class QueueItem extends Component{
                         tdClsVideoStatus = tdCls
                     }
                 }
-                trCls = dmstatus.finished ? 'text-green-300' : dmstatus.interupted ? 'text-red-300' : ''
+                // trCls = dmstatus.finished ? 'text-green-300' : dmstatus.interupted ? 'text-red-300' : ''
    
 
 

@@ -9,7 +9,7 @@
 		},
 		"courses":{
 			"title" : "Courses",
-			"path" : "/course",
+			"path" : "/manager",
 			"iconCls" : "bi bi-bookmark",
 			"order" : 2,
 			"hasChild" : true,
@@ -76,7 +76,7 @@
 			"childItems" : {
 				"table-manager" : {
 					"title" : "Table Manager",
-					"path" : "/database",
+					"path" : "/database/table-manager",
 					"iconCls" : "fa fa-database",
 					"order" : 0
 				},

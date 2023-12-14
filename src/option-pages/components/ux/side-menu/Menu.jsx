@@ -7,7 +7,7 @@ const MenuItem = ({hasChild, title, path, icon,  name,childrens, index}) => {
     const inactiveTabCls = cls24  +" hover:bg-gray-100  hover:bg-gray-100 dark:hover:bg-gray-700"
     const linkCls = ({ isActive, isPending }) => isActive ? activeTabCls :  inactiveTabCls
     const {pathname} = useLocation()
-
+    
     return <>
     {
         hasChild?<>
@@ -26,6 +26,9 @@ const MenuItem = ({hasChild, title, path, icon,  name,childrens, index}) => {
                             const item_ = childrens[key]
                             const childrens_ = item_.childItems || {}
                             // console.log(item_)
+                            if(item_.hidden){
+                                return null
+                            }
                             return <MenuItem key={key} childrens={childrens_} name={key} index={index} hasChild={item_.hasChild} title={item_.title} path={item_.path} icon={item_.iconCls} />
         
                         })

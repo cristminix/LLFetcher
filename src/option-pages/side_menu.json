@@ -28,40 +28,55 @@
 			"order" : 3,
 			"hidden" : true
 		},
-		"setting" : {
-			"title" : "Setting",
+		"settings" : {
+			"title" : "Settings",
 			"path" : "/setting",
 			"iconCls" : "bi bi-gear",
 			"order" : 4,
-			"hidden" : false
-
-		},
-		"test" : {
-			"title" : "Tests",
-			"path" : "/tests",
-			"iconCls" : "bi bi-building-gear",
-			"order" : 4,
-			"hidden" : true,
-			"hasChild" : true,
-
+			"hidden" : false,
 			"childItems":{
 				"find-ds" : {
 					"title" : "findDS",
 					"path" : "/tests/find-ds",
 					"iconCls" : "bi bi-search",
 					"order" : 0
+				}
+			}
+		},
+		"developers" : {
+			"title" : "Developers",
+			"path" : "/developer",
+			"iconCls" : "bi bi-gear",
+			"order" : 4,
+			"hidden" : false,
+			"hasChild" : true,
+
+			"childItems":{
+				"dev-api" : {
+					"title" : "Dev Api",
+					"path" : "/developer/dev-api",
+					"iconCls" : "bi bi-gear",
+					"order" : 0
 				},
 				"native-client" : {
-					"title" : "nativeClient",
-					"path" : "/tests/native-client",
-					"iconCls" : "bi bi-node",
+					"title" : "Native Client",
+					"path" : "/developer/native-client",
+					"iconCls" : "bi bi-gear",
 					"order" : 0
 				},
 				"course-api-new" : {
-					"title" : "New CourseApi",
+					"title" : "Course Api",
 					"path" : "/tests/course-api",
-					"iconCls" : "bi bi-bookmark",
-					"order" : 0
+					"iconCls" : "bi bi-gear",
+					"order" : 0,
+					"hidden" :true
+				},
+				"fetch-api" : {
+					"title" : "Fetch Api Test",
+					"path" : "/developer/fetch-api",
+					"iconCls" : "bi bi-gear",
+					"order" : 0,
+					"hidden" :false
 				}
 				
 			}

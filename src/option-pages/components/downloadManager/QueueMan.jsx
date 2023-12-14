@@ -5,6 +5,7 @@ import {timeout,formatBytes, calculateSpeed,formatLeadingZeros} from "../../../g
 // import {} from "../../components/learning_fn"
 import isNetworkError from 'is-network-error'
 import CourseApi from "../../../global/course-api/CourseApi"
+import ProgressBar from "../../../components/shared/ux/ProgressBar"
 
 const ERROR_NOT_SETUP_QUEUE = "You must run setup queue first"
 const FETCH_TEST_MODE = false
@@ -225,12 +226,15 @@ class QueueMan extends Component{
             dlMeta : null,
             currentIndex : null,
             queueRunning : false,
-            queueFinished : false
+            queueFinished : false,
+            totalIndex : 0,
+            progressIndex: 0
         }
         const {store} = props
         this.mDMStatus = store.get("DMStatus")
         this.mDMSetup = store.get("DMSetup")
         this.queueItemRef = createRef(null)
+        this.progressBarRef = createRef(null)
     }
     /**
      * this is the main fetch method to download the caption and video file
@@ -495,6 +499,7 @@ class QueueMan extends Component{
             // this.setState({dmstatus})
 
         }
+        this.setState({totalIndex:0,progressIndex:0})
     }
     /**
      * Starting current queue process by vector index
@@ -705,19 +710,29 @@ class QueueMan extends Component{
 
         if(finished){
             setQueueFinished(true)
+            this.setState({totalIndex:0,progressIndex:0})
         }else{
             console.log(`queue stil have unfinished item`)
-            this.setState({currentIndex:[0,0]})
+            const progressIndex = this.getProgressIndexFromDb()
+            this.setState({currentIndex:[0,0],progressIndex})
             setQueueResume(true)
         }
         stopDownloadQueue()
         
     }
     async triggerFetchDl(){
-        const {queueRunning} = this.state
-        console.log(`triggerFetchDl called`)
+        if(FETCH_TEST_MODE){
+            await timeout(1000)
+        }
+        let {queueRunning,totalIndex,progressIndex} = this.state
+        let logMessage = `triggerFetchDl called`
+        console.log(logMessage)
+        this.setProgress(null,logMessage)
         if(!queueRunning){
-            console.log(`Queue stoped`)
+            logMessage = `Queue stoped`
+            console.log(logMessage)
+            this.setProgress(null,logMessage)
+
             this.setState({dlRunning:false})
             return
         }
@@ -726,25 +741,31 @@ class QueueMan extends Component{
         let [sIndex,tIndex] = qIndex
         // setCurrentIndex(null)
         if(sIndex === null && tIndex === null){
-            console.log(`${sIndex}, ${tIndex}`)
-            console.log(`Queue Complete`)
+            logMessage = `${sIndex}, ${tIndex} Queue Complete`
+            console.log(logMessage)
+            this.setProgress(null,logMessage)
+            
             this.onQueueComplete()
             return
         }
         if(sIndex == -1 && tIndex == -1){
-            console.log(`${sIndex}, ${tIndex}`)
-            console.log(`Queue Interupted`)
+            logMessage = `${sIndex}, ${tIndex} Queue Interupted`
+            console.log(logMessage)
+            this.setProgress(null,logMessage)
+
             this.setState({dlRunning:false})
             stopDownloadQueue()
             return
         }
 
         if(sIndex >= 0 && tIndex >= 0){
+            logMessage = `Processing ${sIndex}, ${tIndex} ${progressIndex+1} of ${totalIndex}`
+            progressIndex++
+            console.log(logMessage)
+            this.setProgress(null,logMessage)
+
             
-            console.log(`Processing ${sIndex}, ${tIndex}`)
-            
-            
-            this.setState({dlRunning:true, currentIndex : qIndex},async()=>{
+            this.setState({progressIndex,dlRunning:true, currentIndex : qIndex},async()=>{
                 await this.fetchDl()
                 if(queueRunning){
                     this.triggerFetchDl()
@@ -754,10 +775,49 @@ class QueueMan extends Component{
 
         
     }
+    getProgressIndexFromDb(){
+        const {course} = this.props
+        const dmstatuses = this.mDMStatus.getListByCourseId(course.id)
+        let progressIndex = 0
+        dmstatuses.map((dmstatus,index)=>{
+            if(dmstatus.finished){
+                progressIndex++
+            }
+        })
+        return progressIndex
+    }
+    getQueueProgress(){
+        let {totalIndex,progressIndex} = this.state
+        if(totalIndex == 0){
+            const {sections,tocs} = this.props
+            // console.log(sections,tocs)
+            sections.map((section,sIndex)=>{
+                const tocItems = tocs[section.slug]
+                totalIndex += tocItems.length
+            })
+            this.setState({totalIndex})
+        }
+
+        const progress = Math.ceil(progressIndex / totalIndex * 100)
+        return progress
+
+    }
+    setProgress(progress,message){
+        if(progress == null){
+            progress = this.getQueueProgress()
+        }
+        if(this.progressBarRef.current){
+            this.progressBarRef.current.setProgress(progress,message)
+        }
+    }
     triggerQueue(startQueue){
         const {queueStarted} = this.props
         const {dlMeta} = this.state
-        console.log(`QueueMan triggered ${startQueue}`)
+        const logMessage = `QueueMan triggered ${startQueue}`
+        console.log(logMessage)
+        
+        this.setProgress(null,logMessage)
+
         const queueRunning = startQueue
         this.setState({queueRunning},()=>{
             if(startQueue){
@@ -830,15 +890,22 @@ class QueueMan extends Component{
     //     console.log(this.props)
     // }
     render(){
-        const {infoMessage, currentIndex} = this.state
+        const {infoMessage, currentIndex,progressIndex} = this.state
         const {refreshTable,clearStatusBar,logStatusBar,selectedFmt, queueStarted, sections, course, tocs, store, alreadySetup, queueFinished,dmsetup} = this.props
         return (<><div className="queueman mb-12 mt-2">
         
         <div className="queue-man-container">
-            {/*<h4 className="font-bold">Queue Manager UI</h4>*/}
+            
+            
             {
                 
                 alreadySetup ? <>
+                {
+                progressIndex > 0 ? <div className="p4 mb-4">
+                                            {/* <h4 className="font-bold pt-2 pb-4">Queue Manager UI {FETCH_TEST_MODE?"TEST MODE":""}</h4> */}
+                                        <ProgressBar className="w-[400px]" ref={this.progressBarRef}/>
+                                        </div>:null
+                }
                     <QueueInfo clearStatusBar={clearStatusBar} logStatusBar={logStatusBar} selectedFmt={selectedFmt} queueFinished={queueFinished} message={infoMessage} queueStarted={queueStarted} currentIndex={currentIndex}/>
                     <QueueTable refreshTable={refreshTable} dmsetup={dmsetup} clearStatusBar={clearStatusBar} logStatusBar={logStatusBar} resetQueueItem={vIndex=>this.resetQueueItem(vIndex)} startQueueItem={vIndex=>this.startQueueItem(vIndex)} queueItemRef={this.queueItemRef} course={course} sections={sections} tocs={tocs} store={store}/>
                 </> : ERROR_NOT_SETUP_QUEUE

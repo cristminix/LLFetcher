@@ -37,6 +37,9 @@ class DMStatus extends DB{
     getByCourseId(courseId, vIndex){
         return this.singleQuery({query: {courseId, vIndex: this.createVIndex(vIndex)}})
     }
+    getListByCourseId(courseId){
+        return this.query({query: {courseId}})
+    }
     getById(id){
         return this.singleQuery({query: {id}})
     }

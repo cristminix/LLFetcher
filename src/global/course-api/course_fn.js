@@ -696,7 +696,7 @@ const getTocXmlParentElement = (itemStar,doc) => {
             let tocNdP = $tocNdElem.parent()
             const urn =  $tocNdElem.text().trim()
             if(urn === itemStar){
-                console.log(tocNdP.html())
+                // console.log(tocNdP.html())
 
                 let type = tocNdP.find(">type")
                 if(type.length>0){

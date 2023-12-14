@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import { crx } from '@crxjs/vite-plugin'
 import manifest from './manifest.json'
 import { resolve } from 'path'
+import express from 'vite-plugin-express'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -14,7 +15,14 @@ export default defineConfig({
     port:5000
   },
   plugins: [react(),
-    crx({ manifest })
+    express({
+      // the server files export a middleware as default
+      // this config can be a glob
+      middlewareFiles: './src/express/dev-api/router.js',
+      prefixUrl: '/dev-api',
+    }),
+    crx({ manifest }),
+
   ],
   rollupOptions: {
     input: {

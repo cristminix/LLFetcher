@@ -8,7 +8,7 @@
     "file": "assets/font-awesome-7juQPigl.css",
     "src": "_font-awesome.min-!~{008}~.js"
   },
-  "_font-awesome.min-TSCjFFnw.js": {
+  "_font-awesome.min-f7hAjv_o.js": {
     "assets": [
       "assets/fontawesome-webfont-BuWBOUu1.eot",
       "assets/fontawesome-webfont-fo5IWH5D.woff2",
@@ -19,36 +19,33 @@
     "css": [
       "assets/font-awesome-7juQPigl.css"
     ],
-    "file": "assets/font-awesome.min-TSCjFFnw.js",
+    "file": "assets/font-awesome.min-f7hAjv_o.js",
     "imports": [
-      "_index-H9g6PPaV.js"
+      "_index-7gdwcDAI.js"
     ]
   },
   "_index-!~{004}~.js": {
-    "file": "assets/index-6PmZOoQv.css",
+    "file": "assets/index-qlVYmCgA.css",
     "src": "_index-!~{004}~.js"
   },
-  "_index-H9g6PPaV.js": {
+  "_index-7gdwcDAI.js": {
     "css": [
-      "assets/index-6PmZOoQv.css"
+      "assets/index-qlVYmCgA.css"
     ],
-    "file": "assets/index-H9g6PPaV.js"
+    "file": "assets/index-7gdwcDAI.js"
   },
-  "_index-default-FtYdW2tD.js": {
-    "file": "assets/index-default-FtYdW2tD.js",
-    "imports": [
-      "_index-H9g6PPaV.js"
-    ]
+  "_index-default-lPYrPALU.js": {
+    "file": "assets/index-default-lPYrPALU.js"
   },
   "content.jsx-loader.js": {
-    "file": "assets/content.jsx-loader-jw9NR1wv.js",
+    "file": "assets/content.jsx-loader-Lo38rC7z.js",
     "src": "content.jsx-loader.js"
   },
   "index.html": {
-    "file": "assets/index.html-YluIKtLZ.js",
+    "file": "assets/index.html-Rj5-5mj-.js",
     "imports": [
-      "_font-awesome.min-TSCjFFnw.js",
-      "_index-H9g6PPaV.js"
+      "_font-awesome.min-f7hAjv_o.js",
+      "_index-7gdwcDAI.js"
     ],
     "isEntry": true,
     "src": "index.html"
@@ -87,10 +84,10 @@
     "src": "src/background-scripts/background.js"
   },
   "src/content-pages/content.jsx": {
-    "file": "assets/content.jsx-ZpkHFnsQ.js",
+    "file": "assets/content.jsx-FjRgaQ-e.js",
     "imports": [
-      "_index-H9g6PPaV.js",
-      "_index-default-FtYdW2tD.js"
+      "_index-7gdwcDAI.js",
+      "_index-default-lPYrPALU.js"
     ],
     "isEntry": true,
     "src": "src/content-pages/content.jsx"
@@ -101,13 +98,13 @@
       "assets/bootstrap-icons-NpS-Zr3P.woff"
     ],
     "css": [
-      "assets/options-5XLIHhnw.css"
+      "assets/options-ukTkrghj.css"
     ],
-    "file": "assets/options.html-JS5SVnZP.js",
+    "file": "assets/options.html-NDbltzbw.js",
     "imports": [
-      "_font-awesome.min-TSCjFFnw.js",
-      "_index-H9g6PPaV.js",
-      "_index-default-FtYdW2tD.js"
+      "_font-awesome.min-f7hAjv_o.js",
+      "_index-7gdwcDAI.js",
+      "_index-default-lPYrPALU.js"
     ],
     "isEntry": true,
     "src": "src/option-pages/options.html"

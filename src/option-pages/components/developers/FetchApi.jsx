@@ -1,4 +1,4 @@
-import { createRef, useEffect, useState } from "react"
+import { createRef, useEffect, useRef, useState } from "react"
 import { useLocation } from "react-router-dom"
 import { courseUrlFromSlug, isTimeExpired } from "../../../global/course-api/course_fn"
 import Toast from "../../../components/shared/ux/Toast"
@@ -17,8 +17,8 @@ const FetchApi = ({store, config}) => {
     const [transUrl,setTransUrl] = useState(null)
     const [dmsetup,setDmsetup] = useState({selectedFmt:null,selectedTrans:null,enableFilenameIndex:null})
     let lastPath = ""
-    const toastRef = createRef()
-    const dlWizardRef = createRef()
+    const toastRef = useRef(null)
+    const dlWizardRef = useRef(null)
 
     const toast= (message,t)=>{
         if(toastRef.current){
@@ -42,10 +42,11 @@ const FetchApi = ({store, config}) => {
             let tryDoFetch = true
             let tryCount = 0
             while(tryDoFetch){
+                let selectedSloc = null
+
                 const streamLocs = await courseApi.getStreamLocs(toc,expired)
                 tryCount += 1
                 if(streamLocs.length>0){
-                    let selectedSloc = null
                     try{
                         const filteredStreamLocs = streamLocs.filter(sloc=> sloc.fmt == selectedFmt)
                         if(filteredStreamLocs.length>0){
@@ -56,6 +57,33 @@ const FetchApi = ({store, config}) => {
                         }
                     }catch(e){
 
+                    }
+                    
+
+                    const transcripts = await courseApi.getTranscripts(toc,expired)
+                    const transcriptKeys = Object.keys(transcripts)
+                    let selectedTranscript = null
+                    if(transcriptKeys.length>0){
+                        if(transcriptKeys.includes[selectedTrans]){
+                            selectedTranscript = transcripts[selectedTrans]
+                        }else{
+                            if(transcriptKeys.includes('us')){
+                                selectedTranscript = transcripts.us
+                                toast("No Transcript found default to us","warning")
+    
+                            }
+                            else{
+                                try{
+                                    selectedTranscript = transcripts[transcriptKeys[0]]
+                                }catch(e){
+                                }
+                            }
+                        }
+                    }
+                    if(selectedTranscript){
+                        setTransUrl(selectedTranscript.url)
+                    }else{
+                        toast("No Transcript found","error")
                     }
                     if(selectedSloc){
                         // console.log(selectedSloc)
@@ -78,34 +106,7 @@ const FetchApi = ({store, config}) => {
                     break
                 }
             }
-            if(!expired){
-                const transcripts = await courseApi.getTranscripts(toc)
-                const transcriptKeys = Object.keys(transcripts)
-                let selectedTranscript = null
-                if(transcriptKeys.length>0){
-                    if(transcriptKeys.includes[selectedTrans]){
-                        selectedTranscript = transcripts[selectedTrans]
-                    }else{
-                        if(transcriptKeys.includes('us')){
-                            selectedTranscript = transcripts.us
-                            toast("No Transcript found default to us","warning")
-
-                        }
-                        else{
-                            try{
-                                selectedTranscript = transcripts[transcriptKeys[0]]
-                            }catch(e){
-                            }
-                        }
-                    }
-                }
-                if(selectedTranscript){
-                    setTransUrl(selectedTranscript.url)
-                }else{
-                    toast("No Transcript found","error")
-                }
-                console.log(transcripts)
-            }
+             
             
         }else{
             toast("No DMSetup found for this course","error")
@@ -122,6 +123,11 @@ const FetchApi = ({store, config}) => {
             dlWizardRef.current.loadUrl(slocUrl)
         }
     }
+    const doFetchTrans = async() => {
+        if(dlWizardRef.current){
+            dlWizardRef.current.loadUrl(transUrl)
+        }
+    }
     useEffect(()=>{
         if(path){
             if(path!= lastPath){
@@ -136,7 +142,7 @@ const FetchApi = ({store, config}) => {
 
     return <>
     <Toast ref={toastRef}/>
-    <DownloadWizard className="mb-2" ref={dlWizardRef} store={store} config={config} dmsetup={dmsetup} />
+    <DownloadWizard toast={(a,b)=>toast(a,b)} className="mb-2" ref={dlWizardRef} store={store} config={config} dmsetup={dmsetup} />
     <div className="queue-table border rounded-xl shadow-sm p-6 dark:bg-gray-800 dark:border-gray-700">
         {/* <div className="state-tbl flex flex-col mx-auto w-full"> */}
         <div className="flex flex-col">

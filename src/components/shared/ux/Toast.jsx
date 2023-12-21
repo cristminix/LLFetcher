@@ -141,6 +141,9 @@ class Toast extends Component{
     this.toastRefs = []
   }
   add(message, t="normal"){
+    if(!["normal","success","error","warning","closable"].includes(t)){
+      t = "normal"
+    }
     // await setTimeout(f=>{
       const toast = {message,t,iv:null,clock:0,hidden:false}
       const {toastList} = this.state

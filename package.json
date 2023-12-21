@@ -20,6 +20,7 @@
     "fontawesome-4.7": "^4.7.0",
     "is-network-error": "^1.0.0",
     "jquery": "^3.7.1",
+    "js-file-downloader": "^1.1.25",
     "mime": "^4.0.1",
     "preline": "^2.0.2",
     "react": "^18.2.0",

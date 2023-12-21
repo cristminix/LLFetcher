@@ -33,9 +33,10 @@ import { Component } from "react"
 
     const { progress, message } = this.state
     const styles = {  stl0 : { width : `${progress}%` }, }
-    const {className} =this.props
+    const {className,autoHide} =this.props
+    const hiddenCls = autoHide? (progress==0?"hidden":"") : ""
     return <>
-    <div className={className}> 
+    <div className={`${className} ${hiddenCls}`}> 
      <div className={cls0}> 
        <h3 className={cls1}> {message} </h3> 
        <span className={cls2}> {progress}% </span> 

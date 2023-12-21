@@ -66,17 +66,19 @@ const titleCase = str => {
 	return words.join(' ')
 }
 const formatBytes=(bytes) =>{
-    if(isNaN(bytes) ||!isFinite(bytes)) {
-        return null
-    }
+    // bytes = parseInt(bytes)
+    
     if (bytes === 0) {
       return '0 Bytes';
     }
   
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    const formattedValue = parseFloat((bytes / Math.pow(1024, i)).toFixed(2));
-  
+    let i = Math.floor(Math.log(bytes) / Math.log(1024));
+    let formattedValue = parseFloat((bytes / Math.pow(1024, i)).toFixed(2));
+    if(isNaN(formattedValue) ||!isFinite(bytes)) {
+        formattedValue = 0
+        i = 0
+    }
     return `${formattedValue} ${sizes[i]}`;
   }
   const makeDelay = ms => {

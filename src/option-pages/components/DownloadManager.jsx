@@ -46,7 +46,9 @@ const DownloadManager = ({store}) => {
     const [selectedTrans, setSelectedTrans] = useState(selectTrans)
 
     const toast= (message,t)=>{
-      toastRef.current.add(message,t)
+      if(toastRef.current){
+        toastRef.current.add(message,t)
+      }
     }
   
     /**
@@ -65,7 +67,9 @@ const DownloadManager = ({store}) => {
    */
   const clearStatusBar = async () => {
     delay(() => {
-      statusBarManRef.current.clear()
+      if(statusBarManRef.current){
+        statusBarManRef.current.clear()
+      }
 
     })
   }

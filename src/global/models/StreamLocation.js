@@ -5,7 +5,7 @@ class StreamLocation extends DB {
 	fields = ["tocId","fmt","url","expiresAt"]
 
     async deleteByTocId(tocId){
-        await this.deleteRows({query:{tocId}})
+        await this.deleteRows({tocId})
     }
     getByTocId(tocId,fmt){
         return this.singleQuery({query: {tocId,fmt}})

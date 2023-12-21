@@ -66,6 +66,9 @@ const titleCase = str => {
 	return words.join(' ')
 }
 const formatBytes=(bytes) =>{
+    if(isNaN(bytes) ||!isFinite(bytes)) {
+        return null
+    }
     if (bytes === 0) {
       return '0 Bytes';
     }

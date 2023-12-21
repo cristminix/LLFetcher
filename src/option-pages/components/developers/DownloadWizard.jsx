@@ -205,7 +205,7 @@ class DownloadWizard extends Component{
                         <span className={`${thCls}`}>Size</span><span>{formatBytes(size)}</span>
                     </div>
                     <div className="flex">
-                        <ProgressBar ref={this.progressBarRef} className="w-full p-1" autoHide={0}/>
+                        <ProgressBar ref={this.progressBarRef} className="w-full p-1" autoHide={1}/>
                     </div>
                 </div>
                 </>:null

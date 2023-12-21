@@ -43,7 +43,7 @@ const QueueItemToolbar = ({course,clearStatusBar,logStatusBar,startQueueItem,loa
 
         </>
     }
-    <DropdownMenu data={ddToolbarData} onSelect={e=>onSelectToolbarItem(e,course,toc)} btnClassName="py-[7px] px-0 pr-2"/>
+    <DropdownMenu labelIcon="fa fa-cog" data={ddToolbarData} onSelect={e=>onSelectToolbarItem(e,course,toc)} btnClassName="py-[7px] px-0 pr-2"/>
     </div></>)
 }
 

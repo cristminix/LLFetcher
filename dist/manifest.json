@@ -22,13 +22,13 @@
   "content_scripts": [
     {
       "js": [
-        "assets/content.jsx-loader-Lo38rC7z.js"
+        "assets/content.jsx-loader-CBs8Kvpc.js"
       ],
       "matches": [
         "https://www.linkedin.com/learning/*"
       ],
       "css": [
-        "assets/index-qlVYmCgA.css"
+        "assets/index-riAvI53j.css"
       ]
     }
   ],
@@ -61,9 +61,9 @@
         "https://www.linkedin.com/*"
       ],
       "resources": [
-        "assets/index-7gdwcDAI.js",
+        "assets/index-FvUh_8TE.js",
         "assets/index-default-lPYrPALU.js",
-        "assets/content.jsx-FjRgaQ-e.js"
+        "assets/content.jsx-xEAjAANy.js"
       ],
       "use_dynamic_url": true
     }

@@ -209,7 +209,7 @@ const FetchApi = ({store, config}) => {
             </thead> 
             <tbody>
                 <tr>
-                    <th className={`${thCls}`}>Toc Path</th><td colSpan={3}>{path}</td>
+                    <th className={`${thCls}`}>Slug</th><td colSpan={3}>{path}</td>
                 </tr>
                 <tr>
                     <th className={`${thCls}`}>Enable FIdx</th><td colSpan={3}>{dmsetup.enableFilenameIndex?'Yes':'No'}</td>

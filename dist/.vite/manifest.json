@@ -8,7 +8,7 @@
     "file": "assets/font-awesome-7juQPigl.css",
     "src": "_font-awesome.min-!~{008}~.js"
   },
-  "_font-awesome.min-f7hAjv_o.js": {
+  "_font-awesome.min-TzyFBro6.js": {
     "assets": [
       "assets/fontawesome-webfont-BuWBOUu1.eot",
       "assets/fontawesome-webfont-fo5IWH5D.woff2",
@@ -19,33 +19,33 @@
     "css": [
       "assets/font-awesome-7juQPigl.css"
     ],
-    "file": "assets/font-awesome.min-f7hAjv_o.js",
+    "file": "assets/font-awesome.min-TzyFBro6.js",
     "imports": [
-      "_index-7gdwcDAI.js"
+      "_index-FvUh_8TE.js"
     ]
   },
   "_index-!~{004}~.js": {
-    "file": "assets/index-qlVYmCgA.css",
+    "file": "assets/index-riAvI53j.css",
     "src": "_index-!~{004}~.js"
   },
-  "_index-7gdwcDAI.js": {
+  "_index-FvUh_8TE.js": {
     "css": [
-      "assets/index-qlVYmCgA.css"
+      "assets/index-riAvI53j.css"
     ],
-    "file": "assets/index-7gdwcDAI.js"
+    "file": "assets/index-FvUh_8TE.js"
   },
   "_index-default-lPYrPALU.js": {
     "file": "assets/index-default-lPYrPALU.js"
   },
   "content.jsx-loader.js": {
-    "file": "assets/content.jsx-loader-Lo38rC7z.js",
+    "file": "assets/content.jsx-loader-CBs8Kvpc.js",
     "src": "content.jsx-loader.js"
   },
   "index.html": {
-    "file": "assets/index.html-Rj5-5mj-.js",
+    "file": "assets/index.html-87ONaZMV.js",
     "imports": [
-      "_font-awesome.min-f7hAjv_o.js",
-      "_index-7gdwcDAI.js"
+      "_font-awesome.min-TzyFBro6.js",
+      "_index-FvUh_8TE.js"
     ],
     "isEntry": true,
     "src": "index.html"
@@ -84,9 +84,9 @@
     "src": "src/background-scripts/background.js"
   },
   "src/content-pages/content.jsx": {
-    "file": "assets/content.jsx-FjRgaQ-e.js",
+    "file": "assets/content.jsx-xEAjAANy.js",
     "imports": [
-      "_index-7gdwcDAI.js",
+      "_index-FvUh_8TE.js",
       "_index-default-lPYrPALU.js"
     ],
     "isEntry": true,
@@ -100,10 +100,10 @@
     "css": [
       "assets/options-ukTkrghj.css"
     ],
-    "file": "assets/options.html-NDbltzbw.js",
+    "file": "assets/options.html-Qbhfgmvi.js",
     "imports": [
-      "_font-awesome.min-f7hAjv_o.js",
-      "_index-7gdwcDAI.js",
+      "_font-awesome.min-TzyFBro6.js",
+      "_index-FvUh_8TE.js",
       "_index-default-lPYrPALU.js"
     ],
     "isEntry": true,

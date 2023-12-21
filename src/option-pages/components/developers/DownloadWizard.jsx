@@ -92,7 +92,7 @@ const getFileHeaders = async (url,toast=(a,b)=>{a,b}) => {
     const ext = mime2.getExtension(mime)
     filename=`${filename}.${ext}`
 
-    return {status,ok,mime,size,filename}
+    return {status,ok,mime,size,filename,ext}
   }
 class DownloadWizard extends Component{
     progressBarRef = null
@@ -127,7 +127,8 @@ class DownloadWizard extends Component{
             url,
             autoStart: false,
             process: e => this.onDownloadPrgress(e),
-            filename
+            filename,
+            timeout:86400
         })
 
         download.start().then(()=>{
@@ -138,18 +139,26 @@ class DownloadWizard extends Component{
             console.error(error)
         })
     }
-    async loadUrl(url,outputFilename=null){
+    async loadUrl(url,t){
         if(this.progressBarRef.current){
             this.progressBarRef.current.setProgress(0)
         }
-        const {toast} = this.props
+        const {toast,course,toc,getOutFilename,setTranscriptOutFilename,setMediaOutFilename} = this.props
+        console.log(course,toc)
         toast("Test Fetching","info")
 
         let stage = 1
         let getFileHeadersMsg = "Getting file headers"
         let message = `${getFileHeadersMsg}...`
         this.setState({stage,url,message})
-        let {size,mime,status,ok,filename} = await getFileHeaders(url,(a,b)=>toast(a,b))
+        let {size,mime,status,ok,filename,ext} = await getFileHeaders(url,(a,b)=>toast(a,b))
+        
+        filename = await getOutFilename(ext)
+        if(t=='m'){
+            setMediaOutFilename(filename)
+        }else{
+            setTranscriptOutFilename(filename)
+        }
         // let getFileSizeOk = size > 0
         message = `${getFileHeadersMsg} ${ok? "Ok" : "Fails"}`
         if(ok){
@@ -196,7 +205,7 @@ class DownloadWizard extends Component{
                         <span className={`${thCls}`}>Size</span><span>{formatBytes(size)}</span>
                     </div>
                     <div className="flex">
-                        <ProgressBar ref={this.progressBarRef} className="w-full" autoHide={true}/>
+                        <ProgressBar ref={this.progressBarRef} className="w-full p-1" autoHide={0}/>
                     </div>
                 </div>
                 </>:null

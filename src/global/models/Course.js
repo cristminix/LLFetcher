@@ -95,7 +95,7 @@ class Course extends DB {
 
         const mSection = await Section.getInstance()
         const mToc = await Toc.getInstance()
-        sections = mSection.getList(courseId)
+        sections = mSection.getListByCourseId(courseId)
         for(let i in sections){
             const section = sections[i]
             tocs[section.slug] = mToc.getListBySectionId(section.id)

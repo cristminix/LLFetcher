@@ -6,7 +6,7 @@ import ProgressBar from "../../../components/shared/ux/ProgressBar"
 
 
 
-const getFileHeaders = async (url) => {
+const getFileHeaders = async (url,toast=(a,b)=>{a,b}) => {
     let size = -1
     let status = 0
     let ok = false
@@ -27,6 +27,7 @@ const getFileHeaders = async (url) => {
     } catch (e) {
         console.error(e)
         filename = 'unknown'
+        toast(`Couldn't receive filename using default ${filename}`)
     }
 
     
@@ -36,8 +37,8 @@ const getFileHeaders = async (url) => {
     let tryMethodIdx = 0
     // let tryMethodCount = 0
     let tryMethodMax = tryMethods.length
-    
-    while(tryMethodIdx < tryMethodMax){
+    let waitTimeout = 1000
+    topLoop:while(tryMethodIdx < tryMethodMax){
         const method = tryMethods[tryMethodIdx]
         console.log(`try method ${method}`)
         let tryCount = 0
@@ -47,9 +48,10 @@ const getFileHeaders = async (url) => {
                 if(status == 401 ){
                     break
                 }
-                console.log(`Waiting for 5 second before next try`)
-                await timeout(5000)
-                console.log(`Retry ${tryCount} of ${tryMax} because of http ${status} status code`)
+                toast(`Waiting for 5 second before next try`,"normal")
+                await timeout(waitTimeout)
+                waitTimeout += 1000
+                toast(`Retry ${tryCount} of ${tryMax} because of http ${status} status code`,'error')
             }
             try {
                 const response = await fetch(url, { method })
@@ -68,7 +70,7 @@ const getFileHeaders = async (url) => {
                   fetchHeadersOk = true
                 //   console.log(`File size: ${fileSizeInBytes} bytes (${fileSizeInKb} KB)`)
                 } else {
-                  console.error(`Failed to fetch file size. Status: ${response.status}`)
+                //   console.error(`Failed to fetch file size. Status: ${response.status}`)
                 }
             }catch (error) {
                 // console.error('Error fetching file size:', error)
@@ -147,20 +149,24 @@ class DownloadWizard extends Component{
         let getFileHeadersMsg = "Getting file headers"
         let message = `${getFileHeadersMsg}...`
         this.setState({stage,url,message})
-        let {size,mime,status,ok,filename} = await getFileHeaders(url)
+        let {size,mime,status,ok,filename} = await getFileHeaders(url,(a,b)=>toast(a,b))
         // let getFileSizeOk = size > 0
         message = `${getFileHeadersMsg} ${ok? "Ok" : "Fails"}`
+        if(ok){
+            this.setState({size,statusCode:status,mime,message,filename})
+            await timeout(256)
+            const confirmMsg = `Would you like to download this file ${filename} ?`
+            if(confirm(confirmMsg)){
+                toast("Download starting","info")                
+                await this.download(url,filename)
 
-        this.setState({size,statusCode:status,mime,message,filename})
-        await timeout(256)
-        const confirmMsg = `Would you like to download this file ${filename} ?`
-        if(confirm(confirmMsg)){
-            toast("Download starting","info")                
-            await this.download(url,filename)
-
+            }else{
+                toast("Download canceled","info")
+            }
         }else{
-            toast("Download canceled","info")
+            toast(`Error getting file headers http ${status}`)
         }
+        
     }
     render(){
         const {stage,filename,mime,size,url,statusCode,message} = this.state

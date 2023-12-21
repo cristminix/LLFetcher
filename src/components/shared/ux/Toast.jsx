@@ -137,7 +137,7 @@ class Toast extends Component{
 
     // this.toastTimers = []
     // this.toastClocks = []
-    this.toastTimeout= 10
+    this.toastTimeout= 5
     this.toastRefs = []
   }
   add(message, t="normal"){
@@ -150,8 +150,11 @@ class Toast extends Component{
       toastList.push(toast)
       const toasts = []
       let toastIdx = 0
-      for(const toastItem of toastList){
-        const customToast = this.createToast(toastItem,toastIdx++)
+      let tIdx= toastList.length
+      while(--tIdx >= 0 ){
+        // console.log(tIdx)
+        const toastItem = toastList[tIdx]
+        const customToast = this.createToast(toastItem,tIdx)
         toasts.push(customToast)
       }
       this.setState({toastList,toasts},f=>{
@@ -215,18 +218,24 @@ class Toast extends Component{
         // }
         toastList[idx].clock += 1
         // console.log(toastList[idx].clock)
-        const customToast = this.toastRefs[idx].current
+        try{
+          const customToast = this.toastRefs[idx].current
 
-        if(customToast){
-          const restClock = this.toastTimeout - toastList[idx].clock
-          customToast.setClockTimeout(restClock)
-        }
+          if(customToast){
+            const restClock = this.toastTimeout - toastList[idx].clock
+            customToast.setClockTimeout(restClock)
+          }
+          this.setState({toastList})
+          if(toastList[idx].clock == this.toastTimeout){
+            this.hideToast(idx)
+            // clearInterval(iv)
+          }
+        }catch(e){
 
-        this.setState({toastList})
-        if(toastList[idx].clock == this.toastTimeout){
-          this.hideToast(idx)
-          // clearInterval(iv)
         }
+        
+
+        
       },1000)
       toastList[idx].iv = iv
       this.setState({toastList})

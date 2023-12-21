@@ -63,8 +63,9 @@ const FetchApi = ({store, config}) => {
                     const transcripts = await courseApi.getTranscripts(toc,expired)
                     const transcriptKeys = Object.keys(transcripts)
                     let selectedTranscript = null
+                    console.log(selectedTrans,transcriptKeys)
                     if(transcriptKeys.length>0){
-                        if(transcriptKeys.includes[selectedTrans]){
+                        if(transcriptKeys.includes(selectedTrans)){
                             selectedTranscript = transcripts[selectedTrans]
                         }else{
                             if(transcriptKeys.includes('us')){

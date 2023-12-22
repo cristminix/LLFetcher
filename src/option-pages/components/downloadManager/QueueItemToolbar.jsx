@@ -11,10 +11,19 @@ const QueueItemToolbar = ({course,clearStatusBar,logStatusBar,startQueueItem,loa
                    dlStatusResult == 4 ? true : false
     
     const ddToolbarData = [{
-        text: 'Go to Fetch test mode',
+        text: 'Download with dialog wizard',
         value: 'fetch',
-        icon: 'fa fa-globe'
-    }]
+        icon: 'fa fa-download'
+    }
+    // ,{
+    //     text: 'Abort',
+    //     value: 'abort',
+    //     icon: 'fa fa-stop'
+    // }
+]
+    // if(loading){
+    //     ddToolbarData.push({})
+    // }
     const onSelectToolbarItem = (item,course_,toc_) => {
         // console.log(item,toc_)
         if(item=='fetch'){

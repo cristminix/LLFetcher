@@ -107,9 +107,10 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/selectedFmt, 
   const downloadPlaylist = async () => {
     const slug = course.slug
     const fmt = selectedFmt
-
+    console.log(dmsetup)
+    const {enableFilenameIndex}=dmsetup
     const config = {
-      slug, fmt, sections, tocs
+      slug, fmt, sections, tocs, enableFilenameIndex
     }
     createDownloadFile('playlist', config)
   }
@@ -123,23 +124,23 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/selectedFmt, 
      * to generate the shell script file for downloading.
      */
   const downloadHelper = async () => {
-    const { exerciseFiles } = dmsetup
+    const { exerciseFiles, enableFilenameIndex } = dmsetup
 
     const slug = course.slug
     const fmt = selectedFmt
     const config = {
-      slug, fmt, sections, tocs, exerciseFiles
+      slug, fmt, sections, tocs, exerciseFiles, enableFilenameIndex
     }
     createDownloadFile('shell_script', config)
   }
 
   const downloadHelperCmd = async () => {
-    const { exerciseFiles } = dmsetup
+    const { exerciseFiles, enableFilenameIndex } = dmsetup
 
     const slug = course.slug
     const fmt = selectedFmt
     const config = {
-      slug, fmt, sections, tocs, exerciseFiles
+      slug, fmt, sections, tocs, exerciseFiles, enableFilenameIndex
     }
     createDownloadFile('batch_script', config)
   }

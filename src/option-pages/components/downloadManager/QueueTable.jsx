@@ -20,12 +20,12 @@ const QueueTable = ({refreshTable,dmsetup,clearStatusBar, logStatusBar,startQueu
                 <tr>
                 <th className={thCls} rowSpan={2}>No</th>
                 <th className={thCls} rowSpan={2}>Title</th>
-                <th className={thCls} colSpan="2">Status</th>
+                <th className={`${thCls}`} colSpan={2}>Status</th>
                 <th className={thCls} rowSpan={2}>Action</th>
                 </tr>
                 <tr>
-                    <th className={thCls}>Subtitle/Transcript</th>
-                    <th className={thCls}>Media</th>
+                    <th className={`${thCls} w-[200px]`}>Subtitle/Transcript</th>
+                    <th className={`${thCls} w-[200px]`}>Media</th>
                 </tr>
             </thead>
             <tbody>

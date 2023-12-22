@@ -102,15 +102,21 @@ function generateBatchScript(config){
     const dp0 = "%~dp0"
     buffer += `mkdir  "${dp0}${rootDir}"\n`
     buffer += `mkdir  "${dp0}${targetDir}"\n`
+    let number = 0
+
     for(let sidx in config.sections){
         const section = config.sections[sidx]
         for(let tidx in config.tocs[section.slug]){
             const item = config.tocs[section.slug][tidx]
             const slug = item.slug
             const fmt = config.fmt
-            const filename = `${slug}-${fmt}.mp4`
-            const filenameVtt = `${slug}-${fmt}.vtt`
-
+            let filename = `${slug}-${fmt}.mp4`
+            let filenameVtt = `${slug}-${fmt}.vtt`
+            if(config.enableFilenameIndex){
+                ++number
+                filename = `${formatLeadingZeros(number)}-${filename}`
+                filenameVtt = `${formatLeadingZeros(number)}-${filenameVtt}`
+            }
             buffer += `move "${dp0}${filename}" "${dp0}${targetDir}"\n`
             buffer += `move "${dp0}${filenameVtt}" "${dp0}${targetDir}"\n`
         }
@@ -142,15 +148,21 @@ function generateShellScript(config){
     
     buffer += `mkdir -p ${rootDir}\n`
     buffer += `mkdir -p ${targetDir}\n`
+    let number = 0
+
     for(let sidx in config.sections){
         const section = config.sections[sidx]
         for(let tidx in config.tocs[section.slug]){
             const item = config.tocs[section.slug][tidx]
             const slug = item.slug
             const fmt = config.fmt
-            const filename = `${slug}-${fmt}.mp4`
-            const filenameVtt = `${slug}-${fmt}.vtt`
-
+            let filename = `${slug}-${fmt}.mp4`
+            let filenameVtt = `${slug}-${fmt}.vtt`
+            if(config.enableFilenameIndex){
+                ++number
+                filename = `${formatLeadingZeros(number)}-${filename}`
+                filenameVtt = `${formatLeadingZeros(number)}-${filenameVtt}`
+            }
             buffer += `mv -v ${filename} ${targetDir}\n`
             buffer += `mv -v ${filenameVtt} ${targetDir}\n`
         }
@@ -181,14 +193,18 @@ function generateM3u(config){
     const playlistFile = `${config.slug}-${config.fmt}.m3u`
 
     let buffer = "#EXTM3U\n";
-    
+    let number = 0
     for(let sidx in config.sections){
         const section = config.sections[sidx]
         for(let tidx in config.tocs[section.slug]){
             const item = config.tocs[section.slug][tidx]
             const slug = item.slug
             const fmt = config.fmt
-            const filename = `${slug}-${fmt}.mp4`
+            let filename = `${slug}-${fmt}.mp4`
+            if(config.enableFilenameIndex){
+                ++number
+                filename = `${formatLeadingZeros(number)}-${filename}`
+            }
             const duration = item.duration
             const filenameEncoded = encodeURI(filename)
             buffer += `#EXTINF:${duration},${filename}\n`

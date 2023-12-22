@@ -7,6 +7,8 @@ import { niceScrollbarCls } from "../ux/cls"
 import Button from "../../../components/shared/ux/Button"
 import DownloadWizard from "./DownloadWizard"
 import {formatLeadingZeros} from "../../../global/fn"
+import { getCode, getName } from 'country-list'
+
 const FetchApi = ({store, config}) => {
 
     const location = useLocation()
@@ -143,7 +145,7 @@ const FetchApi = ({store, config}) => {
                         }else{
 
                         }
-                        setSlocExpired(expired?'Yes':'No')
+                        setSlocExpired(expired)
                     }else{
                         toast("No StreamLoc found","error")
                     }
@@ -188,7 +190,17 @@ const FetchApi = ({store, config}) => {
 
 
     const thCls = "px-1 py-1 text-left text-xs font-medium text-gray-500 uppercase align-top"
+    let countryFlagUrl = null
+    if(dmsetup){
+        try{
+            const countryCode = dmsetup.selectedTrans.toUpperCase()
+            const countryName = getName(countryCode)
+            countryFlagUrl = `https://purecatamphetamine.github.io/country-flag-icons/3x2/${countryCode}.svg`
+        }catch(e){
 
+        }
+        
+    }
     return <>
     <Toast ref={toastRef}/>
     <DownloadWizard getOutFilename={async(a,b,c)=>await getOutFilename(a,b,c)} toast={(a,b)=>toast(a,b)} className="mb-2" ref={dlWizardRef} store={store} config={config} dmsetup={dmsetup} course={course} toc={toc} setMediaOutFilename={a=>setMediaOutFilename(a)} setTranscriptOutFilename={a=>setTranscriptOutFilename(a)} />
@@ -201,10 +213,10 @@ const FetchApi = ({store, config}) => {
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead>
                 <tr>
-                <th className={`${thCls} w-[150px]`}>Prop</th>
+                <th className={`${thCls} w-[180px]`}>Prop</th>
                 <th className={`${thCls} `}>Value</th>
-                <th className={`${thCls} w-[80px]`}>Expired</th>
-                <th className={`${thCls} w-[180px]`}>Action</th>
+                <th className={`${thCls} w-[80px]`}>Fresh</th>
+                <th className={`${thCls} w-[220px]`}>Action</th>
                 </tr>
             </thead> 
             <tbody>
@@ -212,19 +224,36 @@ const FetchApi = ({store, config}) => {
                     <th className={`${thCls}`}>Slug</th><td colSpan={3}>{path}</td>
                 </tr>
                 <tr>
-                    <th className={`${thCls}`}>Enable FIdx</th><td colSpan={3}>{dmsetup.enableFilenameIndex?'Yes':'No'}</td>
+                    <th className={`${thCls}`}>Enable Numbering</th><td colSpan={3}>
+                    {
+                        dmsetup.enableFilenameIndex ? <i className=" text-green-500 fa fa-check"/> : <i className=" text-red-500 fa fa-times"/>
+                    }
+                    </td>
                 </tr>
                 <tr>
-                    <th className={`${thCls}`}>Selected Fmt</th><td colSpan={3}>{dmsetup.selectedFmt}</td>
+                    <th className={`${thCls}`}>Media Fmt</th><td colSpan={3}>
+                        {
+                            dmsetup ? dmsetup.selectedFmt ? dmsetup.selectedFmt.match(/audio/) ? dmsetup.selectedFmt : `${dmsetup.selectedFmt}p` : null : null
+                        }
+                    </td>
                 </tr>
                 <tr>
-                    <th className={`${thCls}`}>Selected Trans</th><td colSpan={3}>{dmsetup.selectedTrans}</td>
+                    <th className={`${thCls}`}>Language</th><td colSpan={3}><img className="w-8" src={countryFlagUrl}/></td>
                 </tr>
                 <tr>
-                    <th className={`${thCls}`}>Found Matching Trans</th><td colSpan={3}>{foundMatchingTrans}</td>
+                    <th className={`${thCls}`}>Found Matching Trans</th>
+                    <td colSpan={3}>
+                    {
+                        foundMatchingTrans ? <i className=" text-green-500 fa fa-check"/> : <i className=" text-red-500 fa fa-times"/>
+                    }
+                    </td>
                 </tr>
                 <tr>
-                    <th className={`${thCls}`}>Found Matching Fmt</th><td colSpan={3}>{foundMatchingFmt}</td>
+                    <th className={`${thCls}`}>Found Matching Fmt</th><td colSpan={3}>
+                    {
+                        foundMatchingFmt ? <i className=" text-green-500 fa fa-check"/> : <i className=" text-red-500 fa fa-times"/>
+                    }
+                    </td>
                 </tr>
                 {
                     foundMatchingFmt==0? <tr>
@@ -239,10 +268,15 @@ const FetchApi = ({store, config}) => {
                 
                 }
                 <tr>
-                    <th className={`${thCls} `}>Media Url</th><td><p title={slocUrl} className="w-[600px] mb-1 font-mono text-clip overflow-hidden ...">{slocUrl}</p></td><td>{slocExpired}</td>
+                    <th className={`${thCls} `}>Media Url</th><td><p title={slocUrl} className="w-[600px] mb-1 font-mono text-clip overflow-hidden ...">{slocUrl}</p></td>
+                    <td className="text-center">
+                        {
+                            !slocExpired ? <i className=" text-green-500 fa fa-check"/> : <i className=" text-red-500 fa fa-times"/>
+                        }
+                    </td>
                     <td>
                         <div className="flex gap-2 items-center">
-                            <Button caption="Fetch" icon="bi bi-download" onClick={e=>doFetchSloc()}/>
+                            <Button caption="Download" icon="bi bi-download" onClick={e=>doFetchSloc()}/>
                             <Button caption="Open Link" icon="bi bi-globe" onClick={e=>openUrl(slocUrl)}/>
                         </div>
                     </td>
@@ -254,7 +288,7 @@ const FetchApi = ({store, config}) => {
                     <th className={`${thCls} `}>Trans Url</th><td><p title={transUrl} className="mb-1 w-[600px] font-mono text-clip overflow-hidden ...">{transUrl}</p></td><td></td>
                     <td>
                         <div className="flex gap-2 items-center">
-                            <Button caption="Fetch" icon="bi bi-download" onClick={e=>doFetchTrans()}/>
+                            <Button caption="Download" icon="bi bi-download" onClick={e=>doFetchTrans()}/>
                             <Button caption="Open Link" icon="bi bi-globe" onClick={e=>openUrl(transUrl)}/>
                         </div>
                     </td>

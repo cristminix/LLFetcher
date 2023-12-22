@@ -100,12 +100,12 @@ class DownloadWizard extends Component{
         super(props)
         this.state = {
             stage : 1,
-            filename : 'n.a',
-            mime : 'n.a',
-            size : 'n.a',
-            message:'n.a',
-            statusCode: 'n.a',
-            url: 'n.a',
+            filename : null,
+            mime : null,
+            size : null,
+            message:null,
+            statusCode: null,
+            url: null,
         }
         this.progressBarRef = createRef(null)
     }
@@ -201,9 +201,12 @@ class DownloadWizard extends Component{
                     <div className="flex">
                         <span className={`${thCls}`}>Type</span><span>{mime}</span>
                     </div>
-                    <div className="flex">
+                    {
+                        size ? <div className="flex">
                         <span className={`${thCls}`}>Size</span><span>{formatBytes(size)}</span>
-                    </div>
+                    </div>:null
+                    }
+                    
                     <div className="flex">
                         <ProgressBar ref={this.progressBarRef} className="w-full p-1" autoHide={1}/>
                     </div>

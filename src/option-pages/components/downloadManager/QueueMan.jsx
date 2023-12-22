@@ -6,6 +6,7 @@ import {timeout,formatBytes, calculateSpeed,formatLeadingZeros} from "../../../g
 import isNetworkError from 'is-network-error'
 import CourseApi from "../../../global/course-api/CourseApi"
 import ProgressBar from "../../../components/shared/ux/ProgressBar"
+import JsFileDownloader from "js-file-downloader"
 
 const ERROR_NOT_SETUP_QUEUE = "You must run setup queue first"
 const FETCH_TEST_MODE = false
@@ -24,70 +25,40 @@ function rand(vIndex) {
     SAVED_RAND_ARRAY[randKey]= 1
     return inputArray[randomIndex]
 }
-/*
-Temporal Fetch
-const fetch = createFetchMock({
-  "/some-code": ["abcde", "fghij", "klmno", "pqrst"],
-  "/abcde": 12345,
-  "/fghij": 67891,
-  "/klmno": 23456,
-  "/pqrst": 78912,
-});
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-(async function () {
-  try {
-    const url = "https://my-url/some-code";
-    console.log("fetching url", url);
-    const response = await fetch(url);
-    const codes = await response.json();
-    console.log("got", codes);
-    
-    const codesObj = {};
-    for (const code of codes) {
-      await sleep(2000);
-      
-      const url = `https://my-url/${code}`;
-      console.log("fetching url", url);
-      const response = await fetch(url);
-      const value = await response.json();
-      console.log("got", value);
-      
-      codesObj[code] = value;
-    }
-    
-    console.log("codesObj =", codesObj);
-  } catch (error) {
-    console.error(error);
-  }
-})();
-
-
-// fetch mocker factory
-function createFetchMock(dataByPath = {}) {
-  const empty = new Blob([], {type: "text/plain"});
-  
-  const status = {
-    ok:       { status: 200, statusText: "OK"        },
-    notFound: { status: 404, statusText: "Not Found" },
-  };
-  
-  const blobByPath = Object.create(null);
-  for (const path in dataByPath) {
-    const json = JSON.stringify(dataByPath[path]);
-    blobByPath[path] = new Blob([json], { type: "application/json" });
-  }
-  
-  return function (url) {
-    const path = new URL(url).pathname;
-    const response = (path in blobByPath)
-      ? new Response(blobByPath[path], status.ok)
-      : new Response(empty, status.notFound);
-    return Promise.resolve(response);
-  };
+async function fetchDownloadReal(url,outputFilename,mime,progressCallback,vIndex,t) {
+    return new Promise((resolve, reject)=>{
+        let lastLoaded = 0
+        const download = new JsFileDownloader({
+            url,
+            timeout:86400,
+            filename: outputFilename,
+            autoStart: true,
+            process: e => {
+                if (!e.lengthComputable) {
+                    return
+                }
+                let lastReadDate = new Date
+                lastLoaded += e.loaded
+                var downloadingPercentage = Math.floor(e.loaded / e.total * 100)
+                // console.log(downloadingPercentage)
+                const message = `${formatBytes(e.loaded)} of ${formatBytes(e.total)}`
+                progressCallback(e.loaded, e.total, vIndex, lastReadDate, lastLoaded,t)
+                // if(this.progressBarRef.current){
+                //     this.progressBarRef.current.setProgress(downloadingPercentage, message)
+                // }
+            },
+        }).then(()=>{
+            resolve({
+                status:200
+            })
+        }).catch(e=>{
+            console.error(e)    
+            reject(e)
+        })
+    })
 }
-*/
-async function fetchDownloadReal(url, outputFilename, mime, progressCallback, vIndex, t) {
+async function fetchDownloadReal_Old(url, outputFilename, mime, progressCallback, vIndex, t) {
     return new Promise((resolve, reject)=>{
         let contentType
 
@@ -273,17 +244,19 @@ class QueueMan extends Component{
             queueItem.setDlStatus(t, vIndex_, dlStatus)
             await this.mDMStatus.setDlStatus(courseId, t, vIndex_, dlStatus)
             await timeout(5)
-        
+            
+            // let downloadSuccess = false
             
             const data = await fetchDownload(url, outputFilename, null, (loaded, total, vIndex, lastReadDate, lastLoaded, t)=>{
                 this.onDlProgress(loaded, total, vIndex, lastReadDate, lastLoaded, t)
             },vIndex_,t)
+
             if(FETCH_TEST_MODE){
                 dlStatus = rand(vIndex_)
 
             }
-            const blob = data.blob
-            const rStatus = data.status
+            // const blob = data.blob
+            // const rStatus = data.status
             if(data.status == 200){
                 dlStatus = 2
             }else{
@@ -294,9 +267,9 @@ class QueueMan extends Component{
 
             this.setState({infoMessage : `Download ${outputFilename} ${dlStatus == -1 ? 'Failed' : 'Success'}`})
             
-            if(rStatus==200){
-                await this.downloadFileFromBlob(blob, outputFilename)
-            }
+            // if(rStatus==200){
+            //     await this.downloadFileFromBlob(blob, outputFilename)
+            // }
         }else{
             alert(`${t} url is empty`)
         }
@@ -317,6 +290,30 @@ class QueueMan extends Component{
             alert(`HTTP ERROR: ${e.toString()}`)
         }
         
+    }
+    getTocIndexNumber(vIndex){
+        const [sIdx,tIdx] = vIndex
+        const {sections,tocs} = this.props
+        let number = 0
+        let sIndex = 0
+        let tIndex = 0
+
+        for(const section of sections){
+            const sslug = section.slug
+            const tocList = tocs[sslug]
+            for(const toc of tocList){
+                 ++number
+                if(sIndex == sIdx && tIndex == tIdx){
+                    return formatLeadingZeros(number)
+                }
+                tIndex += 1
+
+            }
+            sIndex += 1
+            tIndex = 0
+        }
+        return formatLeadingZeros(1000)
+
     }
     /**
      * This is the main runner fetch to download caption and video file
@@ -354,8 +351,13 @@ class QueueMan extends Component{
             if(runQueue){
                 const {enableFilenameIndex} = dmsetup
                 const filenameBase = `${tocSlug}-${selectedFmt}`
-                const videoFilename = `${filenameBase}.mp4`
-                const captionFilename = `${filenameBase}.vtt`
+                let videoFilename = `${filenameBase}.mp4`
+                let captionFilename = `${filenameBase}.vtt`
+                if(enableFilenameIndex){
+                    const number = this.getTocIndexNumber(vIndex)
+                    videoFilename = `${number}-${videoFilename}`
+                    captionFilename = `${number}-${captionFilename}`
+                }
                 //fetchDlItem(vIndex, t, queueItem, captionUrl="", videoUrl="", captionFilename="", videoFilename="")
                 let dlCaptionStatus
                 let dlVideoStatus
@@ -684,11 +686,11 @@ class QueueMan extends Component{
                 const {captionRef,videoRef} = queueItem.getStatusRef(vIndex)
 
                 if(t=="caption"){
-                    captionRef.current.setValue(`${formatBytes(loaded)}`)
+                    captionRef.current.setValue(`${formatBytes(loaded)} of ${formatBytes(total)}`)
 
                 }
                 else if(t=="video"){
-                    videoRef.current.setValue(`${formatBytes(loaded)}`)
+                    videoRef.current.setValue(`${formatBytes(loaded)} of ${formatBytes(total)}`)
 
                 }
 

@@ -240,7 +240,7 @@ const QueueSetup = ({
             </div>
             <div className="flex items-center p-2 px-2">
                 <div className="w-[150px]">
-                    <label className="font-bold">Select Transcript Lang</label>
+                    <label className="font-bold">Select Language</label>
                 </div>
                 <div className="flex-grow">
 
@@ -251,7 +251,7 @@ const QueueSetup = ({
             </div>
             <div className="flex items-center p-2 px-2">
                 <div className="w-[150px]">
-                    <label className="font-bold">Enable Filename Index</label>
+                    <label className="font-bold">Enable Numbering</label>
                 </div>
                 <div>
                     <CheckBox label="" checked={enableFilenameIndex} onChange={checked=>setEnableFilenameIndex(checked)}/>

@@ -58,6 +58,12 @@
 					"iconCls" : "bi bi-gear",
 					"order" : 0
 				},
+				"course" : {
+					"title" : "Course Api",
+					"path" : "/developer/course-api",
+					"iconCls" : "bi bi-gear",
+					"order" : 0
+				},
 				"native-client" : {
 					"title" : "Native Client",
 					"path" : "/developer/native-client",

@@ -8,6 +8,7 @@ import express from 'vite-plugin-express'
 // https://vitejs.dev/config/
 export default defineConfig({
   server:{
+   
     hmr:{
       port:5001
     },

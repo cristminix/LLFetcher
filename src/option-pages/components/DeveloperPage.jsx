@@ -3,6 +3,8 @@ import {Component,createRef,useState,useEffect} from "react"
 // import DBExplorer from "./dbExplorer/DBExplorer"
 // import DBTableManager from './dbExplorer/DBTableManager'
 import FetchApi from './developers/FetchApi'
+import CourseApi from './developers/CourseApi'
+import DevApi from './developers/DevApi'
 export async function loader({ params }) {
     const { table, page } = params
     return { table, page }
@@ -19,6 +21,12 @@ const DeveloperPage = ({store,config}) => {
 
     if(page == 'fetch-api'){
         return <FetchApi store={store} config={config}/>
+    }
+    if(page == 'course-api'){
+        return <CourseApi store={store} config={config}/>
+    }
+    if(page == 'dev-api'){
+        return <DevApi store={store} config={config}/>
     }
     
     return <div className="developer-page">

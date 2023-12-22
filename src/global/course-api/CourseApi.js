@@ -13,6 +13,11 @@ import {
 } from "./course_fn.js"
 
 import jQuery from "jquery"
+class NetworkLogger {
+	logError(message){
+		console.error(message)
+	}
+}
 
 class CourseApi {
 	store = null
@@ -29,9 +34,13 @@ class CourseApi {
 	lastCourseXmlDocCacheKey = null
 	lastTocXmlDocCacheKey = null
 
-	constructor(store){
+	constructor(store,logger=null){
 		this.store = store
 		this.mPrxCache = store.get('PrxCache')
+		if(!logger){
+			logger = new NetworkLogger()
+		}
+		this.logger = logger
 	}
 
 	informUnauthenticatedAccess(){

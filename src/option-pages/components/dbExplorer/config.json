@@ -45,8 +45,8 @@
             "listMethod" : "getList"
         },
         "course" : {
-            "headers" : ["Title", "Slug","Author IDS","Urn"],
-            "fields" : ["title", "slug","authorIds","urn"],
+            "headers" : ["Title", "Slug","Author IDS","Urn","Thumbnail"],
+            "fields" : ["title", "slug","authorIds","urn","thumbnail"],
             "model" : "Course",
             "listMethod" : "getList"
         },

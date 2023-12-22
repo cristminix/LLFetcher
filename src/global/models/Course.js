@@ -7,7 +7,7 @@ import Toc from "../models/Toc"
 
 class Course extends DB {
 	table = 'course'
-	fields = ["title", "slug", "duration", "sourceCodeRepository", "description",'authorIds','urn']
+	fields = ["title", "slug", "duration", "sourceCodeRepository", "description",'authorIds','urn','thumbnail']
 
 
  /**

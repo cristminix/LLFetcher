@@ -1,9 +1,6 @@
 import fr from 'fetch-retry'
 import { useEffect } from 'react'
-const devApiUrl = (path)=>{
-
-    return `http://127.0.0.1:5000/dev-api/${path}`
-}
+import { devApiUrl } from './fn'
 const fetchr = fr(fetch)
 // console.log(fetch)
 

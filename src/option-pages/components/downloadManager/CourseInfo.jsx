@@ -1,5 +1,5 @@
 import CourseAuthors from "./CourseAuthors"
-import {courseUrlFromSlug,authorUrlFromSlug} from "../../../global/course-api/course_fn"
+import {courseUrlFromSlug,authorUrlFromSlug, isTimeExpired} from "../../../global/course-api/course_fn"
 import { getCode, getName } from 'country-list'
 
 const CourseInfo = ({store, course, authors,selectedFmt,selectedTrans}) => {
@@ -20,8 +20,26 @@ const CourseInfo = ({store, course, authors,selectedFmt,selectedTrans}) => {
     const countryCode = displaySelectItem(selectedTrans).toUpperCase()
     const countryName = getName(countryCode)
     const countryFlagUrl = `https://purecatamphetamine.github.io/country-flag-icons/3x2/${countryCode}.svg`
-
+    let thumbnailUrl = null
+    if(course){
+        console.log(course)
+        const thumbnails = store.get('Thumbnail').getListByCourseId(course.id)
+        // console.log(thumbnails)
+        if(thumbnails.length>0){
+            const thumbnail = thumbnails[0]
+            if(!isTimeExpired(thumbnail.expiresAt)){
+                thumbnailUrl = thumbnails[0].url            
+            }
+        }
+    }
     return (<><div className="course-info">
+        <div className="flex">
+        {
+            thumbnailUrl?<div className="flex thumbnail-container pr-2">
+                <img className="rounded rounded-md w-[128px]" src={thumbnailUrl} alt={course.title}/>
+            </div>:null
+        }    
+        <div className="flex flex-col">
         <div className="flex items-center">
             <div>
                 <h4 className="text-2xl"><i className="bi bi-bookmark"></i> {course.title}</h4>
@@ -42,8 +60,8 @@ const CourseInfo = ({store, course, authors,selectedFmt,selectedTrans}) => {
                 
             </div>
         </div>
-        
-         
+        </div>
+        </div>
     </div></>)
 }
 

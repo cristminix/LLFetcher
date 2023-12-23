@@ -26,6 +26,7 @@ export default function Router({config, store}){
                 <Route  path="/course" element={<CoursePage store={store}/>} loader={courseLoader}/>
                 <Route  path="/course/:ctl/:slug" element={<CoursePage store={store} config={config}/>} loader={courseLoader}/>
                 <Route  path="/manager/:slug" element={<DownloadManager store={store}/>} loader={courseSlugLoader}/>
+                <Route  path="/manager" index={true} element={<DownloadManager store={store}/>} loader={courseSlugLoader}/>
                 {/* <Route  path="/download" element={<DownloadPage store={store}/>}/> */}
                 <Route  path="/setting" element={<SettingPage store={store}/>}/>
                 <Route  path="/database" element={<DatabasePage store={store} config={config}/>} loader={databaseLoader}/>

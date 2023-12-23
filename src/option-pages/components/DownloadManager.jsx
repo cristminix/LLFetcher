@@ -8,17 +8,19 @@ import CourseInfo from "./downloadManager/CourseInfo"
 import QueueSetup from "./downloadManager/QueueSetup"
 import {makeDelay} from "../../global/fn"
 import Toast from '../../components/shared/ux/Toast'
+import DisplayCourseList from './downloadManager/DisplayCourseList'
 export async function loader({ params }) {
     const { slug } = params
     return { slug }
   }
 
 const delay = makeDelay(7000)
-const DownloadManager = ({store}) => {
+const DownloadManager = ({store, config}) => {
     const toastRef = useRef(null)
     const queueManRef = useRef(null)
     const statusBarManRef = useRef(null)
-    const {slug} = useLoaderData()
+    const loaderData = useLoaderData()
+    const slug = loaderData ? loaderData.slug : null
     const [activeCourseData, setActiveCourseData] = useState(null)
     // setup related state
     const [runSetup, setRunSetup] = useState(false)
@@ -278,7 +280,11 @@ const DownloadManager = ({store}) => {
                       ref={statusBarManRef}/>
     </div></>)
     }else{
-      return <><i className='fa fa-spin fa-spinner'/></>
+      if(slug){
+        return <><i className='fa fa-spin fa-spinner'/></>
+      }else{
+        return <DisplayCourseList store={store} config={config} />
+      }
     }
     
 }

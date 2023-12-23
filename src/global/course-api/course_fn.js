@@ -130,11 +130,12 @@ const getAuthors = async(doc,mAuthor,mCourse,course) => {
             
     return authors
 }
-const getCourseInfo = async(doc,courseSlug,mCourse,mExerciseFile) => {
+const getCourseInfo = async(doc,courseSlug,mCourse,mExerciseFile,mThumbnail) => {
     let course = mCourse.getBySlug(courseSlug)
     if(course){
         course.exerciseFiles = mExerciseFile.getListByCourseId(course.id)
         // if()
+        course.thumbnails = mThumbnail.getListByCourseId(course.id)
         return course
     }
     // let course = null
@@ -169,7 +170,9 @@ const getCourseInfo = async(doc,courseSlug,mCourse,mExerciseFile) => {
 			course.duration = parseInt(p.find('duration').text())
 		}
 
-        
+        if(course.description){
+            course.description = course.description.replace('com.linkedin.learning.api.common.AttributedText','')
+        }
 		let dificulty = p.find('dificulty')
 		if(dificulty.length > 0){
 			course.dificulty = dificulty.find('difficultylevel').text()
@@ -243,6 +246,40 @@ const getCourseInfo = async(doc,courseSlug,mCourse,mExerciseFile) => {
             
             
         }
+        // Get course thumbnails
+        const thumbRootUrl = p.find('primaryThumbnail rootUrl').text().trim() 
+        const thumbRootUrlV2 = p.find('primaryThumbnailV2 rootUrl').text().trim() 
+        const thumbs  = p.find('primaryThumbnail artifacts')
+        const thumbV2s = p.find('primaryThumbnailV2 artifacts')
+        console.log(thumbs,thumbRootUrl)
+        console.log(thumbV2s,thumbRootUrlV2)
+        const thumbnails = []
+        if(thumbs.length > 0){
+            for(const artifactEl of thumbs){
+                const artifact = el2Obj(artifactEl)
+                if(artifact){
+                    const thumbUrl = getThumbUrlFromArtifact(artifact, thumbRootUrl)
+                    console.log(thumbUrl)
+                    const size = `${artifact.width}x${artifact.height}`
+                    const expiresAt = parseInt(artifact.expiresat)
+                    const thumbnail = await mThumbnail.create(course.id, size, thumbUrl, expiresAt)
+                    thumbnails.push(thumbnail)
+                }
+            }
+        }else if(thumbV2s.length > 0){
+            for(const artifactEl of thumbV2s){
+                const artifact = el2Obj(artifactEl)
+                if(artifact){
+                    const thumbUrl = getThumbUrlFromArtifact(artifact, thumbRootUrlV2)
+                    console.log(thumbUrl)
+                    const size = `${artifact.width}x${artifact.height}`
+                    const expiresAt = parseInt(artifact.expiresat)
+                    const thumbnail = await mThumbnail.create(course.id, size, thumbUrl, expiresAt)
+                    thumbnails.push(thumbnail)
+                }
+            }
+        }
+        course.thumbnails = thumbnails
         return course
 	}
 	return null
@@ -869,7 +906,30 @@ const getVideoMetaNd = (vStatusUrn, doc) =>{
     // console.log(`getVideoMetaNd time elapsed:${b['elapsed_time']}\n`)
     return [vMetaDataNd, statuses]
 }
-
+/**
+ * Convert child element tagname and text to obj prop val
+*/
+const el2Obj = (el)=>{
+    const childrens=jQuery(el).children()
+    if(childrens.length==0){
+        return null
+    }
+    let obj = {}
+    childrens.map((i,c)=>{
+        const prop = c.tagName.toLocaleLowerCase()
+        const value = jQuery(c).text().trim()
+        obj[prop]=value
+    })
+    return obj
+}
+const getThumbUrlFromArtifact = (artifact,rootUrl)=>{
+    // console.log(artifact)
+    const expired = isTimeExpired(parseInt(artifact.expiresat))
+    if(expired){
+        return null
+    }
+    return `${rootUrl}${artifact.fileidentifyingurlpathsegment}`
+}
 export{
 	getAvgSpeed,
 	isTimeExpired,
@@ -893,5 +953,7 @@ export{
 	convertJsonToXml,
 	parseJsonSchema,
 	
-	lsSet,lsGet,lsUnset,authorUrlFromSlug
+	lsSet,lsGet,lsUnset,authorUrlFromSlug,
+    el2Obj,
+    getThumbUrlFromArtifact
 }

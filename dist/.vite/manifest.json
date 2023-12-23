@@ -1,6 +1,6 @@
 {
   "../../@crx/manifest": {
-    "file": "assets/crx-manifest.js-tfrZiW6l.js",
+    "file": "assets/crx-manifest.js-p6X8hoo7.js",
     "isEntry": true,
     "src": "../../@crx/manifest"
   },
@@ -8,7 +8,7 @@
     "file": "assets/font-awesome-7juQPigl.css",
     "src": "_font-awesome.min-!~{008}~.js"
   },
-  "_font-awesome.min-TzyFBro6.js": {
+  "_font-awesome.min-jFU7LAwd.js": {
     "assets": [
       "assets/fontawesome-webfont-BuWBOUu1.eot",
       "assets/fontawesome-webfont-fo5IWH5D.woff2",
@@ -19,33 +19,33 @@
     "css": [
       "assets/font-awesome-7juQPigl.css"
     ],
-    "file": "assets/font-awesome.min-TzyFBro6.js",
+    "file": "assets/font-awesome.min-jFU7LAwd.js",
     "imports": [
-      "_index-FvUh_8TE.js"
+      "_index-B2SH_Wvo.js"
     ]
   },
   "_index-!~{004}~.js": {
-    "file": "assets/index-riAvI53j.css",
+    "file": "assets/index-3VChB3Iq.css",
     "src": "_index-!~{004}~.js"
   },
-  "_index-FvUh_8TE.js": {
+  "_index-B2SH_Wvo.js": {
     "css": [
-      "assets/index-riAvI53j.css"
+      "assets/index-3VChB3Iq.css"
     ],
-    "file": "assets/index-FvUh_8TE.js"
+    "file": "assets/index-B2SH_Wvo.js"
   },
   "_index-default-lPYrPALU.js": {
     "file": "assets/index-default-lPYrPALU.js"
   },
   "content.jsx-loader.js": {
-    "file": "assets/content.jsx-loader-CBs8Kvpc.js",
+    "file": "assets/content.jsx-loader-BCJoToP9.js",
     "src": "content.jsx-loader.js"
   },
   "index.html": {
-    "file": "assets/index.html-87ONaZMV.js",
+    "file": "assets/index.html-cjCwqmLe.js",
     "imports": [
-      "_font-awesome.min-TzyFBro6.js",
-      "_index-FvUh_8TE.js"
+      "_font-awesome.min-jFU7LAwd.js",
+      "_index-B2SH_Wvo.js"
     ],
     "isEntry": true,
     "src": "index.html"
@@ -84,9 +84,9 @@
     "src": "src/background-scripts/background.js"
   },
   "src/content-pages/content.jsx": {
-    "file": "assets/content.jsx-xEAjAANy.js",
+    "file": "assets/content.jsx-AgAe5ucW.js",
     "imports": [
-      "_index-FvUh_8TE.js",
+      "_index-B2SH_Wvo.js",
       "_index-default-lPYrPALU.js"
     ],
     "isEntry": true,
@@ -100,10 +100,10 @@
     "css": [
       "assets/options-ukTkrghj.css"
     ],
-    "file": "assets/options.html-Qbhfgmvi.js",
+    "file": "assets/options.html-AF7PRuJa.js",
     "imports": [
-      "_font-awesome.min-TzyFBro6.js",
-      "_index-FvUh_8TE.js",
+      "_font-awesome.min-jFU7LAwd.js",
+      "_index-B2SH_Wvo.js",
       "_index-default-lPYrPALU.js"
     ],
     "isEntry": true,

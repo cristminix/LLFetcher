@@ -23,7 +23,7 @@ const Template = ({store,config})=>{
      
      <SidebarToggle/>   
      <Sidebar store={store} config={config}/>
-     <Content/>   
+     <Content store={store} config={config}/>   
     
      {/*<!-- ========== END MAIN CONTENT ========== -->*/} 
    </div>

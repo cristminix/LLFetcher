@@ -1,12 +1,20 @@
+import React, { useEffect, useState } from "react"
 import {
     cls16,
     cls28,cls29,cls30,cls31,cls32,cls33,cls34
 } from "./cls"
-import { Outlet } from 'react-router-dom';
-const ExampleContent = ({}) => {
+import { Outlet, useOutlet } from 'react-router-dom';
+import DownloadManager from "../DownloadManager";
+const ExampleContent = ({store, config}) => {
+    // const [outletEmpty, setOutletEmpty] = useState(true)
+    const outlet = useOutlet()
+    useEffect(() => {
+ 
+    }, [/*props.children*/])
     return (<><div className={`${cls28} pb-2`}> 
         {/*<!-- Page Heading -->*/} 
-        <Outlet/>
+
+        {outlet||<DownloadManager store={store} config={config}/>}
         {/*
         <header> 
           <p className={cls29}> Starter Pages &amp; Examples </p> 

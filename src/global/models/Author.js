@@ -10,6 +10,7 @@ class Author extends DB {
     getById(id){
         return this.singleQuery({query: {id}})
     }
+   
     getListByCourse(course){
 
         const authors = []

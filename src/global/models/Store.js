@@ -15,6 +15,7 @@ import DMStatus from "./DMStatus"
 import Cookie from "./Cookie"
 import Transcript from "./Transcript"
 import PrxCache from "./PrxCache"
+import Thumbnail from "./Thumbnail"
 
 class Store {
 	mApp = null
@@ -42,7 +43,7 @@ class Store {
 	availables = ['DB', 'App', 'Author', 'Course', 'Download',
 		'DownloadConfig', 'DownloadState', 'ExerciseFile', 'Section',
 		'StreamLocation', 'Toc', 'Message',
-		'DMSetup', 'DMStatus', 'Cookie','Transcript','PrxCache']
+		'DMSetup', 'DMStatus', 'Cookie','Transcript','PrxCache','Thumbnail']
 
 	static instance = null
 	
@@ -77,6 +78,7 @@ class Store {
 		this.mCookie = await Cookie.getInstance()
 		this.mTranscript = await Transcript.getInstance()
 		this.mPrxCache = await PrxCache.getInstance()
+		this.mThumbnail = await Thumbnail.getInstance()
 		await this.mApp.init()
 		callback()
 	}

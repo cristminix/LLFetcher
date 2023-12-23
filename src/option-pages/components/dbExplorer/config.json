@@ -8,6 +8,13 @@
             
             "listMethod" : "getList"
         },
+        "thumbnail" : {
+            "headers" : ["courseId", "size", "Url","Expires At"],
+            "fields" : ["courseId", "size", "url","expiresAt"],
+            "model" : "Thumbnail",
+            
+            "listMethod" : "getList"
+        },
         "stream-location" : {
             "headers" : ["Toc ID","Fmt","Url", "Expires At"],
             "fields" : ["tocId","fmt","url","expiresAt"],

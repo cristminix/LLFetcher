@@ -101,6 +101,12 @@
 					"iconCls" : "fa fa-database",
 					"order" : 0
 				},
+				"thumbnail" : {
+					"title" : "Thumbnail",
+					"path" : "/database/thumbnail",
+					"iconCls" : "fa fa-database",
+					"order" : 0
+				},
 				"author" : {
 					"title" : "Author",
 					"path" : "/database/author",

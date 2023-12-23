@@ -3,10 +3,10 @@ import ExampleContent from "./ExampleContent"
 
 
 
-const Content = ({}) => {
+const Content = ({store, config}) => {
     return (<>
      {/*<!-- Content -->*/} 
-     <ExampleContent/>
+     <ExampleContent store={store} config={config}/>
      {/*<!-- End Content -->*/} </>)
 }
 

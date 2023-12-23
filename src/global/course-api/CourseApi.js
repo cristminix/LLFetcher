@@ -211,7 +211,7 @@ class CourseApi {
 		let noCache = !refresh
 		const courseUrl = courseUrlFromSlug(courseSlug)
 		let xmlDoc = await this.getCourseXmlDoc(courseUrl, noCache)
-		let course = await getCourseInfo(xmlDoc,courseSlug,this.store.get('Course'),this.store.get('ExerciseFile'))
+		let course = await getCourseInfo(xmlDoc,courseSlug,this.store.get('Course'),this.store.get('ExerciseFile'),this.store.get('Thumbnail'))
 
 		// console.log(courseUrl,xmlDoc,course)
 		// this.course = course

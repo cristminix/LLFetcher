@@ -58,6 +58,12 @@
 					"iconCls" : "bi bi-gear",
 					"order" : 0
 				},
+				"video-player" : {
+					"title" : "Video Player",
+					"path" : "/developer/video-player",
+					"iconCls" : "bi bi-play",
+					"order" : 0
+				},
 				"course" : {
 					"title" : "Course Api",
 					"path" : "/developer/course-api",

@@ -176,6 +176,9 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/store,selecte
       }
       
     }
+    if(e=='play_in_video_player'){
+      document.location.hash=`/developer/video-player?slug=${course.slug}`
+    }
     // console.log(e)
   }
 
@@ -184,6 +187,11 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/store,selecte
       text:'Reset Queue Setup',
       value:'reset_queue_setup',
       icon:'bi bi-trash'
+    },
+    {
+      text:'Play in Video Player',
+      value:'play_in_video_player',
+      icon:'bi bi-play'
     }
   ]
   return (<><div className="toolbar-man pr-2 pt-4 pb-1">

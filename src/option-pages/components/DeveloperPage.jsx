@@ -5,6 +5,7 @@ import {Component,createRef,useState,useEffect} from "react"
 import FetchApi from './developers/FetchApi'
 import CourseApi from './developers/CourseApi'
 import DevApi from './developers/DevApi'
+import VideoPlayer from './developers/VideoPlayer'
 export async function loader({ params }) {
     const { table, page } = params
     return { table, page }
@@ -21,6 +22,9 @@ const DeveloperPage = ({store,config}) => {
 
     if(page == 'fetch-api'){
         return <FetchApi store={store} config={config}/>
+    }
+    if(page == 'video-player'){
+        return <VideoPlayer store={store} config={config}/>
     }
     if(page == 'course-api'){
         return <CourseApi store={store} config={config}/>

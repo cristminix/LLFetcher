@@ -24,7 +24,9 @@ class DMStatus extends DB{
         "interupted"
     ]
 	type = "collection"
-
+    async deleteByCourseId(courseId){
+        await this.deleteRows({courseId})
+    }
     getListWithCourse(){
         const mCourse = Course.gotInstance()
         let results =  this.db.queryAll(this.table)

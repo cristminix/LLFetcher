@@ -8,7 +8,7 @@ import CourseApi from "../../../global/course-api/CourseApi"
 import ProgressBar from "../../../components/shared/ux/ProgressBar"
 import JsFileDownloader from "js-file-downloader"
 
-const ERROR_NOT_SETUP_QUEUE = "You must run setup queue first"
+const ERROR_NOT_SETUP_QUEUE = "You must run queue setup first"
 const FETCH_TEST_MODE = false
 const FETCH_FAILED_MAX_COUNT = 3
 let SAVED_RAND_ARRAY = {}

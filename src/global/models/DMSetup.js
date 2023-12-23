@@ -26,6 +26,9 @@ class DMSetup extends DB{
         })
         return results
     }
+    async deleteByCourseId(courseId){
+        await this.deleteRows({courseId})
+    }
     getByCourseId(courseId){
         return this.singleQuery({query: {courseId}})
     }

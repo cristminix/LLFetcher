@@ -157,9 +157,14 @@ const DBTableManager = ({store,config}) => {
         
         store.availables.map(model=>{
             results.records[model] = {}
-            store.get(model).getAll().map(rec=>{
-                results.records[model][rec.id]=rec 
-            })
+            try{
+                store.get(model).getAll().map(rec=>{
+                    results.records[model][rec.id]=rec 
+                })
+            }catch(e){
+                console.error(e)
+            }
+            
         })
         let buffer = JSON.stringify(results)
         const objectURL = window.URL.createObjectURL(new Blob([buffer]))

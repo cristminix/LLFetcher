@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react"
 import jQuery from "jquery"
 import { slugify } from "../../../global/fn"
 import { HSSelect } from "preline"
- const AdvancedSelect = ({data,captionSuffix="",label="",selected="",onSelect}) => {
+ const AdvancedSelect = ({data,captionSuffix="",label="",selected="",onSelect,disableSuffixPattern=null}) => {
     const styles = {  }
     const cls0 = "cls-0 relative  w-full"
 		const cls1 = "cls-1 hidden" + ` ${slugify(label)}`
@@ -25,6 +25,10 @@ import { HSSelect } from "preline"
         }, 512)
       }, 512)
   },[data])
+    let dspRegex = null
+    if(disableSuffixPattern){
+      dspRegex = new RegExp(disableSuffixPattern)
+    }
     return <>
     {/*<!-- Select -->*/} 
  <div className={cls0}   > 
@@ -44,10 +48,19 @@ import { HSSelect } from "preline"
 		data.map((item,index)=>{
       let value = item
       let caption = `${item}${captionSuffix}`
-
+      if(disableSuffixPattern){
+        if(dspRegex.test(value)){
+          caption = `${item}` 
+        }
+      }
       if(typeof item == "object" && item !== null){
         value = item.value
         caption = `${item.text}${captionSuffix}`
+        if(disableSuffixPattern){
+          if(dspRegex.test(value)){
+            caption = `${item.text}` 
+          }
+        }
       }
       
      return <option  value={value} key={index} onClick={e=>console.log(e)}> {caption} </option>

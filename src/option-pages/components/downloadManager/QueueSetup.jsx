@@ -221,8 +221,8 @@ const QueueSetup = ({
         {
             showGetAvailableFmt ? <div className="flex p-2 px-2">
                 <Button onMouseOut={e=>clearStatusBar()} 
-                  onMouseOver={e=>logStatusBar('QueueSetup',`Click to retrieve available video format or size`)}
-                loading={loadingFetchToc} icon="fa fa-cog" onClick={e=> getAvailableFmt(e)} caption="Get Available Media Format & Transcripts"/>
+                  onMouseOver={e=>logStatusBar('QueueSetup',`Click to retrieve available media format and subtitle lang`)}
+                loading={loadingFetchToc} icon="fa fa-cog" onClick={e=> getAvailableFmt(e)} caption="Get Available Media Format & Subtitle"/>
             </div> : ''
         }
         {
@@ -232,7 +232,7 @@ const QueueSetup = ({
                     <label className="font-bold">Select Format</label>
                 </div>
                 <div className="flex-grow">
-                    <AdvancedSelect onMouseOut={e=>clearStatusBar()} 
+                    <AdvancedSelect disableSuffixPattern={"audio"} onMouseOut={e=>clearStatusBar()}
                     onMouseOver={e=>logStatusBar('QueueSetup',`Select video size or format`)}
                     data={availableFmt} label="Select Media Format" selected={selectedFmt} onSelect={fmt=>setSelectedFmt(fmt)}
                     captionSuffix="p"/>
@@ -244,8 +244,8 @@ const QueueSetup = ({
                 </div>
                 <div className="flex-grow">
 
-                <AdvancedSelect onMouseOut={e=>clearStatusBar()} label="Select Transcript Language"
-                  onMouseOver={e=>logStatusBar('QueueSetup',`Select transcript lang`)}
+                <AdvancedSelect onMouseOut={e=>clearStatusBar()} label="Select Subtitle Language"
+                  onMouseOver={e=>logStatusBar('QueueSetup',`Select Subtitle lang`)}
                  data={availableTrans} selected={selectedTrans} onSelect={trans=>setSelectedTrans(trans)}/>
                 </div>
             </div>

@@ -5,7 +5,7 @@ import {createDownloadFile} from "../../../global/fn"
 import DropdownMenu from "../../../components/shared/ux/DropdownMenu"
 
 // const btnCls = "py-3 px-4 inline-flex justify-center items-center gap-2 -mt-px -ml-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-l-lg sm:mt-0 sm:first:ml-0 sm:first:rounded-tr-none sm:last:rounded-bl-none sm:last:rounded-r-lg border font-medium bg-white text-gray-700 align-middle hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all text-sm dark:bg-gray-800 dark:hover:bg-slate-800 dark:border-gray-700 dark:text-gray-400"
-const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/selectedFmt, course, sections,tocs,clearStatusBar,logStatusBar,queueResume,queueFinished, dmsetup,queueManRef, alreadySetup, setAlreadySetup,reconfigureSetup, setRunSetup, runSetup, setReconfigureSetup, queueStarted = false, startDownloadQueue, stopDownloadQueue}) => {
+const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/store,selectedFmt, course, sections,tocs,clearStatusBar,logStatusBar,queueResume,queueFinished, dmsetup,queueManRef, alreadySetup, setAlreadySetup,reconfigureSetup, setRunSetup, runSetup, setReconfigureSetup, queueStarted = false, startDownloadQueue, stopDownloadQueue}) => {
     console.log(`queueResume:${queueResume}`)  
   // const [loadingStartQueue, setLoadingStartQueue] = useState(false)
     /**
@@ -165,6 +165,27 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/selectedFmt, 
     console.log(dmsetup)
   },[dmsetup])
 
+  const onSelectDdToolbar=async(e)=>{
+    if(e=='reset_queue_setup'){
+      if(confirm("Are you sure want to reset Queue Setup")){
+        const {courseId} = dmsetup
+        console.log(courseId)
+        await store.get('DMSetup').deleteByCourseId(courseId)
+        await store.get('DMStatus').deleteByCourseId(courseId)
+        document.location.reload()
+      }
+      
+    }
+    // console.log(e)
+  }
+
+  const ddToolbarData = [
+    {
+      text:'Reset Queue Setup',
+      value:'reset_queue_setup',
+      icon:'bi bi-trash'
+    }
+  ]
   return (<><div className="toolbar-man pr-2 pt-4 pb-1">
         <div className="toolbar-man-container">
         
@@ -221,7 +242,7 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/selectedFmt, 
             <Button onClick={e=>downloadHelper(e)} className="" caption="Helper.sh" icon="bi bi-terminal-fill"/>
             <Button onClick={e=>downloadHelperCmd(e)} className="" caption="Helper.cmd" icon="bi bi-terminal"/>
           
-        
+          <DropdownMenu className={`p-0`} data={ddToolbarData} onSelect={(e)=>onSelectDdToolbar(e)} labelIcon="fa fa-cog"/>
       </>:''
     }
     
@@ -229,7 +250,7 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/selectedFmt, 
     </> : <>
     {
       !runSetup ?<Button onMouseOut={e=>clearStatusBar()} 
-      onMouseOver={e=>logStatusBar('ToolbarMan',`Run Setup Queue`)} onClick={e=>setRunSetup(true)} icon="fa fa-cog" caption="Run Setup Queue"/> : ""
+      onMouseOver={e=>logStatusBar('ToolbarMan',`Run Setup Queue`)} onClick={e=>setRunSetup(true)} icon="fa fa-cog" caption="Run Queue Setup"/> : ""
     }
         
     </>

@@ -224,7 +224,7 @@ const DownloadManager = ({store, config}) => {
                     setQueueFinished={setQueueFinished}
                     queueManRef={queueManRef}
                     queueResume={queueResume}
-                    logStatusBar={logStatusBar}
+                    logStatusBar={logStatusBar} store={store}
                     clearStatusBar={clearStatusBar}/>
         <QueueSetup alreadySetup={alreadySetup} toast={toast} setRefreshTable={setRefreshTable}
                     setAlreadySetup={setAlreadySetup}

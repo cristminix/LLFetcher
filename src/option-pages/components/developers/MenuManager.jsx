@@ -4,24 +4,77 @@ import { useEffect, useState } from "react"
 import Pager from "../../../components/shared/Pager"
 import Grid from "../../../components/shared/Grid"
 import Button from "../../../components/shared/ux/Button"
-import {formatBytes} from "../../../global/fn"
+import {formatBytes, slugify} from "../../../global/fn"
 import CheckBox from "../../../components/shared/ux/CheckBox"
 import { devApiUrl } from "./fn"
 const inputCls= "py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
-console.log(import.meta.env)
-const MenuForm = ({data, className})=>{
+// console.log(import.meta.env)
+import { crc32 } from "crc"
+const createUntitledMenu = ()=>{
+    const idx = crc32((new Date).getTime().toString()).toString(16)
+    const title = `Untitled-${idx}`
+    const slug = slugify(title)
+    const path = `/${slug}`
+    const iconCls = 'fa fa-cog'
+    const parent = null
+    const hidden= true
+    const dev = true
+    const order=0
+    const hasChild = false
+
+    return {title,slug,parent,path,iconCls,hidden,dev,order,hasChild}
+}
+const MenuForm = ({data=null, className,hideForm})=>{
     const [title,setTitle] = useState('')
     const [iconCls,setIconCls] = useState('')
     const [path,setPath] = useState('')
     const [order,setOrder] = useState('')
-    const [hidden,sethidden] = useState('')
+    const [hidden,setHidden] = useState(false)
+    const [parent,setParent] = useState(null)
+    const [slug,setSlug] = useState('')
     const [dev,setDev] = useState(false)
     const [hasChild,setHasChild] = useState(false)
     const onEdit = f=> f
     const saveForm = async(f) => {
-        const formData = {title, iconCls, path, order, hidden, hasChild, dev}
-        console.log(formData)
+        const formData = {title, iconCls, path, order, hidden, hasChild, dev, parent, slug}
+        const options = {
+            method: 'POST', // or 'PUT', 'DELETE', etc.
+            headers: {
+              'Content-Type': 'application/json', // Specify the content type if sending JSON data
+              // Add any other headers if needed
+            },
+            body: JSON.stringify(formData) // Convert data to JSON string if sending JSON data
+          
+        }
+        // console.log(formData)
+        // Make the fetch request
+        fetch(devApiUrl('menu/update'), options).then(response => response.json())
+        .then(data => {
+            // Handle the response data
+            console.log('Response:', data);
+            hideForm()
+        })
+        .catch(error => {
+        // Handle errors
+        console.error('Error:', error);
+        })
     }
+
+    useEffect(()=>{
+        if(data){
+            console.log(data)
+            const {title,slug,parent,path,iconCls,hidden,dev,order,hasChild} =data
+            setTitle(title)
+            setSlug(slug)
+            setParent(parent)
+            setDev(dev)
+            setPath(path)
+            setIconCls(iconCls)
+            setHidden(hidden)
+            setHasChild(hasChild)
+            setOrder(order)
+        }
+    },[data])
     return <>
     <form className={className}>
     <div className="flex  items-center p-2 px-2">
@@ -30,6 +83,14 @@ const MenuForm = ({data, className})=>{
         </div>
         <div className="flex-grow">
             <input className={inputCls} defaultValue={title} onChange={e=>setTitle(e.target.value)}/>
+        </div>
+    </div>
+    <div className="flex  items-center p-2 px-2">
+        <div className="w-[150px]">
+            <label className="font-bold">Slug</label>
+        </div>
+        <div className="flex-grow">
+            <input className={inputCls} defaultValue={slug} onChange={e=>setSlug(e.target.value)}/>
         </div>
     </div>
     <div className="flex  items-center p-2 px-2">
@@ -56,13 +117,21 @@ const MenuForm = ({data, className})=>{
             <input className={inputCls} defaultValue={order} onChange={e=>setOrder(e.target.value)}/>
         </div>
     </div>
+    <div className="flex  items-center p-2 px-2">
+        <div className="w-[150px]">
+            <label className="font-bold">Parent</label>
+        </div>
+        <div className="flex-grow">
+            <input className={inputCls} defaultValue={parent} onChange={e=>setParent(e.target.value)}/>
+        </div>
+    </div>
           
     <div className="flex items-center p-2 px-2">
         <div className="w-[150px]">
-            <label className="font-bold">Hidden</label>
+            <label className="font-bold">Hidden {hidden?'Y':'N'}</label>
         </div>
         <div>
-            <CheckBox label="" checked={hidden} onChange={checked=>sethidden(checked)}/>
+            <CheckBox label="" checked={hidden} onChange={checked=>setHidden(checked)}/>
         </div>
     </div>
     <div className="flex items-center p-2 px-2">
@@ -76,6 +145,7 @@ const MenuForm = ({data, className})=>{
             <div className="flex p-2 gap-2">
           
                 <Button disabled={false} icon="fa fa-save" onClick={e=> saveForm(e)} caption="Save"/>
+                <Button disabled={false} icon="fa fa-times" onClick={e=> hideForm(e)} caption="Cancel"/>
             </div>
     </form>
     </>
@@ -92,14 +162,14 @@ const MenuManager = ({store,config}) => {
         order_dir:'asc'
     })
     const [formData,setFormData]=useState(null)
-    const [showForm,setShowForm]=useState(true)
-    const onRefresh = f => f
+    const [showForm,setShowForm]=useState(false)
+    const onRefresh = f => onReinit()
     const onReinit = async (item, index) => {
         
-        if(confirm(`The ${item.table} table is going droped, are you sure want to reinit ?`)){
+        // if(confirm(`The ${item.table} table is going droped, are you sure want to reinit ?`)){
             updateList()
             config.getUiConfig().reloadSidebar()
-        }
+        // }
         
 
         
@@ -107,10 +177,60 @@ const MenuManager = ({store,config}) => {
         console.log(item)
     }
     const addMenuForm = async(item,index)=>{
+        let parent = null
+        if(item){
+            parent = item.slug
+        }
+        const defaultMenu = createUntitledMenu()
+        defaultMenu.parent = parent
+        setFormData(defaultMenu)
+        setShowForm(true)
 
     }
     const editMenuForm = async(item,index)=>{
+        console.log(item)
+        if(typeof item.hidden == "undefined"){
+            item.hidden = false
+        }
+        if(typeof item.dev == "undefined"){
+            item.dev = false
+        }
+        setFormData(item)
+        setShowForm(true)
 
+    }
+    const deleteMenuForm = async(item,index)=>{
+        // console.log(item)
+        if(confirm(`Are you sure want to delete this menu "${item.title}"`)){
+            if(typeof item.hidden == "undefined"){
+                item.hidden = false
+            }
+            if(typeof item.dev == "undefined"){
+                item.dev = false
+            }
+            const formData = item
+            const options = {
+                method: 'POST', // or 'PUT', 'DELETE', etc.
+                headers: {
+                'Content-Type': 'application/json', // Specify the content type if sending JSON data
+                // Add any other headers if needed
+                },
+                body: JSON.stringify(formData) // Convert data to JSON string if sending JSON data
+            
+            }
+            // console.log(formData)
+            // Make the fetch request
+            fetch(devApiUrl('menu/update?delete=true'), options).then(response => response.json())
+            .then(data => {
+                // Handle the response data
+                console.log('Response:', data);
+                // hideForm()
+            })
+            .catch(error => {
+            // Handle errors
+            console.error('Error:', error);
+            })
+        }
 
     }
     const gridOptions = {
@@ -124,7 +244,7 @@ const MenuManager = ({store,config}) => {
 		// remoteUrl : (item) => `${config.getApiEndpoint()}/api/tts/DBerence?key=${item.key}`,
 		callbackFields : {
 			title : (field, value ,item) => {
-                console.log(item)
+                // console.log(item)
 				return <p className={`ml-${item.level*2}`}>{item.hasChild?'+':' '} {value}</p>
 			}, 
 			// value : (field, value, item, index) => {
@@ -150,7 +270,11 @@ const MenuManager = ({store,config}) => {
                     item.level==0?<Button loading={false} icon="fa fa-plus" caption="Add Child" onClick={e => addMenuForm(item, index)}/>:null
                 }
                 <Button loading={false} icon="fa fa-edit" caption="Edit" onClick={e => editMenuForm(item, index)}/>
-                </>
+                {
+                    !item.hasChild?
+                <Button loading={false} icon="fa fa-trash" caption="Delete" onClick={e => deleteMenuForm(item, index)}/>:null
+            }
+            </>
 	   
 			}
 		}
@@ -166,11 +290,12 @@ const MenuManager = ({store,config}) => {
         const slugKeys= Object.keys(schema.links)
         let id = 1
         for(const slug of slugKeys){
-            let {title,path,iconCls,hidden,hasChild} = schema.links[slug]
+            let {title,path,iconCls,hidden,hasChild,order} = schema.links[slug]
             const record = {title,path,iconCls,hidden,hasChild}
             record.id = id
             record.slug = slug
             record.level= 0
+            record.order = order
             const childItems = schema.links[slug].childItems 
             records.push(record)
 
@@ -181,6 +306,7 @@ const MenuManager = ({store,config}) => {
                     const crecord = childItems[cslug]
                     crecord.slug = cslug
                     crecord.level = 1
+                    crecord.parent = slug
                     records.push(crecord)
                 }
             }
@@ -224,12 +350,18 @@ const MenuManager = ({store,config}) => {
     }
 	const containerCls = "border mb-2 rounded-xl shadow-sm p-6 dark:bg-gray-800 dark:border-gray-700"
 	return(<div>
-        <MenuForm data={formData} className={containerCls}/>
+        {
+            showForm?<MenuForm data={formData} className={containerCls} hideForm={e=>setShowForm(false)}/>:null
+        }
+        
         <div  className={`menu-manager ${containerCls}`}>
         <div className="explorer-toolbar">
             <div className="flex gap-2">
                 <Button onClick={e=>exportMenu(e)} caption="Export json" icon="fa fa-file-text"/>
-                <Button onClick={e=>addMenuForm()} icon="fa fa-plus" caption="Add"/>
+                {
+                    !showForm?<Button onClick={e=>addMenuForm()} icon="fa fa-plus" caption="Add"/>:null
+                }
+                
             </div>
             
         </div>		

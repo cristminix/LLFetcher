@@ -11,9 +11,18 @@ class CheckBox extends Component{
         
     }
     componentDidMount(){
-        if(this.ckRef.current){
-            this.ckRef.current.checked = this.props.checked
-        }
+        setTimeout(f=>{
+            if(this.ckRef.current){
+                this.ckRef.current.checked = this.props.checked
+            }
+        },256)
+        
+    }
+    componentWillReceiveProps(a,b){
+        // console.log(a,b)
+        // if(this.ckRef.current){
+        //     this.ckRef.current.checked = b.checked
+        // }
     }
     render(){
         const {id,checked,label} = this.props

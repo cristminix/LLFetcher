@@ -1,214 +1,201 @@
 {
-	"links" : {
-		"welcome":{
-			"title" : "Welcome",
-			"path" : "/welcome",
-			"iconCls" : "bi bi-house",
-			"order": 1,
-			"hidden":true
-		},
-		"courses":{
-			"title" : "Courses",
-			"path" : "/manager",
-			"iconCls" : "bi bi-bookmark",
-			"order" : 2,
-			"useModel" : true,
-			"model" : "Course",
-			"modelListMethod" : "getList",
-			"displayField" : "title",
-			"slugField" : "slug",
-			"childRoutePath" : "/manager/{SLUG_VALUE}",
-			"childIconCls" : "fa fa-bookmark-o"
-		},
-		"download" : {
-			"title" : "Download",
-			"path" : "/download",
-			"iconCls" : "bi bi-download",
-			"order" : 3,
-			"hidden" : true
-		},
-		"settings" : {
-			"title" : "Settings",
-			"path" : "/setting",
-			"iconCls" : "bi bi-gear",
-			"dev":true,
-			"order" : 4,
-			"hidden" : false,
-			"hasChild":true,
-			"childItems":{
-				"find-ds" : {
-					"title" : "findDS",
-					"path" : "/tests/find-ds",
-					"iconCls" : "bi bi-search",
-					"order" : 0
-				}
-			}
-		},
-		"developers" : {
-			"title" : "Developers",
-			"path" : "/developer",
-			"iconCls" : "bi bi-gear",
-			"order" : 4,
-			"hidden" : false,
-			"hasChild" : true,
-			"dev":true,
-			"childItems":{
-				"menu-manager" : {
-					"title" : "Menu Manager",
-					"path" : "/developer/menu-manager",
-					"iconCls" : "bi bi-gear",
-					"order" : 0
-				},
-				"dev-api" : {
-					"title" : "Dev Api",
-					"path" : "/developer/dev-api",
-					"iconCls" : "bi bi-gear",
-					"order" : 0
-				},
-				"video-player" : {
-					"title" : "Video Player",
-					"path" : "/developer/video-player",
-					"iconCls" : "bi bi-play",
-					"order" : 0
-				},
-				"course" : {
-					"title" : "Course Api",
-					"path" : "/developer/course-api",
-					"iconCls" : "bi bi-gear",
-					"order" : 0
-				},
-				"native-client" : {
-					"title" : "Native Client",
-					"path" : "/developer/native-client",
-					"iconCls" : "bi bi-gear",
-					"order" : 0
-				},
-				"course-api-new" : {
-					"title" : "Course Api",
-					"path" : "/tests/course-api",
-					"iconCls" : "bi bi-gear",
-					"order" : 0,
-					"hidden" :true
-				},
-				"fetch-api" : {
-					"title" : "Fetch Api Test",
-					"path" : "/developer/fetch-api",
-					"iconCls" : "bi bi-gear",
-					"order" : 0,
-					"hidden" :false
-				}
-				
-			}
-		},
-		"database" : {
-			"title" : "Database Explorer",
-			"path" : "/database",
-			"iconCls" : "fa fa-database",
-			"order" : 5,
-			"hidden" : 0,
-			"hasChild" : true,
-			"childItems" : {
-				"table-manager" : {
-					"title" : "Table Manager",
-					"path" : "/database/table-manager",
-					"iconCls" : "fa fa-database",
-					"order" : 0
-				},
-				"thumbnail" : {
-					"title" : "Thumbnail",
-					"path" : "/database/thumbnail",
-					"iconCls" : "fa fa-database",
-					"order" : 0
-				},
-				"author" : {
-					"title" : "Author",
-					"path" : "/database/author",
-					"iconCls" : "fa fa-database",
-					"order" : 0
-				},
-				"exercise-file" : {
-					"title" : "ExerciseFile",
-					"path" : "/database/exercise-file",
-					"iconCls" : "fa fa-database",
-					"order" : 0
-				},
-				"stream-location" : {
-					"title" : "StreamLocation",
-					"path" : "/database/stream-location",
-					"iconCls" : "fa fa-database",
-					"order" : 0
-				},
-				"transcript" : {
-					"title" : "Transcript",
-					"path" : "/database/transcript",
-					"iconCls" : "fa fa-database",
-					"order" : 0
-				},
-				"download-state" : {
-					"title" : "DownloadState",
-					"path" : "/database/download-state",
-					"iconCls" : "fa fa-database",
-					"order" : 0
-				},
-				"download-config" : {
-					"title" : "DownloadConfig",
-					"path" : "/database/download-config",
-					"iconCls" : "fa fa-database",
-					"order" : 0
-				},
-				"section" : {
-					"title" : "Section",
-					"path" : "/database/section",
-					"iconCls" : "fa fa-database",
-					"order" : 0
-				},
-				"toc" : {
-					"title" : "Toc",
-					"path" : "/database/toc",
-					"iconCls" : "fa fa-database",
-					"order" : 0
-				},
-				"course" : {
-					"title" : "Course",
-					"path" : "/database/course",
-					"iconCls" : "fa fa-database",
-					"order" : 0
-				},
-				"download" : {
-					"title" : "Download",
-					"path" : "/database/download",
-					"iconCls" : "fa fa-database",
-					"order" : 0
-				},
-				"dm-setup" : {
-					"title" : "DMSetup",
-					"path" : "/database/dm-setup",
-					"iconCls" : "fa fa-database",
-					"order" : 0
-				},
-				"dm-status" : {
-					"title" : "DMStatus",
-					"path" : "/database/dm-status",
-					"iconCls" : "fa fa-database",
-					"order" : 0
-				},
-				"cookie" : {
-					"title" : "Cookie",
-					"path" : "/database/cookie",
-					"iconCls" : "fa fa-database",
-					"order" : 0
-				}
-			}
-		},
-		"bootstrap-icons" : {
-			"title" : "Bootstrap Icons",
-			"path" : "/bootstrap-icons",
-			"iconCls" : "bi bi-bootstrap",
-			"order" : 5,
-			"hidden" : true,
-			"dev":true
-
-		}
-
-	}
+  "links": {
+    "courses": {
+      "title": "Courses",
+      "path": "/manager",
+      "iconCls": "bi bi-bookmark",
+      "order": 2,
+      "useModel": true,
+      "model": "Course",
+      "modelListMethod": "getList",
+      "displayField": "title",
+      "slugField": "slug",
+      "childRoutePath": "/manager/{SLUG_VALUE}",
+      "childIconCls": "fa fa-bookmark-o",
+      "hidden": false,
+      "hasChild": true,
+      "dev": false
+    },
+    "download": {
+      "title": "Download",
+      "path": "/download",
+      "iconCls": "bi bi-download",
+      "order": 3,
+      "hidden": true
+    },
+    "settings": {
+      "title": "Settings",
+      "path": "/setting",
+      "iconCls": "bi bi-gear",
+      "dev": true,
+      "order": 4,
+      "hidden": false,
+      "hasChild": true,
+      "childItems": {
+        "find-ds": {
+          "title": "findDS",
+          "path": "/tests/find-ds",
+          "iconCls": "bi bi-search",
+          "order": 0,
+          "hidden": false,
+          "dev": false
+        }
+      }
+    },
+    "developers": {
+      "title": "Developers",
+      "path": "/developer",
+      "iconCls": "bi bi-gear",
+      "order": 4,
+      "hidden": false,
+      "hasChild": true,
+      "dev": true,
+      "childItems": {
+        "menu-manager": {
+          "title": "Menu Manager",
+          "path": "/developer/menu-manager",
+          "iconCls": "bi bi-gear",
+          "order": 0
+        },
+        "dev-api": {
+          "title": "Dev Api",
+          "path": "/developer/dev-api",
+          "iconCls": "bi bi-gear",
+          "order": 0
+        },
+        "video-player": {
+          "title": "Video Player",
+          "path": "/developer/video-player",
+          "iconCls": "bi bi-play",
+          "order": 0
+        },
+        "course": {
+          "title": "Course Api",
+          "path": "/developer/course-api",
+          "iconCls": "bi bi-gear",
+          "order": 0
+        },
+        "native-client": {
+          "title": "Native Client",
+          "path": "/developer/native-client",
+          "iconCls": "bi bi-gear",
+          "order": 0
+        },
+        "course-api-new": {
+          "title": "Course Api",
+          "path": "/tests/course-api",
+          "iconCls": "bi bi-gear",
+          "order": 0,
+          "hidden": true
+        },
+        "fetch-api": {
+          "title": "Fetch Api Test",
+          "path": "/developer/fetch-api",
+          "iconCls": "bi bi-gear",
+          "order": 0,
+          "hidden": false
+        }
+      }
+    },
+    "database": {
+      "title": "Database Explorer",
+      "path": "/database",
+      "iconCls": "fa fa-database",
+      "order": 5,
+      "hidden": 0,
+      "hasChild": true,
+      "childItems": {
+        "table-manager": {
+          "title": "Table Manager",
+          "path": "/database/table-manager",
+          "iconCls": "fa fa-database",
+          "order": 0
+        },
+        "thumbnail": {
+          "title": "Thumbnail",
+          "path": "/database/thumbnail",
+          "iconCls": "fa fa-database",
+          "order": 0
+        },
+        "author": {
+          "title": "Author",
+          "path": "/database/author",
+          "iconCls": "fa fa-database",
+          "order": 0
+        },
+        "exercise-file": {
+          "title": "ExerciseFile",
+          "path": "/database/exercise-file",
+          "iconCls": "fa fa-database",
+          "order": 0
+        },
+        "stream-location": {
+          "title": "StreamLocation",
+          "path": "/database/stream-location",
+          "iconCls": "fa fa-database",
+          "order": 0
+        },
+        "transcript": {
+          "title": "Transcript",
+          "path": "/database/transcript",
+          "iconCls": "fa fa-database",
+          "order": 0
+        },
+        "download-state": {
+          "title": "DownloadState",
+          "path": "/database/download-state",
+          "iconCls": "fa fa-database",
+          "order": 0
+        },
+        "download-config": {
+          "title": "DownloadConfig",
+          "path": "/database/download-config",
+          "iconCls": "fa fa-database",
+          "order": 0
+        },
+        "section": {
+          "title": "Section",
+          "path": "/database/section",
+          "iconCls": "fa fa-database",
+          "order": 0
+        },
+        "toc": {
+          "title": "Toc",
+          "path": "/database/toc",
+          "iconCls": "fa fa-database",
+          "order": 0
+        },
+        "course": {
+          "title": "Course",
+          "path": "/database/course",
+          "iconCls": "fa fa-database",
+          "order": 0
+        },
+        "download": {
+          "title": "Download",
+          "path": "/database/download",
+          "iconCls": "fa fa-database",
+          "order": 0
+        },
+        "dm-setup": {
+          "title": "DMSetup",
+          "path": "/database/dm-setup",
+          "iconCls": "fa fa-database",
+          "order": 0
+        },
+        "dm-status": {
+          "title": "DMStatus",
+          "path": "/database/dm-status",
+          "iconCls": "fa fa-database",
+          "order": 0
+        },
+        "cookie": {
+          "title": "Cookie",
+          "path": "/database/cookie",
+          "iconCls": "fa fa-database",
+          "order": 0
+        }
+      }
+    }
+  }
 }

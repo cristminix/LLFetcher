@@ -1,6 +1,14 @@
 import {cls14, cls15,cls16,cls22,cls23,cls24, cls25,cls17,cls18,cls19,cls20,cls27} from "../cls"
 import { useLocation, NavLink } from 'react-router-dom';
+const DEV_MODE = import.meta.env.DEV
+const showOnlyOnDev = (item)=>{
+    // console.log(item)
 
+    if(typeof item.dev !== "undefined"){
+        return item.dev == DEV_MODE
+    }
+    return false
+}
 const MenuItem = ({hasChild, title, path, icon,  name,childrens, index}) => {
     const activeTabCls = "flex items-center gap-x-3.5 py-2 px-2.5 bg-gray-100 text-sm text-slate-700 rounded-md dark:bg-gray-900 dark:text-white"
     const activeMenuCls = "bg-gray-100 text-sm text-slate-700 rounded-md dark:bg-gray-900 dark:text-white"
@@ -87,6 +95,11 @@ const Menu = ({data, store, config}) => {
             const item = data[key]
             let childrens = item.childItems || {}
             // console.log(item)
+            if(showOnlyOnDev(item)){
+                if(!DEV_MODE){
+                    item.hidden = true
+                }
+            }
             if(item.hidden){
                 return null
             }

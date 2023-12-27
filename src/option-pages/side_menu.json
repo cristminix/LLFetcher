@@ -12,7 +12,6 @@
 			"path" : "/manager",
 			"iconCls" : "bi bi-bookmark",
 			"order" : 2,
-			"hasChild" : true,
 			"useModel" : true,
 			"model" : "Course",
 			"modelListMethod" : "getList",
@@ -32,8 +31,10 @@
 			"title" : "Settings",
 			"path" : "/setting",
 			"iconCls" : "bi bi-gear",
+			"dev":true,
 			"order" : 4,
 			"hidden" : false,
+			"hasChild":true,
 			"childItems":{
 				"find-ds" : {
 					"title" : "findDS",
@@ -50,8 +51,14 @@
 			"order" : 4,
 			"hidden" : false,
 			"hasChild" : true,
-
+			"dev":true,
 			"childItems":{
+				"menu-manager" : {
+					"title" : "Menu Manager",
+					"path" : "/developer/menu-manager",
+					"iconCls" : "bi bi-gear",
+					"order" : 0
+				},
 				"dev-api" : {
 					"title" : "Dev Api",
 					"path" : "/developer/dev-api",
@@ -198,7 +205,8 @@
 			"path" : "/bootstrap-icons",
 			"iconCls" : "bi bi-bootstrap",
 			"order" : 5,
-			"hidden" : true
+			"hidden" : true,
+			"dev":true
 
 		}
 

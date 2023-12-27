@@ -6,6 +6,7 @@ import FetchApi from './developers/FetchApi'
 import CourseApi from './developers/CourseApi'
 import DevApi from './developers/DevApi'
 import VideoPlayer from './developers/VideoPlayer'
+import MenuManager from './developers/MenuManager'
 export async function loader({ params }) {
     const { table, page } = params
     return { table, page }
@@ -22,6 +23,9 @@ const DeveloperPage = ({store,config}) => {
 
     if(page == 'fetch-api'){
         return <FetchApi store={store} config={config}/>
+    }
+    if(page == 'menu-manager'){
+        return <MenuManager store={store} config={config}/>
     }
     if(page == 'video-player'){
         return <VideoPlayer store={store} config={config}/>

@@ -69,8 +69,10 @@ class GridItems extends React.Component{
 		              
 
 		              <td className={this.tdCls2}>
+						<div className="flex items-center gap-1">
 		                <GridActions options={options} index={index} item={item} linkCls={this.linkCls}/>
-		              </td>
+						</div>
+						</td>
 		            </tr>
 	      		)
 	      	})

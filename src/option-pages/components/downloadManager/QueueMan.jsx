@@ -31,7 +31,7 @@ async function fetchDownloadReal(url,outputFilename,mime,progressCallback,vIndex
         let lastLoaded = 0
         const download = new JsFileDownloader({
             url,
-            timeout:86400,
+            timeout:86400*1000,
             filename: outputFilename,
             autoStart: true,
             process: e => {

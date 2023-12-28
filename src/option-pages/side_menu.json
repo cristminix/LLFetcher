@@ -31,16 +31,7 @@
       "order": 4,
       "hidden": false,
       "hasChild": true,
-      "childItems": {
-        "find-ds": {
-          "title": "findDS",
-          "path": "/tests/find-ds",
-          "iconCls": "bi bi-search",
-          "order": 0,
-          "hidden": false,
-          "dev": false
-        }
-      }
+      "childItems": {}
     },
     "developers": {
       "title": "Developers",
@@ -94,6 +85,15 @@
           "iconCls": "bi bi-gear",
           "order": 0,
           "hidden": false
+        },
+        "queue-man": {
+          "title": "Queue Manager",
+          "iconCls": "fa fa-list",
+          "path": "/developer/queue-man",
+          "order": 0,
+          "hidden": false,
+          "hasChild": false,
+          "dev": true
         }
       }
     },

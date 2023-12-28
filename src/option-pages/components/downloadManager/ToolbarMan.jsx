@@ -179,11 +179,19 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/store,selecte
     if(e=='play_in_video_player'){
       document.location.hash=`/developer/video-player?slug=${course.slug}`
     }
+    if(e=='view_on_dev_queue_man'){
+      document.location.hash=`/developer/queue-man?slug=${course.slug}`
+
+    }
     // console.log(e)
   }
 
   const ddToolbarData = [
     {
+      text:'View in Queue Man Dev',
+      value:'view_on_dev_queue_man',
+      icon:'fa fa-list'
+    },{
       text:'Reset Queue Setup',
       value:'reset_queue_setup',
       icon:'bi bi-trash'

@@ -194,6 +194,15 @@
           "path": "/database/cookie",
           "iconCls": "fa fa-database",
           "order": 0
+        },
+        "qstate": {
+          "title": "QState",
+          "iconCls": "fa fa-database",
+          "path": "/database/qstate",
+          "order": 0,
+          "hidden": false,
+          "hasChild": false,
+          "dev": true
         }
       }
     }

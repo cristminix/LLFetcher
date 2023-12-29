@@ -32,6 +32,31 @@
 	}
 }
 */
+class QueueResult{
+    static INIT = 0
+    static FAILED = 1
+    static FAILED_MEDIA = 2
+    static FAILED_TRANS = 3
+    static SUCCESS_MEDIA = 4
+    static SUCCESS_TRANS = 5
+    static SUCCESS = 6
+
+    static toStr(result){
+        const strs =  [
+            "INIT",
+            "FAILED_MEDIA",
+            "FAILED_TRANS",
+            "FAILED",
+            "SUCCESS_MEDIA",
+            "SUCCESS_TRANS",
+            "SUCCESS"
+        ]
+        if(typeof strs[result] != "undefined"){
+            return strs[result]
+        }
+        return `${result} : Unknown`
+    }
+}
 class QueueState{
     static INIT = 0
     static FETCH_META = 1
@@ -51,6 +76,42 @@ class QueueState{
     static FETCH_TRANS_RETRY = 11
     
     static FETCH_TRANS_OK = 12
+
+
+    static FINISHED = 13
+
+    static toStr(state){
+        const strs =  [
+            "INIT",
+
+            "FETCH_META",
+            
+            "FETCH_META_FAIL",
+            "FETCH_META_RETRY",
+            "FETCH_META_OK",
+
+            "FETCH_MEDIA",
+            "FETCH_MEDIA_FAIL",
+            "FETCH_MEDIA_RETRY",
+            "FETCH_MEDIA_OK",
+
+            "FETCH_TRANS",
+            "FETCH_TRANS_FAIL",
+            "FETCH_TRANS_RETRY",
+            "FETCH_TRANS_OK",
+
+            "FINISHED_MEDIA",
+            "FINISHED_TRANS",
+            
+            "FAILS",
+            "FINISHED"
+
+        ]
+        if(typeof strs[state] != "undefined"){
+            return strs[state]
+        }
+        return `${state} : Unknown`
+    }
 }
 class QueueItem{
     state=QueueState.INIT
@@ -58,6 +119,9 @@ class QueueItem{
     constructor(idx, state){
         this.state = state
         this.idx=idx
+    }
+    setState(state){
+        this.state = state
     }
 }
 class Queue{
@@ -130,32 +194,34 @@ class QueueData {
     buildQueue(){
         let sidx = 0
         let midx = 0
-        for(const section of this.sections){
-            let tidx = 0    
-            for(const toc of this.tocs[section.slug]){
-                const pk=toc.id
-                this.tocArr.push(toc)
-                const pkIdx = `pkidx-${pk}`
-                const vidxKey = `vidx-${sidx}-${tidx}`
-                this.pkIdxMaps[pkIdx]=midx
-                this.vidx[vidxKey]=midx
-                this.defaultQueue.enqueue(new QueueItem(midx,QueueState.INIT))
-                tidx += 1
-                midx += 1
+        if(this.sections){
+            for(const section of this.sections){
+                let tidx = 0    
+                for(const toc of this.tocs[section.slug]){
+                    const pk=toc.id
+                    this.tocArr.push(toc)
+                    const pkIdx = `pk-${pk}`
+                    const vidxKey = `v-${sidx}-${tidx}`
+                    this.pkIdxMaps[pkIdx]=midx
+                    this.vidx[vidxKey]=midx
+                    this.defaultQueue.enqueue(new QueueItem(midx,QueueState.INIT))
+                    tidx += 1
+                    midx += 1
 
+                }
+                sidx += 1
             }
-            sidx += 1
         }
     }
 
     getByVidx(sidx, tidx){
-        const vidxKey = `vidx-${sidx}-${tidx}`
+        const vidxKey = `v-${sidx}-${tidx}`
         const midx = this.vidx[vidxKey]
         return this.tocArr[midx]
 
     }
     getByPkIdx(pk){
-        const pkIdx = `pkidx-${pk}`
+        const pkIdx = `pk-${pk}`
         const midx = this.pkIdxMaps[pkIdx]
         return this.tocArr[midx]
     }
@@ -171,4 +237,4 @@ class QueueData {
     }
 }
 export default Queue
-export{QueueItem,QueueState,QueueData}
+export{QueueItem,QueueState,QueueData,QueueResult}

@@ -16,6 +16,7 @@ import Cookie from "./Cookie"
 import Transcript from "./Transcript"
 import PrxCache from "./PrxCache"
 import Thumbnail from "./Thumbnail"
+import QState from "./QState"
 
 class Store {
 	mApp = null
@@ -34,6 +35,7 @@ class Store {
 	mDMStatus = null
 	mTranscript = null
 	mPrxCache = null
+	mQState = null
 	
  /**
   * List of model class names that the Store will initialize instances of.
@@ -42,7 +44,7 @@ class Store {
   */
 	availables = ['DB', 'App', 'Author', 'Course', 'Download',
 		'DownloadConfig', 'DownloadState', 'ExerciseFile', 'Section',
-		'StreamLocation', 'Toc', 'Message',
+		'StreamLocation', 'Toc', 'Message','QState',
 		'DMSetup', 'DMStatus', 'Cookie','Transcript','PrxCache','Thumbnail']
 
 	static instance = null
@@ -79,6 +81,7 @@ class Store {
 		this.mTranscript = await Transcript.getInstance()
 		this.mPrxCache = await PrxCache.getInstance()
 		this.mThumbnail = await Thumbnail.getInstance()
+		this.mQState = await QState.getInstance()
 		await this.mApp.init()
 		callback()
 	}

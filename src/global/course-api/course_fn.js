@@ -447,7 +447,7 @@ const OBJtoXML = (obj) =>{
 const convertJsonToXml = (schema) => {
 	const row = sanitizeKeys({schema})
     const result = OBJtoXML({root:row})
-    console.log(result)
+    // console.log(result)
     return result
     // let options = {compact: true, ignoreComment: true, spaces: 4}
     // let result = xmlbuilder.json2xml(row, options)

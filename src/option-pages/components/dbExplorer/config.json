@@ -64,6 +64,13 @@
             "listMethod" : "getList"
             
         },
+        "qstate" : {
+            "headers" : ["Course", "TocID", "Index", "State","Result"],
+            "fields" : ["courseId", "tocId","idx","state","result"],
+            "model" : "QState",
+            "listMethod" : "getListWithCourse"
+            
+        },
         "download-state" : {
             "headers" : ["courseId", "Status"],
             "fields" : ["course", "status"],

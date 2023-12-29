@@ -79,6 +79,7 @@ class QueueState{
 
 
     static FINISHED = 13
+    static INTERUPTED = 14
 
     static toStr(state){
         const strs =  [
@@ -100,10 +101,6 @@ class QueueState{
             "FETCH_TRANS_RETRY",
             "FETCH_TRANS_OK",
 
-            "FINISHED_MEDIA",
-            "FINISHED_TRANS",
-            
-            "FAILS",
             "FINISHED"
 
         ]
@@ -235,6 +232,7 @@ class QueueData {
     getTocArr(){
         return this.tocArr
     }
+    
 }
 export default Queue
 export{QueueItem,QueueState,QueueData,QueueResult}

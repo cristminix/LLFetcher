@@ -40,6 +40,7 @@ const QueueMan= ({store, config})=>{
     const mTranscript = store.get('Transcript')
 
     const toast= (message,t)=>{
+        return
         if(toastRef.current){
             toastRef.current.add(message,t)
         }
@@ -70,11 +71,11 @@ const QueueMan= ({store, config})=>{
         
         qState = await mQState.updateState(qState.id, state)
         qItem.setState(state)
-        await timeout(256)
+        // await timeout(96)
         return qState
     }
     const updateQResult = async(qItem,qState, result)=>{
-        await timeout(250)
+        // await timeout(250)
         let toc = queueData.getByIdx(qItem.idx)
         const resultStr = QueueResult.toStr(result)
         let logMessage = `${qItem.idx} : ${toc.title} ... ${resultStr}`
@@ -92,7 +93,7 @@ const QueueMan= ({store, config})=>{
         console.log(resultStr)        
         qState = await mQState.updateResult(qState.id, result)
         // qItem.setState(state)
-        // await timeout(256)
+        // await timeout(96)
         return qState
     }
     const processQueue_fetchTrans = async(qItem, qState, toc)=>{
@@ -109,7 +110,7 @@ const QueueMan= ({store, config})=>{
         }
         if(transcripts.length > 0){
             nQState = await updateQstate(qItem, qState, QueueState.FETCH_TRANS)
-            await timeout(256)
+            await timeout(96)
             nQState = await updateQstate(qItem, qState, TEST_FAILED_TRANS ? QueueState.FETCH_TRANS_FAIL : QueueState.FETCH_TRANS_OK)
 
 
@@ -139,7 +140,7 @@ const QueueMan= ({store, config})=>{
         }
         if(slocs.length > 0){
             nQState = await updateQstate(qItem, qState, QueueState.FETCH_MEDIA)
-            await timeout(256)
+            await timeout(96)
             nQState = await updateQstate(qItem, qState, TEST_FAILED_MEDIA ? QueueState.FETCH_MEDIA_FAIL : QueueState.FETCH_MEDIA_OK)
 
 
@@ -192,6 +193,11 @@ const QueueMan= ({store, config})=>{
         else{
             finalQResult = QueueResult.FAILED
         }   
+        if(finalQResult === QueueResult.SUCCESS){
+            qState = await updateQstate(qItem, qState, QueueState.FINISHED)
+        }else{
+            qState = await updateQstate(qItem, qState, QueueState.INTERUPTED)
+        }
         qState = await updateQResult(qItem, qState, finalQResult)
         return qState
     }
@@ -304,6 +310,7 @@ const QueueMan= ({store, config})=>{
                 
                 if(qState.result == QueueResult.SUCCESS){
                     // qState = await processQueue_SUCCESS_MEDIA(qItem, qState, toc)
+                    
 
                 }
                 else if(qState.result == QueueResult.SUCCESS_MEDIA){
@@ -393,6 +400,113 @@ const QueueMan= ({store, config})=>{
             console.error(e)
         }
         
+    }
+    const qResultView = (tocId, prefix=null)=>{
+        let cls = ''
+        let record = mQState.getByTocId(tocId)
+        let result = null
+        if(record){
+            const prop = prefix ? `${prefix}Result` : 'result'
+            result = record[prop]
+        }
+        if(result && result != QueueResult.INIT){
+            if(prefix == 'm'){
+                if(result === QueueResult.SUCCESS_MEDIA){
+                    cls= 'fa fa-check'
+                }else{
+                    cls = 'fa fa-exclamation-o'
+                }
+            }else if(prefix == 't'){
+                if(result === QueueResult.SUCCESS_TRANS){
+                    cls= 'fa fa-check'
+                }else{
+                    cls = 'fa fa-exclamation-o'
+                }
+            }else{
+                if(result === QueueResult.SUCCESS){
+                    cls= 'fa fa-check'
+                }else{
+                    cls = 'fa fa-exclamation-o'
+                }
+            }
+            return <i className={`fa ${cls}`}/>
+
+        }
+        return null
+    }
+    const qStatusView = (tocId, prefix=null)=>{
+        let cls = ''
+        let record = mQState.getByTocId(tocId)
+        let status = null
+        if(record){
+            const prop = prefix ? `${prefix}State` : 'state'
+            status = record[prop]
+        }
+        if(status){
+            if(prefix == 'm'){
+                switch(status){
+                    case QueueState.INIT:
+                        cls = ''
+                        break
+                    case QueueState.FETCH_MEDIA_OK:
+                        cls = 'fa fa-check'
+                        break
+                    case QueueState.FETCH_MEDIA_FAIL:
+                    case QueueState.FETCH_MEDIA_FAIL:
+                        cls = 'fa fa-exclamation-o'
+                    default:
+                        cls = 'fa fa-spin fa-spinner'
+                            break
+                 }
+                    
+            }else if(prefix == 't'){
+                switch(status){
+                    case QueueState.INIT:
+                        cls = ''
+                        break
+                    case QueueState.FETCH_TRANS_OK:
+                        cls = 'fa fa-check'
+                        break
+                    
+                    case QueueState.FETCH_META_FAIL:
+                    case QueueState.FETCH_TRANS_FAIL:
+                        cls = 'fa fa-exclamation-o'
+                        break
+                    
+                    default:
+                        cls = 'fa fa-spin fa-spinner'
+                        break
+                }
+            }else{
+                switch(status){
+                    case QueueState.INIT:
+                        cls = ''
+                        break
+                    case QueueState.FETCH_MEDIA_OK:
+                    case QueueState.FETCH_TRANS_OK:
+                    case QueueState.FINISHED :
+                        cls = 'fa fa-check'
+                        break
+                    case QueueState.FETCH_META:
+                    case QueueState.FETCH_META_RETRY:
+                    case QueueState.FETCH_MEDIA:
+                    case QueueState.FETCH_TRANS:
+                        cls = 'fa fa-spin fa-spinner'
+                        break
+                    case QueueState.FETCH_META_FAIL:
+                    case QueueState.FETCH_MEDIA_FAIL:
+                    case QueueState.FETCH_TRANS_FAIL:
+                    case QueueState.INTERUPTED:
+                        cls = 'fa fa-exclamation-o'
+                        break
+                }
+            }
+            return <i className={`fa ${cls}`}/>
+
+        }
+        // console.log(status, cls)
+
+        return null
     }
     const confirmLeaveWidow = e => {
         // Standard-compliant browsers
@@ -505,12 +619,19 @@ const QueueMan= ({store, config})=>{
                     tocArray ? <>
                     {
                         tocArray.length > 0 ? tocArray.map((toc,tidx)=>{
+                            
                             return <tr key={tidx}>
                                 <td className={tdCls}>{tidx+1}</td>
                                 <td className={tdCls}>{toc.title}</td>
-                                <td className={tdCls}>{'vtt'}</td>
-                                <td className={tdCls}>{'media'}</td>
-                                <td className={tdCls}>{'toolbar'}</td>
+                                <td className={tdCls}>
+                                    {qStatusView(toc.id, 't')}
+                                </td>
+                                <td className={tdCls}>
+                                    {qStatusView(toc.id, 'm')}
+                                </td>
+                                <td className={tdCls}>
+                                    {qStatusView(toc.id)}
+                                </td>
 
                             </tr>
                         }) : null

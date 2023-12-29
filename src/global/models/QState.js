@@ -42,6 +42,9 @@ class QState extends DB{
     getRow(courseId,tocId,idx){
         return this.singleQuery({query: {courseId, tocId, idx}})
     }
+    getByTocId(tocId){
+        return this.singleQuery({query: {tocId}})
+    }
     getListByCourseId(courseId){
         return this.query({query: {courseId}})
     }
@@ -131,7 +134,38 @@ class QState extends DB{
         }
         return record
     }
-    
+    isFinished(tocId){
+        const record = this.getByTocId(tocId)
+        if(!record){
+            return false
+        }
+
+        return record.result === QueueResult.SUCCESS
+    }
+    getResult(tocId){
+        const record = this.getByTocId(tocId)
+        if(!record){
+            return null
+        }
+
+        return record.result
+    }
+    getTResult(tocId){
+        const record = this.getByTocId(tocId)
+        if(!record){
+            return null
+        }
+
+        return record.tResult
+    }
+    getMResult(tocId){
+        const record = this.getByTocId(tocId)
+        if(!record){
+            return null
+        }
+
+        return record.mResult
+    }
 }
 
 export default QState

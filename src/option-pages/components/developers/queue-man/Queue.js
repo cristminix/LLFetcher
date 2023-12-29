@@ -44,9 +44,9 @@ class QueueResult{
     static toStr(result){
         const strs =  [
             "INIT",
+            "FAILED",
             "FAILED_MEDIA",
             "FAILED_TRANS",
-            "FAILED",
             "SUCCESS_MEDIA",
             "SUCCESS_TRANS",
             "SUCCESS"

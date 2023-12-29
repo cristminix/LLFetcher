@@ -9,7 +9,13 @@ class QState extends DB{
         "tocId",
         "idx",
         "state",
-        "result"
+        "result",
+        "mState",
+        "mResult",
+        "tState",
+        "tResult",
+        "dtStart",
+        "dtEnd"
     ]
 	type = "collection"
     async deleteByCourseId(courseId){
@@ -20,8 +26,15 @@ class QState extends DB{
         let results =  this.db.queryAll(this.table)
         results = results.map(item => {
             try{item.course = mCourse.getById(item.courseId).title}catch(e){}
-            item.state = QueueState.toStr(item.state)
-            item.result = QueueResult.toStr(item.result)
+            const state = QueueState.toStr(item.state)
+            const mState = QueueState.toStr(item.mState)
+            const tState = QueueState.toStr(item.tState)
+
+            const result = QueueResult.toStr(item.result) 
+            const mResult = QueueResult.toStr(item.mResult) 
+            const tResult = QueueResult.toStr(item.tResult) 
+            item.state = `[${state},${mState},${tState}]`
+            item.result = `[${result},${mResult},${tResult}]`
             return item
         })
         return results
@@ -39,8 +52,11 @@ class QState extends DB{
     async create(courseId,tocId,idx,state,result=0){
         let row = this.getRow(courseId, tocId, idx)
         if(!row){
-
-            row = {courseId,tocId,idx,state,result}
+            const tState = 0
+            const mState = 0
+            const mResult = 0
+            const tResult = 0
+            row = {courseId,tocId,idx,state,result,mState,mResult,tState,tResult}
 
             row.id = this.db.insert(this.table,row)
             await this.db.commit()
@@ -80,10 +96,38 @@ class QState extends DB{
         }
         return record
     }
+    async updateTState(id,tState){
+        let record = this.getById(id)
+        if(record){
+            record = await this.update(id, {tState})
+        }
+        return record
+    }
+    async updateMState(id,mState){
+        let record = this.getById(id)
+        if(record){
+            record = await this.update(id, {mState})
+        }
+        return record
+    }
     async updateResult(id,result){
         let record = this.getById(id)
         if(record){
             record = await this.update(id, {result})
+        }
+        return record
+    }
+    async updateMResult(id,mResult){
+        let record = this.getById(id)
+        if(record){
+            record = await this.update(id, {mResult})
+        }
+        return record
+    }
+    async updateTResult(id,tResult){
+        let record = this.getById(id)
+        if(record){
+            record = await this.update(id, {tResult})
         }
         return record
     }

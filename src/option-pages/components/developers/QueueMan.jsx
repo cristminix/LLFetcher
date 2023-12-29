@@ -6,11 +6,13 @@ import { timeout } from "../../../global/fn"
 import { fetchQMeta } from "./queue-man/fn"
 import Toast from "../../../components/shared/ux/Toast"
 import Button from "../../../components/shared/ux/Button"
+import { niceScrollbarCls } from "../ux/cls"
+
 let lastSlug = ''
 let onWIndowLeaveSet = false
 
-const TEST_FAILED_TRANS = true
-const TEST_FAILED_MEDIA = true
+const TEST_FAILED_TRANS = false
+const TEST_FAILED_MEDIA = false
 
 const QueueMan= ({store, config})=>{
     const location = useLocation()
@@ -72,20 +74,22 @@ const QueueMan= ({store, config})=>{
         return qState
     }
     const updateQResult = async(qItem,qState, result)=>{
+        await timeout(250)
         let toc = queueData.getByIdx(qItem.idx)
-        let logMessage = `${qItem.idx} : ${toc.title} ... ${QueueResult.toStr(result)}`
+        const resultStr = QueueResult.toStr(result)
+        let logMessage = `${qItem.idx} : ${toc.title} ... ${resultStr}`
         // setLogMessage(logMessage)
         let mode = 'error'
         if(result == QueueResult.SUCCESS){
             mode = 'success'
         }
-        else if(result == QueueResult.SUCCESS_MEDIA || QueueResult.SUCCESS_TRANS){
+        else if(result == QueueResult.SUCCESS_MEDIA || result == QueueResult.SUCCESS_TRANS){
             mode = 'warning'
         }else{
             mode = 'error'
         }
         toast(logMessage, mode)
-        
+        console.log(resultStr)        
         qState = await mQState.updateResult(qState.id, result)
         // qItem.setState(state)
         // await timeout(256)
@@ -193,74 +197,92 @@ const QueueMan= ({store, config})=>{
     }
     const processQueue_INIT_FAILED = async(qItem,qState,toc)=>{
         console.log(`processQueue_INIT_FAILED() is running`)
-        if(qState.state < QueueState.FETCH_META_OK){
+        if(qState.state != QueueState.FETCH_META_OK){
             qState = await processQueue_fetchMeta(qItem,qState,toc)
+            await mQState.updateMState(qState.id, qState.state)
+            await mQState.updateTState(qState.id, qState.state)
         }
-        if(qState.state >= QueueState.FETCH_META_OK && qState.state < QueueState.FETCH_MEDIA_OK){
+        console.log('QSTATE:'+QueueState.toStr(qState.state))
+
+        if(qState.state == QueueState.FETCH_META_OK){
             qState = await processQueue_fetchMedia(qItem,qState,toc)
+            await mQState.updateMState(qState.id, qState.state)
+            
+            if(qState.state == QueueState.FETCH_MEDIA_OK){
+                qState = await updateQResult(qItem, qState, QueueResult.SUCCESS_MEDIA)
+            }else{
+                qState = await updateQResult(qItem, qState,QueueResult.FAILED_MEDIA)
+            }
+            
+            await mQState.updateMState(qState.id, qState.state)
+            await mQState.updateMResult(qState.id, qState.result)
+            
+            let mediaQResult = qState.result
+            console.log('MEDIA_RESULT:'+QueueResult.toStr(mediaQResult))
+            if(mediaQResult == QueueState.FETCH_MEDIA_OK){
+                qState = await processQueue_fetchTrans(qItem,qState,toc)
+            }
+            else {
+                qState = await processQueue_fetchTrans(qItem,qState,toc)
+
+            }
+            await mQState.updateTState(qState.id, qState.state)
+            
+            if(qState.state == QueueState.FETCH_TRANS_OK){
+                qState = await updateQResult(qItem, qState, QueueResult.SUCCESS_TRANS)
+            }else{
+                qState = await updateQResult(qItem, qState, QueueResult.FAILED_TRANS)
+
+            }
+            await mQState.updateTResult(qState.id, qState.result)
+
+            let transQResult = qState.result
+            console.log('TRANS_RESULT:'+QueueResult.toStr(transQResult))
+
+            qState = await processQueue_result(mediaQResult,transQResult,qItem,qState,toc)
         }
-        
-        if(qState.state == QueueState.FETCH_MEDIA_OK){
-            qState = await updateQResult(qItem, qState, QueueResult.SUCCESS_MEDIA)
-        }else{
-            qState = await updateQResult(qItem, qState,QueueResult.FAILED_MEDIA)
-        }
-        
-        if(qState.state >= QueueState.FETCH_MEDIA_OK && qState.state < QueueState.FETCH_TRANS_OK){
-            qState = await processQueue_fetchTrans(qItem,qState,toc)
-        }
-        
-        let mediaQResult = qState.result
-
-
-        if(mediaQResult == QueueResult.FAILED_MEDIA){
-            qState = await processQueue_fetchTrans(qItem,qState,toc)
-
-        }
-
-        if(qState.state == QueueState.FETCH_TRANS_OK){
-            qState = await updateQResult(qItem, qState, QueueResult.SUCCESS_TRANS)
-        }else{
-            qState = await updateQResult(qItem, qState, QueueResult.FAILED_TRANS)
-
-        }
-        let transQResult = qState.result
-
-        qState = await processQueue_result(mediaQResult,transQResult,qItem,qState,toc)
         return qState
     }
     const processQueue_SUCCESS_MEDIA = async(qItem,qState,toc)=>{
         console.log(`processQueue_SUCCESS_MEDIA() is running`)
-        
-        qState = await processQueue_fetchTrans(qItem,qState,toc)
-        let mediaQResult = QueueResult.SUCCESS_MEDIA
-
-        if(qState.state == QueueState.FETCH_TRANS_OK){
-            qState = await updateQResult(qItem, qState, QueueResult.SUCCESS_TRANS)
-        }else{
-            qState = await updateQResult(qItem, qState,QueueResult.FAILED_TRANS)
+        if(qState.state != QueueState.FETCH_META_OK){
+            qState = await processQueue_fetchMeta(qItem,qState,toc)
         }
+        console.log('QSTATE:'+QueueState.toStr(qState.state))
+        if(qState.state == QueueState.FETCH_META_OK){
+            qState = await processQueue_fetchTrans(qItem,qState,toc)
+
+            if(qState.state == QueueState.FETCH_TRANS_OK){
+                qState = await updateQResult(qItem, qState, QueueResult.SUCCESS_TRANS)
+            }else{
+                qState = await updateQResult(qItem, qState,QueueResult.FAILED_TRANS)
+            }
+        }
+        let mediaQResult = QueueResult.SUCCESS_MEDIA
         let transQResult = qState.result
 
         qState = await processQueue_result(mediaQResult,transQResult,qItem,qState,toc)
         return qState
     }
     const processQueue_SUCCESS_TRANS = async(qItem,qState,toc)=>{
-        console.log(`processQueue_INIT_TRANS() is running`)
-        
-        // if(qState.state < QueueState.FETCH_TRANS_OK){
-            qState = await processQueue_fetchMedia(qItem,qState,toc)
-        // }
-        let transQResult = QueueResult.SUCCESS_TRANS
-
-
-        if(qState.state == QueueState.FETCH_MEDIA_OK){
-            qState = await updateQResult(qItem, qState, QueueResult.SUCCESS_MEDIA)
-        }else{
-            qState = await updateQResult(qItem, qState, QueueResult.FAILED_MEDIA)
-
+        console.log(`processQueue_SUCCESS_TRANS() is running`)
+        if(qState.state != QueueState.FETCH_META_OK){
+            qState = await processQueue_fetchMeta(qItem,qState,toc)
         }
-        
+        console.log('QSTATE:'+QueueState.toStr(qState.state))
+        if(qState.state == QueueState.FETCH_META_OK){
+            qState = await processQueue_fetchMedia(qItem,qState,toc)
+
+
+            if(qState.state == QueueState.FETCH_MEDIA_OK){
+                qState = await updateQResult(qItem, qState, QueueResult.SUCCESS_MEDIA)
+            }else{
+                qState = await updateQResult(qItem, qState, QueueResult.FAILED_MEDIA)
+
+            }
+        }
+        let transQResult = QueueResult.SUCCESS_TRANS
+        let mediaQResult = qState.result
         qState = await processQueue_result(mediaQResult,transQResult,qItem,qState,toc)
         return qState
     }
@@ -280,8 +302,11 @@ const QueueMan= ({store, config})=>{
                 qItem.setState(qState.state)
                 console.log(qState)
                 
-                
-                if(qState.result == QueueResult.SUCCESS_MEDIA){
+                if(qState.result == QueueResult.SUCCESS){
+                    // qState = await processQueue_SUCCESS_MEDIA(qItem, qState, toc)
+
+                }
+                else if(qState.result == QueueResult.SUCCESS_MEDIA){
                     qState = await processQueue_SUCCESS_MEDIA(qItem, qState, toc)
 
                 }
@@ -402,6 +427,14 @@ const QueueMan= ({store, config})=>{
         }
     },[queueData])
     let btnIconCls = !queueRunning ? "fa fa-play" : "fa fa-spin fa-spinner"
+    const thCls = "px-1 py-1 text-left text-xs font-medium text-gray-500 uppercase"
+    const tdCls = "px-1 py-1 whitespace-nowrap text-sm font-medium"
+    
+    let tocArray = null 
+    if(queueData)
+    {
+        tocArray=queueData.getTocArr()
+    }
     return <>
     <div className="relative">
     <Toast ref={toastRef}/>
@@ -447,7 +480,52 @@ const QueueMan= ({store, config})=>{
   
 </div>
     
+<div className="queue-table border rounded-xl shadow-sm p-6 dark:bg-gray-800 dark:border-gray-700">
+        {/* <div className="state-tbl flex flex-col mx-auto w-full"> */}
+        <div className="flex flex-col">
+  <div className={`overflow-x-auto sm:-mx-6 lg:-mx-8 ${niceScrollbarCls}`}>
+    <div className={`inline-block min-w-full py-2 sm:px-6 lg:px-8`}>
+      <div className="overflow-hidden"> 
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead>
+                <tr>
+                <th className={thCls} rowSpan={2}>No</th>
+                <th className={thCls} rowSpan={2}>Title</th>
+                <th className={`${thCls}`} colSpan={2}>Status</th>
+                <th className={thCls} rowSpan={2}>Action</th>
+                </tr>
+                <tr>
+                    <th className={`${thCls} w-[200px]`}>Subtitle/Transcript</th>
+                    <th className={`${thCls} w-[200px]`}>Media</th>
+                </tr>
+            </thead>
+            <tbody>
 
+                {
+                    tocArray ? <>
+                    {
+                        tocArray.length > 0 ? tocArray.map((toc,tidx)=>{
+                            return <tr key={tidx}>
+                                <td className={tdCls}>{tidx+1}</td>
+                                <td className={tdCls}>{toc.title}</td>
+                                <td className={tdCls}>{'vtt'}</td>
+                                <td className={tdCls}>{'media'}</td>
+                                <td className={tdCls}>{'toolbar'}</td>
+
+                            </tr>
+                        }) : null
+                    }                   
+                    </>:null
+                }
+            </tbody>
+        </table>
+        </div>
+        </div>
+        </div>
+        {/* </div> */}
+        </div>
+        </div>
+    
     </>
 }
 

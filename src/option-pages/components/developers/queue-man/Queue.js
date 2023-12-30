@@ -101,7 +101,8 @@ class QueueState{
             "FETCH_TRANS_RETRY",
             "FETCH_TRANS_OK",
 
-            "FINISHED"
+            "FINISHED",
+            "INTERUPTED"
 
         ]
         if(typeof strs[state] != "undefined"){
@@ -112,7 +113,10 @@ class QueueState{
 }
 class QueueItem{
     state=QueueState.INIT
+    loaded=null
+    size=null
     idx=null
+    percentage=null
     constructor(idx, state){
         this.state = state
         this.idx=idx
@@ -120,6 +124,21 @@ class QueueItem{
     setState(state){
         this.state = state
     }
+
+    setSize(size){
+        this.size = size
+    }
+
+    setLoaded(loaded){
+        this.loaded = loaded
+        this.percentage = Math.floor(this.loaded / this.size * 100)
+
+    }
+
+    setPercentage(percentage){
+        this.percentage = percentage
+    }
+
 }
 class Queue{
     static clone(instance){
@@ -231,6 +250,14 @@ class QueueData {
 
     getTocArr(){
         return this.tocArr
+    }
+    pk2Idx(pk){
+        const pkIdx = `pk-${pk}`
+        const midx = this.pkIdxMaps[pkIdx]
+        return midx        
+    }
+    getQueueItem(idx){
+        return this.defaultQueue.items[idx]
     }
     
 }

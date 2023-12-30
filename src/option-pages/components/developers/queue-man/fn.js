@@ -1,6 +1,7 @@
 import { courseUrlFromSlug } from "../../../../global/course-api/course_fn"
+import { formatLeadingZeros } from "../../../../global/fn"
 import { QueueResult } from "./Queue"
-
+import JsFileDownloader from "js-file-downloader"
 // return sloc and trans url
 const fetchQMeta = async(courseApi, toc )=>{
     let slocs = null
@@ -27,8 +28,36 @@ const checkQueueIsAllFinished = async (courseId, tocArray=[], mQState)=>{
     return recordsFiltered.length === tocArray.length
 }
 
-const downloadVtt = async(url,outputFilename,onProgressCallback=f=>f) => {
+const downloadVtt = async(vttUrl,idx, course, toc, store, downloaderRef, onProgressCallback=(e,idx,course,toc,opt,t)=>null) => {
+    return new Promise((resolve, reject)=>{
+        const dmsetup = getDmStup(course.id, store)
+    
+        if(!dmsetup){
+            resolve(false)
+            return
+        }
+        const {enableFilenameIndex, selectedFmt} = dmsetup
+        const filenamePrefix = enableFilenameIndex ? `${formatLeadingZeros(idx+1)}-` : ''
+        const filename = `${filenamePrefix}${toc.slug}-${selectedFmt}.vtt`
+        const url = vttUrl
+        const downloader = new JsFileDownloader({
+            url,
+            autoStart : false,
+            filename,
+            timeout : 86400*1000,
+            process : e => {
+                onProgressCallback(e, idx, course, toc, {filename,url}, 't')
+            }
+        })
+        downloaderRef.current = downloader
 
+        downloader.start().then(function(){
+            resolve(true)
+        })
+        .catch(function(error){
+            reject(error)
+        })
+    })
 }
 
 const getDmStup = (courseId,store) => {
@@ -36,7 +65,37 @@ const getDmStup = (courseId,store) => {
     return mDMSetup.getByCourseId(courseId)
 }
 
-const downloadMedia = async(url,outputFilename,onProgressCallback=f=>f) =>{
+const downloadMedia = async(mediaUrl, idx, course, toc, store, downloaderRef, onProgressCallback=(e,idx,course,toc,opt,t)=>null) =>{
+    
+
+    return new Promise((resolve, reject)=>{
+        const dmsetup = getDmStup(course.id, store)
+    
+        if(!dmsetup){
+            resolve(false)
+            return
+        }
+        const {enableFilenameIndex, selectedFmt} = dmsetup
+        const filenamePrefix = enableFilenameIndex ? `${formatLeadingZeros(idx+1)}-` : ''
+        const filename = `${filenamePrefix}${toc.slug}-${selectedFmt}.mp4`
+        const url = mediaUrl
+        const downloader = new JsFileDownloader({
+            url,
+            autoStart : false,
+            filename,
+            timeout : 86400*1000,
+            process : e => {
+                onProgressCallback(e, idx, course, toc, {filename,url}, 'm')
+            }
+        })
+        downloaderRef.current = downloader
+        downloader.start().then(function(){
+            resolve(true)
+        })
+        .catch(function(error){
+            reject(error)
+        })
+    })
 
 }
 

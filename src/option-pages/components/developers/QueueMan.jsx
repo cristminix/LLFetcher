@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react"
-import {QueueState,QueueData, QueueResult} from "./queue-man/Queue"
+import {QueueState,QueueData, QueueResult, QueueItem} from "./queue-man/Queue"
 import { useLocation } from "react-router-dom"
 import CourseApi from "../../../global/course-api/CourseApi"
-import { timeout } from "../../../global/fn"
-import { checkQueueIsAllFinished, fetchQMeta, selectMediaUrl, selectVttUrl } from "./queue-man/fn"
+import { formatBytes, timeout } from "../../../global/fn"
+import { checkQueueIsAllFinished, downloadMedia, downloadVtt, fetchQMeta, selectMediaUrl, selectVttUrl } from "./queue-man/fn"
 import Toast from "../../../components/shared/ux/Toast"
 import Button from "../../../components/shared/ux/Button"
 import { niceScrollbarCls } from "../ux/cls"
@@ -27,6 +27,7 @@ const QueueMan= ({store, config})=>{
     // const [transcripts,setTranscripts] = useState(null)
     const [courseApi,setCourseApi] = useState(null)
     // const [tocArr,setTocArr] = useState(null)
+    const downloaderRef = useRef(null)
     const [activeQueue,setActiveQueue] = useState(0)
     const [logMessage,setLogMessage]=useState('loading...')
     const [queueRunning,setQueueRunning] = useState(false)
@@ -42,6 +43,14 @@ const QueueMan= ({store, config})=>{
     const mSloc = store.get('StreamLocation')
     const mTranscript = store.get('Transcript')
     const mPrxCache = store.get('PrxCache')
+    const [queueResetting, setQueueResetting] = useState(false)
+    const [queueStoping, setQueueStoping] = useState(false)
+    const [qDlViewsM, setQDlViewsM] = useState([])
+    const [qDlViewsT, setQDlViewsT] = useState([])
+    const [qDlStatusM, setQDlStatusM] = useState([])
+    const [qDlStatusT, setQDlStatusT] = useState([])
+    const [qDlStatusSet, setQDlStatusSet] = useState(false)
+    const [qDlViewsSet, setQDlViewsSet] = useState(false)
 
     const toast= (message,t)=>{
         return
@@ -52,6 +61,7 @@ const QueueMan= ({store, config})=>{
 
     const loadCourseData = async()=>{
         await generateQueueData()
+        loadCourseData.RUNNING = false
     }
    
     const generateQueueData = async()=>{
@@ -71,13 +81,162 @@ const QueueMan= ({store, config})=>{
 
         
     }
-    const updateQstate = async(qItem, qState, state)=>{
+    const handleQDlStatusMChange = (idx, state) => {
+        
+        setQDlStatusM((prevQDlStatusM) =>
+            prevQDlStatusM.map((n_qDlStatusM) =>
+              n_qDlStatusM.idx === idx ? { ...n_qDlStatusM, state } : n_qDlStatusM
+            )
+        )
+    }
+    const handleQDlStatusTChange = (idx, state) => {
+        setQDlStatusT((prevQDlStatusT) =>
+            prevQDlStatusT.map((n_qDlStatusT) =>
+              n_qDlStatusT.idx === idx ? { ...n_qDlStatusT, state } : n_qDlStatusT
+            )
+        )
+    } 
+    const setQDlStatus= (idx, state, t) => {
+        if(t=='m'){
+            handleQDlStatusMChange(idx, state)
+        }else{
+            handleQDlStatusTChange(idx, state)
+        }
+    }
+    const initQDlStatus = (queueMain, queueData)=>{
+        if(qDlStatusSet){
+            return
+        }
+        const n_qDlStatusM = []
+        const n_qDlStatusT = []
+        queueMain.items.map((item,idx)=>{
+            const toc = queueData.getByIdx(idx)
+            const qState = mQState.getByTocId(toc.id)
+            
+            n_qDlStatusM.push({idx,state:qState?qState.mState:QueueState.INIT})
+            n_qDlStatusT.push({idx,state:qState?qState.tState:QueueState.INIT})
+        })
+        setQDlStatusM(n_qDlStatusM)
+        setQDlStatusT(n_qDlStatusT)
+        setQDlStatusSet(true)
+    }
+    const qDlStatusView = (tocId, t=null)=>{
+        const idx = queueData.pk2Idx(tocId)
+        let cls = ''
+        let status = null
+
+        if(t == 'm'){
+            const statusM = qDlStatusM[idx]
+            status = statusM ? statusM.state:0
+        }else if(t == 't'){
+            const statusT = qDlStatusT[idx]
+            status =statusT?statusT.state:0
+        }else{
+            let record = mQState.getByTocId(tocId)
+            if(record){
+                const prop = t ? `${t}State` : 'state'
+                status = record[prop]
+            }
+        }
+        
+        if(status){
+            if(t == 'm'){
+                switch(status){
+                    case QueueState.INIT:
+                        cls = 'fa fa-hour-glass-o'
+                        break
+                        case QueueState.FETCH_META_OK:
+                        cls = 'fa fa-copy'
+                        case QueueState.FETCH_MEDIA_OK:
+                        cls = 'fa fa-check'
+                        break
+                    case QueueState.FETCH_META_FAIL:
+                    case QueueState.FETCH_MEDIA_FAIL:
+                        cls = 'fa fa-exclamation-triangle'
+                        break
+                    default:
+                        cls = 'fa fa-spin fa-spinner'
+                            break
+                 }
+                    
+            }else if(t == 't'){
+                switch(status){
+                    case QueueState.INIT:
+                        cls = 'fa fa-hourglass'
+                        break
+                    case QueueState.FETCH_META_OK:
+                        cls = 'fa fa-copy'
+                        break
+                    case QueueState.FETCH_TRANS_OK:
+                        cls = 'fa fa-check'
+                        break
+                    
+                    case QueueState.FETCH_META_FAIL:
+                    case QueueState.FETCH_TRANS_FAIL:
+                        cls = 'fa fa-exclamation-triangle'
+                        break
+                    
+                    default:
+                        cls = 'fa fa-spin fa-spinner'
+                        break
+                }
+            }else{
+                switch(status){
+                    case QueueState.INIT:
+                        cls = ''
+                        break
+                    case QueueState.FETCH_MEDIA_OK:
+                    case QueueState.FETCH_TRANS_OK:
+                    case QueueState.FINISHED :
+                        cls = 'fa fa-check'
+                        break
+                    case QueueState.FETCH_META:
+                    case QueueState.FETCH_META_RETRY:
+                    case QueueState.FETCH_MEDIA:
+                    case QueueState.FETCH_TRANS:
+                        cls = 'fa fa-spin fa-spinner'
+                        break
+                    case QueueState.FETCH_META_FAIL:
+                    case QueueState.FETCH_MEDIA_FAIL:
+                    case QueueState.FETCH_TRANS_FAIL:
+                    case QueueState.INTERUPTED:
+                        cls = 'fa fa-exclamation-triangle'
+                        break
+                }
+            }
+            return <span title={`${QueueState.toStr(status)}:(${status})`}><i className={`fa ${cls}`}/></span>
+
+        }
+        // console.log(status, cls)
+
+        return null
+    }
+    const updateQState = async(qItem, qState, state)=>{
+        console.log(`updateQState(${qItem.idx},${QueueState.toStr(state)})`)
+        const META_STATES = [QueueState.FETCH_META, QueueState.FETCH_META_FAIL, QueueState.FETCH_META_OK, QueueState.FETCH_META_RETRY]
+        const MEDIA_STATES = [QueueState.FETCH_MEDIA, QueueState.FETCH_MEDIA_FAIL, QueueState.FETCH_MEDIA_OK, QueueState.FETCH_MEDIA_RETRY]
+        const TRANS_STATES = [QueueState.FETCH_TRANS, QueueState.FETCH_TRANS_FAIL, QueueState.FETCH_TRANS_OK, QueueState.FETCH_TRANS_RETRY]
+        if(state == QueueState.INIT){
+            setQDlStatus(qItem.idx,state,'m')
+            setQDlStatus(qItem.idx,state,'t')
+        }else if(META_STATES.includes(state)){
+            setQDlStatus(qItem.idx,state,'m')
+            setQDlStatus(qItem.idx,state,'t')
+        }else if(MEDIA_STATES.includes(state)){
+            setQDlStatus(qItem.idx,state,'m')
+        }else if(TRANS_STATES.includes(state)){
+            setQDlStatus(qItem.idx,state,'t')
+        }
         let toc = queueData.getByIdx(qItem.idx)
-        let logMessage = `${qItem.idx} : ${toc.title} ... ${QueueState.toStr(qItem.state)}`
-        setLogMessage(logMessage)
+       
         
         qState = await mQState.updateState(qState.id, state)
+        console.log(qState)
         qItem.setState(state)
+
+        let logMessage = `${qItem.idx} : ${toc.title} ... ${QueueState.toStr(qState.state)}`
+        setLogMessage(logMessage)
+        console.log(logMessage)
         // await timeout(TEST_ENABLE_TIMEOUT_VALUE)
         return qState
     }
@@ -103,24 +262,37 @@ const QueueMan= ({store, config})=>{
         // await timeout(TEST_ENABLE_TIMEOUT_VALUE)
         return qState
     }
+    
     const processQueue_fetchTrans = async(qItem, qState, toc)=>{
         toast(`processQueue_fetchTrans ${toc.title}`,'normal')
         let nQState = null
         let transcripts = mTranscript.getListByTocId(toc.id)
         
         if(transcripts.length == 0){
-            nQState = await updateQstate(qItem, qState, QueueState.FETCH_META_RETRY)
+            nQState = await updateQState(qItem, qState, QueueState.FETCH_META_RETRY)
             let [slocs_,transcripts_, err] = await processQueue_fetchMeta(qItem, qState, toc)
             if(!err){
                 transcripts = mTranscript.getListByTocId(toc.id)
             }
         }
         if(transcripts.length > 0){
-            nQState = await updateQstate(qItem, qState, QueueState.FETCH_TRANS)
-            const vttUrl = selectVttUrl(transcripts, course.id, store)
+            nQState = await updateQState(qItem, qState, QueueState.FETCH_TRANS)
+            const [vttUrl, errWarn] = selectVttUrl(transcripts, course.id, store)
+            // const [mediaUrl, errWarn] = selectMediaUrl(slocs, course.id, store)
+            let success = false
+            if(vttUrl){
+                try{
+                    success = await downloadVtt(vttUrl,qItem.idx, course, toc, store, downloaderRef, (e,idx,course,toc,opt,t)=>onDownloadProgress(e,idx,course,toc,opt,t))
+
+                }catch(e){
+                    console.error(e)
+                }
+            }
             console.log(vttUrl)
-            await timeout(TEST_ENABLE_TIMEOUT_VALUE)
-            nQState = await updateQstate(qItem, qState, TEST_FAILED_TRANS ? QueueState.FETCH_TRANS_FAIL : QueueState.FETCH_TRANS_OK)
+
+            // await timeout(TEST_ENABLE_TIMEOUT_VALUE)
+            // if()
+            nQState = await updateQState(qItem, qState, !success ? QueueState.FETCH_TRANS_FAIL : QueueState.FETCH_TRANS_OK)
 
 
         }
@@ -141,20 +313,27 @@ const QueueMan= ({store, config})=>{
         let slocs = mSloc.getListByTocId(toc.id)
         
         if(slocs.length == 0){
-            nQState = await updateQstate(qItem, qState, QueueState.FETCH_META_RETRY)
+            nQState = await updateQState(qItem, qState, QueueState.FETCH_META_RETRY)
             let [slocs_,transcripts_, err] = await processQueue_fetchMeta(qItem, qState, toc)
             if(!err){
                 slocs = mSloc.getListByTocId(toc.id)
             }
         }
         if(slocs.length > 0){
-            nQState = await updateQstate(qItem, qState, QueueState.FETCH_MEDIA)
+            nQState = await updateQState(qItem, qState, QueueState.FETCH_MEDIA)
             await timeout(TEST_ENABLE_TIMEOUT_VALUE)
-            const mediaUrl = selectMediaUrl(slocs, course.id, store)
+            const [mediaUrl, errWarn] = selectMediaUrl(slocs, course.id, store)
+            let success = false
+            if(mediaUrl){
+                try{
+                    success = await downloadMedia(mediaUrl,qItem.idx, course, toc, store, downloaderRef,(e,idx,course,toc,opt,t)=>onDownloadProgress(e,idx,course,toc,opt,t))
+
+                }catch(e){
+                    console.error(e)
+                }
+            }
             console.log(mediaUrl)
-            nQState = await updateQstate(qItem, qState, TEST_FAILED_MEDIA ? QueueState.FETCH_MEDIA_FAIL : QueueState.FETCH_MEDIA_OK)
-
-
+            nQState = await updateQState(qItem, qState, !success ? QueueState.FETCH_MEDIA_FAIL : QueueState.FETCH_MEDIA_OK)
         }
 
         console.log(slocs)
@@ -170,7 +349,7 @@ const QueueMan= ({store, config})=>{
         // FETCH_META_FAIL = ok
         
         // update qstate record 
-        nQState = await updateQstate(qItem, qState, QueueState.FETCH_META)
+        nQState = await updateQState(qItem, qState, QueueState.FETCH_META)
         
 
         
@@ -178,13 +357,13 @@ const QueueMan= ({store, config})=>{
         let [slocs,transcripts, err] = await fetchQMeta(courseApi, toc)
         
         if(!err){
-            nQState = await updateQstate(qItem, qState, QueueState.FETCH_META_OK)
+            nQState = await updateQState(qItem, qState, QueueState.FETCH_META_OK)
            
 
 
         }else{
             
-            nQState = await updateQstate(qItem, qState, QueueState.FETCH_META_FAIL)
+            nQState = await updateQState(qItem, qState, QueueState.FETCH_META_FAIL)
             
             
         }
@@ -208,9 +387,9 @@ const QueueMan= ({store, config})=>{
             finalQResult = QueueResult.FAILED
         }   
         if(finalQResult === QueueResult.SUCCESS){
-            qState = await updateQstate(qItem, qState, QueueState.FINISHED)
+            qState = await updateQState(qItem, qState, QueueState.FINISHED)
         }else{
-            qState = await updateQstate(qItem, qState, QueueState.INTERUPTED)
+            qState = await updateQState(qItem, qState, QueueState.INTERUPTED)
         }
         qState = await updateQResult(qItem, qState, finalQResult)
         return qState
@@ -221,7 +400,6 @@ const QueueMan= ({store, config})=>{
             
             await mQState.updateMState(qState.id, QueueState.FETCH_META)
             await mQState.updateTState(qState.id, QueueState.FETCH_META)
-            await updateQstate(qItem,qState, QueueState.FETCH_META)
 
             qState = await processQueue_fetchMeta(qItem,qState,toc)
             await mQState.updateMState(qState.id, qState.state)
@@ -273,7 +451,7 @@ const QueueMan= ({store, config})=>{
         if(qState.state != QueueState.FETCH_META_OK){
             await mQState.updateMState(qState.id, QueueState.FETCH_META)
             await mQState.updateTState(qState.id, QueueState.FETCH_META)
-            await updateQstate(qItem,qState, QueueState.FETCH_META)
+            await updateQState(qItem,qState, QueueState.FETCH_META)
             
             qState = await processQueue_fetchMeta(qItem,qState,toc)
         }
@@ -298,7 +476,7 @@ const QueueMan= ({store, config})=>{
         if(qState.state != QueueState.FETCH_META_OK){
             await mQState.updateMState(qState.id, QueueState.FETCH_META)
             await mQState.updateTState(qState.id, QueueState.FETCH_META)
-            await updateQstate(qItem,qState, QueueState.FETCH_META)
+            await updateQState(qItem,qState, QueueState.FETCH_META)
             qState = await processQueue_fetchMeta(qItem,qState,toc)
         }
         console.log('QSTATE:'+QueueState.toStr(qState.state))
@@ -363,7 +541,6 @@ const QueueMan= ({store, config})=>{
         }
         
     }
-    const [queueStoping, setQueueStoping] = useState(false)
     const stopQueue = async(f) =>{
         const _queueStarted = queueStartedRef.current
         const _queueRunning = queueRunningRef.current
@@ -372,6 +549,10 @@ const QueueMan= ({store, config})=>{
                 setQueueStoping(true)
                 if(course){
                     // setQueueRunning(false)
+                    if(downloaderRef.current){
+                        const abortReason = 'USER_CANCELED'
+                        downloaderRef.current.abort(abortReason)
+                    }
                     queueStartedRef.current = false
                     queueRunningRef.current = false
                     setQueueStoping(false)
@@ -380,8 +561,7 @@ const QueueMan= ({store, config})=>{
             }
         }
     }
-    const [queueResetting, setQueueResetting] = useState(false)
-
+   
     const resetQueue = async(f) =>{
         const _queueStarted = queueStartedRef.current
         const _queueRunning = queueRunningRef.current
@@ -460,16 +640,13 @@ const QueueMan= ({store, config})=>{
     }
     const initQueueData =() => {
         try{
-            const queueData = new QueueData(sections, tocs, course)
-            // console.log(queueData)
-            setQueueData(queueData)
-            // setTocArr(Object.assign([],queueData.getTocArr()))
+            const queueData = new QueueData(sections, tocs, course) 
+            setQueueData(queueData) 
             const queueMain = queueData.cloneQueue()
             console.log(queueMain)
             setQueueMain(queueMain)
-            // setBlockMainContent(false)
-            // const pk = queueMain.dequeue()
-            // console.group(pk)
+            initQDlViews(queueMain)
+            initQDlStatus(queueMain, queueData) 
         }catch(e){
             console.error(e)
         }
@@ -508,80 +685,88 @@ const QueueMan= ({store, config})=>{
         }
         return null
     }
-    const qStatusView = (tocId, prefix=null)=>{
-        let cls = ''
-        let record = mQState.getByTocId(tocId)
-        let status = null
-        if(record){
-            const prop = prefix ? `${prefix}State` : 'state'
-            status = record[prop]
-        }
-        if(status){
-            if(prefix == 'm'){
-                switch(status){
-                    case QueueState.INIT:
-                        cls = ''
-                        break
-                    case QueueState.FETCH_MEDIA_OK:
-                        cls = 'fa fa-check'
-                        break
-                    case QueueState.FETCH_MEDIA_FAIL:
-                    case QueueState.FETCH_MEDIA_FAIL:
-                        cls = 'fa fa-exclamation-o'
-                    default:
-                        cls = 'fa fa-spin fa-spinner'
-                            break
-                 }
-                    
-            }else if(prefix == 't'){
-                switch(status){
-                    case QueueState.INIT:
-                        cls = ''
-                        break
-                    case QueueState.FETCH_TRANS_OK:
-                        cls = 'fa fa-check'
-                        break
-                    
-                    case QueueState.FETCH_META_FAIL:
-                    case QueueState.FETCH_TRANS_FAIL:
-                        cls = 'fa fa-exclamation-o'
-                        break
-                    
-                    default:
-                        cls = 'fa fa-spin fa-spinner'
-                        break
-                }
-            }else{
-                switch(status){
-                    case QueueState.INIT:
-                        cls = ''
-                        break
-                    case QueueState.FETCH_MEDIA_OK:
-                    case QueueState.FETCH_TRANS_OK:
-                    case QueueState.FINISHED :
-                        cls = 'fa fa-check'
-                        break
-                    case QueueState.FETCH_META:
-                    case QueueState.FETCH_META_RETRY:
-                    case QueueState.FETCH_MEDIA:
-                    case QueueState.FETCH_TRANS:
-                        cls = 'fa fa-spin fa-spinner'
-                        break
-                    case QueueState.FETCH_META_FAIL:
-                    case QueueState.FETCH_MEDIA_FAIL:
-                    case QueueState.FETCH_TRANS_FAIL:
-                    case QueueState.INTERUPTED:
-                        cls = 'fa fa-exclamation-o'
-                        break
-                }
-            }
-            return <i className={`fa ${cls}`}/>
+    
 
+    const initQDlViews = (queueMain)=>{
+        if(qDlViewsSet){
+            return
         }
-        // console.log(status, cls)
-
-        return null
+        const n_qDlViewsM = []
+        const n_qDlViewsT = []
+        queueMain.items.map((item,idx)=>{
+            n_qDlViewsM.push({idx,loaded:0,size:0,percentage:0})
+            n_qDlViewsT.push({idx,loaded:0,size:0,percentage:0})
+        })
+        setQDlViewsM(n_qDlViewsM)
+        setQDlViewsT(n_qDlViewsT)
+        setQDlViewsSet(true)
     }
+    const handleQdlViewsMChange = (idx, loaded, size) => {
+        // Use map to create a new array with the updated user
+        const percentage = Math.floor(loaded / size * 100)
+        
+        setQDlViewsM((prevQDlViewsM) =>
+            prevQDlViewsM.map((n_qDlViewsM) =>
+                n_qDlViewsM.idx === idx ? { ...n_qDlViewsM, loaded,size, percentage } : n_qDlViewsM
+            )
+        )
+    }
+    const handleQdlViewsTChange = (idx, loaded, size) => {
+        // Use map to create a new array with the updated user
+        const percentage = Math.floor(loaded / size * 100)
+        
+        setQDlViewsT((prevQDlViewsT) =>
+            prevQDlViewsT.map((n_qDlViewsT) =>
+                n_qDlViewsT.idx === idx ? { ...n_qDlViewsT, loaded,size, percentage } : n_qDlViewsT
+            )
+        )
+    } 
+    const setQDlView = (idx, loaded, size,t) => {
+        if(t == 'm'){
+            handleQdlViewsMChange(idx,loaded,size )
+        }else{
+            handleQdlViewsTChange(idx,loaded,size)
+
+        }
+    }
+    const onDownloadProgress = (e, idx, course, toc, opt, t)=>{
+        if (!e.lengthComputable) {
+            return
+        }
+        
+        const loaded = e.loaded
+        const size = e.total
+        // console.log({loaded,size})
+        setQDlView(idx, loaded, size, t)
+    }
+    const qDlView = (tocId, t)=>{
+        const idx = queueData.pk2Idx(tocId)
+        let qDlView_item = null
+        if(t=='m'){
+            const qDlViewsM_item = qDlViewsM[idx]
+            qDlView_item = qDlViewsM_item
+        }else{
+            const qDlViewsT_item = qDlViewsT[idx]
+            qDlView_item = qDlViewsT_item
+
+        }
+        let message = ''
+        if(qDlView_item){
+            const {loaded,size,percentage} = qDlView_item
+            // console.log(t,idx,loaded,size,percentage)
+            const loadedMB = loaded?formatBytes(loaded):''
+            const sizeMB = size?formatBytes(size):''
+            if(loaded < size){
+                message = `${loadedMB} of ${sizeMB} : ${percentage}%`
+            }else{
+                message= `${sizeMB}`
+
+            }
+        }
+        // console.log(message)
+        return message
+    }
+    
     const confirmLeaveWidow = e => {
         // Standard-compliant browsers
         var confirmationMessage = 'Are you sure you want to leave?'
@@ -590,16 +775,23 @@ const QueueMan= ({store, config})=>{
         return confirmationMessage
     }
     useEffect(()=>{
-        
+        // console.log(`slug=${slug}`)
+        // console.log(`lastSlug=${lastSlug}`)
         if(slug && lastSlug !== slug){
             lastSlug = slug
-            loadCourseData()
+            if(!loadCourseData.RUNNING){
+                loadCourseData.RUNNING = true
+                loadCourseData()
+
+                console.log(`call loadCourseData()`)
+            }
         }
         return f => {
             queueStarted =false
             onQueueStoped()
             setSlug(false)
-            lastSlug=''
+            lastSlug=null
+            queueStartedRef.current = false
         }
     },[slug]) 
 
@@ -610,22 +802,23 @@ const QueueMan= ({store, config})=>{
         }
     },[course,tocs,sections])
     const [queueAllFinished, setQueueAllFinished] = useState(false)
-    
+    const checkQueueFinished = async()=>{
+        if(course){
+            const allFinished = await checkQueueIsAllFinished(course.id, tocArray, mQState)
+            setQueueAllFinished(allFinished)
+            console.log(queueAllFinished)
+        }
+    }
     useEffect(()=>{
         if(queueData){
             setBlockMainContent(false)
+            checkQueueFinished()            
 
         }
     },[queueData])
     useEffect(()=>{
         if(!queueRunning){
-            if(course){
-                checkQueueIsAllFinished(course.id, tocArray, mQState).then(allFinished => {
-                    setQueueAllFinished(allFinished)
-                console.log(queueAllFinished)
-
-                })
-            }
+            checkQueueFinished()            
         }
     },[queueRunning])
     let btnIconCls = !queueRunning ? "fa fa-play" : "fa fa-spin fa-spinner"
@@ -711,13 +904,15 @@ const QueueMan= ({store, config})=>{
                                 <td className={tdCls}>{tidx+1}</td>
                                 <td className={tdCls}>{toc.title}</td>
                                 <td className={tdCls}>
-                                    {qStatusView(toc.id, 't')}
+                                    {qDlView(toc.id, 't')}
+                                    {qDlStatusView(toc.id, 't')}
                                 </td>
                                 <td className={tdCls}>
-                                    {qStatusView(toc.id, 'm')}
+                                    {qDlView(toc.id, 'm')}
+                                    {qDlStatusView(toc.id, 'm')}
                                 </td>
                                 <td className={tdCls}>
-                                    {qStatusView(toc.id)}
+                                    {qDlStatusView(toc.id)}
                                 </td>
 
                             </tr>

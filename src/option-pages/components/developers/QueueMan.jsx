@@ -1,19 +1,20 @@
 import { useEffect, useRef, useState } from "react"
-import Queue,{QueueState,QueueData, QueueResult} from "./queue-man/Queue"
+import {QueueState,QueueData, QueueResult} from "./queue-man/Queue"
 import { useLocation } from "react-router-dom"
 import CourseApi from "../../../global/course-api/CourseApi"
 import { timeout } from "../../../global/fn"
-import { fetchQMeta } from "./queue-man/fn"
+import { checkQueueIsAllFinished, fetchQMeta, selectMediaUrl, selectVttUrl } from "./queue-man/fn"
 import Toast from "../../../components/shared/ux/Toast"
 import Button from "../../../components/shared/ux/Button"
 import { niceScrollbarCls } from "../ux/cls"
+import { courseUrlFromSlug } from "../../../global/course-api/course_fn"
 
 let lastSlug = ''
 let onWIndowLeaveSet = false
 
 const TEST_FAILED_TRANS = false
 const TEST_FAILED_MEDIA = false
-
+const TEST_ENABLE_TIMEOUT_VALUE = 128
 const QueueMan= ({store, config})=>{
     const location = useLocation()
     const qs= location.search
@@ -31,13 +32,16 @@ const QueueMan= ({store, config})=>{
     const [queueRunning,setQueueRunning] = useState(false)
     const [queueMain, setQueueMain] = useState(null)
     const [blockMainContent, setBlockMainContent] = useState(false)
-    let queueInterupted = new Queue()
+    // let queueInterupted = new Queue()
     let queueStarted = false
+    const queueRunningRef = useRef(queueRunning)
+    const queueStartedRef = useRef(queueStarted)
     const toastRef = useRef(null)
     const [queueData,setQueueData] = useState(null)
     const mQState = store.get('QState')
     const mSloc = store.get('StreamLocation')
     const mTranscript = store.get('Transcript')
+    const mPrxCache = store.get('PrxCache')
 
     const toast= (message,t)=>{
         return
@@ -56,6 +60,9 @@ const QueueMan= ({store, config})=>{
         const course = await courseApi.getCourseInfo(slug)
         const sections = await courseApi.getCourseSections(slug)
         const tocs = await courseApi.getCourseTocs(slug)
+        let courseUrl = courseUrlFromSlug(slug)
+        await mPrxCache.unset(courseUrl)
+
         setCourse(course)
         setSections(sections)
         setTocs(tocs)
@@ -71,11 +78,11 @@ const QueueMan= ({store, config})=>{
         
         qState = await mQState.updateState(qState.id, state)
         qItem.setState(state)
-        // await timeout(96)
+        // await timeout(TEST_ENABLE_TIMEOUT_VALUE)
         return qState
     }
     const updateQResult = async(qItem,qState, result)=>{
-        // await timeout(250)
+        // await timeout(TEST_ENABLE_TIMEOUT_VALUE)
         let toc = queueData.getByIdx(qItem.idx)
         const resultStr = QueueResult.toStr(result)
         let logMessage = `${qItem.idx} : ${toc.title} ... ${resultStr}`
@@ -93,7 +100,7 @@ const QueueMan= ({store, config})=>{
         console.log(resultStr)        
         qState = await mQState.updateResult(qState.id, result)
         // qItem.setState(state)
-        // await timeout(96)
+        // await timeout(TEST_ENABLE_TIMEOUT_VALUE)
         return qState
     }
     const processQueue_fetchTrans = async(qItem, qState, toc)=>{
@@ -110,7 +117,9 @@ const QueueMan= ({store, config})=>{
         }
         if(transcripts.length > 0){
             nQState = await updateQstate(qItem, qState, QueueState.FETCH_TRANS)
-            await timeout(96)
+            const vttUrl = selectVttUrl(transcripts, course.id, store)
+            console.log(vttUrl)
+            await timeout(TEST_ENABLE_TIMEOUT_VALUE)
             nQState = await updateQstate(qItem, qState, TEST_FAILED_TRANS ? QueueState.FETCH_TRANS_FAIL : QueueState.FETCH_TRANS_OK)
 
 
@@ -140,7 +149,9 @@ const QueueMan= ({store, config})=>{
         }
         if(slocs.length > 0){
             nQState = await updateQstate(qItem, qState, QueueState.FETCH_MEDIA)
-            await timeout(96)
+            await timeout(TEST_ENABLE_TIMEOUT_VALUE)
+            const mediaUrl = selectMediaUrl(slocs, course.id, store)
+            console.log(mediaUrl)
             nQState = await updateQstate(qItem, qState, TEST_FAILED_MEDIA ? QueueState.FETCH_MEDIA_FAIL : QueueState.FETCH_MEDIA_OK)
 
 
@@ -177,9 +188,12 @@ const QueueMan= ({store, config})=>{
             
             
         }
+        await mPrxCache.unset(toc.url)
+
         return nQState
     }
     const processQueue_result = async(mediaQResult,transQResult,qItem,qState,toc)=>{
+        await timeout(TEST_ENABLE_TIMEOUT_VALUE)
         let finalQResult = mediaQResult
 
         if(mediaQResult == QueueResult.SUCCESS_MEDIA && transQResult == QueueResult.SUCCESS_TRANS){
@@ -204,6 +218,11 @@ const QueueMan= ({store, config})=>{
     const processQueue_INIT_FAILED = async(qItem,qState,toc)=>{
         console.log(`processQueue_INIT_FAILED() is running`)
         if(qState.state != QueueState.FETCH_META_OK){
+            
+            await mQState.updateMState(qState.id, QueueState.FETCH_META)
+            await mQState.updateTState(qState.id, QueueState.FETCH_META)
+            await updateQstate(qItem,qState, QueueState.FETCH_META)
+
             qState = await processQueue_fetchMeta(qItem,qState,toc)
             await mQState.updateMState(qState.id, qState.state)
             await mQState.updateTState(qState.id, qState.state)
@@ -252,6 +271,10 @@ const QueueMan= ({store, config})=>{
     const processQueue_SUCCESS_MEDIA = async(qItem,qState,toc)=>{
         console.log(`processQueue_SUCCESS_MEDIA() is running`)
         if(qState.state != QueueState.FETCH_META_OK){
+            await mQState.updateMState(qState.id, QueueState.FETCH_META)
+            await mQState.updateTState(qState.id, QueueState.FETCH_META)
+            await updateQstate(qItem,qState, QueueState.FETCH_META)
+            
             qState = await processQueue_fetchMeta(qItem,qState,toc)
         }
         console.log('QSTATE:'+QueueState.toStr(qState.state))
@@ -273,6 +296,9 @@ const QueueMan= ({store, config})=>{
     const processQueue_SUCCESS_TRANS = async(qItem,qState,toc)=>{
         console.log(`processQueue_SUCCESS_TRANS() is running`)
         if(qState.state != QueueState.FETCH_META_OK){
+            await mQState.updateMState(qState.id, QueueState.FETCH_META)
+            await mQState.updateTState(qState.id, QueueState.FETCH_META)
+            await updateQstate(qItem,qState, QueueState.FETCH_META)
             qState = await processQueue_fetchMeta(qItem,qState,toc)
         }
         console.log('QSTATE:'+QueueState.toStr(qState.state))
@@ -337,15 +363,59 @@ const QueueMan= ({store, config})=>{
         }
         
     }
+    const [queueStoping, setQueueStoping] = useState(false)
+    const stopQueue = async(f) =>{
+        const _queueStarted = queueStartedRef.current
+        const _queueRunning = queueRunningRef.current
+        if(_queueStarted){
+            if(confirm("Are you sure want to stop Queue ? ")){
+                setQueueStoping(true)
+                if(course){
+                    // setQueueRunning(false)
+                    queueStartedRef.current = false
+                    queueRunningRef.current = false
+                    setQueueStoping(false)
+
+                }
+            }
+        }
+    }
+    const [queueResetting, setQueueResetting] = useState(false)
+
+    const resetQueue = async(f) =>{
+        const _queueStarted = queueStartedRef.current
+        const _queueRunning = queueRunningRef.current
+        if(!_queueStarted){
+            if(confirm("Are you sure want to reset Queue ? ")){
+                setQueueResetting(true)
+                if(course){
+                    await mQState.deleteByCourseId(course.id)
+                    setQueueResetting(false)
+                    setQueueAllFinished(false)
+                }
+            }
+        }
+    }
     const startQueue = async(f) =>{
         if(queueStarted){
             console.warn("Queue already started")
             return
         }
         queueStarted = true
+        queueStartedRef.current = queueStarted
         onQueueStarted()
         while(!queueMain.isEmpty()){
+            const queueStartedTrigger = queueStartedRef.current
+            console.log(queueStartedRef.current)
+            console.log(queueRunningRef.current)
+            if(!queueStartedTrigger){
+                console.log(`Queue Stoped by queueStartedRef.current == false`)
+                onQueueStoped()
+                break
+            }
             if(!queueStarted){
+                console.log(`Queue Stoped by local queueStarted == false`)
+
                 onQueueStoped()
                 break
             }
@@ -360,12 +430,15 @@ const QueueMan= ({store, config})=>{
         }
         if(queueStarted){
             queueStarted = false
+            queueStartedRef.current = queueStarted
             onQueueStoped()
         }
 
     }
     const onQueueStarted = f =>{
         setQueueRunning(true)
+        queueRunningRef.current = true
+
         if(!onWIndowLeaveSet){
             onWIndowLeaveSet = true
             window.addEventListener('beforeunload', confirmLeaveWidow)
@@ -374,6 +447,7 @@ const QueueMan= ({store, config})=>{
     const onQueueStoped = f =>{
         setQueueRunning(false)
         // queueMain = queueData.cloneQueue()
+        queueRunningRef.current = false
         if(queueDataReady()){
             initQueueData()
         }
@@ -535,12 +609,28 @@ const QueueMan= ({store, config})=>{
             initQueueData()
         }
     },[course,tocs,sections])
+    const [queueAllFinished, setQueueAllFinished] = useState(false)
+    
     useEffect(()=>{
         if(queueData){
             setBlockMainContent(false)
+
         }
     },[queueData])
+    useEffect(()=>{
+        if(!queueRunning){
+            if(course){
+                checkQueueIsAllFinished(course.id, tocArray, mQState).then(allFinished => {
+                    setQueueAllFinished(allFinished)
+                console.log(queueAllFinished)
+
+                })
+            }
+        }
+    },[queueRunning])
     let btnIconCls = !queueRunning ? "fa fa-play" : "fa fa-spin fa-spinner"
+    let stopBtnIconCls = !queueStoping ? "fa fa-stop" : "fa fa-spin fa-spinner"
+    let resetBtnIconCls = !queueResetting ? "fa fa-refresh" : "fa fa-spin fa-spinner"
     const thCls = "px-1 py-1 text-left text-xs font-medium text-gray-500 uppercase"
     const tdCls = "px-1 py-1 whitespace-nowrap text-sm font-medium"
     
@@ -549,35 +639,32 @@ const QueueMan= ({store, config})=>{
     {
         tocArray=queueData.getTocArr()
     }
+    
     return <>
     <div className="relative">
     <Toast ref={toastRef}/>
 
-  <div className=" border border-blue-200 rounded-lg p-4">
+  <div className=" border border-gray-700 rounded-lg p-4 mb-2">
     <div className="flex">
     <div>
         <div>{
             queueRunning? logMessage : null
         }
         </div>
-        <div>
+        <div className="flex gap-2">
             {
-            <Button caption={"Start Queue"} disabled={queueRunning} icon={btnIconCls} onClick={e=>startQueue()}/>
-            
+                !queueAllFinished ? <Button caption={"Start Queue"} disabled={queueRunning} icon={btnIconCls} onClick={e=>startQueue()}/> : null
             }
+            {
+                queueAllFinished ? <Button caption={"Reset Queue"} disabled={queueResetting} icon={resetBtnIconCls} onClick={e=>resetQueue()}/> : null
+            }
+            {
+                queueRunning ? <Button caption={"Stop Queue"} disabled={queueStoping} icon={stopBtnIconCls} onClick={e=>stopQueue()}/> : null
+            }
+            
         </div>
     </div>
-      {/* <div className="flex-shrink-0">
-        <svg className="flex-shrink-0 h-4 w-4 text-blue-400 mt-0.5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-      </div>
-      <div className="ms-3">
-        <h3 className="text-sm text-blue-800 font-medium">
-          Attention needed
-        </h3>
-        <div className="text-sm text-blue-700 mt-2">
-          <span className="font-semibold">Holy guacamole!</span> You should check in on some of those fields below.
-        </div>
-      </div> */}
+    
     </div>
   </div>
   {

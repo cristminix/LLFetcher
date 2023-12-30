@@ -51,6 +51,9 @@ class QState extends DB{
     getById(id){
         return this.singleQuery({query: {id}})
     }
+    async deleteByCourseId(courseId){
+        await this.deleteRows({courseId})
+    }
     
     async create(courseId,tocId,idx,state,result=0){
         let row = this.getRow(courseId, tocId, idx)
@@ -142,6 +145,7 @@ class QState extends DB{
 
         return record.result === QueueResult.SUCCESS
     }
+    
     getResult(tocId){
         const record = this.getByTocId(tocId)
         if(!record){

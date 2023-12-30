@@ -1,4 +1,7 @@
 import jQuery from 'jquery'
+import fr from 'fetch-retry'
+
+const fetchRtry = fr(fetch)
 
 const slugify = (text) => {
     // Normalize the text to remove diacritics and special characters
@@ -955,5 +958,6 @@ export{
 	
 	lsSet,lsGet,lsUnset,authorUrlFromSlug,
     el2Obj,
-    getThumbUrlFromArtifact
+    getThumbUrlFromArtifact,
+    fetchRtry
 }

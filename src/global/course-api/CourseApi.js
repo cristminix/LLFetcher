@@ -8,8 +8,8 @@ import {
 	getStreamLocations,
 	getVideoMetaNd,
 	convertJsonToXml,
-	parseJsonSchema,lsSet,lsGet,
-	getCourseXmlParentElement
+	parseJsonSchema,fetchRtry,
+	getCourseXmlParentElement,
 } from "./course_fn.js"
 
 import jQuery from "jquery"
@@ -73,48 +73,49 @@ class CourseApi {
 
 
 	}
-	async fetchWithRetry(url){
-		let ok = false
-        let noCache = false
-        let retryCount = 0
-        let waitTime = 0
-        let statusCode = 0
-        let response = {ok:false,status:0,text:f=>""}
-        while (!ok) {
-            if (retryCount > 0) {
-                console.log(`retry ${retryCount}`)
-            }
 
-            if (waitTime > 0) {
-                console.log(`wait for ${waitTime} second`)
-                setTimeout(() => {}, waitTime * 1000)
-            }
-            try{
-				response = await fetch(url)
-				// console.log(response)
-				statusCode = response.status
+	// async fetchWithRetry(url){
+	// 	let ok = false
+    //     let noCache = false
+    //     let retryCount = 0
+    //     let waitTime = 0
+    //     let statusCode = 0
+    //     let response = {ok:false,status:0,text:f=>""}
+    //     while (!ok) {
+    //         if (retryCount > 0) {
+    //             console.log(`retry ${retryCount}`)
+    //         }
+
+    //         if (waitTime > 0) {
+    //             console.log(`wait for ${waitTime} second`)
+    //             setTimeout(() => {}, waitTime * 1000)
+    //         }
+    //         try{
+	// 			response = await fetch(url)
+	// 			// console.log(response)
+	// 			statusCode = response.status
 				
-				// console.log(response)
-			}catch(e){
-				console.error(e)
-			}
-            if (statusCode != 200) {
-                retryCount += 1
-                noCache = true
-                waitTime += 5
-            } else {
-                ok = true
-                waitTime = 0
-            }
+	// 			// console.log(response)
+	// 		}catch(e){
+	// 			console.error(e)
+	// 		}
+    //         if (statusCode != 200) {
+    //             retryCount += 1
+    //             noCache = true
+    //             waitTime += 5
+    //         } else {
+    //             ok = true
+    //             waitTime = 0
+    //         }
 
-            if (retryCount > 3) {
-                console.log(`retry counts reached max : ${retryCount}`)
-                waitTime = 0
-                break
-            }
-        }
-        return response
-	}
+    //         if (retryCount > 3) {
+    //             console.log(`retry counts reached max : ${retryCount}`)
+    //             waitTime = 0
+    //             break
+    //         }
+    //     }
+    //     return response
+	// }
 	async getXmlDoc(url,noCache=false,statusCodeSaveKey=null){
 		let xmlDoc = null
 		const webCache = await this.mPrxCache.get(url)
@@ -126,7 +127,7 @@ class CourseApi {
 		}else{
 			
 			try{
-				let response = await this.fetchWithRetry(url)
+				let response = await fetchRtry(url)
 				statusCode = response.status
 				if(response.ok){
 					let responseText = await response.text()

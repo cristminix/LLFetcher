@@ -28,7 +28,7 @@ const checkQueueIsAllFinished = async (courseId, tocArray=[], mQState)=>{
     return recordsFiltered.length === tocArray.length
 }
 
-const downloadVtt = async(vttUrl,idx, course, toc, store, downloaderRef, onProgressCallback=(e,idx,course,toc,opt,t)=>null) => {
+const downloadVtt = async(vttUrl,idx, course, toc, store, downloaderRef, qState, onProgressCallback=(e,idx,course,toc,opt,qState,t)=>null) => {
     return new Promise((resolve, reject)=>{
         const dmsetup = getDmStup(course.id, store)
     
@@ -46,7 +46,7 @@ const downloadVtt = async(vttUrl,idx, course, toc, store, downloaderRef, onProgr
             filename,
             timeout : 86400*1000,
             process : e => {
-                onProgressCallback(e, idx, course, toc, {filename,url}, 't')
+                onProgressCallback(e, idx, course, toc, {filename,url},qState, 't')
             }
         })
         downloaderRef.current = downloader
@@ -65,7 +65,7 @@ const getDmStup = (courseId,store) => {
     return mDMSetup.getByCourseId(courseId)
 }
 
-const downloadMedia = async(mediaUrl, idx, course, toc, store, downloaderRef, onProgressCallback=(e,idx,course,toc,opt,t)=>null) =>{
+const downloadMedia = async(mediaUrl, idx, course, toc, store, downloaderRef, qState, onProgressCallback=(e,idx,course,toc,opt,qState,t)=>null) =>{
     
 
     return new Promise((resolve, reject)=>{
@@ -85,7 +85,7 @@ const downloadMedia = async(mediaUrl, idx, course, toc, store, downloaderRef, on
             filename,
             timeout : 86400*1000,
             process : e => {
-                onProgressCallback(e, idx, course, toc, {filename,url}, 'm')
+                onProgressCallback(e, idx, course, toc, {filename,url},qState, 'm')
             }
         })
         downloaderRef.current = downloader

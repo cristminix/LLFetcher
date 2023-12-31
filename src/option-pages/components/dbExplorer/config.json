@@ -65,8 +65,8 @@
             
         },
         "qstate" : {
-            "headers" : ["Index", "State:[all,media,trans]","Result:[all,media,trans]"],
-            "fields" : ["idx","state","result"],
+            "headers" : ["Index", "State:[all,media,trans]","Result:[all,media,trans]","DL[mLoaded,mSize,tLoaded,tSize]"],
+            "fields" : ["idx","state","result","size"],
             "model" : "QState",
             "listMethod" : "getListWithCourse"
             

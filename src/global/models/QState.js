@@ -12,10 +12,15 @@ class QState extends DB{
         "result",
         "mState",
         "mResult",
+        "mLoaded",
+        "mSize",
         "tState",
         "tResult",
+        "tLoaded",
+        "tSize",
         "dtStart",
-        "dtEnd"
+        "dtEnd",
+        
     ]
 	type = "collection"
     async deleteByCourseId(courseId){
@@ -35,6 +40,13 @@ class QState extends DB{
             const tResult = QueueResult.toStr(item.tResult) 
             item.state = `[${state},${mState},${tState}]`
             item.result = `[${result},${mResult},${tResult}]`
+
+            const mLoaded = item.tLoaded
+            const tLoaded = item.tLoaded
+            const mSize = item.mSize
+            const tSize = item.tSize
+
+            item.size= `[${mLoaded},${mSize},${tLoaded},${tSize}]`
             return item
         })
         return results
@@ -62,7 +74,12 @@ class QState extends DB{
             const mState = 0
             const mResult = 0
             const tResult = 0
-            row = {courseId,tocId,idx,state,result,mState,mResult,tState,tResult}
+            const mLoaded = 0
+            const mSize = 0
+            const tLoaded = 0
+            const tSize = 0
+            
+            row = {courseId,tocId,idx,state,result,mState,mResult,tState,tResult,mLoaded,mSize,tLoaded,tSize}
 
             row.id = this.db.insert(this.table,row)
             await this.db.commit()
@@ -134,6 +151,40 @@ class QState extends DB{
         let record = this.getById(id)
         if(record){
             record = await this.update(id, {tResult})
+        }
+        return record
+    }
+    async updateMLoaded(id,mLoaded){
+        let record = this.getById(id)
+        if(record){
+            record = await this.update(id, {mLoaded})
+        }
+        return record
+    }
+    async updateMSize(id,mSize,mLoaded=null){
+        let record = this.getById(id)
+        if(record){
+            if(!mLoaded){
+                mLoaded = record.mLoaded
+            }
+            record = await this.update(id, {mSize,mLoaded})
+        }
+        return record
+    }
+    async updateTLoaded(id,tLoaded){
+        let record = this.getById(id)
+        if(record){
+            record = await this.update(id, {tLoaded})
+        }
+        return record
+    }
+    async updateTSize(id,tSize,tLoaded=null){
+        let record = this.getById(id)
+        if(record){
+            if(!tLoaded){
+                tLoaded= record.tLoaded
+            }
+            record = await this.update(id, {tSize,tLoaded})
         }
         return record
     }

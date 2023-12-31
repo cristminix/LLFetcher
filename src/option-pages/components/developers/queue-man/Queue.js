@@ -113,10 +113,10 @@ class QueueState{
 }
 class QueueItem{
     state=QueueState.INIT
-    loaded=null
-    size=null
+    // loaded=null
+    // size=null
     idx=null
-    percentage=null
+    // percentage=null
     constructor(idx, state){
         this.state = state
         this.idx=idx
@@ -125,19 +125,19 @@ class QueueItem{
         this.state = state
     }
 
-    setSize(size){
-        this.size = size
-    }
+    // setSize(size){
+    //     this.size = size
+    // }
 
-    setLoaded(loaded){
-        this.loaded = loaded
-        this.percentage = Math.floor(this.loaded / this.size * 100)
+    // setLoaded(loaded){
+    //     this.loaded = loaded
+    //     this.percentage = Math.floor(this.loaded / this.size * 100)
 
-    }
+    // }
 
-    setPercentage(percentage){
-        this.percentage = percentage
-    }
+    // setPercentage(percentage){
+    //     this.percentage = percentage
+    // }
 
 }
 class Queue{

@@ -120,11 +120,11 @@ const QueueMan= ({store, config})=>{
         setQDlStatusT(n_qDlStatusT)
         setQDlStatusSet(true)
     }
-    const qDlStatusView = (tocId, t=null)=>{
+    const qDlStatusView = (tocId, t=null, defaultText='')=>{
         const idx = queueData.pk2Idx(tocId)
         let cls = ''
         let status = null
-
+        
         if(t == 'm'){
             const statusM = qDlStatusM[idx]
             status = statusM ? statusM.state:0
@@ -143,7 +143,7 @@ const QueueMan= ({store, config})=>{
             if(t == 'm'){
                 switch(status){
                     case QueueState.INIT:
-                        cls = 'fa fa-hour-glass-o'
+                        cls = 'fa fa-hourglass-o'
                         break
                         case QueueState.FETCH_META_OK:
                         cls = 'fa fa-copy'
@@ -155,14 +155,16 @@ const QueueMan= ({store, config})=>{
                         cls = 'fa fa-exclamation-triangle'
                         break
                     default:
-                        cls = 'fa fa-spin fa-spinner'
+                        // cls = 'fa fa-spin fa-spinner'
+                        cls = queueRunning ? 'fa fa-spin fa-spinner':'fa fa-exclamation-triangle'
+
                             break
                  }
                     
             }else if(t == 't'){
                 switch(status){
                     case QueueState.INIT:
-                        cls = 'fa fa-hourglass'
+                        cls = 'fa fa-hourglass-o'
                         break
                     case QueueState.FETCH_META_OK:
                         cls = 'fa fa-copy'
@@ -177,7 +179,7 @@ const QueueMan= ({store, config})=>{
                         break
                     
                     default:
-                        cls = 'fa fa-spin fa-spinner'
+                        cls = queueRunning ? 'fa fa-spin fa-spinner':'fa fa-exclamation-triangle'
                         break
                 }
             }else{
@@ -194,7 +196,7 @@ const QueueMan= ({store, config})=>{
                     case QueueState.FETCH_META_RETRY:
                     case QueueState.FETCH_MEDIA:
                     case QueueState.FETCH_TRANS:
-                        cls = 'fa fa-spin fa-spinner'
+                        cls = queueRunning?'fa fa-spin fa-spinner':'fa fa-exclamation-triangle'
                         break
                     case QueueState.FETCH_META_FAIL:
                     case QueueState.FETCH_MEDIA_FAIL:
@@ -209,7 +211,7 @@ const QueueMan= ({store, config})=>{
         }
         // console.log(status, cls)
 
-        return null
+        return defaultText
     }
     const updateQState = async(qItem, qState, state)=>{
         console.log(`updateQState(${qItem.idx},${QueueState.toStr(state)})`)
@@ -220,8 +222,13 @@ const QueueMan= ({store, config})=>{
             setQDlStatus(qItem.idx,state,'m')
             setQDlStatus(qItem.idx,state,'t')
         }else if(META_STATES.includes(state)){
-            setQDlStatus(qItem.idx,state,'m')
-            setQDlStatus(qItem.idx,state,'t')
+            if(qState.tResult != QueueResult.SUCCESS_TRANS){
+                setQDlStatus(qItem.idx,state,'t')
+                
+            }
+            if(qState.tResult != QueueState.SUCCESS_MEDIA){
+                setQDlStatus(qItem.idx,state,'m')
+            }
         }else if(MEDIA_STATES.includes(state)){
             setQDlStatus(qItem.idx,state,'m')
         }else if(TRANS_STATES.includes(state)){
@@ -282,7 +289,7 @@ const QueueMan= ({store, config})=>{
             let success = false
             if(vttUrl){
                 try{
-                    success = await downloadVtt(vttUrl,qItem.idx, course, toc, store, downloaderRef, (e,idx,course,toc,opt,t)=>onDownloadProgress(e,idx,course,toc,opt,t))
+                    success = await downloadVtt(vttUrl,qItem.idx, course, toc, store, downloaderRef,qState, (e,idx,course,toc,opt,t)=>onDownloadProgress(e,idx,course,toc,opt,qState,t))
 
                 }catch(e){
                     console.error(e)
@@ -326,7 +333,7 @@ const QueueMan= ({store, config})=>{
             let success = false
             if(mediaUrl){
                 try{
-                    success = await downloadMedia(mediaUrl,qItem.idx, course, toc, store, downloaderRef,(e,idx,course,toc,opt,t)=>onDownloadProgress(e,idx,course,toc,opt,t))
+                    success = await downloadMedia(mediaUrl,qItem.idx, course, toc, store, downloaderRef,qState,(e,idx,course,toc,opt,qState,t)=>onDownloadProgress(e,idx,course,toc,opt,qState,t))
 
                 }catch(e){
                     console.error(e)
@@ -645,7 +652,7 @@ const QueueMan= ({store, config})=>{
             const queueMain = queueData.cloneQueue()
             console.log(queueMain)
             setQueueMain(queueMain)
-            initQDlViews(queueMain)
+            initQDlViews(queueMain, queueData)
             initQDlStatus(queueMain, queueData) 
         }catch(e){
             console.error(e)
@@ -687,15 +694,23 @@ const QueueMan= ({store, config})=>{
     }
     
 
-    const initQDlViews = (queueMain)=>{
+    const initQDlViews = (queueMain, queueData)=>{
         if(qDlViewsSet){
             return
         }
         const n_qDlViewsM = []
         const n_qDlViewsT = []
         queueMain.items.map((item,idx)=>{
-            n_qDlViewsM.push({idx,loaded:0,size:0,percentage:0})
-            n_qDlViewsT.push({idx,loaded:0,size:0,percentage:0})
+            const toc = queueData.getByIdx(idx)
+            const qState = mQState.getRow(course.id,toc.id,idx)
+            let mPctg = 0
+            let tPctg = 0 
+            if(qState){        
+                mPctg = Math.floor(qState.mLoaded / qState.mSize * 100)
+                tPctg = Math.floor(qState.tLoaded / qState.tSize * 100)
+            }
+            n_qDlViewsM.push({idx,loaded:qState?qState.mLoaded:0,size:qState?qState.mSize:0,percentage:mPctg})
+            n_qDlViewsT.push({idx,loaded:qState?qState.tLoaded:0,size:qState?qState.tSize:0,percentage:tPctg})
         })
         setQDlViewsM(n_qDlViewsM)
         setQDlViewsT(n_qDlViewsT)
@@ -729,7 +744,7 @@ const QueueMan= ({store, config})=>{
 
         }
     }
-    const onDownloadProgress = (e, idx, course, toc, opt, t)=>{
+    const onDownloadProgress = (e, idx, course, toc, opt, qState, t)=>{
         if (!e.lengthComputable) {
             return
         }
@@ -737,6 +752,8 @@ const QueueMan= ({store, config})=>{
         const loaded = e.loaded
         const size = e.total
         // console.log({loaded,size})
+        const updateMethod = t=='m'?'updateMSize':'updateTSize'
+        mQState[updateMethod](qState.id,size,loaded)
         setQDlView(idx, loaded, size, t)
     }
     const qDlView = (tocId, t)=>{
@@ -904,12 +921,20 @@ const QueueMan= ({store, config})=>{
                                 <td className={tdCls}>{tidx+1}</td>
                                 <td className={tdCls}>{toc.title}</td>
                                 <td className={tdCls}>
-                                    {qDlView(toc.id, 't')}
-                                    {qDlStatusView(toc.id, 't')}
+                                    <div className="flex gap-2">
+                                        <span><i className="fa fa-file-text"/></span>
+                                        <span>{qDlView(toc.id, 't')}</span>
+                                        <span>{qDlStatusView(toc.id, 't','...')}</span>
+                                    </div>
                                 </td>
                                 <td className={tdCls}>
-                                    {qDlView(toc.id, 'm')}
-                                    {qDlStatusView(toc.id, 'm')}
+                                    <div className="flex gap-2">
+                                        <span><i className="fa fa-file-video-o"/></span>
+                                        <span>{qDlView(toc.id, 'm')}</span>
+                                        <span>{qDlStatusView(toc.id, 'm','...')}</span>
+                                    </div>
+                                   
+                                    
                                 </td>
                                 <td className={tdCls}>
                                     {qDlStatusView(toc.id)}

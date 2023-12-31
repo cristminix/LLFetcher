@@ -28,7 +28,7 @@ const QueueMan= ({store, config})=>{
     const [courseApi,setCourseApi] = useState(null)
     // const [tocArr,setTocArr] = useState(null)
     const downloaderRef = useRef(null)
-    const [activeQueue,setActiveQueue] = useState(0)
+    const [activeQueueIdx,setActiveQueueIdx] = useState(0)
     const [logMessage,setLogMessage]=useState('loading...')
     const [queueRunning,setQueueRunning] = useState(false)
     const [queueMain, setQueueMain] = useState(null)
@@ -124,6 +124,7 @@ const QueueMan= ({store, config})=>{
         const idx = queueData.pk2Idx(tocId)
         let cls = ''
         let status = null
+        let record = mQState.getByTocId(tocId)
         
         if(t == 'm'){
             const statusM = qDlStatusM[idx]
@@ -132,7 +133,6 @@ const QueueMan= ({store, config})=>{
             const statusT = qDlStatusT[idx]
             status =statusT?statusT.state:0
         }else{
-            let record = mQState.getByTocId(tocId)
             if(record){
                 const prop = t ? `${t}State` : 'state'
                 status = record[prop]
@@ -141,12 +141,17 @@ const QueueMan= ({store, config})=>{
         
         if(status){
             if(t == 'm'){
+                if(record){
+                    if(record.mResult === QueueResult.SUCCESS_MEDIA || record.result === QueueResult.SUCCESS){
+                        status = QueueState.FETCH_MEDIA_OK
+                    }
+                }
                 switch(status){
                     case QueueState.INIT:
                         cls = 'fa fa-hourglass-o'
                         break
                         case QueueState.FETCH_META_OK:
-                        cls = 'fa fa-copy'
+                        cls = 'fa fa-hourglass-o'
                         case QueueState.FETCH_MEDIA_OK:
                         cls = 'fa fa-check'
                         break
@@ -156,18 +161,23 @@ const QueueMan= ({store, config})=>{
                         break
                     default:
                         // cls = 'fa fa-spin fa-spinner'
-                        cls = queueRunning ? 'fa fa-spin fa-spinner':'fa fa-exclamation-triangle'
+                        cls = queueRunning && idx == activeQueueIdx? `fa fa-spin fa-spinner `:''
 
                             break
                  }
                     
             }else if(t == 't'){
+                if(record){
+                    if(record.tResult === QueueResult.SUCCESS_TRANS || record.result === QueueResult.SUCCESS){
+                        status = QueueState.FETCH_TRANS_OK
+                    }
+                }
                 switch(status){
                     case QueueState.INIT:
                         cls = 'fa fa-hourglass-o'
                         break
                     case QueueState.FETCH_META_OK:
-                        cls = 'fa fa-copy'
+                        cls = 'fa fa-hourglass-o'
                         break
                     case QueueState.FETCH_TRANS_OK:
                         cls = 'fa fa-check'
@@ -179,7 +189,7 @@ const QueueMan= ({store, config})=>{
                         break
                     
                     default:
-                        cls = queueRunning ? 'fa fa-spin fa-spinner':'fa fa-exclamation-triangle'
+                        cls = queueRunning  && idx == activeQueueIdx? 'fa fa-spin fa-spinner':''
                         break
                 }
             }else{
@@ -271,6 +281,12 @@ const QueueMan= ({store, config})=>{
     }
     
     const processQueue_fetchTrans = async(qItem, qState, toc)=>{
+        if(!queueStartedRef.current){
+            // toast(`processQueue_fetchTrans ${toc.title}`,'normal')
+            console.error(`processQueue_fetchTrans ${toc.title} ABORTED`)
+            return qState
+
+        }
         toast(`processQueue_fetchTrans ${toc.title}`,'normal')
         let nQState = null
         let transcripts = mTranscript.getListByTocId(toc.id)
@@ -314,6 +330,12 @@ const QueueMan= ({store, config})=>{
         return nQState
     }
     const processQueue_fetchMedia = async(qItem, qState, toc)=>{
+        if(!queueRunningRef.current){
+            // toast(`processQueue_fetchTrans ${toc.title}`,'normal')
+            console.error(`processQueue_fetchMedia ${toc.title} ABORTED`)
+            return qState
+
+        }
         toast(`processQueue_fetchMedia ${toc.title}`,'normal')
         
         let nQState = null
@@ -608,6 +630,7 @@ const QueueMan= ({store, config})=>{
             }
 
             let qItem = queueMain.dequeue()
+            setActiveQueueIdx(qItem.idx)
             // console.log(idx)
             if(queueData){
                 await processQueue(qItem)
@@ -900,14 +923,14 @@ const QueueMan= ({store, config})=>{
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead>
                 <tr>
-                <th className={thCls} rowSpan={2}>No</th>
-                <th className={thCls} rowSpan={2}>Title</th>
+                <th className={`${thCls} w-[20px]`} rowSpan={2}>No</th>
+                <th className={`${thCls} w-auto`} rowSpan={2}>Title</th>
                 <th className={`${thCls}`} colSpan={2}>Status</th>
-                <th className={thCls} rowSpan={2}>Action</th>
+                <th className={`${thCls} text-center`}  rowSpan={2}>Action</th>
                 </tr>
                 <tr>
-                    <th className={`${thCls} w-[200px]`}>Subtitle/Transcript</th>
-                    <th className={`${thCls} w-[200px]`}>Media</th>
+                    <th className={`${thCls} w-[180px]`}>Subtitle/Transcript</th>
+                    <th className={`${thCls} w-[180px]`}>Media</th>
                 </tr>
             </thead>
             <tbody>
@@ -921,23 +944,28 @@ const QueueMan= ({store, config})=>{
                                 <td className={tdCls}>{tidx+1}</td>
                                 <td className={tdCls}>{toc.title}</td>
                                 <td className={tdCls}>
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 px-2">
                                         <span><i className="fa fa-file-text"/></span>
-                                        <span>{qDlView(toc.id, 't')}</span>
+                                        <span className="w-auto">{qDlView(toc.id, 't')}</span>
                                         <span>{qDlStatusView(toc.id, 't','...')}</span>
                                     </div>
                                 </td>
                                 <td className={tdCls}>
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 px-2">
                                         <span><i className="fa fa-file-video-o"/></span>
-                                        <span>{qDlView(toc.id, 'm')}</span>
+                                        <span className="w-auto">{qDlView(toc.id, 'm')}</span>
                                         <span>{qDlStatusView(toc.id, 'm','...')}</span>
                                     </div>
                                    
                                     
                                 </td>
                                 <td className={tdCls}>
+                                    <div className="flex gap-2 items-center px-2 justify-center">
+                                        <Button caption="" icon="fa fa-download"/>
+                                        <Button caption="" icon="fa fa-refresh"/>
                                     {qDlStatusView(toc.id)}
+
+                                    </div>
                                 </td>
 
                             </tr>

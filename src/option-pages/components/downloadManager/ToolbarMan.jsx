@@ -176,11 +176,15 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/store,selecte
       }
       
     }
-    if(e=='play_in_video_player'){
+    else if(e=='play_in_video_player'){
       document.location.hash=`/developer/video-player?slug=${course.slug}`
     }
-    if(e=='view_on_dev_queue_man'){
+    else if(e=='view_on_dev_queue_man'){
       document.location.hash=`/developer/queue-man?slug=${course.slug}`
+
+    }
+    else if(e=='reconfigure'){
+      onReconfigure()
 
     }
     // console.log(e)
@@ -188,10 +192,11 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/store,selecte
 
   const ddToolbarData = [
     {
-      text:'View in Queue Man Dev',
-      value:'view_on_dev_queue_man',
-      icon:'fa fa-list'
-    },{
+      text:'Recofigure Setup',
+      value:'reconfigure',
+      icon:'fa fa-cog'
+    },
+    {
       text:'Reset Queue Setup',
       value:'reset_queue_setup',
       icon:'bi bi-trash'
@@ -206,7 +211,7 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/store,selecte
         <div className="toolbar-man-container">
         
 
-<div className="flex gap-2 flex-wrap">
+<div className="flex gap-2 flex-wrap justify-end">
   {
     alreadySetup ? <>
     
@@ -214,9 +219,9 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/store,selecte
       !reconfigureSetup ? <>
       {
         !queueFinished ? <>
-          <Button onMouseOut={e=>clearStatusBar()} 
+          {/* <Button onMouseOut={e=>clearStatusBar()} 
                   onMouseOver={e=>logStatusBar('ToolbarMan',`${queueResume?'Resume Queue' : 'Start Queue'}`)}
-                  loading={queueStarted} className="" disabled={queueStarted} caption={queueResume?"Resume":"Start Queue"} icon="fa fa-play" onClick={e=>onStartQueue(e)}/>
+                  loading={queueStarted} className="" disabled={queueStarted} caption={queueResume?"Resume":"Start Queue"} icon="fa fa-play" onClick={e=>onStartQueue(e)}/> */}
 
           {
             !queueStarted ? <>
@@ -226,16 +231,16 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/store,selecte
                   caption="Reconfigure" icon="fa fa-cog" onClick={e=>onReconfigure(e)}/>
             
             </>:<>
-          <Button onMouseOut={e=>clearStatusBar()} 
+          {/* <Button onMouseOut={e=>clearStatusBar()} 
                   onMouseOver={e=>logStatusBar('ToolbarMan',`Stop Current Queue`)}
                   disabled={!queueStarted} caption="Stop Queue" icon="fa fa-square" onClick={e=>onStopQueue(e)}/>
-            
+             */}
             </>
           }
         </> : <>
-          <Button  onMouseOut={e=>clearStatusBar()} 
+          {/* <Button  onMouseOut={e=>clearStatusBar()} 
                   onMouseOver={e=>logStatusBar('ToolbarMan',`Reset Current Queue`)}
-                  className=""  caption="Reset Queue" icon="fa fa-refresh" onClick={e=>onResetQueue(e)}/>
+                  className=""  caption="Reset Queue" icon="fa fa-refresh" onClick={e=>onResetQueue(e)}/> */}
           
         </>
       }
@@ -254,6 +259,7 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/store,selecte
             {
               dmsetup.sourceRepo ? <><Button onClick={e=>openSourceRepo(e)} className="" label="Source Repo:" title={dmsetup.sourceRepo} caption="Source Repo" icon="fa fa-file-archive-o"/></> : ''
             }
+          <span className="mb-2">{course.description}</span>  
           <Button onClick={e=>downloadPlaylist(e)}  className="" caption="Playlist.m3u" icon="bi bi-collection-play"/>
             <Button onClick={e=>downloadHelper(e)} className="" caption="Helper.sh" icon="bi bi-terminal-fill"/>
             <Button onClick={e=>downloadHelperCmd(e)} className="" caption="Helper.cmd" icon="bi bi-terminal"/>

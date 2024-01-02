@@ -95,7 +95,13 @@ const Menu = ({data, store, config}) => {
             const item = data[key]
             let childrens = item.childItems || {}
             // console.log(item)
-            if(showOnlyOnDev(item)){
+            if(typeof item.dev !== 'undefined'){
+
+            }else{
+                item.dev = false
+            }
+            if(item.dev){
+                console.log(import.meta.env)
                 if(!DEV_MODE){
                     item.hidden = true
                 }

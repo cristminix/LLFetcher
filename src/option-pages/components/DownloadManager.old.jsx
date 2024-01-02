@@ -1,7 +1,7 @@
 import {useLoaderData } from 'react-router-dom'
 import {useState,useEffect, useRef} from "react"
 
-import QueueMan from './developers/QueueMan'
+import QueueMan from "./downloadManager/QueueMan"
 import ToolbarMan from "./downloadManager/ToolbarMan"
 import StatusBarMan from "./downloadManager/StatusbarMan"
 import CourseInfo from "./downloadManager/CourseInfo"
@@ -200,7 +200,7 @@ const DownloadManager = ({store, config}) => {
       const {course, authors, sections, tocs}  = activeCourseData
       return (<>
       
-      <div className="download-manager h-screen">
+      <div className="download-manager">
         <Toast ref={toastRef}/>
         <CourseInfo store={store} course={course} authors={authors} selectedFmt={selectedFmt} selectTrans={selectTrans} selectedTrans={selectedTrans} />
         <ToolbarMan alreadySetup={alreadySetup} toast={toast} 
@@ -257,7 +257,7 @@ const DownloadManager = ({store, config}) => {
                     logStatusBar={logStatusBar}
                     clearStatusBar={clearStatusBar}
                     />
-        {/* <QueueMan alreadySetup={alreadySetup} toast={toast} dmsetup={dmsetup} refreshTable={refreshTable}
+        <QueueMan alreadySetup={alreadySetup} toast={toast} dmsetup={dmsetup} refreshTable={refreshTable}
                   reconfigureSetup={reconfigureSetup}
                   course={course}
                   sections={sections}
@@ -272,17 +272,7 @@ const DownloadManager = ({store, config}) => {
                   setQueueResume={setQueueResume}
                   selectedFmt={selectedFmt} 
                   logStatusBar={logStatusBar}
-                  clearStatusBar={clearStatusBar}/> */}
-        {
-          alreadySetup?<QueueMan ref={queueManRef} store={store} config={config} 
-          activeSlug={course.slug}
-          onQueueAllFinished={e=>onQueueFinished(true)}
-          logStatusBar={logStatusBar}
-          clearStatusBar={clearStatusBar}
-          />:null
-        }
-        
-
+                  clearStatusBar={clearStatusBar}/>
         <StatusBarMan store={store} toast={toast}
                       course={course} 
                       alreadySetup={alreadySetup} 

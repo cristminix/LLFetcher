@@ -27,9 +27,9 @@
       "title": "Settings",
       "path": "/setting",
       "iconCls": "bi bi-gear",
-      "dev": true,
+      "dev": false,
       "order": 4,
-      "hidden": false,
+      "hidden": true,
       "hasChild": true,
       "childItems": {}
     },

@@ -8,7 +8,7 @@
     "file": "assets/font-awesome-7juQPigl.css",
     "src": "_font-awesome.min-!~{008}~.js"
   },
-  "_font-awesome.min-jFU7LAwd.js": {
+  "_font-awesome.min-b-UvNx0o.js": {
     "assets": [
       "assets/fontawesome-webfont-BuWBOUu1.eot",
       "assets/fontawesome-webfont-fo5IWH5D.woff2",
@@ -19,33 +19,33 @@
     "css": [
       "assets/font-awesome-7juQPigl.css"
     ],
-    "file": "assets/font-awesome.min-jFU7LAwd.js",
+    "file": "assets/font-awesome.min-b-UvNx0o.js",
     "imports": [
-      "_index-B2SH_Wvo.js"
+      "_index-13gBkqi1.js"
     ]
   },
   "_index-!~{004}~.js": {
-    "file": "assets/index-3VChB3Iq.css",
+    "file": "assets/index-kv11viWf.css",
     "src": "_index-!~{004}~.js"
   },
-  "_index-B2SH_Wvo.js": {
+  "_index-13gBkqi1.js": {
     "css": [
-      "assets/index-3VChB3Iq.css"
+      "assets/index-kv11viWf.css"
     ],
-    "file": "assets/index-B2SH_Wvo.js"
+    "file": "assets/index-13gBkqi1.js"
   },
   "_index-default-lPYrPALU.js": {
     "file": "assets/index-default-lPYrPALU.js"
   },
   "content.jsx-loader.js": {
-    "file": "assets/content.jsx-loader-BCJoToP9.js",
+    "file": "assets/content.jsx-loader-_yvuCi1s.js",
     "src": "content.jsx-loader.js"
   },
   "index.html": {
-    "file": "assets/index.html-cjCwqmLe.js",
+    "file": "assets/index.html-vt6LDXym.js",
     "imports": [
-      "_font-awesome.min-jFU7LAwd.js",
-      "_index-B2SH_Wvo.js"
+      "_font-awesome.min-b-UvNx0o.js",
+      "_index-13gBkqi1.js"
     ],
     "isEntry": true,
     "src": "index.html"
@@ -84,9 +84,9 @@
     "src": "src/background-scripts/background.js"
   },
   "src/content-pages/content.jsx": {
-    "file": "assets/content.jsx-AgAe5ucW.js",
+    "file": "assets/content.jsx-mLmecRsC.js",
     "imports": [
-      "_index-B2SH_Wvo.js",
+      "_index-13gBkqi1.js",
       "_index-default-lPYrPALU.js"
     ],
     "isEntry": true,
@@ -98,12 +98,12 @@
       "assets/bootstrap-icons-NpS-Zr3P.woff"
     ],
     "css": [
-      "assets/options-ukTkrghj.css"
+      "assets/options-BUofy8cZ.css"
     ],
-    "file": "assets/options.html-AF7PRuJa.js",
+    "file": "assets/options.html-A4yo__U8.js",
     "imports": [
-      "_font-awesome.min-jFU7LAwd.js",
-      "_index-B2SH_Wvo.js",
+      "_font-awesome.min-b-UvNx0o.js",
+      "_index-13gBkqi1.js",
       "_index-default-lPYrPALU.js"
     ],
     "isEntry": true,

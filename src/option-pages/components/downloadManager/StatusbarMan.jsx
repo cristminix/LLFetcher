@@ -14,12 +14,14 @@ class StatusbarMan extends Component{
         if(t == 'QueueItem.toc.title'){
             this.setState({customMessage:data})
         }
-        if(t == 'default'){
+        else if(t == 'default'){
             this.setState({message:data})
         }
-        if(t=='QueueItemToolbar.startQueue' || t == 'ToolbarMan' || 'QueueSetup'){
+        else if(t=='QueueItemToolbar.startQueue' || t == 'ToolbarMan' || 'QueueSetup'){
             this.setState({customMessage:data})
 
+        }else{
+            this.setState({message:data})
         }
     }
     clear(){

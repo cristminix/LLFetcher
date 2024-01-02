@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { forwardRef, useEffect, useRef, useState, Component } from "react"
 import {QueueState,QueueData, QueueResult, QueueItem} from "./queue-man/Queue"
 import { useLocation } from "react-router-dom"
 import CourseApi from "../../../global/course-api/CourseApi"
@@ -15,11 +15,19 @@ let onWIndowLeaveSet = false
 const TEST_FAILED_TRANS = false
 const TEST_FAILED_MEDIA = false
 const TEST_ENABLE_TIMEOUT_VALUE = 128
-const QueueMan= ({store, config})=>{
+import ProxyComponent from "./queue-man/ProxyComponent"
+
+const QueueMan= forwardRef(({store, config, activeSlug=null,
+    onQueueAllFinished=f=>f,
+    logStatusBar=f=>f,
+    clearStatusBar=f=>f
+}, ref)=>{
+    // ref=this
+    // ref.current = this
     const location = useLocation()
     const qs= location.search
     const qp= new URLSearchParams(qs)
-    const [slug,setSlug] = useState(qp.get('slug'))
+    const [slug,setSlug] = useState(activeSlug?activeSlug:qp.get('slug'))
     const [course,setCourse] = useState(null)
     const [sections,setSections] = useState(null)
     const [tocs,setTocs] = useState(null)
@@ -588,11 +596,11 @@ const QueueMan= ({store, config})=>{
         }
         
     }
-    const stopQueue = async(f) =>{
+    const stopQueue = async() =>{
         const _queueStarted = queueStartedRef.current
         const _queueRunning = queueRunningRef.current
         if(_queueStarted){
-            if(confirm("Are you sure want to stop Queue ? ")){
+            // if(confirm("Are you sure want to stop Queue ? ")){
                 setQueueStoping(true)
                 if(course){
                     // setQueueRunning(false)
@@ -605,25 +613,28 @@ const QueueMan= ({store, config})=>{
                     setQueueStoping(false)
 
                 }
-            }
+            // }
         }
     }
    
-    const resetQueue = async(f) =>{
+    const resetQueue = async() =>{
         const _queueStarted = queueStartedRef.current
         const _queueRunning = queueRunningRef.current
         if(!_queueStarted){
             if(confirm("Are you sure want to reset Queue ? ")){
                 setQueueResetting(true)
                 if(course){
+                    setQDlViewsSet(false)
+                    setQDlStatusSet(false)
                     await mQState.deleteByCourseId(course.id)
                     setQueueResetting(false)
                     setQueueAllFinished(false)
+                    setSlug(null)
                 }
             }
         }
     }
-    const startQueue = async(f) =>{
+    const startQueue = async() =>{
         if(queueStarted){
             console.warn("Queue already started")
             return
@@ -682,7 +693,7 @@ const QueueMan= ({store, config})=>{
 
         window.removeEventListener('beforeunload', confirmLeaveWidow)
         onWIndowLeaveSet = false
-
+        checkQueueFinished()
     }
     const queueDataReady = ()=>{
         const valid_data = course != null && sections != null && tocs != null
@@ -841,6 +852,10 @@ const QueueMan= ({store, config})=>{
             return
         }
         console.log(`startQueueSingle(${idx})`)
+        if(!onWIndowLeaveSet){
+            onWIndowLeaveSet = true
+            window.addEventListener('beforeunload', confirmLeaveWidow)
+        }
         let qItem = queueMain.items[idx]
         setActiveQueueIdx(qItem.idx)
         // console.log(idx)
@@ -856,9 +871,11 @@ const QueueMan= ({store, config})=>{
             queueStartedRef.current = false
 
             console.log(`single mode complete`)
-
+            checkQueueFinished()
 
         }
+        window.removeEventListener('beforeunload', confirmLeaveWidow)
+        onWIndowLeaveSet = false
     }
 
     const abortQueueSingle = async(idx)=>{
@@ -866,8 +883,27 @@ const QueueMan= ({store, config})=>{
 
     }
     
-    const resetQueueSingle = async(idx)=>{
+    const resetQueueSingle = async(idx,result,toc,qState)=>{
         console.log(`resetQueueSingle(${idx})`)
+        setQDlViewsSet(false)
+        setQDlStatusSet(false)
+        // await timeout(512)
+        await mQState.update(qState.id,{
+            tLoaded:0,
+            mLoaded:0,
+            tSize:0,
+            mSize:0,
+            tResult:QueueState.INIT,
+            mResult:QueueState.INIT,
+            tState:QueueState.INIT,
+            mState:QueueState.INIT,
+            result:QueueResult.INIT
+        })
+
+        // initQueueData()
+        // 
+
+        setSlug(null)
 
     }
     
@@ -900,6 +936,11 @@ const QueueMan= ({store, config})=>{
     const checkQueueFinished = async()=>{
         if(course){
             const allFinished = await checkQueueIsAllFinished(course.id, tocArray, mQState)
+            if(allFinished){
+                if(typeof onQueueAllFinished === 'function'){
+                    onQueueAllFinished()
+                }
+            }
             setQueueAllFinished(allFinished)
             console.log(queueAllFinished)
         }
@@ -912,10 +953,14 @@ const QueueMan= ({store, config})=>{
         }
     },[queueData])
     useEffect(()=>{
-        if(!queueRunning){
+        // if(!queueRunning){
             checkQueueFinished()            
-        }
+        // }
     },[queueRunning])
+
+    useEffect(()=>{
+        logStatusBar('default', logMessage)
+    },[logMessage])
     let btnIconCls = !queueRunning ? "fa fa-play" : "fa fa-spin fa-spinner"
     let stopBtnIconCls = !queueStoping ? "fa fa-stop" : "fa fa-spin fa-spinner"
     let resetBtnIconCls = !queueResetting ? "fa fa-refresh" : "fa fa-spin fa-spinner"
@@ -927,28 +972,48 @@ const QueueMan= ({store, config})=>{
     {
         tocArray=queueData.getTocArr()
     }
-    
-    return <>
-    <div className="relative">
-    <Toast ref={toastRef}/>
+    const runProxyCallback = async(fn,args)=>{
+        // console.log(a,b)?
+        try{
+            if(fn === 'startQueue'){
+                startQueueBtnRef.current.click()
+                // await startQueue()
+            }
+            else if(fn === 'stopQueue'){
+                // await stopQueue()
+                stopQueueBtnRef.current.click()
 
-  <div className=" border border-gray-700 rounded-lg p-4 mb-2">
+            }
+        }catch(e){
+
+        }
+        
+    }
+    const startQueueBtnRef = useRef(null)
+    const stopQueueBtnRef = useRef(null)
+    const resetQueueBtnRef = useRef(null)
+    return <>
+    <ProxyComponent ref={ref} proxyCallback={(a,b)=>runProxyCallback(a,b)}/>
+    <div className="relative">
+    {/* <Toast ref={toastRef}/> */}
+
+  <div className=" py-2 mb-2">
     <div className="flex">
     <div>
         <div>{
-            queueRunning? logMessage : null
+            // queueRunning? logMessage : null
         }
         </div>
         <div className="flex gap-2">
             {!singleMode?<>
                 {
-                    true ? <Button caption={`${queueRunning?'Queue is running':'Start Queue'}`} loading={queueRunning} disabled={queueRunning} icon={btnIconCls} onClick={e=>startQueue()}/> : null
+                    !queueAllFinished ? <Button ref={startQueueBtnRef} caption={`${queueRunning?'Queue is running':'Start Queue'}`} loading={queueRunning} disabled={queueRunning} icon={btnIconCls} onClick={e=>startQueue()}/> : null
                 }
                 {
-                    queueAllFinished ? <Button caption={"Reset Queue"} disabled={queueResetting} icon={resetBtnIconCls} onClick={e=>resetQueue()}/> : null
+                    queueAllFinished ? <Button ref={resetQueueBtnRef} caption={"Reset Queue"} disabled={queueResetting} icon={resetBtnIconCls} onClick={e=>resetQueue()}/> : null
                 }
                 {
-                    queueRunning ? <Button caption={"Stop Queue"} disabled={queueStoping} icon={stopBtnIconCls} onClick={e=>stopQueue()}/> : null
+                    queueRunning ? <Button ref={stopQueueBtnRef} caption={"Stop Queue"} disabled={queueStoping} icon={stopBtnIconCls} onClick={e=>stopQueue()}/> : null
                 }
             </>:''}
         </div>
@@ -965,12 +1030,7 @@ const QueueMan= ({store, config})=>{
     <span className="sr-only">Loading...</span>
   </div>
 </div>
-    </>:null
-  }    
-  
-</div>
-    
-<div className="queue-table border rounded-xl shadow-sm p-6 dark:bg-gray-800 dark:border-gray-700">
+    </>:<div className="queue-table border rounded-xl shadow-sm p-6 dark:bg-gray-800 dark:border-gray-700">
         {/* <div className="state-tbl flex flex-col mx-auto w-full"> */}
         <div className="flex flex-col">
   <div className={`overflow-x-auto sm:-mx-6 lg:-mx-8 ${niceScrollbarCls}`}>
@@ -1024,7 +1084,7 @@ const QueueMan= ({store, config})=>{
                                     <div className="flex gap-2">{
                                         !queueRunning?<>
                                             {
-                                                result === QueueResult.SUCCESS ? <Button title="Requeue" onClick={e=>resetQueueSingle(tidx)} icon="fa fa-trash"/>
+                                                result === QueueResult.SUCCESS ? <Button title="Requeue" onClick={e=>resetQueueSingle(tidx,result,toc,qState)} icon="fa fa-trash"/>
                                                 :<Button onClick={e=>startQueueSingle(tidx, result)} 
                                                          title={`${result === QueueResult.INTERUPTED || result === QueueResult.FAILED ? 'Retry':'Download'}`} 
                                                          disabled={singleMode}
@@ -1057,8 +1117,13 @@ const QueueMan= ({store, config})=>{
         {/* </div> */}
         </div>
         </div>
+  }    
+  
+</div>
+    
+
     
     </>
-}
+})
 
 export default QueueMan

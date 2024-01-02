@@ -31,6 +31,7 @@ const QueueMan= ({store, config})=>{
     const [activeQueueIdx,setActiveQueueIdx] = useState(0)
     const [logMessage,setLogMessage]=useState('loading...')
     const [queueRunning,setQueueRunning] = useState(false)
+    const [singleMode,setSingleMode] = useState(false)
     const [queueMain, setQueueMain] = useState(null)
     const [blockMainContent, setBlockMainContent] = useState(false)
     // let queueInterupted = new Queue()
@@ -71,7 +72,7 @@ const QueueMan= ({store, config})=>{
         const sections = await courseApi.getCourseSections(slug)
         const tocs = await courseApi.getCourseTocs(slug)
         let courseUrl = courseUrlFromSlug(slug)
-        await mPrxCache.unset(courseUrl)
+        // await mPrxCache.unset(courseUrl)
 
         setCourse(course)
         setSections(sections)
@@ -150,9 +151,10 @@ const QueueMan= ({store, config})=>{
                     case QueueState.INIT:
                         cls = 'fa fa-hourglass-o'
                         break
-                        case QueueState.FETCH_META_OK:
+                    case QueueState.FETCH_META_OK:
                         cls = 'fa fa-hourglass-o'
-                        case QueueState.FETCH_MEDIA_OK:
+                        break
+                    case QueueState.FETCH_MEDIA_OK:
                         cls = 'fa fa-check'
                         break
                     case QueueState.FETCH_META_FAIL:
@@ -161,7 +163,7 @@ const QueueMan= ({store, config})=>{
                         break
                     default:
                         // cls = 'fa fa-spin fa-spinner'
-                        cls = queueRunning && idx == activeQueueIdx? `fa fa-spin fa-spinner `:''
+                        cls = (queueRunning || singleMode) && idx == activeQueueIdx? `fa fa-spin fa-spinner `:''
 
                             break
                  }
@@ -189,7 +191,7 @@ const QueueMan= ({store, config})=>{
                         break
                     
                     default:
-                        cls = queueRunning  && idx == activeQueueIdx? 'fa fa-spin fa-spinner':''
+                        cls = (queueRunning || singleMode)  && idx == activeQueueIdx? 'fa fa-spin fa-spinner':''
                         break
                 }
             }else{
@@ -206,7 +208,7 @@ const QueueMan= ({store, config})=>{
                     case QueueState.FETCH_META_RETRY:
                     case QueueState.FETCH_MEDIA:
                     case QueueState.FETCH_TRANS:
-                        cls = queueRunning?'fa fa-spin fa-spinner':'fa fa-exclamation-triangle'
+                        cls = (queueRunning || singleMode)?'fa fa-spin fa-spinner':'fa fa-exclamation-triangle'
                         break
                     case QueueState.FETCH_META_FAIL:
                     case QueueState.FETCH_MEDIA_FAIL:
@@ -330,7 +332,7 @@ const QueueMan= ({store, config})=>{
         return nQState
     }
     const processQueue_fetchMedia = async(qItem, qState, toc)=>{
-        if(!queueRunningRef.current){
+        if(!queueStartedRef.current){
             // toast(`processQueue_fetchTrans ${toc.title}`,'normal')
             console.error(`processQueue_fetchMedia ${toc.title} ABORTED`)
             return qState
@@ -357,8 +359,24 @@ const QueueMan= ({store, config})=>{
                 try{
                     success = await downloadMedia(mediaUrl,qItem.idx, course, toc, store, downloaderRef,qState,(e,idx,course,toc,opt,qState,t)=>onDownloadProgress(e,idx,course,toc,opt,qState,t))
 
+                    // check filesize
+                    const lastQState = mQState.getById(qState.id)
+                    if(lastQState){
+                        if(lastQState.loaded !== lastQState.size){
+                            alert('Content Size mismatch detected, this caused by unstable net connection')
+                            success = false
+                        }
+                    }
                 }catch(e){
                     console.error(e)
+                    if(typeof e.request !== 'undefined'){
+                        if(typeof e.request.status !== 'undefined'){
+                            if(e.request.status === 401){
+                                console.error(`reached HTTP 401`)
+                                // console.error(`tryng `)
+                            }
+                        }
+                    }
                 }
             }
             console.log(mediaUrl)
@@ -663,6 +681,8 @@ const QueueMan= ({store, config})=>{
         }
 
         window.removeEventListener('beforeunload', confirmLeaveWidow)
+        onWIndowLeaveSet = false
+
     }
     const queueDataReady = ()=>{
         const valid_data = course != null && sections != null && tocs != null
@@ -814,9 +834,44 @@ const QueueMan= ({store, config})=>{
         (e || window.event).returnValue = confirmationMessage // For some older browsers
         return confirmationMessage
     }
+
+    const startQueueSingle = async(idx,lastResult)=>{
+        if(queueStartedRef.current){
+            alert('Could not start queue single, Please wait until the last download complete')
+            return
+        }
+        console.log(`startQueueSingle(${idx})`)
+        let qItem = queueMain.items[idx]
+        setActiveQueueIdx(qItem.idx)
+        // console.log(idx)
+        console.log(qItem)
+        setSingleMode(true)
+        queueStartedRef.current = true
+        if(queueData){
+            console.log(queueData)
+            await processQueue(qItem)
+            // console.log(`waiting for 3 sec`)
+            // await timeout(3000)
+            setSingleMode(false)
+            queueStartedRef.current = false
+
+            console.log(`single mode complete`)
+
+
+        }
+    }
+
+    const abortQueueSingle = async(idx)=>{
+        console.log(`stopQueueSingle(${idx})`)
+
+    }
+    
+    const resetQueueSingle = async(idx)=>{
+        console.log(`resetQueueSingle(${idx})`)
+
+    }
+    
     useEffect(()=>{
-        // console.log(`slug=${slug}`)
-        // console.log(`lastSlug=${lastSlug}`)
         if(slug && lastSlug !== slug){
             lastSlug = slug
             if(!loadCourseData.RUNNING){
@@ -885,16 +940,17 @@ const QueueMan= ({store, config})=>{
         }
         </div>
         <div className="flex gap-2">
-            {
-                !queueAllFinished ? <Button caption={"Start Queue"} disabled={queueRunning} icon={btnIconCls} onClick={e=>startQueue()}/> : null
-            }
-            {
-                queueAllFinished ? <Button caption={"Reset Queue"} disabled={queueResetting} icon={resetBtnIconCls} onClick={e=>resetQueue()}/> : null
-            }
-            {
-                queueRunning ? <Button caption={"Stop Queue"} disabled={queueStoping} icon={stopBtnIconCls} onClick={e=>stopQueue()}/> : null
-            }
-            
+            {!singleMode?<>
+                {
+                    true ? <Button caption={`${queueRunning?'Queue is running':'Start Queue'}`} loading={queueRunning} disabled={queueRunning} icon={btnIconCls} onClick={e=>startQueue()}/> : null
+                }
+                {
+                    queueAllFinished ? <Button caption={"Reset Queue"} disabled={queueResetting} icon={resetBtnIconCls} onClick={e=>resetQueue()}/> : null
+                }
+                {
+                    queueRunning ? <Button caption={"Stop Queue"} disabled={queueStoping} icon={stopBtnIconCls} onClick={e=>stopQueue()}/> : null
+                }
+            </>:''}
         </div>
     </div>
     
@@ -939,7 +995,11 @@ const QueueMan= ({store, config})=>{
                     tocArray ? <>
                     {
                         tocArray.length > 0 ? tocArray.map((toc,tidx)=>{
-                            
+                            const qState = mQState.getRow(course.id, toc.id, tidx)
+                            let result = QueueResult.INIT
+                            if(qState){
+                                result = qState.result
+                            }
                             return <tr key={tidx}>
                                 <td className={tdCls}>{tidx+1}</td>
                                 <td className={tdCls}>{toc.title}</td>
@@ -961,9 +1021,25 @@ const QueueMan= ({store, config})=>{
                                 </td>
                                 <td className={tdCls}>
                                     <div className="flex gap-2 items-center px-2 justify-center">
-                                        <Button caption="" icon="fa fa-download"/>
-                                        <Button caption="" icon="fa fa-refresh"/>
-                                    {qDlStatusView(toc.id)}
+                                    <div className="flex gap-2">{
+                                        !queueRunning?<>
+                                            {
+                                                result === QueueResult.SUCCESS ? <Button title="Requeue" onClick={e=>resetQueueSingle(tidx)} icon="fa fa-trash"/>
+                                                :<Button onClick={e=>startQueueSingle(tidx, result)} 
+                                                         title={`${result === QueueResult.INTERUPTED || result === QueueResult.FAILED ? 'Retry':'Download'}`} 
+                                                         disabled={singleMode}
+                                                         loading={singleMode && activeQueueIdx === tidx}
+                                                         icon={`fa fa-${result === QueueResult.INTERUPTED || result === QueueResult.FAILED ? 'refresh':'download'}`}/>
+                                            }
+                                            {/* <span>{QueueResult.toStr(result)}</span> */}
+                                            
+                                        </>
+                                        
+                                        :''
+                                    }
+                                    </div>
+                                        
+                                    {/* {qDlStatusView(toc.id)} */}
 
                                     </div>
                                 </td>

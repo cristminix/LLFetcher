@@ -14,7 +14,7 @@ const Template = ({store,config})=>{
 	      console.log(status)
 	      setHideSidebar(status)
 	    },'template')
-		
+      window.dialogContentRef = dialogContentRef
   	},[])
     return <>
     <div className={cls0}> 

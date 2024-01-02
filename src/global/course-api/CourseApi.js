@@ -332,7 +332,7 @@ class CourseApi {
         
 		const mTranscript = this.store.get("Transcript")
         if (refresh) {
-            this.mTranscript.deleteByTocId(toc.id)
+            mTranscript.deleteByTocId(toc.id)
             noCache = true
         }
 

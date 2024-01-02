@@ -1,18 +1,38 @@
-import { courseUrlFromSlug } from "../../../../global/course-api/course_fn"
+import { courseUrlFromSlug, isTimeExpired } from "../../../../global/course-api/course_fn"
 import { formatLeadingZeros } from "../../../../global/fn"
 import { QueueResult } from "./Queue"
 import JsFileDownloader from "js-file-downloader"
+
+
+const checkSlocsExpired = (slocs)=>{
+    let countExpired = 0
+    slocs.map(item => {
+        if(isTimeExpired(item.expiresAt)){
+            countExpired+=1
+        }
+    })
+
+    return countExpired
+}
 // return sloc and trans url
 const fetchQMeta = async(courseApi, toc )=>{
     let slocs = null
     let transcripts = null
     let err = null
+    let refresh = false
     try{
-        slocs = await courseApi.getStreamLocs(toc)
-        transcripts = await courseApi.getTranscripts(toc)
+        slocs = await courseApi.getStreamLocs(toc, refresh)
+        if(checkSlocsExpired(slocs) > 0){
+            console.error('EXPIRED')
+            refresh = true
+            slocs = await courseApi.getStreamLocs(toc, refresh)
+
+        }
+        transcripts = await courseApi.getTranscripts(toc, refresh)
         // let courseUrl = courseUrlFromSlug(slug)
     }catch(e){
         err = e
+        console.error(e)
     }
     
 
@@ -101,7 +121,7 @@ const downloadMedia = async(mediaUrl, idx, course, toc, store, downloaderRef, qS
 
 const selectMediaUrl = (slocs, courseId, store, defaultFmt='720') => {
     const dmsetup = getDmStup(courseId, store)
-    
+    let isExpired = false
     if(!dmsetup){
         return null
     }
@@ -132,9 +152,13 @@ const selectMediaUrl = (slocs, courseId, store, defaultFmt='720') => {
         errWarnMsg.prefered = selectedSloc.fmt
     }
     if(selectedSloc){
+        isExpired = isTimeExpired(selectedSloc.expiresAt)
+        if(isExpired){
+            console.error(`sloc url is expired`)
+        }
         mediaUrl = selectedSloc.url
     }
-    return [mediaUrl, errWarnMsg]
+    return [mediaUrl, errWarnMsg, isExpired]
 }
 
 const selectVttUrl = (transcripts,courseId, store, defaultLang='en')=>{

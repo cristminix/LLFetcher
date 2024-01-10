@@ -18,7 +18,7 @@ const ExampleContent = ({store, config}) => {
     useEffect(() => {
  
     }, [/*props.children*/])
-    const mainContentCls = !hideSidebar ? `${cls28} pb-2`: `${cls28} lg:ps-4`
+    const mainContentCls = !hideSidebar ? `${cls28} pb-2`: `${cls28} lg:ps-8`
     return (<><div className={`${mainContentCls}`}> 
         {/*<!-- Page Heading -->*/} 
 

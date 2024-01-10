@@ -76,7 +76,7 @@ const QueueMan= forwardRef(({store, config, activeSlug=null,
     const generateQueueData = async()=>{
         setBlockMainContent(true)
         const courseApi = new CourseApi(store)
-        const course = await courseApi.getCourseInfo(slug)
+        const course = await courseApi.getCourseInfo(slug, true)
         const sections = await courseApi.getCourseSections(slug)
         const tocs = await courseApi.getCourseTocs(slug)
         let courseUrl = courseUrlFromSlug(slug)

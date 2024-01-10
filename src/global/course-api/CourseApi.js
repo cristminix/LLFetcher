@@ -209,10 +209,10 @@ class CourseApi {
 	async fetchCourseInfo(courseSlug, refresh=false){
 		
 
-		let noCache = !refresh
+		let noCache = refresh
 		const courseUrl = courseUrlFromSlug(courseSlug)
 		let xmlDoc = await this.getCourseXmlDoc(courseUrl, noCache)
-		let course = await getCourseInfo(xmlDoc,courseSlug,this.store.get('Course'),this.store.get('ExerciseFile'),this.store.get('Thumbnail'))
+		let course = await getCourseInfo(xmlDoc,courseSlug,this.store.get('Course'),this.store.get('ExerciseFile'),this.store.get('Thumbnail'), noCache)
 
 		// console.log(courseUrl,xmlDoc,course)
 		// this.course = course

@@ -29,9 +29,9 @@ const MsgEvt = (name, data = null) => {
 	return {name, data}
 }
 const sendMessage = async(eventName, data = null, target='content', callback = f => f) => {
-	return new Promise((resolve, reject)=>{
+	// return new Promise((resolve, reject)=>{
         const evt = MsgEvt(eventName, data)
-    try{
+    // try{
 		if(target === 'content'){
 	    	chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
 		        const tab = tabs[0];
@@ -47,28 +47,28 @@ const sendMessage = async(eventName, data = null, target='content', callback = f
                         // if you don't have any response it's ok but you should actually handle
                         // it and we are doing this when we are examining chrome.runtime.lastError
                     }
-                    resolve(response)
+                    // resolve(response)
                 })
 		    })
 	    }else{
 	    	chrome.runtime.sendMessage(evt, (response) => {
                 if (!chrome.runtime.lastError) {
                     // if you have any response
-                    callback(response)
+                    callback&&callback(response)
                 } else {
-                    callback(response)
+                    callback&&callback(response)
 
                     // if you don't have any response it's ok but you should actually handle
                     // it and we are doing this when we are examining chrome.runtime.lastError
                 }
-                resolve(response)
+                // resolve(response)
             })
 	    }
-    }catch(e){
-    	console.log(e)
-        reject(e)
-    }
-    })
+    // }catch(e){
+    // 	console.log(e)
+    //     reject(e)
+    // }
+    // })
     
     
     

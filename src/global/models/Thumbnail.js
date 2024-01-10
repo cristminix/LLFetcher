@@ -1,7 +1,8 @@
-import DB from "./DB"
+// import DB from "./DB"
+import DBIndexed from "./DBIndexed"
 
-class Thumbnail extends DB {
-	table = 'tumbnail'
+class Thumbnail extends DBIndexed {
+	table = 'thumbnail'
 	fields = ["courseId", "size", "url","expiresAt"]
 
     async deleteByCourseId(courseId){

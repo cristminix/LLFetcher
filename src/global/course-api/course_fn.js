@@ -133,13 +133,17 @@ const getAuthors = async(doc,mAuthor,mCourse,course) => {
             
     return authors
 }
-const getCourseInfo = async(doc,courseSlug,mCourse,mExerciseFile,mThumbnail) => {
-    let course = mCourse.getBySlug(courseSlug)
-    if(course){
-        course.exerciseFiles = mExerciseFile.getListByCourseId(course.id)
-        // if()
-        course.thumbnails = mThumbnail.getListByCourseId(course.id)
-        return course
+const getCourseInfo = async(doc,courseSlug,mCourse,mExerciseFile,mThumbnail,noCache=false) => {
+    let course = null
+    if(!noCache){
+        course = mCourse.getBySlug(courseSlug)
+
+        if(course){
+            course.exerciseFiles = mExerciseFile.getListByCourseId(course.id)
+            // if()
+            course.thumbnails = mThumbnail.getListByCourseId(course.id)
+            return course
+        }
     }
     // let course = null
 	const [p,courseUrn] = getCourseXmlParentElement(doc)

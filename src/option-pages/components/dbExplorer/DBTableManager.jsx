@@ -100,7 +100,7 @@ const DBTableManager = ({store,config}) => {
         }else{
             const model = store.get(table)
             const tableName = model.table
-            counts = store.getCounts(tableName)
+            counts = store.getCounts(model,tableName)
         }
         return counts
     }   
@@ -111,7 +111,7 @@ const DBTableManager = ({store,config}) => {
         }else{
             const model = store.get(table)
             const tableName = model.table
-            sSize = await store.getStorageSize(tableName)
+            sSize = await store.getStorageSize(model,tableName)
         }
         
         return formatBytes(sSize)

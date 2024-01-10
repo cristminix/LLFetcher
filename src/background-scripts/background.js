@@ -1,95 +1,101 @@
 // background.js
+import ChromeStorageIndexedDBWorker, {getDatabaseSize,
+  getTableSize,
+  getTableCount} from "../global/models/service-workers/ChromeStorageIndexedDBWorker"
+// const csidbWorker = new ChromeStorageIndexedDBWorker()
+// csidbWorker.start()
 let db = null
-const getTableCount = async (db_, dbName)=>{
-  return new Promise((resolve,reject) => {
-    if (db_ == null) {
-      return reject()
-    }
-    var size = 0
-    // db_ = event.target.result
-    var transaction = db_.transaction([dbName])
-      .objectStore(dbName)
-      .openCursor()
 
-    transaction.onsuccess = function(event){
-        var cursor = event.target.result
-        if(cursor){
-            var storedObject = cursor.value
-            // var json = JSON.stringify(storedObject)
-            size += 1 //json.length
-            cursor.continue()
-        }
-        else{
-          resolve(size)
-        }
-    }.bind(this)
-    transaction.onerror = function(err){
-        reject("error in " + dbName + ": " + err)
-    }
-  })
-}
-const getTableSize = async (db_, dbName)=>{
-  return new Promise((resolve,reject) => {
-    if (db_ == null) {
-      return reject()
-    }
-    var size = 0
-    // db_ = event.target.result
-    var transaction = db_.transaction([dbName])
-      .objectStore(dbName)
-      .openCursor()
 
-    transaction.onsuccess = function(event){
-        var cursor = event.target.result
-        if(cursor){
-            var storedObject = cursor.value
-            var json = JSON.stringify(storedObject)
-            size += json.length
-            cursor.continue()
-        }
-        else{
-          resolve(size)
-        }
-    }.bind(this)
-    transaction.onerror = function(err){
-        reject("error in " + dbName + ": " + err)
-    }
-  })
-}
+async function insert_csidb(records) {
+  if (db) {
+      const insert_transaction = db.transaction("csidb", "readwrite")
+      const objectStore = insert_transaction.objectStore("csidb")
 
-const getDatabaseSize = function (dbName) {
-  const request = indexedDB.open(dbName)
-  let db_
-  let dbSize = 0
-  request.onerror = function(event) {
-    alert("Why didn't you allow my web app to use IndexedDB?!")
-  }
-  request.onsuccess = function(event) {
-    db_ = event.target.result
-    let tableNames = [ ...db_.objectStoreNames ]
-    (function(tableNames, db_) {
-      let tableSizeGetters = tableNames
-        .reduce( (acc, tableName) => {
-          acc.push( getTableSize(db_, tableName) )
-          return acc
-        }, [])
+      return new Promise((resolve, reject) => {
+          insert_transaction.oncomplete = function () {
+              // console.log("ALL INSERT TRANSACTIONS COMPLETE.")
+              resolve(true)
+          }
 
-      Promise.all(tableSizeGetters)
-        .then(sizes => {
-          console.log('--------- ' + db_.name + ' -------------')
-          tableNames.forEach( (tableName,i) => {
-            console.log(" - " + tableName + "\t: " + humanReadableSize(sizes[i]))
+          insert_transaction.onerror = function () {
+              // console.log("PROBLEM INSERTING RECORDS.")
+              resolve(false)
+          }
+
+          records.forEach(item => {
+              let request = objectStore.add(item)
+
+              request.onsuccess = function () {
+                  // console.log("Added: ", item)
+              }
           })
-          var total = sizes.reduce(function(acc, val) {
-            return acc + val
-          }, 0)
+      })
+  }
+}
+async function get_csidb(dbName) {
+  if (db) {
+      const get_transaction = db.transaction("csidb", "readonly")
+      const objectStore = get_transaction.objectStore("csidb")
 
-          // console.log("TOTAL: " + total)
-        })
-      })(tableNames, db_)
+      return new Promise((resolve, reject) => {
+          get_transaction.oncomplete = function () {
+          // console.log("ALL GET TRANSACTIONS COMPLETE.")
+          }
+
+          get_transaction.onerror = function () {
+          // console.log("PROBLEM GETTING RECORDS.")
+          }
+
+          let request = objectStore.get(dbName)
+
+          request.onsuccess = function (event) {
+          resolve(event.target.result)
+          }
+      })
   }
 }
 
+async function update_csidb(record) {
+  if (db) {
+      const put_transaction = db.transaction("csidb", "readwrite")
+      const objectStore = put_transaction.objectStore("csidb")
+
+      return new Promise((resolve, reject) => {
+          put_transaction.oncomplete = function () {
+              // console.log("ALL PUT TRANSACTIONS COMPLETE.")
+              resolve(true)
+          }
+
+          put_transaction.onerror = function () {
+              // console.log("PROBLEM UPDATING RECORDS.")
+              resolve(false)
+          }
+
+          objectStore.put(record)
+      })
+  }
+}
+async function delete_csidb(dbName) {
+  if (db) {
+      const delete_transaction = db.transaction("csidb", "readwrite")
+      const objectStore = delete_transaction.objectStore("csidb")
+
+      return new Promise((resolve, reject) => {
+          delete_transaction.oncomplete = function () {
+              // console.log("ALL DELETE TRANSACTIONS COMPLETE.")
+              resolve(true)
+          }
+
+          delete_transaction.onerror = function () {
+              // console.log("PROBLEM DELETE RECORDS.")
+              resolve(false)
+          }
+
+          objectStore.delete(dbName)
+      })
+  }
+}
 async function create_prxCacheDb() {
     const request = indexedDB.open('main')
 
@@ -104,8 +110,13 @@ async function create_prxCacheDb() {
             keyPath: 'key'
         })
 
+        objectStore = db.createObjectStore('csidb', {
+          keyPath: 'dbName'
+      })
+
+
         objectStore.transaction.oncomplete = function (event) {
-            // console.log("ObjectStore Created.")
+            console.log("ObjectStore Created.")
         }
     }
 
@@ -214,15 +225,27 @@ async function delete_prxCache(key) {
 }
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) =>{
     // console.log(request,sendResponse)
-    const {name,data,key} = request
-    if(name === 'db.create'){
-
+    const {name,data,key} = request   
+    if(name === 'csidb.select'){
+      get_csidb(data.dbName).then((item)=>{
+          sendResponse(item)
+      })
     }
-    else if(name === 'db.update'){
-
-    }
-    else if(name === 'db.delete'){
-
+    else if(name === 'csidb.commit'){
+      if(data.records){
+        const {records} = data
+        const record = records[0]
+        get_csidb(record.dbName).then(existingRec=>{
+          if(existingRec){
+            console.log(`Update csidb existing rec:${existingRec.dbName}`)
+            update_csidb(record)
+          }else{
+            console.log(`insert csidb:${record.dbName}`)
+            insert_csidb(records)
+          }
+        })
+        
+      }
     }
     else if(name === 'prxCache.clear'){
       // getTableCount(db, 'prxCache').then(size=>{

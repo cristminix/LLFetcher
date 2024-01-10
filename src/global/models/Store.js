@@ -1,4 +1,5 @@
 import DB from "./DB"
+import DBIndexed from "./DBIndexed"
 import App from "./App"
 import Author from "./Author"
 import Course from "./Course"
@@ -79,7 +80,7 @@ class Store {
 		this.mDMStatus = await DMStatus.getInstance()
 		this.mCookie = await Cookie.getInstance()
 		this.mTranscript = await Transcript.getInstance()
-		this.mPrxCache = await PrxCache.getInstance()
+		this.mPrxCache = PrxCache.getInstance()
 		this.mThumbnail = await Thumbnail.getInstance()
 		this.mQState = await QState.getInstance()
 		await this.mApp.init()
@@ -112,17 +113,26 @@ class Store {
 			const prop = `m${model}`
 			return this[prop]
 		}
-		console.error(`Store.get() ${model} is not available`)
+		// console.error(`Store.get() ${model} is not available`)
 		return null
 	}
 
-	async getStorageSize(table=null){
+	async getStorageSize(model,table=null){
 		return new Promise((resolve,reject)=>{
+		if(!model.useIndexedDb){
 			DB.connection.getDataSize(table, size=>resolve(size))
+		}else{
+			return DBIndexed.connection.getDataSize(table, size=>resolve(size))
+		}
+			
 		})
 	}
-	getCounts(table){
-		return DB.connection.getTableCounts(table)
+	getCounts(model,table){
+		if(!model.useIndexedDb){
+			return DB.connection.getTableCounts(table)
+		}else{
+			return DBIndexed.connection.getTableCounts(table)
+		}
 	}
 }
 

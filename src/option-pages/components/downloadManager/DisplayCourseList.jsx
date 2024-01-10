@@ -11,6 +11,8 @@ const CourseDisplay = ({store,config,course})=>{
             const thumbnail = thumbnails[thumbnails.length-1]
             if(!isTimeExpired(thumbnail.expiresAt)){
                 thumbnailUrl = thumbnail.url            
+            }else{
+                console.error( `Thumbnail expired`)
             }
         }
     }

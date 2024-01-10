@@ -8,7 +8,7 @@
     "file": "assets/font-awesome-7juQPigl.css",
     "src": "_font-awesome.min-!~{008}~.js"
   },
-  "_font-awesome.min-WWb_13u-.js": {
+  "_font-awesome.min-26qNlz8p.js": {
     "assets": [
       "assets/fontawesome-webfont-BuWBOUu1.eot",
       "assets/fontawesome-webfont-fo5IWH5D.woff2",
@@ -19,33 +19,33 @@
     "css": [
       "assets/font-awesome-7juQPigl.css"
     ],
-    "file": "assets/font-awesome.min-WWb_13u-.js",
+    "file": "assets/font-awesome.min-26qNlz8p.js",
     "imports": [
-      "_index-MRY8GoMH.js"
+      "_index-iGxTX5Jb.js"
     ]
   },
   "_index-!~{004}~.js": {
-    "file": "assets/index-n8tk0BZT.css",
+    "file": "assets/index-N3DTh-6n.css",
     "src": "_index-!~{004}~.js"
-  },
-  "_index-MRY8GoMH.js": {
-    "css": [
-      "assets/index-n8tk0BZT.css"
-    ],
-    "file": "assets/index-MRY8GoMH.js"
   },
   "_index-default-lPYrPALU.js": {
     "file": "assets/index-default-lPYrPALU.js"
   },
+  "_index-iGxTX5Jb.js": {
+    "css": [
+      "assets/index-N3DTh-6n.css"
+    ],
+    "file": "assets/index-iGxTX5Jb.js"
+  },
   "content.jsx-loader.js": {
-    "file": "assets/content.jsx-loader-uwtz-U_j.js",
+    "file": "assets/content.jsx-loader-iiPPZ3aE.js",
     "src": "content.jsx-loader.js"
   },
   "index.html": {
-    "file": "assets/index.html-RzZYKSc5.js",
+    "file": "assets/index.html-CGzR-nAn.js",
     "imports": [
-      "_font-awesome.min-WWb_13u-.js",
-      "_index-MRY8GoMH.js"
+      "_font-awesome.min-26qNlz8p.js",
+      "_index-iGxTX5Jb.js"
     ],
     "isEntry": true,
     "src": "index.html"
@@ -79,14 +79,14 @@
     "src": "node_modules/fontawesome-4.7/fonts/fontawesome-webfont.woff2"
   },
   "src/background-scripts/background.js": {
-    "file": "assets/background.js-4T8YM5hi.js",
+    "file": "assets/background.js-XO2IzGCY.js",
     "isEntry": true,
     "src": "src/background-scripts/background.js"
   },
   "src/content-pages/content.jsx": {
-    "file": "assets/content.jsx-Q0rY5z2N.js",
+    "file": "assets/content.jsx-lkXs4jkl.js",
     "imports": [
-      "_index-MRY8GoMH.js",
+      "_index-iGxTX5Jb.js",
       "_index-default-lPYrPALU.js"
     ],
     "isEntry": true,
@@ -100,10 +100,10 @@
     "css": [
       "assets/options-BUofy8cZ.css"
     ],
-    "file": "assets/options.html-z1TKC8do.js",
+    "file": "assets/options.html-Xj8-5JCi.js",
     "imports": [
-      "_font-awesome.min-WWb_13u-.js",
-      "_index-MRY8GoMH.js",
+      "_font-awesome.min-26qNlz8p.js",
+      "_index-iGxTX5Jb.js",
       "_index-default-lPYrPALU.js"
     ],
     "isEntry": true,

@@ -96,11 +96,12 @@ async function delete_csidb(dbName) {
       })
   }
 }
+create_prxCacheDb()
 async function create_prxCacheDb() {
     const request = indexedDB.open('main')
 
     request.onerror = function (event) {
-        // console.log("Problem opening DB.")
+        console.log("Problem opening DB.")
     }
 
     request.onupgradeneeded = function (event) {

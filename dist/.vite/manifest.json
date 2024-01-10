@@ -8,7 +8,7 @@
     "file": "assets/font-awesome-7juQPigl.css",
     "src": "_font-awesome.min-!~{008}~.js"
   },
-  "_font-awesome.min-26qNlz8p.js": {
+  "_font-awesome.min-ye2iUhej.js": {
     "assets": [
       "assets/fontawesome-webfont-BuWBOUu1.eot",
       "assets/fontawesome-webfont-fo5IWH5D.woff2",
@@ -19,7 +19,7 @@
     "css": [
       "assets/font-awesome-7juQPigl.css"
     ],
-    "file": "assets/font-awesome.min-26qNlz8p.js",
+    "file": "assets/font-awesome.min-ye2iUhej.js",
     "imports": [
       "_index-iGxTX5Jb.js"
     ]
@@ -42,9 +42,9 @@
     "src": "content.jsx-loader.js"
   },
   "index.html": {
-    "file": "assets/index.html-CGzR-nAn.js",
+    "file": "assets/index.html-jLiqNZgb.js",
     "imports": [
-      "_font-awesome.min-26qNlz8p.js",
+      "_font-awesome.min-ye2iUhej.js",
       "_index-iGxTX5Jb.js"
     ],
     "isEntry": true,
@@ -79,7 +79,7 @@
     "src": "node_modules/fontawesome-4.7/fonts/fontawesome-webfont.woff2"
   },
   "src/background-scripts/background.js": {
-    "file": "assets/background.js-XO2IzGCY.js",
+    "file": "assets/background.js-Og0hrKAS.js",
     "isEntry": true,
     "src": "src/background-scripts/background.js"
   },
@@ -100,9 +100,9 @@
     "css": [
       "assets/options-BUofy8cZ.css"
     ],
-    "file": "assets/options.html-Xj8-5JCi.js",
+    "file": "assets/options.html-1W3iCPhc.js",
     "imports": [
-      "_font-awesome.min-26qNlz8p.js",
+      "_font-awesome.min-ye2iUhej.js",
       "_index-iGxTX5Jb.js",
       "_index-default-lPYrPALU.js"
     ],

@@ -32,9 +32,11 @@ class IndexedDBStorage{
             // return result
             // try{
                 sendMessage('csidb.select', {dbName}, 'background',response=>{
-                    
-                    result[dbName]=response.data
-                    console.log(result)
+                    console.log(response)
+                    if(response){
+                        result[dbName]=response
+                        console.log(result)
+                    }
                     resolve(result)
                 })
             // }catch(e){
@@ -53,10 +55,12 @@ class IndexedDBStorage{
         if(typeof input === 'object'){
             const dbNames = Object.keys(input)
             dbNames.map(dbName=>{
-                const data = input[dbName]
-                this.tmpDb[dbName] = data
+                const row = input[dbName]
+                console.log(row)
+                this.tmpDb[dbName] = row
+                row.dbName=dbName
                 // const {key,cacheContent,statusCode,url} = this
-                const record = {dbName,data}
+                const record = row
                 sendMessage('csidb.commit',{records:[record]},'background',()=>{
                     // resolve(true)
                 })

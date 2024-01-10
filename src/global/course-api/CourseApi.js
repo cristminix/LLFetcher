@@ -118,7 +118,7 @@ class CourseApi {
 	// }
 	async getXmlDoc(url,noCache=false,statusCodeSaveKey=null){
 		let xmlDoc = null
-		const webCache = await this.mPrxCache.get(url)
+		let webCache = await this.mPrxCache.get(url, noCache)
 		let cacheContent = null
 		let statusCode = 0
 		if(!webCache.isEmpty()){
@@ -133,7 +133,7 @@ class CourseApi {
 					let responseText = await response.text()
 					cacheContent = responseText
 					if(statusCode == 200){
-						this.mPrxCache.set(url,cacheContent,statusCode)
+						await this.mPrxCache.set(url,cacheContent,statusCode)
 					}
 				}
 			
@@ -164,7 +164,7 @@ class CourseApi {
 	}
 	async getCourseXmlDoc(courseUrl, noCache=false){
 
-		let xmlDoc = this.courseXmlDoc
+		let xmlDoc = noCache? null : this.courseXmlDoc
 		if(!xmlDoc){
 			const[doc,cacheKey] = await this.getXmlDoc(courseUrl,noCache,'courseXmlDocFetchStatus')
 			this.lastCourseXmlDocCacheKey = cacheKey
@@ -177,7 +177,7 @@ class CourseApi {
 	async getTocXmlDoc(tocSlug,tocUrl,noCache=false){
 		
 		let xmlDoc = null
-		if(typeof this.tocXmlDocs[tocSlug] !== 'undefined'){
+		if(typeof this.tocXmlDocs[tocSlug] !== 'undefined'  && !noCache){
 			xmlDoc = this.tocXmlDocs[tocSlug]
 		}
 		if(!xmlDoc ){

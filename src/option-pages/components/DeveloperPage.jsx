@@ -8,6 +8,7 @@ import DevApi from './developers/DevApi'
 import VideoPlayer from './developers/VideoPlayer'
 import MenuManager from './developers/MenuManager'
 import QueueMan from './developers/QueueMan'
+import IndexedDb from './developers/IndexedDb'
 export async function loader({ params }) {
     const { table, page } = params
     return { table, page }
@@ -24,6 +25,9 @@ const DeveloperPage = ({store,config}) => {
 
     if(page == 'fetch-api'){
         return <FetchApi store={store} config={config}/>
+    }
+    if(page == 'indexed-db'){
+        return <IndexedDb store={store} config={config}/>
     }
     if(page == 'queue-man'){
         return <QueueMan store={store} config={config}/>

@@ -16,6 +16,7 @@ class DB {
 	db = null
 	database = 'learning'
 	type = 'collection'
+	useIndexedDb = false
 
 
 	static instance = null

@@ -94,6 +94,15 @@
           "hidden": false,
           "hasChild": false,
           "dev": true
+        },
+        "indexed-db": {
+          "title": "Indexed DB",
+          "iconCls": "fa fa-database",
+          "path": "developer/indexed-db",
+          "order": 0,
+          "hidden": false,
+          "hasChild": false,
+          "dev": true
         }
       }
     },

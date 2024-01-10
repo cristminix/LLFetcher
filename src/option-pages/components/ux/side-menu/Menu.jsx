@@ -101,7 +101,7 @@ const Menu = ({data, store, config}) => {
                 item.dev = false
             }
             if(item.dev){
-                console.log(import.meta.env)
+                // console.log(import.meta.env)
                 if(!DEV_MODE){
                     item.hidden = true
                 }

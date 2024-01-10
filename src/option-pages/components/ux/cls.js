@@ -1,6 +1,6 @@
 const styles = {  }
 const cls0 = "cls-0 bg-gray-50 dark:bg-slate-900"
-const cls1 = "cls-1 sticky top-0 inset-x-0 z-20 bg-white border-y px-4 sm:px-6 md:px-8 lg:hidden dark:bg-gray-800 dark:border-gray-700"
+const cls1 = "cls-1 sticky top-0 inset-x-0 z-20 bg-white border-y px-4 sm:px-6 md:px-8  dark:bg-gray-800 dark:border-gray-700"
 const cls2 = "cls-2 flex items-center py-4"
 const cls3 = "cls-3 text-gray-500 hover:text-gray-600"
 const cls4 = "cls-4 sr-only"

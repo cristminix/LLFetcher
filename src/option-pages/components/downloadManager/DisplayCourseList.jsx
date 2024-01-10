@@ -4,7 +4,7 @@ import { courseUrlFromSlug, isTimeExpired } from "../../../global/course-api/cou
 const CourseDisplay = ({store,config,course})=>{
     let thumbnailUrl = null
     if(course){
-        console.log(course)
+        // console.log(course)
         const thumbnails = store.get('Thumbnail').getListByCourseId(course.id)
         // console.log(thumbnails)
         if(thumbnails.length>0){

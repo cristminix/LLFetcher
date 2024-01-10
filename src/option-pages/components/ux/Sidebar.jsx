@@ -5,9 +5,10 @@ import {cls10,cls11,cls12,cls13,cls14,cls15,cls16,
 
 import appLogo from "/logo/icon-48.png"
 import SideMenu from "./SideMenu";
-import { useEffect,useRef } from "react";
+import { useEffect,useRef, useState } from "react";
 const Sidebar=({store,config})=>{
   const sideMenuRef = useRef(null)
+  const [hideSidebar, setHideSidebar]=useState(true)
   const toggle = ()=>{
     // const status = !hideSidebar
     // setHideSidebar(status)
@@ -22,14 +23,19 @@ const Sidebar=({store,config})=>{
     // setTimeout(f=>setSideMenuLinks(side_menu.links),100)
   }
   useEffect(()=>{
-  //  config.getUiConfig().applyHiddenSidebarStatus(setHideSidebar)
+   config.getUiConfig().applyHiddenSidebarStatus(setHideSidebar,(status)=>{
+    console.log('setHideSidebar',status)
+    setHideSidebar(status)
+   },'sidebar')
    config.getUiConfig().applyReloadSidebar(f=>{
     reloadSidebar()
    },'sidebar')
   },[])
+
+  const sidebarCls = hideSidebar?`lg:hidden ${cls10} `:cls10
         return<>
         {/*<!-- Sidebar -->*/} 
-     <div id="application-sidebar" className={cls10}> 
+     <div id="application-sidebar" className={`${sidebarCls}`}> 
        <div className={cls11}> 
          {/* <a href="#" aria-label="Brand" className={cls12}> Brand </a>  */}
          <a className={cls12} href="#" aria-label="Brand">

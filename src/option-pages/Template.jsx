@@ -21,7 +21,7 @@ const Template = ({store,config})=>{
      {/*<!-- ========== MAIN CONTENT ========== -->*/} 
 	    <DialogContent ref={dialogContentRef}/>
      
-     <SidebarToggle/>   
+     <SidebarToggle  store={store} config={config}/>   
      <Sidebar store={store} config={config}/>
      <Content store={store} config={config}/>   
     

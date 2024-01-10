@@ -1,5 +1,6 @@
 
 import crc from 'crc'
+import { sendMessage } from '../fn' 
 
 const WEBCACHE_PREFIX = 'WebCache_'
 
@@ -11,6 +12,7 @@ class WebCache{
 
     constructor(url){
         this.setUrl(url)
+        sendMessage('prxCache.create',null,'background')
     }
     setUrl(url){
         this.url = url
@@ -20,15 +22,23 @@ class WebCache{
         }
     }
     static async fromKey(key){
-        const row = await chrome.storage.local.get(key)
-        if(row){
-            const data = JSON.parse(row[key])
-            const webCache = new WebCache(data.url)
-            webCache.setCacheContent(data.cacheContent)
-            webCache.setStatusCode(data.statusCode)
-            return webCache
-        }
-        return null
+        // const row = await chrome.storage.local.get(key)
+        return new Promise((resolve, reject)=>{
+            sendMessage('prxCache.get', {key}, 'background',data=>{
+                 if(data){
+                    
+                    const webCache = new WebCache(data.url)
+                    webCache.setCacheContent(data.cacheContent)
+                    webCache.setStatusCode(data.statusCode)
+                    resolve(webCache)
+                }
+                
+                resolve(null)
+            })
+        })
+
+       
+        // return null
     }
     setCacheContent(cacheContent){
         this.cacheContent = cacheContent
@@ -40,13 +50,16 @@ class WebCache{
 
     async save(){
         const {key,cacheContent,statusCode,url} = this
-        const data = {statusCode,url,cacheContent}
-        const dataStr = JSON.stringify(data)
-        await chrome.storage.local.set({[key]:dataStr})
+        const record = {key,statusCode,url,cacheContent}
+        sendMessage('prxCache.insert',{records:[record]},'background')
+        // const dataStr = JSON.stringify(data)
+        // await chrome.storage.local.set({[key]:dataStr})
     }
 
     async delete(){
-        await chrome.storage.local.remove(this.key)
+        // await chrome.storage.local.remove(this.key)
+       await sendMessage('prxCache.delete',{key:this.key})
+
     }
 
     getKey(){
@@ -58,24 +71,20 @@ class WebCache{
     }
 
     async load(){
-        let dataStr = await chrome.storage.local.get(this.key)
-        let data = null
-        if(typeof dataStr === "object"){
-            dataStr = dataStr[this.key]
-            try{
-                data = JSON.parse(dataStr)
-                this.setCacheContent(data.cacheContent)
-                this.setStatusCode(data.statusCode)
-                this.setUrl(data.url)
-            }catch{
-                data = null
-            }
-        }
-        if(data){
-            if(data.cacheContent){
-                this.cacheContent = data.cacheContent
-            }
-        }
+        return new Promise((resolve, reject)=>{
+         
+            sendMessage('prxCache.get', {key:this.key}, 'background',data=>{
+                
+                if(data){
+                    if(data.cacheContent){
+                        this.cacheContent = data.cacheContent
+                    }
+                }
+                resolve(true)
+            })
+            
+        })
+        
     }
     getCacheContent(){
         return this.cacheContent   
@@ -84,7 +93,9 @@ class WebCache{
         return this.statusCode
     }
     isEmpty(){
-        return this.cacheContent == null
+        const empty = this.cacheContent == null || typeof this.cacheContent == 'undefined'
+        console.log(`Empty:`,empty)
+        return empty
     }
 }
 
@@ -98,17 +109,22 @@ class PrxCache{
         return PrxCache.instance
     }
     async clearAll(){
-        Object.keys(await chrome.storage.local.get()).forEach(key=>{
-            if(key.startsWith(WEBCACHE_PREFIX)){
-                // console.log(key)
-
-                chrome.storage.local.remove(key)
-            }
+        return new Promise((resolve, reject)=>{
+            sendMessage('prxCache.clear', null, 'background',data=>{
+                resolve(data)
+            })
+            
         })
     }
-    async get(url){
+    async get(url,noCache=false){
         const webCache = new WebCache(url)
-        await webCache.load()
+        if(noCache){
+            await webCache.delete()
+            console.log(`PrxCache.get(${url},noCache=${noCache?'1':'0'})`)
+            
+        }else{
+            await webCache.load()
+        }
         return webCache
     }
     async getByKey(key){
@@ -138,25 +154,20 @@ class PrxCache{
         }
     }
     async getCounts(){
-        let data = await chrome.storage.local.get(null)
-        let count = 0
-        for(let key in data){
-            if(key.startsWith(WEBCACHE_PREFIX)){
-                count += 1
-            }
-        }
-        return count
+        return new Promise((resolve, reject)=>{
+            sendMessage('prxCache.count', null, 'background',data=>{
+                resolve(data)
+            })
+            
+        })
     }
     async getSize(){
-        let data = await chrome.storage.local.get(null)
-        let size = 0
-        for(let key in data){
-            if(key.startsWith(WEBCACHE_PREFIX)){
-                let dataSize = new TextEncoder().encode(data[key]).length
-                size += dataSize
-            }
-        }
-        return size
+        return new Promise((resolve, reject)=>{
+            sendMessage('prxCache.size', null, 'background',data=>{
+                resolve(data)
+            })
+            
+        })
     }
 }
 export {WebCache}

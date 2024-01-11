@@ -32,12 +32,12 @@ class IndexedDBStorage{
             // return result
             // try{
                 sendMessage('csidb.select', {dbName}, 'background',response=>{
-                    console.log(response)
-                    if(response){
-                        result[dbName]=response
-                        console.log(result)
-                    }
-                    resolve(result)
+                    // console.log(response)
+                    // if(response){
+                    //     result[dbName]=response
+                    //     console.log(result)
+                    // }
+                    resolve(response)
                 })
             // }catch(e){
             //     reject(e)
@@ -158,31 +158,60 @@ export default class ChromeStorageIndexedDB{
             callback(dataSize)
 		})
 	}
-    async init(){
+    retryInit = 0
+    isReady = false
+    async init(dontRetry = false){
+        this.retryInit += 1
         // console.log(`${this.constructor.name}.init()`)
         let tmpDb = await this.getItem(this.db_id )
         console.log(tmpDb)
-        if(this.stype === 1){
-            tmpDb = JSON.parse(tmpDb)
-            this.db = tmpDb
+        if(!dontRetry){
+            if(!tmpDb){
+                console.log(`tmpDb is null, retry in 1 second`)
+                if(this.retryInit < 3){
+                    setTimeout(()=>{
+                        this.init()
+                    },2000)
+                }else{
+                    this.init(true)
+                }
+            }else{
+                this.db = tmpDb
+            }
         }else{
-            if(typeof tmpDb[this.db_id] !== 'undefined'){
-                this.db = tmpDb[this.db_id];
-                console.log(this.db)
+            this.db = tmpDb
+            let passedCount = 0
+            if(this.db){
+                passedCount += 1
+                if(typeof this.db.data !== undefined){
+                    if(this.db.data){
+                        passedCount += 1
+                    }
+                }
+                if(typeof this.db.tables !== undefined){
+                    if(this.db.tables){
+                        passedCount += 1
+                    }
+                }
+            }
+            if( passedCount === 3 ) {
+                this.isReady = true
+            }else{
+                await this.createEmptyDb()
+                this.isReady = true
             }
         }
+    }
+    async createEmptyDb(){
+        console.log('CREATING NEW DB DATA')
+        // console.log(`${this.constructor.name}.init() storage is null`)
 
-        
-        if( !( this.db  && this.db.tables && this.db.data ) ) {
-            // console.log(`${this.constructor.name}.init() storage is null`)
-
-            if(!this.validateName(this.db_name)) {
-                this.error("The name '" + this.db_name + "' contains invalid characters");
-            } else {
-                this.db = {tables: {}, data: {}};
-                await this.commit();
-                this.db_new = true;
-            }
+        if(!this.validateName(this.db_name)) {
+            this.error("The name '" + this.db_name + "' contains invalid characters");
+        } else {
+            this.db = {tables: {}, data: {}};
+            await this.commit();
+            this.db_new = true;
         }
     }
     async reload(){
@@ -249,6 +278,9 @@ export default class ChromeStorageIndexedDB{
 
     // check whether a table exists
     tableExists(table_name) {
+        if(!this.isReady){
+            return false
+        }
         if(typeof this.db.tables[table_name] !== 'object'){
             return false;
         }
@@ -257,7 +289,10 @@ export default class ChromeStorageIndexedDB{
 
     // check whether a table exists, and if not, throw an error
     tableExistsWarn(table_name) {
-		if(!this.tableExists(table_name)) {
+		if(!this.isReady){
+            return false
+        }
+        if(!this.tableExists(table_name)) {
             this.error("The table '" + table_name + "' does not exist");
         }
     }
@@ -414,6 +449,9 @@ export default class ChromeStorageIndexedDB{
 
     // select rows in a table by field-value pairs, returns the ids of matches
     queryByValues(table_name, data) {
+        if(!this.isReady){
+            return false
+        }
         var result_ids = [],
 			exists = false,
 			row = null;
@@ -564,6 +602,9 @@ export default class ChromeStorageIndexedDB{
 
     // given a data list, only retain valid fields in a table
     validFields(table_name, data) {
+        if(!this.isReady){
+            return false
+        }
         var field = '', new_data = {};
 
         for(field in data) {

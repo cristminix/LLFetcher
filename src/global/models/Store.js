@@ -117,12 +117,20 @@ class Store {
 		return null
 	}
 
-	async getStorageSize(model,table=null){
+	async getStorageSize(model=null,table=null){
 		return new Promise((resolve,reject)=>{
-		if(!model.useIndexedDb){
-			DB.connection.getDataSize(table, size=>resolve(size))
+		if(model){
+			if(!model.useIndexedDb){
+				DB.connection.getDataSize(table, size=>resolve(size))
+			}else{
+				DBIndexed.connection.getDataSize(table, size=>resolve(size))
+			}
 		}else{
-			return DBIndexed.connection.getDataSize(table, size=>resolve(size))
+			DB.connection.getDataSize(null, size=>{
+				DBIndexed.connection.getDataSize(null, size2=>resolve(size+size2))
+				
+			})
+
 		}
 			
 		})

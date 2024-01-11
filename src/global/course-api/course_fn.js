@@ -247,7 +247,7 @@ const getCourseInfo = async(doc,courseSlug,mCourse,mExerciseFile,mThumbnail,noCa
                         course.exerciseFiles.push(savedExerciseFile)
                     }
                 }catch(e){
-                    console.error(e)
+                    // console.error(e)
                 }
             }
             
@@ -266,7 +266,7 @@ const getCourseInfo = async(doc,courseSlug,mCourse,mExerciseFile,mThumbnail,noCa
                 const artifact = el2Obj(artifactEl)
                 if(artifact){
                     const thumbUrl = getThumbUrlFromArtifact(artifact, thumbRootUrl)
-                    console.log(thumbUrl)
+                    // console.log(thumbUrl)
                     const size = `${artifact.width}x${artifact.height}`
                     const expiresAt = parseInt(artifact.expiresat)
                     const thumbnail = await mThumbnail.create(course.id, size, thumbUrl, expiresAt)
@@ -278,7 +278,7 @@ const getCourseInfo = async(doc,courseSlug,mCourse,mExerciseFile,mThumbnail,noCa
                 const artifact = el2Obj(artifactEl)
                 if(artifact){
                     const thumbUrl = getThumbUrlFromArtifact(artifact, thumbRootUrlV2)
-                    console.log(thumbUrl)
+                    // console.log(thumbUrl)
                     const size = `${artifact.width}x${artifact.height}`
                     const expiresAt = parseInt(artifact.expiresat)
                     const thumbnail = await mThumbnail.create(course.id, size, thumbUrl, expiresAt)

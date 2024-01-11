@@ -33,9 +33,13 @@ class DBIndexed {
 
 			return
 		}
-		if(!this.db.tableExists(this.table)){
-			this.db.createTable(this.table, this.fields)
-			await this.db.commit()
+		if(this.db.isReady){
+			if(!this.db.tableExists(this.table)){
+				this.db.createTable(this.table, this.fields)
+				await this.db.commit()
+			}
+		}else{
+			console.error(`db is not ready`)
 		}
 	}	
 	async initDB(){

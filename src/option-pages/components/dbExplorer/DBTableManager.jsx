@@ -89,7 +89,8 @@ const DBTableManager = ({store,config}) => {
 		}
 	}
     const updateStorageSize = async() => {
-        const ssize = await store.getStorageSize()
+        let ssize = await store.getStorageSize()
+        ssize += await store.get("PrxCache").getSize()
         setStorageSz(ssize)
         // console.log(ssize)
     }

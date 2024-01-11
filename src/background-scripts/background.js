@@ -76,7 +76,7 @@ async function update_csidb(record) {
       })
   }
 }
-async function delete_csidb(dbName) {
+async function delete_csidb(dbName, clear =false) {
   if (db) {
       const delete_transaction = db.transaction("csidb", "readwrite")
       const objectStore = delete_transaction.objectStore("csidb")
@@ -91,8 +91,11 @@ async function delete_csidb(dbName) {
               // console.log("PROBLEM DELETE RECORDS.")
               resolve(false)
           }
-
-          objectStore.delete(dbName)
+          if(!clear){
+            objectStore.delete(dbName)
+          }else{
+            objectStore.clear()
+          }
       })
   }
 }
@@ -204,7 +207,7 @@ async function update_prxCache(record) {
   }
 }
 
-async function delete_prxCache(key) {
+async function delete_prxCache(key, clear=false) {
   if (db) {
       const delete_transaction = db.transaction("prxCache", "readwrite")
       const objectStore = delete_transaction.objectStore("prxCache")
@@ -220,7 +223,11 @@ async function delete_prxCache(key) {
               resolve(false)
           }
 
-          objectStore.delete(key)
+          if(!clear){
+            objectStore.delete(key)
+          }else{
+            objectStore.clear()
+          }
       })
   }
 }
@@ -249,9 +256,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) =>{
       }
     }
     else if(name === 'prxCache.clear'){
-      // getTableCount(db, 'prxCache').then(size=>{
-      //   sendResponse(size)
-      // })
+      delete_prxCache(null, true).then(size=>{
+        sendResponse(size)
+      })
     }
     else if(name === 'prxCache.count'){
       getTableCount(db, 'prxCache').then(size=>{

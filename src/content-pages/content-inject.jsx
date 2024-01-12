@@ -1,10 +1,8 @@
-console.log('this is content script')
-console.log('src/content-pages/content.js')
-
+console.log('this is content script inject app')
+import React from 'react'
 import { createRef } from "react"
 import ReactDOM from 'react-dom/client'
 import "../global/tailwind.index.css"
-import ContentScript from "./ContentScript.js"
 import ContentScriptApp from './ContentScriptApp.jsx'
 import {
     createReactRootElement,
@@ -52,7 +50,7 @@ const main = async () => {
 	const root = ReactDOM.createRoot(el)
 	root.render(<ContentScriptApp ref={appRef} appContainerId={appContainerId} />)
 
-	const contentScript = new ContentScript()  
+	 
 }
 
 

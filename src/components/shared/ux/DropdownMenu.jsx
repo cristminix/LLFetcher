@@ -1,5 +1,6 @@
 import { Component } from "react"
 import { crc32 } from "crc"
+import {HSDropdown} from "preline"
 /***
  * props :
  * label : string
@@ -23,7 +24,24 @@ class DropdownMenu extends Component{
 	}
     componentWillReceiveProps(){
         setTimeout(() => {
-            HSStaticMethods.autoInit();
+            console.log(`HSDropdown.autoInit() called`)
+            try{
+                HSDropdown.autoInit()
+
+            }catch(e){
+                console.log(e)
+            }
+        }, 1000)
+    }
+    componentDidMount(){
+        setTimeout(() => {
+            console.log(`HSDropdown.autoInit() called`)
+            try{
+                HSDropdown.autoInit()
+
+            }catch(e){
+                console.log(e)
+            }
         }, 1000)
     }
     render(){

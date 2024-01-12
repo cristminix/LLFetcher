@@ -1,4 +1,4 @@
-import { useLoaderData } from 'react-router-dom'
+import { useLoaderData, useLocation } from 'react-router-dom'
 import {Component,createRef,useState,useEffect,useRef} from "react"
 import CourseApi from "../../global/course-api/CourseApi"
 import {courseUrlFromSlug} from "../../global/course-api/course_fn"
@@ -89,7 +89,8 @@ class FetchStateInfo extends Component{
 		</>
 	}
 }
-const AddCoursePage=({slug, store, config,onOk})=>{
+const AddCoursePage=({useM3Rec, slug, store, config,onOk})=>{
+	
 	const [xmlSchema,setXmlSchema] = useState(null)
 	const [course,setCourse] = useState(null)
 	const [authors,setAuthors] = useState(null)
@@ -163,7 +164,15 @@ const AddCoursePage=({slug, store, config,onOk})=>{
 		}
 		 
 	}
-	const doFetchCourse = async(courseSlug) => {
+	const doFetchCourseM3RecPrxCache = async(courseSlug)=>{
+		const mPrxCache = store.get('PrxCache')
+		const result = await mPrxCache.get(slug)
+		console.log(result)
+	}
+	const doFetchCourse = async(courseSlug, useM3RecPrxCache=false) => {
+		if(useM3RecPrxCache){
+			return await doFetchCourseM3RecPrxCache(courseSlug)
+		}
 		const mCourse = store.get("Course")
 		const mAuthor = store.get("Author")
 		const mSection = store.get("Section")
@@ -289,7 +298,7 @@ const AddCoursePage=({slug, store, config,onOk})=>{
       // </>:""
     }
     </div>
-	<FetchStateInfo ref={fetchInfoCiRef} name="Course Info" onFetch={e=>doFetchCourse(slug)} onRetry={e=>doFetchCourse(slug)} />
+	<FetchStateInfo ref={fetchInfoCiRef} name="Course Info" onFetch={e=>doFetchCourse(slug, useM3Rec)} onRetry={e=>doFetchCourse(slug, useM3Rec)} />
 	{
 		course ? <div className='w-full my-2 p-4 rounded-md border bg-gray-200'>
 			<JsonView src={course} />
@@ -334,11 +343,15 @@ const AddCoursePage=({slug, store, config,onOk})=>{
 }
 
 const CoursePage = ({store,config}) => {
+	const location = useLocation()
+    const qs= location.search
+    const qp= new URLSearchParams(qs)
+    const [useM3Rec,setUseM3Rec] = useState(qp.get('useM3Rec'))
     const {ctl,slug} = useLoaderData()
     const [renderedPage,setRenderedPage] = useState("")
     const middleware = async(ctl,slug)=>{
     	const components = {
-    		'add' : <AddCoursePage config={config} slug={slug} store={store} onOk={f=>f}/>
+    		'add' : <AddCoursePage useM3Rec={useM3Rec} config={config} slug={slug} store={store} onOk={f=>f}/>
     	}
     	// console.log(ctl,slug)
     	setRenderedPage(components[ctl])

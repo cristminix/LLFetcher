@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build&& cpy preline.js dist/",
+    "build-script-inject": "esbuild src/content-pages/content-inject.jsx --minify --bundle --outdir=src/content-pages/dist --loader:.js=jsx",
+    "build": "npm run build-script-inject && vite build &&  cpy preline.js dist/",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },

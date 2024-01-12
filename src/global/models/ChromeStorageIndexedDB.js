@@ -160,7 +160,7 @@ export default class ChromeStorageIndexedDB{
 	}
     retryInit = 0
     isReady = false
-    async init(dontRetry = false){
+    async init(dontRetry = false, callback=null){
         this.retryInit += 1
         // console.log(`${this.constructor.name}.init()`)
         let tmpDb = await this.getItem(this.db_id )
@@ -170,10 +170,10 @@ export default class ChromeStorageIndexedDB{
                 console.log(`tmpDb is null, retry in 1 second`)
                 if(this.retryInit < 3){
                     setTimeout(()=>{
-                        this.init()
+                        this.init(dontRetry, callback)
                     },2000)
                 }else{
-                    this.init(true)
+                    this.init(true, callback)
                 }
             }else{
                 this.db = tmpDb
@@ -196,9 +196,11 @@ export default class ChromeStorageIndexedDB{
             }
             if( passedCount === 3 ) {
                 this.isReady = true
+                callback()
             }else{
                 await this.createEmptyDb()
                 this.isReady = true
+                callback()
             }
         }
     }

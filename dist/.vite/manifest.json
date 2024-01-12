@@ -1,14 +1,14 @@
 {
   "../../@crx/manifest": {
-    "file": "assets/crx-manifest.js-p6X8hoo7.js",
+    "file": "assets/crx-manifest.js-d_jKls67.js",
     "isEntry": true,
     "src": "../../@crx/manifest"
   },
-  "_font-awesome.min-!~{008}~.js": {
-    "file": "assets/font-awesome-7juQPigl.css",
-    "src": "_font-awesome.min-!~{008}~.js"
+  "_font-awesome.min-!~{007}~.js": {
+    "file": "assets/font-awesome-UufRsjal.css",
+    "src": "_font-awesome.min-!~{007}~.js"
   },
-  "_font-awesome.min-ye2iUhej.js": {
+  "_font-awesome.min-ygwq1kxg.js": {
     "assets": [
       "assets/fontawesome-webfont-BuWBOUu1.eot",
       "assets/fontawesome-webfont-fo5IWH5D.woff2",
@@ -17,35 +17,25 @@
       "assets/fontawesome-webfont-9d686-IE.svg"
     ],
     "css": [
-      "assets/font-awesome-7juQPigl.css"
+      "assets/font-awesome-UufRsjal.css"
     ],
-    "file": "assets/font-awesome.min-ye2iUhej.js",
+    "file": "assets/font-awesome.min-ygwq1kxg.js",
     "imports": [
-      "_index-iGxTX5Jb.js"
+      "_index-l-FjSNo0.js"
     ]
   },
-  "_index-!~{004}~.js": {
-    "file": "assets/index-N3DTh-6n.css",
-    "src": "_index-!~{004}~.js"
+  "_index-l-FjSNo0.js": {
+    "file": "assets/index-l-FjSNo0.js"
   },
-  "_index-default-lPYrPALU.js": {
-    "file": "assets/index-default-lPYrPALU.js"
-  },
-  "_index-iGxTX5Jb.js": {
-    "css": [
-      "assets/index-N3DTh-6n.css"
-    ],
-    "file": "assets/index-iGxTX5Jb.js"
-  },
-  "content.jsx-loader.js": {
-    "file": "assets/content.jsx-loader-iiPPZ3aE.js",
-    "src": "content.jsx-loader.js"
+  "content.js-loader.js": {
+    "file": "assets/content.js-loader-kM9HECy4.js",
+    "src": "content.js-loader.js"
   },
   "index.html": {
-    "file": "assets/index.html-jLiqNZgb.js",
+    "file": "assets/index.html-yAtXlwJa.js",
     "imports": [
-      "_font-awesome.min-ye2iUhej.js",
-      "_index-iGxTX5Jb.js"
+      "_font-awesome.min-ygwq1kxg.js",
+      "_index-l-FjSNo0.js"
     ],
     "isEntry": true,
     "src": "index.html"
@@ -79,18 +69,17 @@
     "src": "node_modules/fontawesome-4.7/fonts/fontawesome-webfont.woff2"
   },
   "src/background-scripts/background.js": {
-    "file": "assets/background.js-Og0hrKAS.js",
+    "file": "assets/background.js-8p8zkt1W.js",
     "isEntry": true,
     "src": "src/background-scripts/background.js"
   },
-  "src/content-pages/content.jsx": {
-    "file": "assets/content.jsx-lkXs4jkl.js",
+  "src/content-pages/content.js": {
+    "file": "assets/content.js-KfJG23bj.js",
     "imports": [
-      "_index-iGxTX5Jb.js",
-      "_index-default-lPYrPALU.js"
+      "_index-l-FjSNo0.js"
     ],
     "isEntry": true,
-    "src": "src/content-pages/content.jsx"
+    "src": "src/content-pages/content.js"
   },
   "src/option-pages/options.html": {
     "assets": [
@@ -100,11 +89,10 @@
     "css": [
       "assets/options-BUofy8cZ.css"
     ],
-    "file": "assets/options.html-1W3iCPhc.js",
+    "file": "assets/options.html-CJCPnrO5.js",
     "imports": [
-      "_font-awesome.min-ye2iUhej.js",
-      "_index-iGxTX5Jb.js",
-      "_index-default-lPYrPALU.js"
+      "_font-awesome.min-ygwq1kxg.js",
+      "_index-l-FjSNo0.js"
     ],
     "isEntry": true,
     "src": "src/option-pages/options.html"

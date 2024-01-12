@@ -1,3 +1,4 @@
+import React from 'react'
 import { useState, useEffect } from "react"
 import CheckerTag from "./CheckerTag"
 const CoursePageChecker = ({validCoursePage}) => {

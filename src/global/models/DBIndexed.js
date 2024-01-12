@@ -43,12 +43,14 @@ class DBIndexed {
 		}
 	}	
 	async initDB(){
-		await this.db.init()
-		if(this instanceof DBIndexed){
-			await this.initTable()
-		}else{
-			console.error(`${this.constructor.name}.initTable() not implemented`)
-		}
+		await this.db.init(true, ()=>{
+			if(this instanceof DBIndexed){
+				this.initTable()
+			}else{
+				console.error(`${this.constructor.name}.initTable() not implemented`)
+			}
+		})
+		
 
 		
 	}

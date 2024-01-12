@@ -1,6 +1,8 @@
+import React from 'react'
 import { Component } from "react"
 import {applyJQueryContainsRegex} from '../global/fn.js'
 import jQuery from "jquery"
+import { getCourseInfo, getCourseSections, getM3Rec, getM3RecByType } from "./legacy/fn.js"
 applyJQueryContainsRegex(jQuery)
 
 class ActionCSA extends Component{
@@ -18,8 +20,12 @@ class ActionCSA extends Component{
 	async getCourseInfo(){
 		return getCourseInfo(this.state.slug)
 	}
-
-
+	async getM3Rec(){
+		return getM3Rec()
+	}
+	async getM3RecByType(type,m3Rec){
+		return getM3RecByType(type,m3Rec)
+	}
 	async validCoursePage(){
 		return this.state.validCoursePage
 
@@ -62,6 +68,22 @@ class ActionCSA extends Component{
 	async getCourseSections(urn){
 		console.log(urn)
 		// return getCourseSections(urn)
+	}
+	async addCourseLegacy(slug){
+		if(!slug){
+			slug = document.location.href.replace("https://www.linkedin.com/learning/","").split("/")[0]
+		}
+		console.log(`Add Course using internal API: ${slug}`)
+		let course = getCourseInfo(slug)
+		let sections
+		if(course) {
+			if(course.urn){	
+				sections = getCourseSections(course.urn)
+			}
+		}
+		return [course, sections]
+		// console.log(course, sections)
+		// // return getCourseSections(urn)
 	}
 }
 

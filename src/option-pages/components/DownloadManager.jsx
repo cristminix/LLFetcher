@@ -200,7 +200,7 @@ const DownloadManager = ({store, config}) => {
       const {course, authors, sections, tocs}  = activeCourseData
       return (<>
       
-      <div className="download-manager h-screen">
+      <div className="download-manager min-h-screen">
         <Toast ref={toastRef}/>
         <CourseInfo store={store} course={course} authors={authors} selectedFmt={selectedFmt} selectTrans={selectTrans} selectedTrans={selectedTrans} />
         <ToolbarMan alreadySetup={alreadySetup} toast={toast} 

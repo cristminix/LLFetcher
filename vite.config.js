@@ -4,6 +4,7 @@ import { crx } from '@crxjs/vite-plugin'
 import manifest from './manifest.json'
 import { resolve } from 'path'
 import express from 'vite-plugin-express'
+import { fileURLToPath } from 'node:url'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -33,10 +34,9 @@ export default defineConfig({
     },
   },
   resolve: {
-    alias: {
-      buffer: 'rollup-plugin-node-polyfills/polyfills/buffer-es6',
-      // process: 'rollup-plugin-node-polyfills/polyfills/process-es6'
-    }
+    alias:{
+      buffer: 'rollup-plugin-node-polyfills/polyfills/buffer-es6'
+      },
   },
   define: {
     // By default, Vite doesn't include shims for NodeJS/

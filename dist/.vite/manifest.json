@@ -1,14 +1,14 @@
 {
-  "../../@crx/manifest": {
-    "file": "assets/crx-manifest.js-d_jKls67.js",
+  "../../../@crx/manifest": {
+    "file": "assets/crx-manifest.js-AVdigsv5.js",
     "isEntry": true,
-    "src": "../../@crx/manifest"
+    "src": "../../../@crx/manifest"
   },
   "_font-awesome.min-!~{007}~.js": {
     "file": "assets/font-awesome-UufRsjal.css",
     "src": "_font-awesome.min-!~{007}~.js"
   },
-  "_font-awesome.min-ygwq1kxg.js": {
+  "_font-awesome.min-pPzmwAtt.js": {
     "assets": [
       "assets/fontawesome-webfont-BuWBOUu1.eot",
       "assets/fontawesome-webfont-fo5IWH5D.woff2",
@@ -19,7 +19,7 @@
     "css": [
       "assets/font-awesome-UufRsjal.css"
     ],
-    "file": "assets/font-awesome.min-ygwq1kxg.js",
+    "file": "assets/font-awesome.min-pPzmwAtt.js",
     "imports": [
       "_index-l-FjSNo0.js"
     ]
@@ -32,9 +32,9 @@
     "src": "content.js-loader.js"
   },
   "index.html": {
-    "file": "assets/index.html-yAtXlwJa.js",
+    "file": "assets/index.html-9G6QsoWH.js",
     "imports": [
-      "_font-awesome.min-ygwq1kxg.js",
+      "_font-awesome.min-pPzmwAtt.js",
       "_index-l-FjSNo0.js"
     ],
     "isEntry": true,
@@ -89,9 +89,9 @@
     "css": [
       "assets/options-BUofy8cZ.css"
     ],
-    "file": "assets/options.html-CJCPnrO5.js",
+    "file": "assets/options.html-M1gvFvef.js",
     "imports": [
-      "_font-awesome.min-ygwq1kxg.js",
+      "_font-awesome.min-pPzmwAtt.js",
       "_index-l-FjSNo0.js"
     ],
     "isEntry": true,

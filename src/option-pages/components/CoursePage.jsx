@@ -2,6 +2,7 @@ import { useLoaderData, useLocation } from 'react-router-dom'
 import {Component,createRef,useState,useEffect,useRef} from "react"
 import CourseApi from "../../global/course-api/CourseApi"
 import {courseUrlFromSlug} from "../../global/course-api/course_fn"
+import CourseApiLegacy from "../../global/course-api/legacy/CourseApiLegacy"
 import JsonView from 'react18-json-view'
 import Toast from '../../components/shared/ux/Toast'
 import 'react18-json-view/src/style.css'
@@ -165,12 +166,36 @@ const AddCoursePage=({useM3Rec, slug, store, config,onOk})=>{
 		 
 	}
 	const doFetchCourseM3RecPrxCache = async(courseSlug)=>{
+		fetchInfoCiRef.current.setRunLevel(1)
+		fetchInfoCiRef.current.setLoading(true)
+
 		const mPrxCache = store.get('PrxCache')
 		const result = await mPrxCache.get(slug)
+		if(result){
+			const ds = result.cacheContent
+			const courseApiLegacy = new CourseApiLegacy(ds, courseSlug, store)
+			const course = await courseApiLegacy.getCourse()
+			const sections = await courseApiLegacy.getSections()
+			const tocs = await courseApiLegacy.getTocs()
+			const authors = await courseApiLegacy.getAuthors()
+			const exerciseFiles = courseApiLegacy.getExerciseFiles()
+			const thumbnails = courseApiLegacy.getThumbnails()
+			if(course){
+				config.getUiConfig().reloadSidebar()
+			}
+			if(tocs){
+				fetchInfoCiRef.current.setStatusCode(200)
+				redirectToCourseManager()  
+			}
+			console.log(course, sections, tocs, authors, exerciseFiles, thumbnails)
+		}
 		console.log(result)
+		
+		fetchInfoCiRef.current.setLoading(false)
 	}
 	const doFetchCourse = async(courseSlug, useM3RecPrxCache=false) => {
 		if(useM3RecPrxCache){
+			
 			return await doFetchCourseM3RecPrxCache(courseSlug)
 		}
 		const mCourse = store.get("Course")

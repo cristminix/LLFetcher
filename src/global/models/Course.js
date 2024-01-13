@@ -116,7 +116,7 @@ class Course extends DB {
     async addAuthorId(id, authorId){
         const course = this.getById(id)
         if(course){
-            const authorIds = course.authorIds
+            const authorIds = course.authorIds.filter(item=>item)
             if(!authorIds.includes(authorId)){
                 authorIds.push(authorId)
 

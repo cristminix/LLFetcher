@@ -78,13 +78,19 @@ class CourseApiLegacy {
 
                 const course = {
                     title,
-                    duration : duration.duration?duration.duration:0,
+                    // duration : duration.duration?duration.duration:0,
+                    duration,
                     sourceCodeRepository,
                     subtitle, 
                     slug,
                     description:'',
                     urn:entityUrn,
                     githubCodespace 
+                }
+                if(row.duration){
+                    if(row.duration.duration){
+                        course.duration = row.duration.duration
+                    }
                 }
                 if(row.description){
                     course.description = row.description.text

@@ -785,13 +785,21 @@ const getTocXmlParentElement = (itemStar,doc) => {
 	}
 	return entityNdP
 }
+const findElementContainsBeginWith = ($root,element,str) => {
+    const $results = $root.find(`${element}:contains('${str}')`)
+    const filteredResults = $results.filter((i,el)=>{
+        const text=jQuery(el).text().trim()
+        return text.startsWith(str)
+    })
+    return filteredResults
+}
 const getCourseXmlParentElement = (doc) => {
     if(!doc){
         return [null,null]
     }
 	let p = null
 	let courseUrn = null
-	let courseUrnNd = doc.find(`star_elements:contains('urn:li:learningApiCourse:')`)
+	let courseUrnNd = findElementContainsBeginWith(doc,'star_elements','urn:li:learningApiCourse:')//doc.find(`star_elements:contains('urn:li:learningApiCourse:')`)
 	// console.log(courseUrnNd)
 	
 	if(courseUrnNd.length == 0){
@@ -800,10 +808,11 @@ const getCourseXmlParentElement = (doc) => {
 	if(courseUrnNd.length > 0){
 		// for(let i in courseUrnNd ){
 		// let courseUrnNdItem = $(courseUrnNd[i])
-		courseUrn = courseUrnNd.text()
-		let entityUrnNd = doc.find(`entityUrn:contains('${courseUrn}')`)
+		courseUrn = courseUrnNd.text().trim()
+        console.log(courseUrn)
+		let entityUrnNd = findElementContainsBeginWith(doc,'entityUrn',courseUrn)
 		for(const entityUrnNdItem of entityUrnNd ){
-			if(jQuery(entityUrnNdItem).text() == courseUrn){
+			if(jQuery(entityUrnNdItem).text().trim() == courseUrn){
 				// console.log(entityUrnNdItem)
 				p = jQuery(entityUrnNdItem).closest('included')
 				break

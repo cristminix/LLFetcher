@@ -60,7 +60,9 @@ const detectVideoJs = (callback)=>{
     });
 }
 const isCoursePage = ()=>{
-	return jQuery('div[data-avail-test]').attr('data-avail-test') === 'page:course'
+	let valid = jQuery('div[data-avail-test]').attr('data-avail-test') === 'page:course'
+
+    return valid
 }
 // function getCourseSlug(){
 // 	const ci = getCourseInfo()

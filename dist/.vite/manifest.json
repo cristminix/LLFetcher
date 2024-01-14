@@ -8,7 +8,7 @@
     "file": "assets/font-awesome-UufRsjal.css",
     "src": "_font-awesome.min-!~{007}~.js"
   },
-  "_font-awesome.min-pPzmwAtt.js": {
+  "_font-awesome.min-MY_SdhSL.js": {
     "assets": [
       "assets/fontawesome-webfont-BuWBOUu1.eot",
       "assets/fontawesome-webfont-fo5IWH5D.woff2",
@@ -19,7 +19,7 @@
     "css": [
       "assets/font-awesome-UufRsjal.css"
     ],
-    "file": "assets/font-awesome.min-pPzmwAtt.js",
+    "file": "assets/font-awesome.min-MY_SdhSL.js",
     "imports": [
       "_index-l-FjSNo0.js"
     ]
@@ -32,9 +32,9 @@
     "src": "content.js-loader.js"
   },
   "index.html": {
-    "file": "assets/index.html-9G6QsoWH.js",
+    "file": "assets/index.html-kLJPsVQD.js",
     "imports": [
-      "_font-awesome.min-pPzmwAtt.js",
+      "_font-awesome.min-MY_SdhSL.js",
       "_index-l-FjSNo0.js"
     ],
     "isEntry": true,
@@ -89,9 +89,9 @@
     "css": [
       "assets/options-BUofy8cZ.css"
     ],
-    "file": "assets/options.html-M1gvFvef.js",
+    "file": "assets/options.html-2ofbbOON.js",
     "imports": [
-      "_font-awesome.min-pPzmwAtt.js",
+      "_font-awesome.min-MY_SdhSL.js",
       "_index-l-FjSNo0.js"
     ],
     "isEntry": true,

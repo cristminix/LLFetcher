@@ -371,7 +371,7 @@ const CoursePage = ({store,config}) => {
 	const location = useLocation()
     const qs= location.search
     const qp= new URLSearchParams(qs)
-    const [useM3Rec,setUseM3Rec] = useState(qp.get('useM3Rec'))
+    const [useM3Rec,setUseM3Rec] = useState(parseInt(qp.get('useM3Rec')))
     const {ctl,slug} = useLoaderData()
     const [renderedPage,setRenderedPage] = useState("")
     const middleware = async(ctl,slug)=>{

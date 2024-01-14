@@ -10,7 +10,7 @@ import { isTimeExpired } from '../../../global/course-api/course_fn'
 import { getCode, getName as getCountryName } from 'country-list'
 import DropdownMenu from '../../../components/shared/ux/DropdownMenu'
 import DropdownSelect from '../../../components/shared/ux/DropdownSelect'
-// import HSDropdown from '@preline/dropdown'
+import {HSDropdown} from 'preline'
 
 const VideoPlayer=({store, config, options, onReady})=>{
     const location = useLocation()
@@ -257,14 +257,18 @@ const VideoPlayer=({store, config, options, onReady})=>{
     }
     if(streamLocs){
         sloc = pickSloc(streamLocs, choosenFmt)
-        const isExpired = isTimeExpired(sloc.expiresAt)
-      if(isExpired){
-        console.error(`SLOC:expired(2)`)
-        setBlockMainContent(false)
-        // refresh = true
-        // streamLocs = await courseApi.getStreamLocs(selectedToc, refresh)
-        return 
-      }
+        if(sloc){
+          const isExpired = isTimeExpired(sloc.expiresAt)
+          if(isExpired){
+            console.error(`SLOC:expired(2)`)
+            alert(`SLOC:expired(2)`)
+            setBlockMainContent(false)
+            // refresh = true
+            // streamLocs = await courseApi.getStreamLocs(selectedToc, refresh)
+            return 
+          }
+        }
+      
         if(sloc){
           const player = playerRef.current
 
@@ -288,9 +292,13 @@ const VideoPlayer=({store, config, options, onReady})=>{
             player.addRemoteTextTrack(track, true)
           })
 
+        }else{
+          alert(`Could not find a suitable stream location`)
         }
         console.log(sloc)
                 
+    }else{
+      alert(`Could not find stream location list`)
     }
     setBlockMainContent(false)
     

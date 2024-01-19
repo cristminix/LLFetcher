@@ -5,68 +5,164 @@
 */
 
 import { sendMessage } from "../fn"
-
+async function insert_csidb(db,records) {
+    if (db) {
+        const insert_transaction = db.transaction("csidb", "readwrite")
+        const objectStore = insert_transaction.objectStore("csidb")
+  
+        return new Promise((resolve, reject) => {
+            insert_transaction.oncomplete = function () {
+                // console.log("ALL INSERT TRANSACTIONS COMPLETE.")
+                resolve(true)
+            }
+  
+            insert_transaction.onerror = function () {
+                // console.log("PROBLEM INSERTING RECORDS.")
+                resolve(false)
+            }
+  
+            records.forEach(item => {
+                let request = objectStore.add(item)
+  
+                request.onsuccess = function () {
+                    // console.log("Added: ", item)
+                }
+            })
+        })
+    }
+  }
+  async function get_csidb(db,dbName) {
+    if (db) {
+        const get_transaction = db.transaction("csidb", "readonly")
+        const objectStore = get_transaction.objectStore("csidb")
+  
+        return new Promise((resolve, reject) => {
+            get_transaction.oncomplete = function () {
+            // console.log("ALL GET TRANSACTIONS COMPLETE.")
+            }
+  
+            get_transaction.onerror = function () {
+            // console.log("PROBLEM GETTING RECORDS.")
+            }
+  
+            let request = objectStore.get(dbName)
+  
+            request.onsuccess = function (event) {
+            resolve(event.target.result)
+            }
+        })
+    }
+  }
+  
+  async function update_csidb(db,record) {
+    if (db) {
+        const put_transaction = db.transaction("csidb", "readwrite")
+        const objectStore = put_transaction.objectStore("csidb")
+  
+        return new Promise((resolve, reject) => {
+            put_transaction.oncomplete = function () {
+                // console.log("ALL PUT TRANSACTIONS COMPLETE.")
+                resolve(true)
+            }
+  
+            put_transaction.onerror = function () {
+                // console.log("PROBLEM UPDATING RECORDS.")
+                resolve(false)
+            }
+  
+            objectStore.put(record)
+        })
+    }
+  }
 class IndexedDBStorage{
     dbName=null
     tmpDb={}
     constructor(dbName){
         this.dbName=dbName
     }
-    async get(input){
-        return new Promise((resolve, reject)=>{
-            let dbName = null
-            let result = {}
-            if(Array.isArray(input)){
-                dbName = input.pop()
-            }else{
-                dbName = input
+    async getDb(){
+        return new Promise((resolve,reject)=>{
+            const request = indexedDB.open('main')
+
+            request.onerror = function (event) {
+                console.log("Problem opening DB.")
+                reject(event)
             }
-            if(typeof this.tmpDb[dbName] !== 'undefined'){
-                result[dbName]=this.tmpDb[dbName]
-            }else{
-                result[dbName]=null
-            }
-            console.log(dbName)
-            console.log(arguments)
-            
-            // return result
-            // try{
-                sendMessage('csidb.select', {dbName}, 'background',response=>{
-                    // console.log(response)
-                    // if(response){
-                    //     result[dbName]=response
-                    //     console.log(result)
-                    // }
-                    resolve(response)
+        
+            request.onupgradeneeded = function (event) {
+                const db = event.target.result
+        
+                let objectStore = db.createObjectStore('prxCache', {
+                    keyPath: 'key'
                 })
-            // }catch(e){
-            //     reject(e)
-            //     console.error(e)
-            // }
-            
-            // resolve(result)
+        
+                objectStore = db.createObjectStore('csidb', {
+                  keyPath: 'dbName'
+              })
+        
+        
+                objectStore.transaction.oncomplete = function (event) {
+                    console.log("ObjectStore Created.")
+                }
+            }
+        
+            request.onsuccess = function (event) {
+                const db = event.target.result
+                // console.log("DB OPENED.")
+                // insert_records(roster)
+                // insert_prxCache([{key:'nana'}])
+                resolve(db)
+        
+                db.onerror = function (event) {
+                    // console.log("FAILED TO OPEN DB.")
+                }
+            }
         })
+       
+    }
+    async get(input){
+        const db = await this.getDb()
+        if(db){
+            let content= await get_csidb(db,'db_learning')
+            console.log(content)
+            return content
+        }
+        return null
     }
 
     async set(input){
         let dbName = null
         let result = {}
-
-        if(typeof input === 'object'){
-            const dbNames = Object.keys(input)
-            dbNames.map(dbName=>{
-                const row = input[dbName]
-                console.log(row)
-                this.tmpDb[dbName] = row
-                row.dbName=dbName
-                // const {key,cacheContent,statusCode,url} = this
-                const record = row
-                sendMessage('csidb.commit',{records:[record]},'background',()=>{
-                    // resolve(true)
+        const db = await this.getDb()
+        if(db){
+            if(typeof input === 'object'){
+                const dbNames = Object.keys(input)
+                dbNames.map(dbName=>{
+                    const row = input[dbName]
+                    console.log(row)
+                    this.tmpDb[dbName] = row
+                    row.dbName=dbName
+                    // const {key,cacheContent,statusCode,url} = this
+                    const record = row
+                    const records = [record]
+                    // const record = records[0]
+                    get_csidb(db,dbName).then(existingRec=>{
+                    if(existingRec){
+                        console.log(`Update csidb existing rec:${existingRec.dbName}`)
+                        update_csidb(db,record)
+                    }else{
+                        console.log(`insert csidb:${record.dbName}`)
+                        insert_csidb(db,records)
+                    }
+                    })
+                    // sendMessage('csidb.commit',{records:[record]},'background',()=>{
+                    //     // resolve(true)
+                    // })
                 })
-            })
-            
+                
+            }
         }
+        
         // if(Array.isArray(input)){
         //     dbName = input.pop()
         // }
@@ -159,50 +255,38 @@ export default class ChromeStorageIndexedDB{
 		})
 	}
     retryInit = 0
-    isReady = false
-    async init(dontRetry = false, callback=null){
+    isReady = true
+    async init(dontRetry = false, callback=f=>f){
         this.retryInit += 1
         // console.log(`${this.constructor.name}.init()`)
         let tmpDb = await this.getItem(this.db_id )
         console.log(tmpDb)
-        if(!dontRetry){
-            if(!tmpDb){
-                console.log(`tmpDb is null, retry in 1 second`)
-                if(this.retryInit < 3){
-                    setTimeout(()=>{
-                        this.init(dontRetry, callback)
-                    },2000)
-                }else{
-                    this.init(true, callback)
+        this.db = tmpDb
+        let passedCount = 0
+        if(this.db){
+            passedCount += 1
+            if(typeof this.db.data !== undefined){
+                if(this.db.data){
+                    passedCount += 1
                 }
-            }else{
-                this.db = tmpDb
+            }
+            if(typeof this.db.tables !== undefined){
+                if(this.db.tables){
+                    passedCount += 1
+                }
             }
         }else{
-            this.db = tmpDb
-            let passedCount = 0
-            if(this.db){
-                passedCount += 1
-                if(typeof this.db.data !== undefined){
-                    if(this.db.data){
-                        passedCount += 1
-                    }
-                }
-                if(typeof this.db.tables !== undefined){
-                    if(this.db.tables){
-                        passedCount += 1
-                    }
-                }
-            }
-            if( passedCount === 3 ) {
-                this.isReady = true
-                callback()
-            }else{
-                await this.createEmptyDb()
-                this.isReady = true
-                callback()
-            }
         }
+        console.log(`passedCount:${passedCount}`)
+        if( passedCount === 3 ) {
+        //     // this.isReady = true
+        }else{
+            await this.createEmptyDb()
+            
+        //     // this.isReady = true
+        }
+        callback()
+
     }
     async createEmptyDb(){
         console.log('CREATING NEW DB DATA')

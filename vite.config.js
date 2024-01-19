@@ -5,6 +5,7 @@ import manifest from './manifest.json'
 import { resolve } from 'path'
 import express from 'vite-plugin-express'
 import { fileURLToPath } from 'node:url'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -24,6 +25,7 @@ export default defineConfig({
       prefixUrl: '/dev-api',
     }),
     crx({ manifest }),
+    nodePolyfills()
 
   ],
   rollupOptions: {
@@ -36,7 +38,7 @@ export default defineConfig({
   resolve: {
     alias:{
       buffer: 'rollup-plugin-node-polyfills/polyfills/buffer-es6'
-      },
+    }
   },
   define: {
     // By default, Vite doesn't include shims for NodeJS/

@@ -167,31 +167,32 @@ const getCourseInfo = async(doc,courseSlug,mCourse,mExerciseFile,mThumbnail,noCa
 		}
 
 		course.description = p.find('description').text()
-		course.descriptionV2 = p.find('descriptionV2').text()
+		course.descriptionV2 = p.find('descriptionV2 text').text()
 		if(course.descriptionV2){
 			course.description = course.descriptionV2
 		}
-
+        let descriptionV3 = p.find('descriptionV3 text')
+        if(descriptionV3.length > 0){
+            // console.log(descriptionV3.html())   
+        	course.descriptionV3 = descriptionV3.text()
+        	if(course.descriptionV3){
+				course.description = course.descriptionV3
+			}
+        }
 		let duration = p.find('duration')
 		if(duration.length>0){
 			course.duration = parseInt(p.find('duration').text())
 		}
 
-        if(course.description){
-            course.description = course.description.replace('com.linkedin.learning.api.common.AttributedText','')
-        }
+        // if(course.description){
+        //     course.description = course.description.replace(/com.linkedin.learning.api.common.AttributedText/,'')
+        // }
 		let dificulty = p.find('dificulty')
 		if(dificulty.length > 0){
 			course.dificulty = dificulty.find('difficultylevel').text()
 		}
 
-        let descriptionv3 = p.find('descriptionV3')
-        if(descriptionv3.length > 0){
-        	course.descriptionv3 = descriptionv3.text()
-        	if(course.descriptionV3){
-				course.description = course.descriptionV3
-			}
-        }
+        
 
         let sourceCodeRepo=p.find('sourceCodeRepository')
         if(sourceCodeRepo.length > 0){
@@ -233,6 +234,7 @@ const getCourseInfo = async(doc,courseSlug,mCourse,mExerciseFile,mThumbnail,noCa
         }
         // return
         const {title,slug,sourceCodeRepository,description,urn} = course
+        console.log(course)
         // exerciseFiles = course.exerciseFiles
 		course = await mCourse.create(title,slug,course.duration,sourceCodeRepository,description,urn)
         course.exerciseFiles = []
@@ -526,7 +528,12 @@ const parseJsonSchema = (responseText) => {
 }
 const convert2Xml = (data,pageName,cacheXmlToFile=false) => {}
 const getTranscripts = async (vMetaDataNd,doc,toc,mTranscript) => {
-	let transcripts = mTranscript.getListByTocIdAsObject(toc.id)
+	let transcripts = null
+    try{
+        transcripts = mTranscript.getListByTocIdAsObject(toc.id)
+    }catch(e){
+        console.error(e)
+    }
 
     if (transcripts) {
         console.log('transcripts_get_from_m_transcript')

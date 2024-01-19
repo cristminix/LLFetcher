@@ -49,6 +49,7 @@
     "postcss": "^8.4.32",
     "tailwindcss": "^3.3.5",
     "vite": "^5.0.0",
-    "vite-plugin-express": "^1.0.3"
+    "vite-plugin-express": "^1.0.3",
+    "vite-plugin-node-polyfills": "^0.19.0"
   }
 }

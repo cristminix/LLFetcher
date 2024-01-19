@@ -137,15 +137,31 @@ class Course extends DB {
         if(!course){
             const id = 0;
             const authorIds = [];
-            course = {id,title,slug,duration,sourceCodeRepository,description,authorIds,urn};
+            course = {id,title,slug,duration,sourceCodeRepository,description,authorIds,urn}
             course.id = this.db.insert(this.table,course);
             await this.db.commit();
         }else{
-            console.error(`${this.constructor.name}.create() rowExist`)
+            course = await this.update(course.id,{title,slug,duration,sourceCodeRepository,description,urn})
+            console.error(`${this.constructor.name}.create() rowExist, update row`)
 
         }
 
         return course;
+    }
+    async update(id,row_){
+        let record = this.getById(id)
+        if(record){
+            this.db.update(this.table,{id},(row)=>{
+                for(let k in row_){
+                    row[k] = row_[k]
+                    record[k] = row_[k]
+                }
+                return row
+            })
+            await this.db.commit()
+        }
+        
+        return record
     }
 }
 

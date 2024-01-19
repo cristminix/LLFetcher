@@ -1,6 +1,7 @@
 
-import express, { Request, Router } from 'express'
+import express from 'express'
 import fs from 'fs'
+const { Request, Router } = express
 const router = Router()
 const baseDir = "src/express/dev-api/"
 

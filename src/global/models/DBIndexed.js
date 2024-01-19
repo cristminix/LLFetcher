@@ -33,18 +33,20 @@ class DBIndexed {
 
 			return
 		}
-		if(this.db.isReady){
+		// if(this.db.isReady){
 			if(!this.db.tableExists(this.table)){
 				this.db.createTable(this.table, this.fields)
 				await this.db.commit()
 			}
-		}else{
-			console.error(`db is not ready`)
-		}
+		// }else{
+			// console.error(`db is not ready`)
+		// }
 	}	
 	async initDB(){
 		await this.db.init(true, ()=>{
 			if(this instanceof DBIndexed){
+				console.log(`${this.constructor.name}.initTable()`)
+
 				this.initTable()
 			}else{
 				console.error(`${this.constructor.name}.initTable() not implemented`)

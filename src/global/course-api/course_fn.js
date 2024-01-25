@@ -148,7 +148,7 @@ const getCourseInfo = async(doc,courseSlug,mCourse,mExerciseFile,mThumbnail,noCa
     // let course = null
 	const [p,courseUrn] = getCourseXmlParentElement(doc)
 	if(p){
-		let courseSlugFound = p.find('slug').text()
+		let courseSlugFound = p.find('slug:first').text()
 		console.log(`course slug found : ${courseSlugFound}`)
 		course = {
 			url : `https://www.linkedin.com/learning/${courseSlug}`,
@@ -158,7 +158,7 @@ const getCourseInfo = async(doc,courseSlug,mCourse,mExerciseFile,mThumbnail,noCa
 			description : null,
 			urn : courseUrn
 		}
-		course.title = p.find('title').text()
+		course.title = p.find('title:first').text()
 		course.visibility = p.find('visibility').text()
 
 		let viewerCounts = p.find('viewerCounts')
@@ -174,7 +174,13 @@ const getCourseInfo = async(doc,courseSlug,mCourse,mExerciseFile,mThumbnail,noCa
         let descriptionV3 = p.find('descriptionV3 text')
         if(descriptionV3.length > 0){
             // console.log(descriptionV3.html())   
-        	course.descriptionV3 = descriptionV3.text()
+            // try{
+                course.descriptionV3 = jQuery(descriptionV3[0].firstChild).text()
+            	// course.descriptionV3 = descriptionV3[0].firstChild.innerText
+
+            // }catch(e){
+                // console.error(e)
+            // }
         	if(course.descriptionV3){
 				course.description = course.descriptionV3
 			}
@@ -256,8 +262,11 @@ const getCourseInfo = async(doc,courseSlug,mCourse,mExerciseFile,mThumbnail,noCa
             
         }
         // Get course thumbnails
-        const thumbRootUrl = p.find('primaryThumbnail rootUrl').text().trim() 
-        const thumbRootUrlV2 = p.find('primaryThumbnailV2 rootUrl').text().trim() 
+        let thumbRootUrl = p.find('primaryThumbnail rootUrl:first').text().trim() 
+        let thumbRootUrlV2 = p.find('primaryThumbnailV2 rootUrl:first').text().trim() 
+        if(thumbRootUrlV2.length > 0){
+            thumbRootUrl = thumbRootUrlV2
+        }
         const thumbs  = p.find('primaryThumbnail artifacts')
         const thumbV2s = p.find('primaryThumbnailV2 artifacts')
         console.log(thumbs,thumbRootUrl)

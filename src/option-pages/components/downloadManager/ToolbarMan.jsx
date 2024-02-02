@@ -192,7 +192,7 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/store,selecte
 
   const ddToolbarData = [
     {
-      text:'Recofigure Setup',
+      text:'Recofigure Queue Setup',
       value:'reconfigure',
       icon:'fa fa-cog'
     },
@@ -226,9 +226,9 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/store,selecte
           {
             !queueStarted ? <>
 
-          <Button onMouseOut={e=>clearStatusBar()} 
+          {/*<Button onMouseOut={e=>clearStatusBar()} 
                   onMouseOver={e=>logStatusBar('ToolbarMan',`Reconfigure Queue Setup`)}
-                  caption="Reconfigure" icon="fa fa-cog" onClick={e=>onReconfigure(e)}/>
+                  caption="Reconfigure" icon="fa fa-cog" onClick={e=>onReconfigure(e)}/>*/}
             
             </>:<>
           {/* <Button onMouseOut={e=>clearStatusBar()} 

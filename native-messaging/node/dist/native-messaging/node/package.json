@@ -1,0 +1,20 @@
+{
+  "name": "llfetcher-native-messaging-server",
+  "version": "1.0.0",
+  "description": "LLFetcher Native Messaging Server with auto reload",
+  "main": "src/main.mjs",
+  "scripts": {
+    "start": "node src/main.mjs"
+  },
+  "author": "Putra Budiman <cristminix@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "base-64": "^1.0.0",
+    "bunyan-request-logger": "^0.2.5",
+    "bunyan-sfdx-no-dtrace": "^1.8.2",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  }
+}

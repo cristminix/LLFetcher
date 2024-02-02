@@ -7,6 +7,12 @@ class ComponentWithMessaging extends Component{
 	async sendMessageAsync(msg, data, target='content'){
 		
 		return new Promise((resolve, reject)=>{
+			if(!chrome){
+				reject( `running_in_dev_mode`)
+			}
+			if(!chrome.runtime){
+				reject( `running_in_dev_mode`)
+			}
 			const commandListener = (evt, source) => {
 				// console.log(evt)
 				chrome.runtime.onMessage.removeListener(commandListener)
@@ -41,6 +47,12 @@ class ComponentWithMessaging extends Component{
 		this.onMessageCommand(evt, source)
 	}
 	onMessage(){
+		if(!chrome){
+			return
+		}
+		if(!chrome.runtime){
+			return
+		}
 		try{
 			chrome.runtime.onMessage.removeListener(this.commandListener)
 			chrome.runtime.onMessage.addListener(this.commandListener)

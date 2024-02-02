@@ -1,5 +1,3 @@
-console.log('option-main.jsx')
-
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 // import OptionPage from './components/OptionPage'

@@ -10,8 +10,11 @@
     ],
     "host_permissions":[
       "https://www.linkedin.com/learning/*",
+      "https://www.youtube.com/*",
       "http://localhost:5000/*",
-      "http://127.0.0.1:5000/*"
+      "http://127.0.0.1:5000/*",
+      "http://localhost:7700/*",
+      "http://127.0.0.1:7700/*"
     ],
     
     "background":{

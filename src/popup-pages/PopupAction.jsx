@@ -42,29 +42,6 @@ class PopupAction extends ComponentWithMessaging{
 	onNavUpdate(nav){
 		this.setState({nav})
 	}
-	// onMessageCommand(evt, source){
-    // 	if(evt.name === 'cmd.getCourseSections'){
-	// 		const csi = evt.data
-	// 		const courseSectionInfoStr = JSON.stringify(csi)
-	// 		this.setState({courseSectionInfoStr})
-	// 		this.createCourseSections(csi)
-    // 	}
-	// }
-	// async createCourseTocs(items, section){
-	// 	const tocs = []
-	// 	const tocIds = []
-	// 	for(let i in items){
-	// 		const {title, slug, duration, itemStar, vStatusUrn} = items[i]
-	// 		const captionFmt = ""
-	// 		const captionUrl = ""
-	// 		const url = ""
-	// 		const toc = await this.mToc.create(title, slug, url, duration, captionUrl, captionFmt, section.id,itemStar,vStatusUrn)
-	// 		tocs.push(toc)
-	// 		tocIds.push(toc.id)
-	// 	}
-	// 	const newSection = await this.mSection.updateTocIds(section.id, tocIds)
-	// 	return [newSection, tocs]
-	// }
 
 	async loadCourseSections(){
 		console.log(`Popup.createCourseSections() empty csi `)
@@ -81,27 +58,7 @@ class PopupAction extends ComponentWithMessaging{
 
 		}
 	}
-	// async createCourseSections(csi){
-	// 	if(this.state.course){
-	// 		let sections = []
-	// 		let tocs = {}
-	// 		if( csi.length > 0){
-	// 			for(let i in csi){
-	// 				const {title,items,itemStars} = csi[i]
-	// 				const section = await this.mSection.create(title, slugify(title), this.state.course.id,itemStars)
-	// 				// console.log(section)
-	// 				const [newSection, newTocs] = await this.createCourseTocs(items, section)
-	// 				// console.log(newSection)
-	// 				sections.push(newSection)
-	// 				tocs[section.slug] = newTocs
-	// 			}
-	// 		}
-	// 		await this.updateCourseData(sections, tocs)
-	// 	}
 
-		
-				
-	// }
 	async activateOptionTab(slug){
 		const url = chrome.runtime.getURL(`options.html#/manager/${slug}`)
 		const tabs = await chrome.tabs.query({ url: `${chrome.runtime.getURL('options.html')}*` })

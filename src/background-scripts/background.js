@@ -4,6 +4,8 @@ import ChromeStorageIndexedDBWorker, {getDatabaseSize,
   getTableCount} from "../global/models/service-workers/ChromeStorageIndexedDBWorker"
 // const csidbWorker = new ChromeStorageIndexedDBWorker()
 // csidbWorker.start()
+import { connect, sendNativeMessage, sendNativeMessageAsync } from "./native-messaging"
+import base64 from "base-64"
 let db = null
 
 
@@ -99,7 +101,6 @@ async function delete_csidb(dbName, clear =false) {
       })
   }
 }
-create_prxCacheDb()
 async function create_prxCacheDb() {
     const request = indexedDB.open('main')
 
@@ -232,9 +233,17 @@ async function delete_prxCache(key, clear=false) {
   }
 }
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) =>{
-    // console.log(request,sendResponse)
+    console.log(request,sendResponse)
     const {name,data,key} = request   
-    if(name === 'csidb.select'){
+    if(name.match(/^nm\./)){
+      const cmd = name.replace(/^nm\./,'')
+      const packet64 = base64.encode(JSON.stringify({cmd,data}))
+      // sendNativeMessage(packet64)
+      sendNativeMessageAsync(packet64,(response)=>{
+        sendResponse(response)
+      })
+    }
+    else if(name === 'csidb.select'){
       get_csidb(data.dbName).then((item)=>{
           sendResponse(item)
       })
@@ -317,3 +326,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) =>{
     }
     return true
   })
+
+create_prxCacheDb()
+connect()

@@ -103,6 +103,15 @@
           "hidden": false,
           "hasChild": false,
           "dev": true
+        },
+        "video-analizer": {
+          "title": "Video Analizer",
+          "iconCls": "fa fa-youtube",
+          "path": "/developer/video-analizer",
+          "order": 0,
+          "hidden": false,
+          "hasChild": false,
+          "dev": true
         }
       }
     },

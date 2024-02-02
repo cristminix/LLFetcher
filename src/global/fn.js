@@ -18,8 +18,8 @@ const slugify = str => {
 const onMessage = (callback) => {
 	try{
 		chrome.runtime.onMessage.addListener((evt, source) =>{
-			callback(evt, source);  
-		});
+			callback(evt, source)  
+		})
 	}catch(e){
 		console.log(e)
 	}	
@@ -34,7 +34,7 @@ const sendMessage = async(eventName, data = null, target='content', callback = f
     // try{
 		if(target === 'content'){
 	    	chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-		        const tab = tabs[0];
+		        const tab = tabs[0]
 		        chrome.tabs.sendMessage(tab.id, evt,  (response) => {
                     if (!chrome.runtime.lastError) {
                         // if you have any response
@@ -81,17 +81,17 @@ const formatBytes=(bytes) =>{
     // bytes = parseInt(bytes)
     
     if (bytes === 0) {
-      return '0 Bytes';
+      return '0 Bytes'
     }
   
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    let i = Math.floor(Math.log(bytes) / Math.log(1024));
-    let formattedValue = parseFloat((bytes / Math.pow(1024, i)).toFixed(2));
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
+    let i = Math.floor(Math.log(bytes) / Math.log(1024))
+    let formattedValue = parseFloat((bytes / Math.pow(1024, i)).toFixed(2))
     if(isNaN(formattedValue) ||!isFinite(bytes)) {
         formattedValue = 0
         i = 0
     }
-    return `${formattedValue} ${sizes[i]}`;
+    return `${formattedValue} ${sizes[i]}`
   }
   const makeDelay = ms => {
     let timer = 0
@@ -99,7 +99,7 @@ const formatBytes=(bytes) =>{
         clearTimeout (timer)
         timer = setTimeout(callback, ms)
         return timer
-    };
+    }
 
 }
 function generateBatchScript(config){
@@ -204,7 +204,7 @@ function generateShellScript(config){
 function generateM3u(config){
     const playlistFile = `${config.slug}-${config.fmt}.m3u`
 
-    let buffer = "#EXTM3U\n";
+    let buffer = "#EXTM3U\n"
     let number = 0
     for(let sidx in config.sections){
         const section = config.sections[sidx]
@@ -264,20 +264,20 @@ function createDownloadFile(kind,config){
     anchor.click()
 }
 const timeout =(ms)=> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms))
 }
 function calculateSpeed(loaded,startTime,endTime) {
     //Time taken in seconds
-    let timeDuration = (endTime - startTime) / 1000;
+    let timeDuration = (endTime - startTime) / 1000
     //total bots
-    let loadedBits = loaded;
-    let speedInBps = (loadedBits / timeDuration).toFixed(2);
-    // let speedInKbps = (speedInBps / 1024).toFixed(2);
-    // let speedInMbps = (speedInKbps / 1024).toFixed(2);
+    let loadedBits = loaded
+    let speedInBps = (loadedBits / timeDuration).toFixed(2)
+    // let speedInKbps = (speedInBps / 1024).toFixed(2)
+    // let speedInMbps = (speedInKbps / 1024).toFixed(2)
   
-    // bitOutput.innerHTML += `${speedInBps}`;
-    // kboutput.innerHTML += `${speedInKbps}`;
-    // mboutput.innerHTML += `${speedInMbps}`;
+    // bitOutput.innerHTML += `${speedInBps}`
+    // kboutput.innerHTML += `${speedInKbps}`
+    // mboutput.innerHTML += `${speedInMbps}`
 
     return speedInBps
 }
@@ -293,7 +293,17 @@ const formatLeadingZeros = (number, size=2) => {
         useGrouping: false
     })
 }
-
+const getQueryStringFromUrlAsObject = (url) => {
+    const urlObj = new URL(url)
+    const queryParams = urlObj.searchParams
+    const queryParamsObj = {}
+  
+    for (const [key, value] of queryParams) {
+      queryParamsObj[key] = value 
+    }
+  
+    return queryParamsObj
+  }
 export {
     applyJQueryContainsRegex,
     slugify,
@@ -304,5 +314,6 @@ export {
     makeDelay,
     createDownloadFile,
     timeout,
-    calculateSpeed,formatLeadingZeros   
+    calculateSpeed,formatLeadingZeros,
+    getQueryStringFromUrlAsObject   
 }

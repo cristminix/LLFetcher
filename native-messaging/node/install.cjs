@@ -36,7 +36,16 @@ const main = async()=>{
         console.error(e)
     }
     console.log("Generating registry-entries.reg")
-    const manifestFullPath = path.resolve(manifestFilePath)
+    /*
+    Windows Registry Editor Version 5.00
+
+[HKEY_CURRENT_USER\Software\Microsoft\Edge\NativeMessagingHosts\com.cristminix.llfetcher]
+@="E:\\projects\\LLFetcher\\native-messaging\\node\\dist\\manifest.json"
+
+
+    */
+    let manifestFullPath = JSON.stringify(path.resolve(manifestFilePath))
+    console.log(manifestFullPath)
     const regFilePath = `${__dirname}/dist/registry-entries.reg`
     let registryKey = `HKEY_CURRENT_USER\\Software\\Google\\Chrome\\NativeMessagingHosts\\`
     if(browserName === 'msedge'){
@@ -44,7 +53,7 @@ const main = async()=>{
     }
     let registryEntriesBuff = `Windows Registry Editor Version 5.00
     [${registryKey}${manifest.name}]
-    @="${manifestFullPath}"`
+    @=${manifestFullPath}`
 
     console.log(registryEntriesBuff)
     try{

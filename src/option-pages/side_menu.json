@@ -16,6 +16,25 @@
       "hasChild": true,
       "dev": false
     },
+    "native-clients": {
+      "title": "Native Client App",
+      "iconCls": "fa fa-cog",
+      "path": "/native-client-app",
+      "order": 0,
+      "hidden": false,
+      "hasChild": true,
+      "dev": false,
+      "childItems": {
+        "native-client": {
+          "title": "Native Client",
+          "iconCls": "bi bi-gear",
+          "path": "/native-client-app/native-client",
+          "order": 0,
+          "hidden": false,
+          "dev": true
+        }
+      }
+    },
     "download": {
       "title": "Download",
       "path": "/download",
@@ -63,12 +82,6 @@
         "course": {
           "title": "Course Api",
           "path": "/developer/course-api",
-          "iconCls": "bi bi-gear",
-          "order": 0
-        },
-        "native-client": {
-          "title": "Native Client",
-          "path": "/developer/native-client",
           "iconCls": "bi bi-gear",
           "order": 0
         },
@@ -224,5 +237,7 @@
         }
       }
     }
-  }
+    
+  },
+  "hasChild": true
 }

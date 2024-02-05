@@ -35,7 +35,8 @@ const parseMessage = (message,LOG)=>{
         case 'custom':
             break
         case 'ping':
-            output = 'PONG'
+            messageObj.output = 'PONG'
+            output = messageObj
             break
     }
     sendMessageToChrome(output)

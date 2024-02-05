@@ -14,6 +14,7 @@ import DatabasePage, {loader as databaseLoader} from "./components/DatabasePage"
 // import TestPage, {loader as testPageLoader} from "./components/TestPage"
 import DeveloperPage,{loader as developerPageLoader} from './components/DeveloperPage'
 import ErrorPage from "./ErrorPage"
+import NativeClientApp, {loader as ncAppLoader} from './components/NativeClientApp'
 
 export default function Router({config, store}){
         
@@ -32,7 +33,9 @@ export default function Router({config, store}){
                 <Route  path="/database" element={<DatabasePage store={store} />}/>
                 <Route  path="/developer" element={<DeveloperPage store={store} config={config}/>} loader={developerPageLoader}/>
                 <Route  path="/developer/:page" element={<DeveloperPage store={store} config={config}/>} loader={developerPageLoader}/>
-              
+                <Route  path="/native-client-app" element={<NativeClientApp store={store} config={config}/>} loader={ncAppLoader}/>
+                <Route  path="/native-client-app/:page" element={<NativeClientApp store={store} config={config}/>} loader={ncAppLoader}/>
+                
             </Route>
                 
 

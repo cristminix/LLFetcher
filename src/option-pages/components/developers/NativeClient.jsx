@@ -80,8 +80,7 @@ const NativeClient = ({store,config}) => {
 	}
     
     const updateList = async () => {
-        const newGrid = Object.assign({}, grid)
-        setGrid(null)
+        
         const records = [{
             cmd : 'ping',
             desc :'Ping Module',
@@ -89,11 +88,13 @@ const NativeClient = ({store,config}) => {
             output:'',
             status:0
         }]
-       
-        console.log(records)
-        newGrid.records = records
-        setGrid(newGrid)
-        // updateStorageSize()
+        
+        setGrid(prevGrid => {
+            return {
+               ...prevGrid,
+                records
+            }
+        })
     }
     useEffect(()=>{
         updateList()        

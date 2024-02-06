@@ -23,14 +23,32 @@
       "order": 0,
       "hidden": false,
       "hasChild": true,
-      "dev": false,
+      "dev": true,
       "childItems": {
         "native-client": {
           "title": "Native Client",
           "iconCls": "bi bi-gear",
           "path": "/native-client-app/native-client",
-          "order": 0,
+          "order": "1",
           "hidden": false,
+          "dev": true
+        },
+        "user-management": {
+          "title": "User Management",
+          "iconCls": "fa fa-users",
+          "path": "/native-client-app/user-management",
+          "order": "1",
+          "hidden": false,
+          "hasChild": false,
+          "dev": true
+        },
+        "yt-upload-pv": {
+          "title": "YT Upload PV",
+          "iconCls": "fa fa-youtube",
+          "path": "/native-client-app/yt-upload",
+          "order": "2",
+          "hidden": false,
+          "hasChild": false,
           "dev": true
         }
       }
@@ -65,7 +83,9 @@
           "title": "Menu Manager",
           "path": "/developer/menu-manager",
           "iconCls": "bi bi-gear",
-          "order": 0
+          "order": "-1",
+          "hidden": false,
+          "dev": false
         },
         "dev-api": {
           "title": "Dev Api",
@@ -237,7 +257,6 @@
         }
       }
     }
-    
   },
   "hasChild": true
 }

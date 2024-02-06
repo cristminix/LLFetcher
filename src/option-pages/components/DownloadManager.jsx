@@ -194,7 +194,11 @@ const DownloadManager = ({store, config}) => {
       onQueueFinished(queueFinished)
     },[queueFinished])
     
-
+    const updateCourse = nCourse => {
+      setActiveCourseData((prevActiveCourseData)=>{
+        return {...oActiveCourseData,course:nCourse}
+      })
+    }
     if(activeCourseData){
       console.log(activeCourseData)
       const {course, authors, sections, tocs}  = activeCourseData
@@ -202,7 +206,7 @@ const DownloadManager = ({store, config}) => {
       
       <div className="download-manager min-h-screen">
         <Toast ref={toastRef}/>
-        <CourseInfo store={store} course={course} authors={authors} selectedFmt={selectedFmt} selectTrans={selectTrans} selectedTrans={selectedTrans} />
+        <CourseInfo store={store} course={course} updateCourse={nCourse=>updateCourse(nCourse)} authors={authors} selectedFmt={selectedFmt} selectTrans={selectTrans} selectedTrans={selectedTrans} />
         <ToolbarMan alreadySetup={alreadySetup} toast={toast} 
                     setAlreadySetup={setAlreadySetup}
                     reconfigureSetup={reconfigureSetup}

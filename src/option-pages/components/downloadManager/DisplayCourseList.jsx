@@ -20,7 +20,7 @@ const CourseDisplay = ({store,config,course})=>{
     return <>
     <div className="course-display flex gap-2 mb-2 bg-gray-50 dark:bg-slate-800 p-4">
         {
-            thumbnailUrl?<div style={{backgroundImage:`url('${thumbnailUrl}'`}} className={`flex-none w-[256px] bg-cover thumbnail-container rounded rounded-md  `}>
+            thumbnailUrl?<div style={{backgroundImage:`url('${thumbnailUrl}'`}} className={`flex-none min-h-[128px] w-[256px] bg-cover thumbnail-container rounded rounded-md  `}>
                 
             </div>:null
         }    

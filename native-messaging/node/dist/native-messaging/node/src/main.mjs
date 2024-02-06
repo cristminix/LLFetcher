@@ -7,6 +7,8 @@ import os from 'os'
 import bunyan from 'bunyan-sfdx-no-dtrace'
 import RequestLogger from 'bunyan-request-logger'
 import base64 from 'base-64'
+import { DS } from "./api/data-source/index.js"
+
 
 function isBase64(str) {
     const base64Regex = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
@@ -31,16 +33,17 @@ const LOG = bunyan.createLogger(loggerConfig)
 const HTTP_LOG = RequestLogger(loggerConfig).requestLogger()
 
 const app = express()
-
+const datasource = new DS(LOG)
+let ds = null
 app.use(HTTP_LOG)
-http.createServer(app).listen(7700)
 
 app.get('/:eventName', function(request, response) {
 
     const delay = request.query.delay
     // On an HTTP request, write stuff to stdout to communicate with Chrome.
     const outputMessage = JSON.stringify(request.params.eventName)
-    const buf = new Buffer(4) // 32 bits.
+    const buf = Buffer.allocUnsafe(4) // 32 bits.
+
     buf.writeInt32LE(outputMessage.length, 0) // Use writeInt32BE if you're running on a big-endian architecture.
 
     function sendMessageToChrome() {
@@ -71,7 +74,7 @@ process.stdin.on('readable', async() => {
     // read as an unsigned 32-bit integer.
     process.stdin.setEncoding('utf8')
     var chunk = process.stdin.read(4) // Read the first 4 bytes to get length
-    var length = new Buffer(chunk).readUInt32LE(0) // Convert to integer
+    var length = Buffer.from(chunk).readUInt32LE(0) // Convert to integer
 
     // TODO: What if we don't have all the data yet?
     let message = process.stdin.read(length)
@@ -86,7 +89,7 @@ process.stdin.on('readable', async() => {
         const seed = (new Date()).getTime()
         const moduleImport = await import(/* @vite-ignore */  `./dynamic-module.mjs?rand=${seed}`)
         const {parseMessage} = moduleImport
-        parseMessage(message,LOG) 
+        parseMessage(message,LOG, datasource) 
     }catch(e){
         // console.error(e)
         LOG.error(e.toString())
@@ -114,3 +117,15 @@ process.on('uncaughtException', function(error) {
     console.error('Process got uncaughtException', error)
 })
 
+ds = datasource.initialize()
+if(ds){
+    ds.then(f=>{
+        LOG.info('Database connected')
+    }).catch(e=>{
+        LOG.error('Database not connected')
+    })
+}else{
+    LOG.error('Failed to initialize sqlite database')
+}
+
+http.createServer(app).listen(7700)

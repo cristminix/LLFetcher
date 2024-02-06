@@ -1,25 +1,34 @@
 import { Link, useLoaderData } from 'react-router-dom'
 import {Component,createRef,useState,useEffect} from "react"
-import NativeClient from './developers/NativeClient'
+// import NativeClient from './nat/NativeClient'
+import NativeClient from './native-client-app/NativeClient'
+import UserManagement from './native-client-app/UserManagement'
+import YTUpload from './native-client-app/YTUpload'
 
 export async function loader({ params }) {
-    const { table, page } = params
-    return { table, page }
+    const { module, pageNumber } = params
+    return { module, pageNumber }
 }
 
 
 const NativeClientApp = ({store,config}) => {
-    const {table, page} = useLoaderData()
+    const {module, pageNumber} = useLoaderData()
 
-    let viewMode = table ? 'explorer' : 'manager'
-    if(table == 'table-manager'){
-        viewMode = 'manager'
-    }
+    // let viewMode = table ? 'explorer' : 'manager'
+    // if(table == 'table-manager'){
+    //     viewMode = 'manager'
+    // }
 
-    if(page == 'native-client'){
+    if(module == 'native-client'){
         return <NativeClient store={store} config={config}/>
     }
-    return <div className="native-client-app">
+    else if(module == 'user-management'){
+        return <UserManagement store={store} config={config} pageNumber={pageNumber}/>
+    }
+    else if(module == 'yt-upload'){
+        return <YTUpload store={store} config={config} pageNumber={pageNumber}/>
+    }
+    else return <div className="native-client-app">
         {
             // viewMode === 'explorer' ? <DBExplorer store={store} table={table} page={page}/> : ''
         }

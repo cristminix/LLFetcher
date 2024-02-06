@@ -9,7 +9,7 @@ import VideoPlayer from './developers/VideoPlayer'
 import MenuManager from './developers/MenuManager'
 import QueueMan from './developers/QueueMan'
 import IndexedDb from './developers/IndexedDb'
-import NativeClient from './developers/NativeClient'
+// import NativeClient from './developers/NativeClient'
 import VideoAnalizer from './youtube/VideoAnalizer'
 export async function loader({ params }) {
     const { table, page } = params
@@ -31,9 +31,7 @@ const DeveloperPage = ({store,config}) => {
     if(page == 'fetch-api'){
         return <FetchApi store={store} config={config}/>
     }
-    if(page == 'native-client'){
-        return <NativeClient store={store} config={config}/>
-    }
+    
     if(page == 'indexed-db'){
         return <IndexedDb store={store} config={config}/>
     }

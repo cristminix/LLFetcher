@@ -5,8 +5,8 @@ import Pager from "../../../components/shared/Pager"
 import Grid from "../../../components/shared/Grid"
 import Button from "../../../components/shared/ux/Button"
 import {formatBytes, sendMessage, slugify} from "../../../global/fn"
-import CheckBox from "../../../components/shared/ux/CheckBox"
-import { devApiUrl } from "./fn"
+// import CheckBox from "../../../components/shared/ux/CheckBox"
+// import { devApiUrl } from "../developers/fn"
 const inputCls= "py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
 import { crc32 } from "crc"
 
@@ -101,7 +101,7 @@ const NativeClient = ({store,config}) => {
     },[])
     
 	const containerCls = "border mb-2 rounded-xl shadow-sm p-6 dark:bg-gray-800 dark:border-gray-700"
-	return(<div>
+	return(<div className="min-h-screen">
         {
             // showForm?<MenuForm data={formData} className={containerCls} hideForm={e=>setShowForm(false)}/>:null
         }

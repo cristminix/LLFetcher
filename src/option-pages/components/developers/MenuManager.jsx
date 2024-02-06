@@ -7,6 +7,8 @@ import Button from "../../../components/shared/ux/Button"
 import {formatBytes, slugify} from "../../../global/fn"
 import CheckBox from "../../../components/shared/ux/CheckBox"
 import { devApiUrl } from "./fn"
+// import ModalForm from "./menu-manager/ModalForm"
+import jQuery from "jquery"
 const inputCls= "py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
 // console.log(import.meta.env)
 import { crc32 } from "crc"
@@ -52,7 +54,8 @@ const MenuForm = ({data=null, className,hideForm})=>{
         .then(data => {
             // Handle the response data
             console.log('Response:', data);
-            hideForm()
+            // hideForm()
+            jQuery('#basic-modal-menu-closer').click()
         })
         .catch(error => {
         // Handle errors
@@ -75,79 +78,112 @@ const MenuForm = ({data=null, className,hideForm})=>{
             setOrder(order)
         }
     },[data])
+ 
+    
+    useEffect(()=>{
+        HSOverlay.autoInit()
+    },[])
     return <>
-    <form className={className}>
+    <button id="basic-modal-menu-clicker" type="button" className="hidden py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600" data-hs-overlay="#hs-basic-modal-menu">
+  Open modal
+</button>
+
+<div id="hs-basic-modal-menu" className="hs-overlay hs-overlay-open:opacity-100 hs-overlay-open:duration-500 hidden w-full h-full fixed top-0 start-0 z-[60] opacity-0 overflow-x-hidden transition-all overflow-y-auto pointer-events-none">
+  <div className="hs-overlay-open:opacity-100 hs-overlay-open:duration-500 opacity-0 transition-all sm:max-w-lg sm:w-full m-3 sm:mx-auto">
+    <div className="flex flex-col bg-white border shadow-sm rounded-xl pointer-events-auto dark:bg-gray-800 dark:border-gray-700 dark:shadow-slate-700/[.7]">
+      <div className="flex justify-between items-center py-3 px-4 border-b dark:border-gray-700">
+        <h3 className="font-bold text-gray-800 dark:text-white">
+          {title}
+        </h3>
+        <button type="button" id="basic-modal-menu-closer" onClick={e=>hideForm(e)} className="flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-full border border-transparent text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-gray-700 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600" data-hs-overlay="#hs-basic-modal-menu">
+          <span className="sr-only">Close</span>
+          <svg className="flex-shrink-0 w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div className="p-4 overflow-y-auto">
+      <form className={'className'}>
     <div className="flex  items-center p-2 px-2">
-        <div className="w-[150px]">
+        <div className="w-[70px]">
             <label className="font-bold">Title</label>
         </div>
         <div className="flex-grow">
-            <input className={inputCls} defaultValue={title} onChange={e=>setTitle(e.target.value)}/>
+            <input tabIndex={1} className={inputCls} defaultValue={title} onChange={e=>setTitle(e.target.value)}/>
         </div>
     </div>
     <div className="flex  items-center p-2 px-2">
-        <div className="w-[150px]">
+        <div className="w-[70px]">
             <label className="font-bold">Slug</label>
         </div>
         <div className="flex-grow">
-            <input className={inputCls} defaultValue={slug} onChange={e=>setSlug(e.target.value)}/>
+            <input tabIndex={2} className={inputCls} defaultValue={slug} onChange={e=>setSlug(e.target.value)}/>
         </div>
     </div>
     <div className="flex  items-center p-2 px-2">
-        <div className="w-[150px]">
+        <div className="w-[70px]">
             <label className="font-bold">Path</label>
         </div>
         <div className="flex-grow">
-            <input className={inputCls} defaultValue={path} onChange={e=>setPath(e.target.value)}/>
+            <input tabIndex={3} className={inputCls} defaultValue={path} onChange={e=>setPath(e.target.value)}/>
         </div>
     </div>
+    
+    
     <div className="flex  items-center p-2 px-2">
-        <div className="w-[150px]">
-            <label className="font-bold">Icon Cls</label>
-        </div>
-        <div className="flex-grow">
-            <input className={inputCls} defaultValue={iconCls} onChange={e=>setIconCls(e.target.value)}/>
-        </div>
-    </div>
-    <div className="flex  items-center p-2 px-2">
-        <div className="w-[150px]">
-            <label className="font-bold">Order</label>
-        </div>
-        <div className="flex-grow">
-            <input className={inputCls} defaultValue={order} onChange={e=>setOrder(e.target.value)}/>
-        </div>
-    </div>
-    <div className="flex  items-center p-2 px-2">
-        <div className="w-[150px]">
+        <div className="w-[70px]">
             <label className="font-bold">Parent</label>
         </div>
         <div className="flex-grow">
-            <input className={inputCls} defaultValue={parent} onChange={e=>setParent(e.target.value)}/>
+            <input tabIndex={4} className={inputCls} defaultValue={parent} onChange={e=>setParent(e.target.value)}/>
         </div>
     </div>
-          
+    <div className="flex  items-center p-2 px-2">
+        <div className="w-[70px]">
+            <label className="font-bold">Order</label>
+        </div>
+        <div className="w-[140px]">
+            <input tabIndex={5} type="number" className={`${inputCls}`} defaultValue={order} onChange={e=>setOrder(e.target.value)}/>
+        </div>
+    </div>
+    <div className="flex  items-center p-2 px-2">
+        <div className="w-[70px]">
+            <label className="font-bold">Icon Cls</label>
+        </div>
+        <div className="flex-grow">
+            <input tabIndex={6} className={inputCls} defaultValue={iconCls} onChange={e=>setIconCls(e.target.value)}/>
+        </div>
+    </div>      
     <div className="flex items-center p-2 px-2">
-        <div className="w-[150px]">
-            <label className="font-bold">Hidden {hidden?'Y':'N'}</label>
+    <div>
+            <CheckBox tabIndex={7} label="" checked={hidden} onChange={checked=>setHidden(checked)}/>
         </div>
-        <div>
-            <CheckBox label="" checked={hidden} onChange={checked=>setHidden(checked)}/>
+        <div className="w-[70px]">
+            <label className="font-bold">Hidden </label>
         </div>
+        
     </div>
     <div className="flex items-center p-2 px-2">
-        <div className="w-[150px]">
-            <label className="font-bold">Development Mode</label>
+    <div>
+            <CheckBox tabIndex={8} label="" checked={dev} onChange={checked=>setDev(checked)}/>
         </div>
-        <div>
-            <CheckBox label="" checked={dev} onChange={checked=>setDev(checked)}/>
+        <div className="w-[140px]">
+            <label className="font-bold">Dev Mode</label>
         </div>
+        
     </div>
-            <div className="flex p-2 gap-2">
-          
-                <Button disabled={false} icon="fa fa-save" onClick={e=> saveForm(e)} caption="Save"/>
-                <Button disabled={false} icon="fa fa-times" onClick={e=> hideForm(e)} caption="Cancel"/>
-            </div>
+           
     </form>
+      </div>
+      <div className="flex justify-end items-center gap-x-2 py-3 px-4 border-t dark:border-gray-700">
+        <button tabIndex={9} onClick={e=>hideForm(e)} type="button" className="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-white dark:hover:bg-gray-800 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600" data-hs-overlay="#hs-basic-modal-menu">
+          Close
+        </button>
+        <button tabIndex={10} onClick={e=>saveForm(e)} type="button" className="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600">
+          Save changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
     </>
 }
 
@@ -186,6 +222,12 @@ const MenuManager = ({store,config}) => {
         setFormData(defaultMenu)
         setShowForm(true)
 
+        jQuery('#basic-modal-menu-clicker').click()
+        setTimeout(()=>{
+            jQuery('#hs-basic-modal-menu form input:first').focus()
+
+        },1000)
+
     }
     const editMenuForm = async(item,index)=>{
         console.log(item)
@@ -197,6 +239,11 @@ const MenuManager = ({store,config}) => {
         }
         setFormData(item)
         setShowForm(true)
+        jQuery('#basic-modal-menu-clicker').click()
+        setTimeout(()=>{
+            jQuery('#hs-basic-modal-menu form input:first').focus()
+
+        },1000)
 
     }
     const deleteMenuForm = async(item,index)=>{
@@ -350,9 +397,8 @@ const MenuManager = ({store,config}) => {
     }
 	const containerCls = "border mb-2 rounded-xl shadow-sm p-6 dark:bg-gray-800 dark:border-gray-700"
 	return(<div>
-        {
-            showForm?<MenuForm data={formData} className={containerCls} hideForm={e=>setShowForm(false)}/>:null
-        }
+        <MenuForm data={formData} className={containerCls} hideForm={e=>setShowForm(false)}/>
+        
         
         <div  className={`menu-manager ${containerCls}`}>
         <div className="explorer-toolbar">

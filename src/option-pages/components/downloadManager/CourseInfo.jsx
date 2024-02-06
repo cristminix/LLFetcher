@@ -1,9 +1,12 @@
 import CourseAuthors from "./CourseAuthors"
 import {courseUrlFromSlug,authorUrlFromSlug, isTimeExpired} from "../../../global/course-api/course_fn"
 import { getCode, getName } from 'country-list'
+import { useEffect, useState } from "react"
+import CourseApi from "../../../global/course-api/CourseApi"
 
-const CourseInfo = ({store, course, authors,selectedFmt,selectedTrans}) => {
+const CourseInfo = ({store, course,updateCourse, authors,selectedFmt,selectedTrans}) => {
     // console.log(course)
+    const [thumbnailUrl,setThumbnailUrl]= useState(null)
     const displaySelectItem = (item,t=null) => {
         if(typeof item === 'string'){
             if(item.match(/^select/i)){
@@ -20,18 +23,33 @@ const CourseInfo = ({store, course, authors,selectedFmt,selectedTrans}) => {
     const countryCode = displaySelectItem(selectedTrans).toUpperCase()
     const countryName = getName(countryCode)
     const countryFlagUrl = `https://purecatamphetamine.github.io/country-flag-icons/3x2/${countryCode}.svg`
-    let thumbnailUrl = null
-    if(course){
-        console.log(course)
-        const thumbnails = store.get('Thumbnail').getListByCourseId(course.id)
-        // console.log(thumbnails)
-        if(thumbnails.length>0){
-            const thumbnail = thumbnails[0]
-            if(!isTimeExpired(thumbnail.expiresAt)){
-                thumbnailUrl = thumbnails[0].url            
+    const updateCourseThumbnail = async() => {
+        const nCourseApi = new CourseApi(store)
+        const nCourse = await nCourseApi.getCourseInfo(course.slug, true)
+        updateCourse(nCourse)
+    }
+    const getThumbnailUrl = async() => {
+        if(course){
+            // console.log(course)
+            const thumbnails = store.get('Thumbnail').getListByCourseId(course.id)
+            // console.log(thumbnails)
+            if(thumbnails.length>0){
+                const thumbnail = thumbnails[0]
+                if(!isTimeExpired(thumbnail.expiresAt,false)){
+                    const nThumbnailUrl = thumbnails[0].url 
+                    setThumbnailUrl(nThumbnailUrl)           
+                }else{
+                    console.error('Thumbnail expired')
+                    console.log('updating thumbnail')
+                    updateCourseThumbnail()
+                }
             }
         }
-    }
+    }   
+    
+    useEffect(()=>{
+        getThumbnailUrl()
+    },[course])
     return (<><div className="course-info">
         <div className="flex">
         {

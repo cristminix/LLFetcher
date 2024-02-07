@@ -28,6 +28,8 @@ const onMessage = (callback) => {
 const MsgEvt = (name, data = null) => {
 	return {name, data}
 }
+
+
 const sendMessage = async(eventName, data = null, target='content', callback = f => f) => {
 	// return new Promise((resolve, reject)=>{
         const evt = MsgEvt(eventName, data)
@@ -304,6 +306,21 @@ const getQueryStringFromUrlAsObject = (url) => {
   
     return queryParamsObj
   }
+
+const getFile64=async(file) =>{
+    return new Promise((resolve, reject)=>{
+        const reader = new FileReader()
+        reader.readAsDataURL(file)
+        
+        reader.onload = function () {
+            resolve(reader.result)
+        }
+        reader.onerror = function (error) {
+            reject(error)
+        }
+    })
+    
+}
 export {
     applyJQueryContainsRegex,
     slugify,
@@ -315,5 +332,6 @@ export {
     createDownloadFile,
     timeout,
     calculateSpeed,formatLeadingZeros,
-    getQueryStringFromUrlAsObject   
+    getQueryStringFromUrlAsObject,
+    getFile64   
 }

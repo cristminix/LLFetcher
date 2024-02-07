@@ -77,7 +77,7 @@ process.stdin.on('readable', async() => {
     var length = Buffer.from(chunk).readUInt32LE(0) // Convert to integer
 
     // TODO: What if we don't have all the data yet?
-    let message = process.stdin.read(length)
+    let message = process.stdin.read()
     // while (chunk !== null) {
     //     message += chunk
     //     chunk - process.stdin.read()

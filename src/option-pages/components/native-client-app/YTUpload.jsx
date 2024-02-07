@@ -1,14 +1,79 @@
-import schema from "../../side_menu.json"
+// import schema from "../../side_menu.json"
 
 import { useEffect, useState } from "react"
 import Pager from "../../../components/shared/Pager"
 import Grid from "../../../components/shared/Grid"
 import Button from "../../../components/shared/ux/Button"
 import {formatBytes, sendMessage, slugify} from "../../../global/fn"
+import UploadForm, {createUntitledUpload} from "./form/UploadForm"
 // import CheckBox from "../../../components/shared/ux/CheckBox"
 // import { devApiUrl } from "../developers/fn"
-const inputCls= "py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
-import { crc32 } from "crc"
+import jQuery from "jquery"
+import Queue from "../developers/queue-man/Queue"
+class MessageQueue {
+    queue = null
+    running = false
+   constructor(){
+    this.queue = new Queue()
+   }
+   
+   run(){
+    if(!this.running){
+        this.running = true
+        this.runDelayed()
+    }
+   }
+
+   async sendMessageAsync(eventName, data, target, callback){
+    return new Promise((resolve, reject) => {
+        sendMessage(eventName, data, target, response=>{
+            callback(response)
+            resolve(response)
+        })
+
+    })
+   }
+   async runDelayed(){
+    while(!this.queue.isEmpty()){
+        const message = this.queue.dequeue()
+        const {eventName, data, target, callback} = message
+        await this.sendMessageAsync(eventName, data, target, callback)
+    }
+    this.running = false
+   }
+   enqueue(queue){
+    this.queue.enqueue(queue)
+    
+   }
+   sendMessage(eventName, data, target, callback) {
+        const messageId = (new Date).getTime().toString()
+
+        const queue = {messageId, eventName, data, target, callback}
+        this.enqueue(queue)
+        this.run()
+    }
+}
+const messageQueue = new MessageQueue()
+
+const ImgYtUpload = ({className,pk})=>{
+    const [source64,setSource64] = useState('')
+    useEffect(()=>{
+        if(pk){
+            setTimeout(async()=>{
+                messageQueue.sendMessage(`nm.api.cms.ytupload.get`, {pk},'background',response=>{
+                    // if(response.data.pk == pk){
+                        console.log({response})
+                        const {thumbnail} = response.output
+                        setSource64(thumbnail)
+                    // }
+                })
+            },1000)
+            
+        }
+    },[pk])
+
+    return <><img src={source64}/></>
+}
 
 const YTUpload = ({store,config,pageNumber}) => {
     const [grid,setGrid] = useState({
@@ -25,98 +90,47 @@ const YTUpload = ({store,config,pageNumber}) => {
     
     const onRefresh = f =>  updateList()
 
-    const addMenuForm = async(item,index)=>{
+    const addForm = async(item,index)=>{
         let parent = null
         if(item){
             parent = item.slug
         }
-        const defaultMenu = createUntitledMenu()
+        const defaultMenu = createUntitledUpload()
         defaultMenu.parent = parent
         setFormData(defaultMenu)
         setShowForm(true)
 
-        jQuery('#basic-modal-menu-clicker').click()
+        jQuery('#basic-modal-upload-clicker').trigger("click")
         setTimeout(()=>{
-            jQuery('#hs-basic-modal-menu form input:first').focus()
+            jQuery('#hs-basic-modal-upload form input:first').focus()
 
         },1000)
 
     }
-    const editMenuForm = async(item,index)=>{
+    const editForm = async(item,index)=>{
         console.log(item)
-        if(typeof item.hidden == "undefined"){
-            item.hidden = false
-        }
-        if(typeof item.dev == "undefined"){
-            item.dev = false
-        }
+        
         setFormData(item)
         setShowForm(true)
-        jQuery('#basic-modal-menu-clicker').click()
+        
+        jQuery('#basic-modal-upload-clicker').trigger("click")
         setTimeout(()=>{
-            jQuery('#hs-basic-modal-menu form input:first').focus()
+            jQuery('#hs-basic-modal-upload form input:first').focus()
 
         },1000)
 
     }
-    const deleteMenuForm = async(item,index)=>{
+    const deleteForm = async(item,index)=>{
         // console.log(item)
-        if(confirm(`Are you sure want to delete this menu "${item.title}"`)){
-            if(typeof item.hidden == "undefined"){
-                item.hidden = false
-            }
-            if(typeof item.dev == "undefined"){
-                item.dev = false
-            }
-            const formData = item
-            const options = {
-                method: 'POST', // or 'PUT', 'DELETE', etc.
-                headers: {
-                'Content-Type': 'application/json', // Specify the content type if sending JSON data
-                // Add any other headers if needed
-                },
-                body: JSON.stringify(formData) // Convert data to JSON string if sending JSON data
-            
-            }
-            // console.log(formData)
-            // Make the fetch request
-            fetch(devApiUrl('menu/update?delete=true'), options).then(response => response.json())
-            .then(data => {
-                // Handle the response data
-                console.log('Response:', data);
-                // hideForm()
-            })
-            .catch(error => {
-            // Handle errors
-            console.error('Error:', error);
+        if(confirm(`Are you sure want to delete this upload "${item.title}"`)){
+            sendMessage(`nm.api.cms.ytupload.delete`, {pk:item.id},'background',response=>{
+                console.log({response})
+                updateList()
             })
         }
 
     }
-   
-    const runCmd = async (item, idx) => {
-        console.log(item, idx)
-        setGrid(prevGrid => {
-            return {
-               ...prevGrid,
-                records : prevGrid.records.map((n_record,n_index) =>
-                    n_index === idx ? { ...n_record, status:1, output : '' } : n_record
-                )
-            }
-        })
-        sendMessage(`nm.${item.cmd}`, {idx},'background',response=>{
-            console.log({response})
-            setGrid(prevGrid => {
-                return {
-                   ...prevGrid,
-                    records : prevGrid.records.map((n_record,n_index) =>
-                        n_index === idx ? { ...n_record, status:2, output : response } : n_record
-                    )
-                }
-            })
-
-        })
-    }
+  
     
     const gridOptions = {
 		numberWidthCls : '1/8',
@@ -128,9 +142,15 @@ const YTUpload = ({store,config,pageNumber}) => {
 		// editUrl : (item) =>{ return `/DBerences/tts-server/${item.key}`},
 		// remoteUrl : (item) => `${config.getApiEndpoint()}/api/tts/DBerence?key=${item.key}`,
 		callbackFields : {
-			title : (field, value ,item) => {
+			thumbnail : (field, value ,item) => {
                 // console.log(item)
-				return <p className={`ml-${item.level*2}`}>{item.hasChild?'+':' '} {value}</p>
+                // if(!item.callback_called){
+                //     console.log('callbackFields called')
+                //     item.callback_called = true
+                    
+                    return <ImgYtUpload pk={item.id}/>
+                // }
+				// 
 			}, 
 			// value : (field, value, item, index) => {
 			// 	return editorFactory(item, index)
@@ -141,7 +161,8 @@ const YTUpload = ({store,config,pageNumber}) => {
             edit : (item, index, options, linkCls, gridAction) => {
 				return <>
                 
-                <Button loading={false} icon="fa fa-edit" caption="Edit" onClick={e => editMenuForm(item, index)}/>
+                <Button loading={false} icon="fa fa-edit" caption="Edit" onClick={e => editForm(item, index)}/>
+                <Button loading={false} icon="fa fa-trash" caption="Delete" onClick={e => deleteForm(item, index)}/>
                 
             </>
 	   
@@ -150,6 +171,7 @@ const YTUpload = ({store,config,pageNumber}) => {
 	}
     
     const updateList = async () => {
+        console.log('updateList called')
         const page = parseInt(pageNumber) || 1
         /*const nGrid  = await fetch(`http://localhost:7001/api/cms/users`).then(r=>r.json())
         
@@ -187,12 +209,14 @@ const YTUpload = ({store,config,pageNumber}) => {
         })
     }
     useEffect(()=>{
-        updateList()        
+        // if(pageNumber){
+            updateList()
+        // }        
     },[pageNumber])
     
 	const containerCls = "border mb-2 rounded-xl shadow-sm p-6 dark:bg-gray-800 dark:border-gray-700"
 	return(<div className="min-h-screen">
-        {/* <MenuForm data={formData} className={containerCls} hideForm={e=>setShowForm(false)}/> */}
+        <UploadForm updateList={e=>updateList()} data={formData} className={containerCls} hideForm={e=>setShowForm(false)}/>
 
         {
             // showForm?<MenuForm data={formData} className={containerCls} hideForm={e=>setShowForm(false)}/>:null
@@ -203,7 +227,7 @@ const YTUpload = ({store,config,pageNumber}) => {
             <div className="flex gap-2">
                 {/* <Button onClick={e=>exportMenu(e)} caption="Export json" icon="fa fa-file-text"/> */}
                 {
-                    !showForm?<Button onClick={e=>addMenuForm()} icon="fa fa-plus" caption="Add Upload"/>:null
+                    !showForm?<Button onClick={e=>addForm()} icon="fa fa-plus" caption="Add Upload"/>:null
                 }
                 
             </div>
@@ -220,7 +244,7 @@ const YTUpload = ({store,config,pageNumber}) => {
                       </div>
                       <div className="pager-container mt-3">
                         {
-                            grid ? <Pager path="/native-client-app/user-management" 
+                            grid ? <Pager path="/native-client-app/yt-upload" 
                                  page={grid.page} 
                                  total_pages={grid.total_pages} 
                                  limit={grid.limit}

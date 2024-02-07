@@ -81,10 +81,21 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 
 // Native Messaging
 function sendNativeMessage(message) {
-    port.postMessage(message)
+    // port.postMessage(message)
 }
-
+function string2Bin(str) {
+  var result = [];
+  for (var i = 0; i < str.length; i++) {
+    result.push(str.charCodeAt(i).toString(2));
+  }
+  return result;
+}
 async function sendNativeMessageAsync(message, callback) {
+    // console.log(message)
+    let utf8Encode = new TextEncoder()
+    const msgBa = string2Bin(message)
+    // console.log(msgBa)
+    
     return new Promise((resolve, reject) => {
         const onMessageCallback = (response) => {
             resolve(response)
@@ -93,7 +104,7 @@ async function sendNativeMessageAsync(message, callback) {
         }
         try{
             port.onMessage.addListener(onMessageCallback)
-            port.postMessage(message)
+            port.postMessage(msgBa)
 
         }catch(e){
             reject(e)
@@ -121,7 +132,7 @@ function onNativeMessage(eventName) {
             })
             break
         default:
-            sendNativeMessage('Event name', eventName, 'is unknown. Doing nothing.')
+            // sendNativeMessage('Event name', eventName, 'is unknown. Doing nothing.')
             break
     }
 }

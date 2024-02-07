@@ -23,15 +23,13 @@
       "order": 0,
       "hidden": false,
       "hasChild": true,
-      "dev": true,
       "childItems": {
         "native-client": {
           "title": "Native Client",
           "iconCls": "bi bi-gear",
           "path": "/native-client-app/native-client",
           "order": "1",
-          "hidden": false,
-          "dev": true
+          "hidden": false
         },
         "user-management": {
           "title": "User Management",
@@ -39,8 +37,7 @@
           "path": "/native-client-app/user-management",
           "order": "1",
           "hidden": false,
-          "hasChild": false,
-          "dev": true
+          "hasChild": false
         },
         "yt-upload-pv": {
           "title": "YT Upload PV",
@@ -48,8 +45,7 @@
           "path": "/native-client-app/yt-upload",
           "order": "2",
           "hidden": false,
-          "hasChild": false,
-          "dev": true
+          "hasChild": false
         }
       }
     },

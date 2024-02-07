@@ -233,13 +233,13 @@ async function delete_prxCache(key, clear=false) {
   }
 }
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) =>{
-    console.log(request,sendResponse)
+    // console.log(request,sendResponse)
     const {name,data,key} = request   
     if(name.match(/^nm\./)){
       const cmd = name.replace(/^nm\./,'')
-      const packet64 = base64.encode(JSON.stringify({cmd,data}))
+      // const packet64 = base64.encode(JSON.stringify({cmd,data}))
       // sendNativeMessage(packet64)
-      sendNativeMessageAsync(packet64,(response)=>{
+      sendNativeMessageAsync(JSON.stringify({cmd,data}),(response)=>{
         sendResponse(response)
       })
     }

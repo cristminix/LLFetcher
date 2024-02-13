@@ -181,10 +181,12 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/store,selecte
     }
     else if(e=='view_on_dev_queue_man'){
       document.location.hash=`/developer/queue-man?slug=${course.slug}`
-
     }
     else if(e=='reconfigure'){
       onReconfigure()
+    }
+    else if(e=='refresh_course_data'){
+      document.location.hash=`/course/add/${course.slug}?useM3Rec=0&refresh=1`
 
     }
     // console.log(e)
@@ -205,6 +207,11 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/store,selecte
       text:'Play in Video Player',
       value:'play_in_video_player',
       icon:'bi bi-play'
+    },
+    {
+      text:'Refresh Course Data',
+      value:'refresh_course_data',
+      icon:'bi bi-arrow-clockwise'
     }
   ]
   return (<><div className="toolbar-man pr-2 pt-4 pb-1">

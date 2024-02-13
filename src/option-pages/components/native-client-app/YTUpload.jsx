@@ -26,15 +26,25 @@ class MessageQueue {
 
    async sendMessageAsync(eventName, data, target, callback){
     return new Promise((resolve, reject) => {
-        sendMessage(eventName, data, target, response=>{
-            callback(response)
-            resolve(response)
-        })
+        try{
+            // console.log(eventName, data, target)
+            sendMessage(eventName, data, target, response=>{
+                if(typeof callback == 'function'){
+                    callback(response)
+                }
+                resolve(response)
+            })
+        }catch(e){
+            resolve(e)
+        }
+        
 
     })
    }
    async runDelayed(){
-    while(!this.queue.isEmpty()){
+    const emptyQueue = this.queue.isEmpty()
+    console.log(emptyQueue)
+    while(!emptyQueue){
         const message = this.queue.dequeue()
         const {eventName, data, target, callback} = message
         await this.sendMessageAsync(eventName, data, target, callback)
@@ -156,7 +166,11 @@ const YTUpload = ({store,config,pageNumber}) => {
 			// 	return editorFactory(item, index)
 			// }
 		},
-
+        callbackHeaders:{
+            title:(field,index, fields)=>{
+                return "Upload"
+            }
+        },
 		callbackActions : {
             edit : (item, index, options, linkCls, gridAction) => {
 				return <>

@@ -8,6 +8,12 @@ const GridHeaders = ({options}) => {
       {
       	options.headers.map((caption, index) =>{
       		const tableHeaderWidthCls = options.widthCls[index] || ''
+			if(options.callbackHeaders){
+				const field = options.fields[index]
+				if(options.callbackHeaders[field]){
+					caption = options.callbackHeaders[field](field,index,options.fields)
+				}
+			}
       		return (<th key={index} scope="col" className={`${tableHeaderWidthCls} ${tableHeaderCls}`}>{caption}</th>)
       	})
       }

@@ -90,7 +90,7 @@ class FetchStateInfo extends Component{
 		</>
 	}
 }
-const AddCoursePage=({useM3Rec, slug, store, config,onOk})=>{
+const AddCoursePage=({refresh,useM3Rec, slug, store, config,onOk})=>{
 	
 	const [xmlSchema,setXmlSchema] = useState(null)
 	const [course,setCourse] = useState(null)
@@ -199,6 +199,7 @@ const AddCoursePage=({useM3Rec, slug, store, config,onOk})=>{
 			return await doFetchCourseM3RecPrxCache(courseSlug)
 		}
 		const mCourse = store.get("Course")
+		const mDMSetup = store.get("DMSetup")
 		const mAuthor = store.get("Author")
 		const mSection = store.get("Section")
 		const mToc = store.get("Toc")
@@ -223,6 +224,14 @@ const AddCoursePage=({useM3Rec, slug, store, config,onOk})=>{
 			course = await courseApi.getCourseInfo(courseSlug,true)
 			
 			fetchInfoCiRef.current.setStatusCode(courseApi.courseXmlDocFetchStatus)
+			const dmsetup = mDMSetup.getByCourseId(course.id)
+			if(dmsetup){
+				const {exerciseFiles} = course
+				if(exerciseFiles){
+					console.log('updating dmsetup exercise files')
+					await mDMSetup.update(dmsetup.id,{exerciseFiles})
+				}
+			}
 		}
 		
 		
@@ -372,11 +381,12 @@ const CoursePage = ({store,config}) => {
     const qs= location.search
     const qp= new URLSearchParams(qs)
     const [useM3Rec,setUseM3Rec] = useState(parseInt(qp.get('useM3Rec')))
+    const [refresh,setRefresh] = useState(parseInt(qp.get('refresh')))
     const {ctl,slug} = useLoaderData()
     const [renderedPage,setRenderedPage] = useState("")
     const middleware = async(ctl,slug)=>{
     	const components = {
-    		'add' : <AddCoursePage useM3Rec={useM3Rec} config={config} slug={slug} store={store} onOk={f=>f}/>
+    		'add' : <AddCoursePage refresh={refresh} useM3Rec={useM3Rec} config={config} slug={slug} store={store} onOk={f=>f}/>
     	}
     	// console.log(ctl,slug)
     	setRenderedPage(components[ctl])

@@ -28,7 +28,9 @@ const onMessage = (callback) => {
 const MsgEvt = (name, data = null) => {
 	return {name, data}
 }
-
+const sendMessageNative = (message) => {
+    
+}
 
 const sendMessage = async(eventName, data = null, target='content', callback = f => f) => {
 	// return new Promise((resolve, reject)=>{

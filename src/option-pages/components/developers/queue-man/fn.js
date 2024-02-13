@@ -2,7 +2,118 @@ import { courseUrlFromSlug, isTimeExpired } from "../../../../global/course-api/
 import { formatLeadingZeros } from "../../../../global/fn"
 import { QueueResult } from "./Queue"
 import JsFileDownloader from "js-file-downloader"
+import FileSaver from 'file-saver'
+import streamSaver from 'streamsaver'
+const cdl_getOpeningIds = () => {
+    var ids = []
+    try {
+      ids = JSON.parse(localStorage.openWhenComplete)
+    } catch (e) {
+      localStorage.openWhenComplete = JSON.stringify(ids)
+    }
+    return ids
+  }
+  
+  const cdl_setOpeningIds = (ids)=> {
+    localStorage.openWhenComplete = JSON.stringify(ids)
+  }
+let cdl_overwrite = (item, suggest) =>{
+    suggest({filename: item.filename,
+        conflict_action: 'overwrite',
+        conflictAction: 'overwrite'
+    })
+    // Force all downloads to overwrite any existing files instead of inserting
+    // ' (1)', ' (2)', etc.
+    // conflict_action was renamed to conflictAction in
+    // https://chromium.googlesource.com/chromium/src/+/f1d784d6938b8fe8e0d257e41b26341992c2552c
+    // which was first picked up in branch 1580.
+}
+let cdl_changed = (delta)=> {
+    if (!delta.state ||
+        (delta.state.current != 'complete')) {
+      return
+    }
+    let ids = cdl_getOpeningIds()
+    if (ids.indexOf(delta.id) < 0) {
+      return
+    }
+    chrome.downloads.open(delta.id)
+    ids.splice(ids.indexOf(delta.id), 1)
+    cdl_setOpeningIds(ids)
+  }
 
+const chromeDownload = async (url, filename, onProgressCallback=f=>f)=>{
+    
+    return new Promise((resolve, reject)=>{
+      
+        chrome.downloads.onChanged.removeListener(cdl_changed)
+        cdl_changed = (delta)=> {
+            if (!delta.state ||
+                (delta.state.current != 'complete')) {
+              return
+            }
+            let ids = cdl_getOpeningIds()
+            if (ids.indexOf(delta.id) < 0) {
+              return
+            }
+            // chrome.downloads.open(delta.id)
+            resolve(true)
+            ids.splice(ids.indexOf(delta.id), 1)
+            cdl_setOpeningIds(ids)
+          }
+        chrome.downloads.onChanged.addListener(cdl_changed)
+
+        chrome.downloads.onDeterminingFilename.removeListener(cdl_overwrite)
+        cdl_overwrite = (item, suggest) =>{
+            suggest({filename,
+                conflict_action: 'overwrite',
+                conflictAction: 'overwrite'
+            })
+        }
+        chrome.downloads.onDeterminingFilename.addListener(cdl_overwrite)
+
+        chrome.downloads.download({url,filename}, function(downloadId) {
+            var ids = cdl_getOpeningIds()
+            if (ids.indexOf(downloadId) >= 0) {
+                return
+            }
+            ids.push(downloadId)
+            cdl_setOpeningIds(ids)
+        })
+    })
+
+}
+const downloadUsingStreamWriter = async (url, filename, onProgressCallback=f=>f)=>{
+    return new Promise((resolve, reject)=>{
+        const fileStream = streamSaver.createWriteStream(filename)
+        try{
+            fetch(url).then(res => {
+                const readableStream = res.body
+        
+                // more optimized
+                if (window.WritableStream && readableStream.pipeTo) {
+                return readableStream.pipeTo(fileStream)
+                    .then(() => {
+                        console.log('done writing')
+                        resolve(true)
+                    })
+                }
+        
+                window.writer = fileStream.getWriter()
+        
+                const reader = res.body.getReader()
+                const pump = () => reader.read()
+                .then(res => res.done
+                    ? writer.close()
+                    : writer.write(res.value).then(pump))
+        
+                pump()
+            })
+        }catch(e){
+            reject(e)
+        }
+    })
+}
 
 const checkSlocsExpired = (slocs)=>{
     let countExpired = 0
@@ -48,7 +159,9 @@ const checkQueueIsAllFinished = async (courseId, tocArray=[], mQState)=>{
     return recordsFiltered.length === tocArray.length
 }
 
-const downloadVtt = async(vttUrl,idx, course, toc, store, downloaderRef, qState, onProgressCallback=(e,idx,course,toc,opt,qState,t)=>null) => {
+const downloadVtt = async(vttUrl,idx, course, toc, store, downloaderRef, qState, provider,onProgressCallback=(e,idx,course,toc,opt,qState,t,provider)=>null) => {
+    console.log(provider)
+    
     return new Promise((resolve, reject)=>{
         const dmsetup = getDmStup(course.id, store)
     
@@ -60,23 +173,33 @@ const downloadVtt = async(vttUrl,idx, course, toc, store, downloaderRef, qState,
         const filenamePrefix = enableFilenameIndex ? `${formatLeadingZeros(idx+1)}-` : ''
         const filename = `${filenamePrefix}${toc.slug}-${selectedFmt}.vtt`
         const url = vttUrl
-        const downloader = new JsFileDownloader({
-            url,
-            autoStart : false,
-            filename,
-            timeout : 86400*1000,
-            process : e => {
-                onProgressCallback(e, idx, course, toc, {filename,url},qState, 't')
-            }
-        })
-        downloaderRef.current = downloader
+        let downloader = null 
+        if(provider=='js-file-downloader'){
+            downloader = new JsFileDownloader({
+                url,
+                autoStart : false,
+                filename,
+                timeout : 86400*1000,
+                process : e => {
+                    onProgressCallback(e, idx, course, toc, {filename,url},qState, 't',provider)
+                }
+            })
+            downloaderRef.current = downloader
 
-        downloader.start().then(function(){
-            resolve(true)
-        })
-        .catch(function(error){
-            reject(error)
-        })
+            downloader.start().then(function(){
+                resolve(true)
+            })
+            .catch(function(error){
+                reject(error)
+            })
+        }
+        else if(provider=='file-saver'){
+           downloadUsingStreamWriter(url, filename).then(stt=>resolve(stt)).catch(e=>reject(e))
+        }
+        else if(provider=='direct'){
+            chromeDownload(url, filename).then(stt=>resolve(stt)).catch(e=>reject(e))
+        }
+
     })
 }
 
@@ -85,8 +208,9 @@ const getDmStup = (courseId,store) => {
     return mDMSetup.getByCourseId(courseId)
 }
 
-const downloadMedia = async(mediaUrl, idx, course, toc, store, downloaderRef, qState, onProgressCallback=(e,idx,course,toc,opt,qState,t)=>null) =>{
+const downloadMedia = async(mediaUrl, idx, course, toc, store, downloaderRef, qState,provider,onProgressCallback=(e,idx,course,toc,opt,qState,t,provider)=>null) =>{
     
+    console.log(provider)
 
     return new Promise((resolve, reject)=>{
         const dmsetup = getDmStup(course.id, store)
@@ -99,22 +223,29 @@ const downloadMedia = async(mediaUrl, idx, course, toc, store, downloaderRef, qS
         const filenamePrefix = enableFilenameIndex ? `${formatLeadingZeros(idx+1)}-` : ''
         const filename = `${filenamePrefix}${toc.slug}-${selectedFmt}.mp4`
         const url = mediaUrl
-        const downloader = new JsFileDownloader({
-            url,
-            autoStart : false,
-            filename,
-            timeout : 86400*1000,
-            process : e => {
-                onProgressCallback(e, idx, course, toc, {filename,url},qState, 'm')
-            }
-        })
-        downloaderRef.current = downloader
-        downloader.start().then(function(){
-            resolve(true)
-        })
-        .catch(function(error){
-            reject(error)
-        })
+        let downloader = null 
+        if(provider=='js-file-downloader'){
+            downloader = new JsFileDownloader({
+                url,
+                autoStart : false,
+                filename,
+                timeout : 86400*1000,
+                process : e => {
+                    onProgressCallback(e, idx, course, toc, {filename,url},qState, 'm',provider)
+                }
+            })
+            downloaderRef.current = downloader
+            downloader.start().then(()=>{
+                resolve(true)
+            })
+            .catch((error)=>{
+                reject(error)
+            })
+        }else if(provider=='file-saver'){
+            downloadUsingStreamWriter(url, filename).then(stt=>resolve(stt)).catch(e=>reject(e))
+        }else if(provider=='direct'){
+            chromeDownload(url, filename).then(stt=>resolve(stt)).catch(e=>reject(e))
+        }
     })
 
 }

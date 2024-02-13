@@ -44,7 +44,7 @@ class ActionCSA extends Component{
 		return true
 	}
 	async getCookie(){
-		return cookiesToJSON()
+		return document.cookie
 	}
 	async validCoursePageAuto(){
 		return this.state.validCoursePage

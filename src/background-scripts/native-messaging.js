@@ -92,8 +92,8 @@ function string2Bin(str) {
 }
 async function sendNativeMessageAsync(message, callback) {
     // console.log(message)
-    let utf8Encode = new TextEncoder()
-    const msgBa = string2Bin(message)
+    // let encoder = new TextEncoder()
+    // const msgBa = encoder.encode(message).toString()
     // console.log(msgBa)
     
     return new Promise((resolve, reject) => {
@@ -104,7 +104,7 @@ async function sendNativeMessageAsync(message, callback) {
         }
         try{
             port.onMessage.addListener(onMessageCallback)
-            port.postMessage(msgBa)
+            port.postMessage(message)
 
         }catch(e){
             reject(e)
@@ -139,6 +139,7 @@ function onNativeMessage(eventName) {
 
 function onDisconnected() {
     console.error('Failed to connect. ' + chrome.runtime.lastError.message)
+
 }
 
 function connect() {

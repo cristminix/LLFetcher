@@ -7,6 +7,7 @@ import Button from "../../../components/shared/ux/Button"
 import {formatBytes, sendMessage, slugify} from "../../../global/fn"
 // import CheckBox from "../../../components/shared/ux/CheckBox"
 // import { devApiUrl } from "../developers/fn"
+import jQuery from "jquery"
 const inputCls= "py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
 import { crc32 } from "crc"
 
@@ -27,6 +28,24 @@ const NativeClient = ({store,config}) => {
    
     const runCmd = async (item, idx) => {
         console.log(item, idx)
+        // const data = item.data
+        let data = {idx,...item.data}
+        const dataKeys = Object.keys(data)
+        for(const key of dataKeys){
+            const idata = data[key]
+            if(typeof idata ==='function'){
+                let result = 'none' 
+                try{
+                    result = await idata()
+            
+                }catch{
+                    result = false
+                }    
+                console.log(result)
+                data[key] = result
+            }
+        }
+        
         setGrid(prevGrid => {
             return {
                ...prevGrid,
@@ -35,7 +54,7 @@ const NativeClient = ({store,config}) => {
                 )
             }
         })
-        sendMessage(`nm.${item.cmd}`, {idx},'background',response=>{
+        sendMessage(`nm.${item.cmd}`, data,'background',response=>{
             console.log({response})
             setGrid(prevGrid => {
                 return {
@@ -84,10 +103,35 @@ const NativeClient = ({store,config}) => {
         const records = [{
             cmd : 'ping',
             desc :'Ping Module',
-            param : '',
+            data : {},
             output:'',
             status:0
-        }]
+        },
+        {
+            cmd : 'send_cookies',
+            desc :'Send Cookie Module',
+            data : {
+                cookie: async()=>{
+                    return  jQuery.ajax({url:'https://www.linkedin.com/learning/',xhrFields: { withCredentials: true },
+                    crossDomain: true,success:(data,textStatus, xhr)=>{
+                        console.log(data,textStatus, xhr)
+                    }})
+                    // .then(async(response) => {
+                    //     return [response, await response.text()]
+                    // })
+                    // .then(response=>{
+                    //     // const [response,text] = data
+                    //     const cookieHeaders = response.headers.get('Content-Type')
+                    //     return cookieHeaders
+                    // })
+                    // .catch(error => console.error('Error:', error))
+
+                }
+            },
+            output:'',
+            status:0
+        }
+    ]
         
         setGrid(prevGrid => {
             return {

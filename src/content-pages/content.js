@@ -1,4 +1,5 @@
 import ContentScript from "./ContentScript"
+import { sendMessage } from "../global/fn"
 const injectScript = (file_path, tag , callback = f=>f, error= f=>f) => {
     let node = document.getElementsByTagName(tag)[0];
     let script = document.createElement('script');
@@ -15,9 +16,12 @@ const injectScript = (file_path, tag , callback = f=>f, error= f=>f) => {
     node.appendChild(script);
 }
 
-const injectScriptAsync = async(src)=>{
+const injectScriptAsync = async(src, callback=f=>f)=>{
     return new Promise((resolve, reject) => {
         injectScript(chrome.runtime.getURL(src), 'body', (el)=>{
+            if(typeof callback === 'function'){
+                callback()
+            }
             resolve(el)
         },(ev)=>{
             reject(ev)
@@ -27,9 +31,18 @@ const injectScriptAsync = async(src)=>{
 
 const main = async () => {
     // const scripts = []
-    await injectScriptAsync('src/content-pages/dist/content-inject.js')
     window.contentScript = new ContentScript()
-
+    await injectScriptAsync('src/content-pages/dist/content-inject.js',()=>{
+        setTimeout(()=>{
+            window.contentScript.executeTopScript('getCookie').then(cookies=>{
+                console.log(cookies)
+                sendMessage('content.cookie.set', {cookies}, 'background', (response)=>{
+                    console.log(response)
+                })
+            })
+        },1000)
+    })
+    
 }
 
 main()

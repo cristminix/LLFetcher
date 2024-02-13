@@ -17,9 +17,18 @@ class ExerciseFile extends DB {
             const id = 0
             exerciseFile = {id,courseId,name,url,size}
             exerciseFile.id = this.db.insert(this.table,exerciseFile)
-            await this.db.commit()
 
+        }else{
+            console.log(exerciseFile.url, url)
+            const id = exerciseFile.id
+            exerciseFile.url = url
+            this.db.update(this.table,{id}, row => {
+                row.url = url
+                return row
+            })
+            console.log(`Exercise file updated`)
         }
+        await this.db.commit()
 
         return exerciseFile
     }

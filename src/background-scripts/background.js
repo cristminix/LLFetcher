@@ -1,247 +1,73 @@
 // background.js
-import ChromeStorageIndexedDBWorker, {getDatabaseSize,
+import {
   getTableSize,
   getTableCount} from "../global/models/service-workers/ChromeStorageIndexedDBWorker"
-// const csidbWorker = new ChromeStorageIndexedDBWorker()
-// csidbWorker.start()
+
 import { connect, sendNativeMessage, sendNativeMessageAsync } from "./native-messaging"
-import base64 from "base-64"
-let db = null
+
+import { 
+  idb_connect,
+  idb_get,
+  idb_insert,
+  idb_update,
+  idb_delete,
+  // idb_close,
+  idb_create_store
+}  from "../global/models/fn.js"
+
+let conn = null
 
 
-async function insert_csidb(records) {
-  if (db) {
-      const insert_transaction = db.transaction("csidb", "readwrite")
-      const objectStore = insert_transaction.objectStore("csidb")
+const insert_csidb = async records => await idb_insert("csidb", records, conn)
 
-      return new Promise((resolve, reject) => {
-          insert_transaction.oncomplete = function () {
-              // console.log("ALL INSERT TRANSACTIONS COMPLETE.")
-              resolve(true)
-          }
+const get_csidb = async dbName => await idb_get("csidb", dbName, conn)
 
-          insert_transaction.onerror = function () {
-              // console.log("PROBLEM INSERTING RECORDS.")
-              resolve(false)
-          }
+const update_csidb = async record => await idb_update("csidb", record, conn)
 
-          records.forEach(item => {
-              let request = objectStore.add(item)
+// const delete_csidb = async (dbName, clear = false) => await idb_delete("csidb", dbName, clear, conn)
 
-              request.onsuccess = function () {
-                  // console.log("Added: ", item)
-              }
-          })
-      })
-  }
-}
-async function get_csidb(dbName) {
-  if (db) {
-      const get_transaction = db.transaction("csidb", "readonly")
-      const objectStore = get_transaction.objectStore("csidb")
+const insert_prxCache = async records => await idb_insert("prxCache", records, conn)
 
-      return new Promise((resolve, reject) => {
-          get_transaction.oncomplete = function () {
-          // console.log("ALL GET TRANSACTIONS COMPLETE.")
-          }
+const get_prxCache = async key => await idb_get("prxCache", key, conn)
 
-          get_transaction.onerror = function () {
-          // console.log("PROBLEM GETTING RECORDS.")
-          }
+const update_prxCache = async record => await idb_update("prxCache", record, conn)
 
-          let request = objectStore.get(dbName)
+const delete_prxCache = async (key, clear = false) => await idb_delete("prxCache", key, clear, conn)
 
-          request.onsuccess = function (event) {
-          resolve(event.target.result)
-          }
-      })
-  }
+const create_idb_store = async () => {
+  conn = await idb_create_store([
+    { name: 'prxCache', keyPath: 'key' },
+    { name: 'csidb', keyPath: 'dbName' },
+    { name: 'userdata', keyPath: 'key' }
+  ])
 }
 
-async function update_csidb(record) {
-  if (db) {
-      const put_transaction = db.transaction("csidb", "readwrite")
-      const objectStore = put_transaction.objectStore("csidb")
 
-      return new Promise((resolve, reject) => {
-          put_transaction.oncomplete = function () {
-              // console.log("ALL PUT TRANSACTIONS COMPLETE.")
-              resolve(true)
-          }
-
-          put_transaction.onerror = function () {
-              // console.log("PROBLEM UPDATING RECORDS.")
-              resolve(false)
-          }
-
-          objectStore.put(record)
-      })
-  }
-}
-async function delete_csidb(dbName, clear =false) {
-  if (db) {
-      const delete_transaction = db.transaction("csidb", "readwrite")
-      const objectStore = delete_transaction.objectStore("csidb")
-
-      return new Promise((resolve, reject) => {
-          delete_transaction.oncomplete = function () {
-              // console.log("ALL DELETE TRANSACTIONS COMPLETE.")
-              resolve(true)
-          }
-
-          delete_transaction.onerror = function () {
-              // console.log("PROBLEM DELETE RECORDS.")
-              resolve(false)
-          }
-          if(!clear){
-            objectStore.delete(dbName)
-          }else{
-            objectStore.clear()
-          }
-      })
-  }
-}
-async function create_prxCacheDb() {
-    const request = indexedDB.open('main')
-
-    request.onerror = function (event) {
-        console.log("Problem opening DB.")
-    }
-
-    request.onupgradeneeded = function (event) {
-        db = event.target.result
-
-        let objectStore = db.createObjectStore('prxCache', {
-            keyPath: 'key'
-        })
-
-        objectStore = db.createObjectStore('csidb', {
-          keyPath: 'dbName'
-      })
-
-
-        objectStore.transaction.oncomplete = function (event) {
-            console.log("ObjectStore Created.")
-        }
-    }
-
-    request.onsuccess = function (event) {
-        db = event.target.result
-        // console.log("DB OPENED.")
-        // insert_records(roster)
-        // insert_prxCache([{key:'nana'}])
-
-        db.onerror = function (event) {
-            // console.log("FAILED TO OPEN DB.")
-        }
-    }
-}
-// background.js
-async function insert_prxCache(records) {
-  if (db) {
-      const insert_transaction = db.transaction("prxCache", "readwrite")
-      const objectStore = insert_transaction.objectStore("prxCache")
-
-      return new Promise((resolve, reject) => {
-          insert_transaction.oncomplete = function () {
-              // console.log("ALL INSERT TRANSACTIONS COMPLETE.")
-              resolve(true)
-          }
-
-          insert_transaction.onerror = function () {
-              // console.log("PROBLEM INSERTING RECORDS.")
-              resolve(false)
-          }
-
-          records.forEach(item => {
-              let request = objectStore.add(item)
-
-              request.onsuccess = function () {
-                  // console.log("Added: ", item)
-              }
-          })
-      })
-  }
-}
-// background.js
-async function get_prxCache(key) {
-  if (db) {
-      const get_transaction = db.transaction("prxCache", "readonly")
-      const objectStore = get_transaction.objectStore("prxCache")
-
-      return new Promise((resolve, reject) => {
-          get_transaction.oncomplete = function () {
-          // console.log("ALL GET TRANSACTIONS COMPLETE.")
-          }
-
-          get_transaction.onerror = function () {
-          // console.log("PROBLEM GETTING RECORDS.")
-          }
-
-          let request = objectStore.get(key)
-
-          request.onsuccess = function (event) {
-          resolve(event.target.result)
-          }
-      })
-  }
-}
-
-async function update_prxCache(record) {
-  if (db) {
-      const put_transaction = db.transaction("prxCache", "readwrite")
-      const objectStore = put_transaction.objectStore("prxCache")
-
-      return new Promise((resolve, reject) => {
-          put_transaction.oncomplete = function () {
-              // console.log("ALL PUT TRANSACTIONS COMPLETE.")
-              resolve(true)
-          }
-
-          put_transaction.onerror = function () {
-              // console.log("PROBLEM UPDATING RECORDS.")
-              resolve(false)
-          }
-
-          objectStore.put(record)
-      })
-  }
-}
-
-async function delete_prxCache(key, clear=false) {
-  if (db) {
-      const delete_transaction = db.transaction("prxCache", "readwrite")
-      const objectStore = delete_transaction.objectStore("prxCache")
-
-      return new Promise((resolve, reject) => {
-          delete_transaction.oncomplete = function () {
-              // console.log("ALL DELETE TRANSACTIONS COMPLETE.")
-              resolve(true)
-          }
-
-          delete_transaction.onerror = function () {
-              // console.log("PROBLEM DELETE RECORDS.")
-              resolve(false)
-          }
-
-          if(!clear){
-            objectStore.delete(key)
-          }else{
-            objectStore.clear()
-          }
-      })
-  }
-}
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) =>{
     // console.log(request,sendResponse)
     const {name,data,key} = request   
     if(name.match(/^nm\./)){
       const cmd = name.replace(/^nm\./,'')
-      // const packet64 = base64.encode(JSON.stringify({cmd,data}))
-      // sendNativeMessage(packet64)
-      sendNativeMessageAsync(JSON.stringify({cmd,data}),(response)=>{
+      sendNativeMessageAsync({cmd,data},(response)=>{
         sendResponse(response)
       })
+    }
+    else if(name === 'content.cookie.set'){
+      if(data.cookies){
+        const key = 'uCookies'
+        const record = {key, content: data.cookies}
+        idb_get("userdata",record.key,conn).then(existingRec=>{
+          if(existingRec){
+            console.log(`Update existing userdata rec:${existingRec.key}`)
+            idb_update("userdata",record,conn)
+          }else{
+            console.log(`insert userdata:${record.key}`)
+            idb_insert("userdata",record,conn)
+          }
+        })
+        
+      }
+      sendResponse(request)
     }
     else if(name === 'csidb.select'){
       get_csidb(data.dbName).then((item)=>{
@@ -270,12 +96,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) =>{
       })
     }
     else if(name === 'prxCache.count'){
-      getTableCount(db, 'prxCache').then(size=>{
+      getTableCount(conn, 'prxCache').then(size=>{
         sendResponse(size)
       })
     }
     else if(name === 'prxCache.size'){
-      getTableSize(db, 'prxCache').then(size=>{
+      getTableSize(conn, 'prxCache').then(size=>{
         sendResponse(size)
       })
     }
@@ -285,7 +111,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) =>{
       })
     }
     else if(name === 'prxCache.create'){
-      create_prxCacheDb()
+      create_idb_store()
     }
     else if(name === 'prxCache.update'){
       if(data.records){
@@ -327,5 +153,5 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) =>{
     return true
   })
 
-create_prxCacheDb()
+create_idb_store()
 connect()

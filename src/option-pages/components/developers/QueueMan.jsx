@@ -8,6 +8,7 @@ import Toast from "../../../components/shared/ux/Toast"
 import Button from "../../../components/shared/ux/Button"
 import { niceScrollbarCls } from "../ux/cls"
 import { courseUrlFromSlug } from "../../../global/course-api/course_fn"
+import DropdownMenu from "../../../components/shared/ux/DropdownMenu"
 
 let lastSlug = ''
 let onWIndowLeaveSet = false
@@ -41,10 +42,12 @@ const QueueMan= forwardRef(({store, config, activeSlug=null,
     const [queueRunning,setQueueRunning] = useState(false)
     const [singleMode,setSingleMode] = useState(false)
     const [queueMain, setQueueMain] = useState(null)
+    const [downloadProvider, setDownloadProvider] = useState('js-file-downloader')
     const [blockMainContent, setBlockMainContent] = useState(false)
     // let queueInterupted = new Queue()
     let queueStarted = false
     const queueRunningRef = useRef(queueRunning)
+    const downloadProviderRef = useRef(downloadProvider)
     const queueStartedRef = useRef(queueStarted)
     const toastRef = useRef(null)
     const [queueData,setQueueData] = useState(null)
@@ -315,7 +318,7 @@ const QueueMan= forwardRef(({store, config, activeSlug=null,
             let success = false
             if(vttUrl){
                 try{
-                    success = await downloadVtt(vttUrl,qItem.idx, course, toc, store, downloaderRef,qState, (e,idx,course,toc,opt,t)=>onDownloadProgress(e,idx,course,toc,opt,qState,t))
+                    success = await downloadVtt(vttUrl,qItem.idx, course, toc, store, downloaderRef,qState, downloadProviderRef.current,(e,idx,course,toc,opt,t,provider)=>onDownloadProgress(e,idx,course,toc,opt,qState,t,provider))
 
                 }catch(e){
                     console.error(e)
@@ -365,7 +368,7 @@ const QueueMan= forwardRef(({store, config, activeSlug=null,
             let success = false
             if(mediaUrl){
                 try{
-                    success = await downloadMedia(mediaUrl,qItem.idx, course, toc, store, downloaderRef,qState,(e,idx,course,toc,opt,qState,t)=>onDownloadProgress(e,idx,course,toc,opt,qState,t))
+                    success = await downloadMedia(mediaUrl,qItem.idx, course, toc, store, downloaderRef,qState,downloadProviderRef.current,(e,idx,course,toc,opt,qState,t,provider)=>onDownloadProgress(e,idx,course,toc,opt,qState,t,provider))
 
                     // check filesize
                     const lastQState = mQState.getById(qState.id)
@@ -798,7 +801,7 @@ const QueueMan= forwardRef(({store, config, activeSlug=null,
 
         }
     }
-    const onDownloadProgress = (e, idx, course, toc, opt, qState, t)=>{
+    const onDownloadProgress = (e, idx, course, toc, opt, qState, t,provider)=>{
         if (!e.lengthComputable) {
             return
         }
@@ -992,6 +995,55 @@ const QueueMan= forwardRef(({store, config, activeSlug=null,
     const startQueueBtnRef = useRef(null)
     const stopQueueBtnRef = useRef(null)
     const resetQueueBtnRef = useRef(null)
+
+    const onSelectDdToolbar=async(e,tidx,result,toc,qState)=>{
+        console.log(e,tidx,result,toc,qState)
+        if(e=='download_with_filesaver_js'){
+            const provider = 'file-saver'
+            setDownloadProvider(provider)
+            downloadProviderRef.current = provider
+
+            startQueueSingle(tidx, result)
+        }else if (e=='download_direct'){
+            const provider = 'direct'
+            setDownloadProvider(provider)
+            downloadProviderRef.current = provider
+            
+            startQueueSingle(tidx, result)
+        }
+        /*else if(e=='play_in_video_player'){
+          document.location.hash=`/developer/video-player?slug=${course.slug}`
+        }
+        else if(e=='view_on_dev_queue_man'){
+          document.location.hash=`/developer/queue-man?slug=${course.slug}`
+        }
+        else if(e=='reconfigure'){
+          onReconfigure()
+        }
+        else if(e=='refresh_course_data'){
+          document.location.hash=`/course/add/${course.slug}?useM3Rec=0&refresh=1`
+    
+        }*/
+        // console.log(e)
+      }
+    
+      const ddToolbarData = [
+        {
+          text:'Download with filesaver.js',
+          value:'download_with_filesaver_js',
+          icon:'bi bi-download'
+        },
+        {
+            text:'Direct Download',
+            value:'download_direct',
+            icon:'bi bi-download'
+          },
+          {
+            text:'Download With aria2c',
+            value:'download_aria2c',
+            icon:'bi bi-download'
+          }
+      ]
     return <>
     <ProxyComponent ref={ref} proxyCallback={(a,b)=>runProxyCallback(a,b)}/>
     <div className="relative">
@@ -1085,12 +1137,19 @@ const QueueMan= forwardRef(({store, config, activeSlug=null,
                                         !queueRunning?<>
                                             {
                                                 result === QueueResult.SUCCESS ? <Button title="Requeue" onClick={e=>resetQueueSingle(tidx,result,toc,qState)} icon="fa fa-trash"/>
-                                                :<Button onClick={e=>startQueueSingle(tidx, result)} 
+                                                :<Button onClick={e=>{
+                                                    const provider = 'js-file-downloader'
+                                                    setDownloadProvider(provider)
+                                                    downloadProviderRef.current = provider
+                                                    startQueueSingle(tidx, result)
+                                                }} 
                                                          title={`${result === QueueResult.INTERUPTED || result === QueueResult.FAILED ? 'Retry':'Download'}`} 
                                                          disabled={singleMode}
                                                          loading={singleMode && activeQueueIdx === tidx}
                                                          icon={`fa fa-${result === QueueResult.INTERUPTED || result === QueueResult.FAILED ? 'refresh':'download'}`}/>
                                             }
+          <DropdownMenu className={`p-0`} btnClassName={`px-0 py-0 pl-2 pr-2`} data={ddToolbarData} onSelect={(e)=>onSelectDdToolbar(e,tidx,result,toc,qState)} labelIcon={null}/>
+
                                             {/* <span>{QueueResult.toStr(result)}</span> */}
                                             
                                         </>

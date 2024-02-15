@@ -1,7 +1,7 @@
 import util from 'util'
 import child_process from 'child_process'
 import fs from 'fs'
-
+import path from 'path'
 const exec = util.promisify(child_process.exec)
 const slugify = (str) => str.toLowerCase()
                             .replace(/[^a-z0-9]+/g, '-')
@@ -34,6 +34,89 @@ const cookiesToString = (cookiesArr) => {
     })
 
     return cookies
+}
+
+const spawnCommand = async(command, args,logger, callback=f=>f)=>{
+    return new Promise((resolve, reject)=>{
+        const spawn = child_process.spawn
+        let child = spawn(command, args)
+
+        child.stdout.on('data', (data)=> {
+            callback(data)
+        })
+        child.on('exit', function (code) {
+            callback('complete')
+            console.log('child process exited with code ' + code.toString())
+            resolve(true)
+        })
+    })
+}
+const spawnAria2c = async(url, filename, cookies, course, logger)=>{
+    const {slug} = course
+    const downloadDir = `storage/downloads/${slug}`
+    const outFilename=  `${downloadDir}/${filename}`
+    let cookieStr =cookiesToString(cookies)
+    const cookieHeader = `cookie: ${cookieStr}`
+
+    let response = await spawnCommand('aria2c', [
+        // argTestScriptPath,
+        url,
+        '--disable-ipv6',
+        '--user-agent', "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 Edg/121.0.0.0",
+        '--out', outFilename,
+        '--header', cookieHeader,
+        // '--auto-file-renaming','false'
+    ],logger,(data)=>{
+        if(data == 'complete'){
+            return
+        }
+        
+        let line = data.toString().replace('[','').replace(']','').trim()
+        if(line == '')
+            return
+        if(line.includes('%')){
+            let lines = line.split(' ')
+            lines.shift()
+            // console.log(lines)
+            let [progress,conn,loaded,eta]=lines
+            if(conn)
+                conn = conn.replace('CN:','')
+            if(loaded)
+                loaded = loaded.replace('DL:','')
+            if(eta)
+                eta = eta.replace('ETA:','')
+            else
+                eta = 0
+            console.log({
+                type: 'delta',
+                data :{
+                    progress,
+                    conn,
+                    loaded,
+                    eta
+                }
+            })
+            // callback(line)
+        }else if(line.includes('NOTICE')){
+            let lines = line.split(' ')
+            lines.shift()
+            lines.shift()
+            lines.shift()
+            line = lines.join(' ')
+            console.log({
+                type: 'notice',
+                data: line
+            })
+        }else{
+
+            console.log({
+                type: 'log',
+                data: line
+            })
+        }
+    })
+
+   return response
 }
 const runAria2c = async(url,filename,cookies,logger)=>{
     let cookieStr =cookiesToString(cookies)
@@ -121,7 +204,11 @@ const main = async()=>{
     const url = 'https://www.linkedin.com/dms/prv/vid/C4E0DAQH3hgtgN8Q-ZQ/learning-original-video-vbr-720/0/1616097987316?ea=73722380&ua=226898049&e=1707988769&v=beta&t=eHyKqNlhY0NXaXrApwgUhj4deo33JKZoV8HiMh0igWk'
     const cookies = JSON.parse(await fs.readFileSync('./cookies.json'))
     const filename = 'video.mp4'
-    const response = await runAria2c(url,filename,cookies,logger)
+    const course = {
+        slug : 'learning-go-8399317'
+    }
+    const response = await spawnAria2c(url,filename,cookies,course,logger)
+
     console.log(response)
     process.exit(0)
 }

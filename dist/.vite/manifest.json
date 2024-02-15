@@ -1,15 +1,20 @@
 {
-  "../../../@crx/manifest": {
-    "file": "assets/crx-manifest.js-AVdigsv5.js",
+  "../../@crx/manifest": {
+    "file": "assets/crx-manifest.js-qOuZxvAI.js",
     "isEntry": true,
-    "src": "../../../@crx/manifest"
+    "src": "../../@crx/manifest"
   },
-  "_font-awesome.min-!~{007}~.js": {
-    "file": "assets/font-awesome-UufRsjal.css",
-    "src": "_font-awesome.min-!~{007}~.js"
+  "_fn-FSIKaUxd.js": {
+    "file": "assets/fn-FSIKaUxd.js"
   },
-  "_font-awesome.min-MY_SdhSL.js": {
+  "_font-awesome.min-!~{008}~.js": {
+    "file": "assets/font-awesome-ogKUMtIa.css",
+    "src": "_font-awesome.min-!~{008}~.js"
+  },
+  "_font-awesome.min-0wTPF2mD.js": {
     "assets": [
+      "assets/bootstrap-icons-bb42NSi8.woff2",
+      "assets/bootstrap-icons-TqycWyKO.woff",
       "assets/fontawesome-webfont-BuWBOUu1.eot",
       "assets/fontawesome-webfont-fo5IWH5D.woff2",
       "assets/fontawesome-webfont-gyuW7eKX.woff",
@@ -17,35 +22,35 @@
       "assets/fontawesome-webfont-9d686-IE.svg"
     ],
     "css": [
-      "assets/font-awesome-UufRsjal.css"
+      "assets/font-awesome-ogKUMtIa.css"
     ],
-    "file": "assets/font-awesome.min-MY_SdhSL.js",
+    "file": "assets/font-awesome.min-0wTPF2mD.js",
     "imports": [
-      "_index-l-FjSNo0.js"
+      "_index-1JXFPcb5.js"
     ]
   },
-  "_index-l-FjSNo0.js": {
-    "file": "assets/index-l-FjSNo0.js"
+  "_index-1JXFPcb5.js": {
+    "file": "assets/index-1JXFPcb5.js"
   },
   "content.js-loader.js": {
-    "file": "assets/content.js-loader-kM9HECy4.js",
+    "file": "assets/content.js-loader-X1SZcxv1.js",
     "src": "content.js-loader.js"
   },
   "index.html": {
-    "file": "assets/index.html-kLJPsVQD.js",
+    "file": "assets/index.html-V21ZcecD.js",
     "imports": [
-      "_font-awesome.min-MY_SdhSL.js",
-      "_index-l-FjSNo0.js"
+      "_font-awesome.min-0wTPF2mD.js",
+      "_index-1JXFPcb5.js"
     ],
     "isEntry": true,
     "src": "index.html"
   },
   "node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff": {
-    "file": "assets/bootstrap-icons-NpS-Zr3P.woff",
+    "file": "assets/bootstrap-icons-TqycWyKO.woff",
     "src": "node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff"
   },
   "node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff2": {
-    "file": "assets/bootstrap-icons-2eO-ad8Y.woff2",
+    "file": "assets/bootstrap-icons-bb42NSi8.woff2",
     "src": "node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff2"
   },
   "node_modules/fontawesome-4.7/fonts/fontawesome-webfont.eot": {
@@ -69,30 +74,30 @@
     "src": "node_modules/fontawesome-4.7/fonts/fontawesome-webfont.woff2"
   },
   "src/background-scripts/background.js": {
-    "file": "assets/background.js-8p8zkt1W.js",
+    "file": "assets/background.js-YocnhhG8.js",
+    "imports": [
+      "_fn-FSIKaUxd.js"
+    ],
     "isEntry": true,
     "src": "src/background-scripts/background.js"
   },
   "src/content-pages/content.js": {
-    "file": "assets/content.js-KfJG23bj.js",
+    "file": "assets/content.js-OnMJFtla.js",
     "imports": [
-      "_index-l-FjSNo0.js"
+      "_index-1JXFPcb5.js"
     ],
     "isEntry": true,
     "src": "src/content-pages/content.js"
   },
   "src/option-pages/options.html": {
-    "assets": [
-      "assets/bootstrap-icons-2eO-ad8Y.woff2",
-      "assets/bootstrap-icons-NpS-Zr3P.woff"
-    ],
     "css": [
-      "assets/options-BUofy8cZ.css"
+      "assets/options-OlCN2y-Z.css"
     ],
-    "file": "assets/options.html-2ofbbOON.js",
+    "file": "assets/options.html-9Pw28Z2m.js",
     "imports": [
-      "_font-awesome.min-MY_SdhSL.js",
-      "_index-l-FjSNo0.js"
+      "_font-awesome.min-0wTPF2mD.js",
+      "_index-1JXFPcb5.js",
+      "_fn-FSIKaUxd.js"
     ],
     "isEntry": true,
     "src": "src/option-pages/options.html"

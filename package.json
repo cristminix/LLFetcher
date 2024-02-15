@@ -30,6 +30,7 @@
     "country-list": "^2.3.0",
     "crc": "^4.3.2",
     "fetch-retry": "^5.0.6",
+    "file-saver": "^2.0.5",
     "fontawesome-4.7": "^4.7.0",
     "is-network-error": "^1.0.0",
     "jquery": "^3.7.1",
@@ -41,6 +42,7 @@
     "react-router-dom": "^6.13.0",
     "react18-json-view": "^0.2.6",
     "rollup-plugin-node-polyfills": "^0.2.1",
+    "streamsaver": "^2.0.6",
     "underscore": "^1.13.6",
     "uuid": "^9.0.1",
     "video.js": "^8.6.1"

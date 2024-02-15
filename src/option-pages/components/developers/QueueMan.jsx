@@ -998,14 +998,20 @@ const QueueMan= forwardRef(({store, config, activeSlug=null,
 
     const onSelectDdToolbar=async(e,tidx,result,toc,qState)=>{
         console.log(e,tidx,result,toc,qState)
-        if(e=='download_with_filesaver_js'){
-            const provider = 'file-saver'
+        if(e=='download_stream_writer'){
+            const provider = 'stream-writer'
             setDownloadProvider(provider)
             downloadProviderRef.current = provider
 
             startQueueSingle(tidx, result)
         }else if (e=='download_direct'){
             const provider = 'direct'
+            setDownloadProvider(provider)
+            downloadProviderRef.current = provider
+            
+            startQueueSingle(tidx, result)
+        }else if (e=='download_aria2c'){
+            const provider = 'aria2c'
             setDownloadProvider(provider)
             downloadProviderRef.current = provider
             
@@ -1030,7 +1036,7 @@ const QueueMan= forwardRef(({store, config, activeSlug=null,
       const ddToolbarData = [
         {
           text:'Download with filesaver.js',
-          value:'download_with_filesaver_js',
+          value:'download_stream_writer',
           icon:'bi bi-download'
         },
         {

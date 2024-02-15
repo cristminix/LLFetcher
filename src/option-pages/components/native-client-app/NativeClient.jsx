@@ -7,6 +7,8 @@ import Button from "../../../components/shared/ux/Button"
 import {formatBytes, sendMessage, slugify} from "../../../global/fn"
 // import CheckBox from "../../../components/shared/ux/CheckBox"
 // import { devApiUrl } from "../developers/fn"
+import JsonView from 'react18-json-view'
+import UserData from "../../../global/models/UserData"
 import jQuery from "jquery"
 const inputCls= "py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
 import { crc32 } from "crc"
@@ -27,7 +29,6 @@ const NativeClient = ({store,config}) => {
     const onRefresh = f => f
    
     const runCmd = async (item, idx) => {
-        console.log(item, idx)
         // const data = item.data
         let data = {idx,...item.data}
         const dataKeys = Object.keys(data)
@@ -41,10 +42,11 @@ const NativeClient = ({store,config}) => {
                 }catch{
                     result = false
                 }    
-                console.log(result)
+                // console.log(result)
                 data[key] = result
             }
         }
+        console.log(data)
         
         setGrid(prevGrid => {
             return {
@@ -60,7 +62,7 @@ const NativeClient = ({store,config}) => {
                 return {
                    ...prevGrid,
                     records : prevGrid.records.map((n_record,n_index) =>
-                        n_index === idx ? { ...n_record, status:2, output : response } : n_record
+                        n_index === idx ? { ...n_record, status:2, param:data,output : response } : n_record
                     )
                 }
             })
@@ -70,20 +72,39 @@ const NativeClient = ({store,config}) => {
     const gridOptions = {
 		numberWidthCls : '1/8',
 		actionWidthCls : '1/8',
-		widthCls : ['1/5'],
-		headers : ['Cmd','Desc','Param','Output','Status'],
-		fields : ['cmd','desc','param','output', 'status'],
+		widthCls : ['1/4','1/4','1/4','1/4'],
+		headers : ['Cmd & Desc','Param','Output','Status'],
+		fields : ['cmd','param','output', 'status'],
 		enableEdit : true,
 		// editUrl : (item) =>{ return `/DBerences/tts-server/${item.key}`},
 		// remoteUrl : (item) => `${config.getApiEndpoint()}/api/tts/DBerence?key=${item.key}`,
-		callbackFields : {
-			title : (field, value ,item) => {
+		callbackHeaders : {
+           
+        },
+        callbackFields : {
+            cmd :  (field, value ,item) => {
+                return <div><code>{item.cmd}</code> <p>{item.desc}</p></div>
+            },
+			param : (field, value ,item) => {
                 // console.log(item)
-				return <p className={`ml-${item.level*2}`}>{item.hasChild?'+':' '} {value}</p>
+                try{
+                    value = JSON.parse(value)
+                }catch(e){
+                    value = ''
+
+                }
+				return <JsonView src={value} collapseStringsAfterLength={25}/>
+
+                 
 			}, 
-			// value : (field, value, item, index) => {
-			// 	return editorFactory(item, index)
-			// }
+			output : (field, value, item, index) => {
+                try{
+                    value = JSON.parse(value)
+                }catch(e){
+                    value = ''
+                }
+				return <JsonView src={value} collapseStringsAfterLength={25}/>
+			}
 		},
 
 		callbackActions : {
@@ -111,21 +132,17 @@ const NativeClient = ({store,config}) => {
             cmd : 'send_cookies',
             desc :'Send Cookie Module',
             data : {
-                cookie: async()=>{
-                    return  jQuery.ajax({url:'https://www.linkedin.com/learning/',xhrFields: { withCredentials: true },
-                    crossDomain: true,success:(data,textStatus, xhr)=>{
-                        console.log(data,textStatus, xhr)
-                    }})
-                    // .then(async(response) => {
-                    //     return [response, await response.text()]
-                    // })
-                    // .then(response=>{
-                    //     // const [response,text] = data
-                    //     const cookieHeaders = response.headers.get('Content-Type')
-                    //     return cookieHeaders
-                    // })
-                    // .catch(error => console.error('Error:', error))
-
+                cookies: async()=>{
+                    const userData = UserData.getInstance()
+                    await userData.connect()
+                    const row = await userData.get('uCookies')
+                    if(row){
+                        if(row.content){
+                            const cookies = row.content
+                            return cookies
+                        }
+                    }
+                    return null
                 }
             },
             output:'',

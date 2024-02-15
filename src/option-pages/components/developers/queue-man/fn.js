@@ -2,8 +2,10 @@ import { courseUrlFromSlug, isTimeExpired } from "../../../../global/course-api/
 import { formatLeadingZeros } from "../../../../global/fn"
 import { QueueResult } from "./Queue"
 import JsFileDownloader from "js-file-downloader"
-import FileSaver from 'file-saver'
+// import FileSaver from 'stream-writer'
+import { sendMessage } from "../../../../global/fn"
 import streamSaver from 'streamsaver'
+import UserData from "../../../../global/models/UserData"
 const cdl_getOpeningIds = () => {
     var ids = []
     try {
@@ -115,6 +117,27 @@ const downloadUsingStreamWriter = async (url, filename, onProgressCallback=f=>f)
     })
 }
 
+const downloadUsingAria2c = async (url, filename, course, onProgressCallback=f=>f)=>{
+    return new Promise(async(resolve, reject)=>{
+        let cookies = await chrome.cookies.getAll({domain:'www.linkedin.com'})
+
+        if(cookies){
+            try{
+                sendMessage(`nm.download.aria2c`, {url,filename,cookies,course},'background',response=>{
+                    console.log({response})
+                    resolve(response)
+                })
+            }catch(e){
+                reject(e)
+            }
+            
+        }else{
+            reject('No Cookies')
+        }
+    })
+    
+}
+
 const checkSlocsExpired = (slocs)=>{
     let countExpired = 0
     slocs.map(item => {
@@ -159,20 +182,21 @@ const checkQueueIsAllFinished = async (courseId, tocArray=[], mQState)=>{
     return recordsFiltered.length === tocArray.length
 }
 
-const downloadVtt = async(vttUrl,idx, course, toc, store, downloaderRef, qState, provider,onProgressCallback=(e,idx,course,toc,opt,qState,t,provider)=>null) => {
+const downloadController = async(url,idx, course, toc, store, downloaderRef, qState, provider,t,onProgressCallback=(e,idx,course,toc,opt,qState,t,provider)=>null) => {
     console.log(provider)
     
     return new Promise((resolve, reject)=>{
         const dmsetup = getDmStup(course.id, store)
     
         if(!dmsetup){
+            console.error('No DM Setup')
             resolve(false)
             return
         }
         const {enableFilenameIndex, selectedFmt} = dmsetup
         const filenamePrefix = enableFilenameIndex ? `${formatLeadingZeros(idx+1)}-` : ''
-        const filename = `${filenamePrefix}${toc.slug}-${selectedFmt}.vtt`
-        const url = vttUrl
+        const filename = `${filenamePrefix}${toc.slug}-${selectedFmt}.${t=='t'?'vtt':'mp4'}`
+        // const url = vttUrl
         let downloader = null 
         if(provider=='js-file-downloader'){
             downloader = new JsFileDownloader({
@@ -181,7 +205,7 @@ const downloadVtt = async(vttUrl,idx, course, toc, store, downloaderRef, qState,
                 filename,
                 timeout : 86400*1000,
                 process : e => {
-                    onProgressCallback(e, idx, course, toc, {filename,url},qState, 't',provider)
+                    onProgressCallback(e, idx, course, toc, {filename,url},qState, t,provider)
                 }
             })
             downloaderRef.current = downloader
@@ -193,14 +217,19 @@ const downloadVtt = async(vttUrl,idx, course, toc, store, downloaderRef, qState,
                 reject(error)
             })
         }
-        else if(provider=='file-saver'){
+        else if(provider=='stream-writer'){
            downloadUsingStreamWriter(url, filename).then(stt=>resolve(stt)).catch(e=>reject(e))
         }
         else if(provider=='direct'){
             chromeDownload(url, filename).then(stt=>resolve(stt)).catch(e=>reject(e))
+        }else if(provider=='aria2c'){
+            downloadUsingAria2c(url, filename, course).then(stt=>resolve(stt)).catch(e=>reject(e))
         }
 
     })
+}
+const downloadVtt = async(vttUrl,idx, course, toc, store, downloaderRef, qState, provider,onProgressCallback=(e,idx,course,toc,opt,qState,t,provider)=>null) => {
+    return await downloadController(vttUrl,idx, course, toc, store, downloaderRef, qState, provider,'t',onProgressCallback)
 }
 
 const getDmStup = (courseId,store) => {
@@ -209,45 +238,7 @@ const getDmStup = (courseId,store) => {
 }
 
 const downloadMedia = async(mediaUrl, idx, course, toc, store, downloaderRef, qState,provider,onProgressCallback=(e,idx,course,toc,opt,qState,t,provider)=>null) =>{
-    
-    console.log(provider)
-
-    return new Promise((resolve, reject)=>{
-        const dmsetup = getDmStup(course.id, store)
-    
-        if(!dmsetup){
-            resolve(false)
-            return
-        }
-        const {enableFilenameIndex, selectedFmt} = dmsetup
-        const filenamePrefix = enableFilenameIndex ? `${formatLeadingZeros(idx+1)}-` : ''
-        const filename = `${filenamePrefix}${toc.slug}-${selectedFmt}.mp4`
-        const url = mediaUrl
-        let downloader = null 
-        if(provider=='js-file-downloader'){
-            downloader = new JsFileDownloader({
-                url,
-                autoStart : false,
-                filename,
-                timeout : 86400*1000,
-                process : e => {
-                    onProgressCallback(e, idx, course, toc, {filename,url},qState, 'm',provider)
-                }
-            })
-            downloaderRef.current = downloader
-            downloader.start().then(()=>{
-                resolve(true)
-            })
-            .catch((error)=>{
-                reject(error)
-            })
-        }else if(provider=='file-saver'){
-            downloadUsingStreamWriter(url, filename).then(stt=>resolve(stt)).catch(e=>reject(e))
-        }else if(provider=='direct'){
-            chromeDownload(url, filename).then(stt=>resolve(stt)).catch(e=>reject(e))
-        }
-    })
-
+    return await downloadController(mediaUrl,idx, course, toc, store, downloaderRef, qState, provider,'m',onProgressCallback)
 }
 
 const selectMediaUrl = (slocs, courseId, store, defaultFmt='720') => {

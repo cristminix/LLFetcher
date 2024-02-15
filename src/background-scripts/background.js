@@ -53,20 +53,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) =>{
       })
     }
     else if(name === 'content.cookie.set'){
-      if(data.cookies){
         const key = 'uCookies'
-        const record = {key, content: data.cookies}
-        idb_get("userdata",record.key,conn).then(existingRec=>{
-          if(existingRec){
-            console.log(`Update existing userdata rec:${existingRec.key}`)
-            idb_update("userdata",record,conn)
-          }else{
-            console.log(`insert userdata:${record.key}`)
-            idb_insert("userdata",record,conn)
-          }
+        chrome.cookies.getAll({domain:'www.linkedin.com'}).then(cookies=>{
+          const record = {key, content: cookies}
+          idb_get("userdata",record.key,conn).then(existingRec=>{
+            if(existingRec){
+              console.log(`Update existing userdata rec:${existingRec.key}`)
+              idb_update("userdata",record,conn)
+            }else{
+              console.log(`insert userdata:${record.key}`)
+              idb_insert("userdata",record,conn)
+            }
+          })
         })
         
-      }
+        
       sendResponse(request)
     }
     else if(name === 'csidb.select'){

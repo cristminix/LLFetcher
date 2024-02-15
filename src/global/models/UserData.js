@@ -12,7 +12,7 @@ class UserData {
         return UserData.instance
     }
     constructor(){
-        this.connect()
+        // this.connect()
     }
     async connect(){
         if(!this.conn){

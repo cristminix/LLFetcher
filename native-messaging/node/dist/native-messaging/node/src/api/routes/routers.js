@@ -8,14 +8,14 @@ class DynamicRouter{
     constructor(availables){
         this.availables = availables
     }
-    async attach(app, datasource){
+    async attach(app, datasource,ENV){
         for(let ctl in this.availables){
             const item = this.availables[ctl]
             const entityModulePath = `./${ctl}.js`
             try{
                 const moduleImport = await import(/* @vite-ignore */  entityModulePath)
     
-                this.routers[ctl] = new moduleImport.default(datasource)
+                this.routers[ctl] = new moduleImport.default(datasource,ENV)
                 app.use('/api/cms',this.routers[ctl].getRouter())
             }catch(e){
                 console.error(e)

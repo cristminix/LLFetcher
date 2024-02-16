@@ -34,10 +34,9 @@ async function getEntities(schemaDef){
 
     return [entitySchemas, models]
 }
-process.env['CMS_DB_ENGINE'] = 'sqlite'
-process.env['CMS_DB_LOCATION'] = "storage/cms.sqlite"
 
-const {CMS_DB_ENGINE, CMS_DB_LOCATION} = process.env
+
+// const {CMS_DB_ENGINE, CMS_DB_LOCATION} = process.env
 
 
 class DS{
@@ -45,8 +44,10 @@ class DS{
     manager = null
     models = {}
     logger = null
-    constructor(logger){
+    constructor(CMS_DB_ENGINE, CMS_DB_LOCATION,logger){
         this.logger = logger
+        this.CMS_DB_ENGINE = CMS_DB_ENGINE
+        this.CMS_DB_LOCATION = CMS_DB_LOCATION
         this.logger.info(CMS_DB_ENGINE, CMS_DB_LOCATION)
         this.logger.info('cwd',process.cwd())
 
@@ -72,15 +73,15 @@ class DS{
         this.models = models
         // this.logger.info('entities',entities)
         // return new Promise(async(resolve, reject)=>{
-            if(CMS_DB_ENGINE == 'sqlite'){
+            if(this.CMS_DB_ENGINE == 'sqlite'){
                 // this.logger.info('A')
 
-                if(CMS_DB_LOCATION){
+                if(this.CMS_DB_LOCATION){
                     // this.logger.info('B')
 
                     this.datasource = new DataSource({
                         type: "better-sqlite3",
-                        database:CMS_DB_LOCATION,
+                        database:this.CMS_DB_LOCATION,
                         synchronize: true,
                         logging: 0,
                         entities,

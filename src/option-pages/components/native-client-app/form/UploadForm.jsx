@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { crc32 } from "crc"
 import {formatBytes, sendMessage, slugify, getFile64} from "../../../../global/fn"
 import jQuery from "jquery"
 const inputCls= "py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
 import CheckBox from "../../../../components/shared/ux/CheckBox"
-
+import { apiUrl } from "../fn"
 const createUntitledUpload = ()=>{
     const idx = crc32((new Date).getTime().toString()).toString(16)
     const title = `Untitled-${idx}`
@@ -23,20 +23,36 @@ const UploadForm = ({data=null, className,hideForm,updateList})=>{
     const [category,setCategory] = useState('')
     const [tags,setTags] = useState('')
     const [thumbnail,setThumbnail] = useState('')
-    
+    const thumbnailRef = useRef(null)
     const onEdit = f=> f
     const saveForm = async(f) => {
         let pk=null
         if(data.id){
             pk = data.id
         }
-        const formData = {pk,title,description,video,category,tags,thumbnail}
-        sendMessage(`nm.api.cms.ytupload.${pk?'update':'create'}`, formData,'background',response=>{
-            console.log({response})
+        const formDataItem = {pk,title,description,video,category,tags}
+        // sendMessage(`nm.api.cms.ytupload.${pk?'update':'create'}`, formData,'background',response=>{
+        //     console.log({response})
+        
+        // })
+        const formData = new FormData()
+        formData.append('thumbnail',thumbnailRef.current.files[0])
+        Object.keys(formDataItem).map((key)=>{
+            formData.append(key,formDataItem[key])
+        })
+        const url = apiUrl(['yt-upload',pk?`update/${pk}`:'create'])
+        fetch(url, {
+            method: 'POST',
+            body: formData
+          })
+          .then(response => response.json())
+          .then(data => {
+            console.log(data)
             jQuery('#basic-modal-upload-closer').click()
             
-            updateList()
+            updateList()    
         })
+        .catch(error => console.error('Error:', error))
         
     }
     const setThumbnailFile= async(target)=>{
@@ -48,14 +64,10 @@ const UploadForm = ({data=null, className,hideForm,updateList})=>{
     const getRemoteRowData = async()=>{
         // return
         const pk = data.id
-        sendMessage(`nm.api.cms.ytupload.get`, {pk},'background',response=>{
-            console.log({response})
-            const {thumbnail} = response.output
-            setThumbnail(thumbnail)
-            // jQuery('#basic-modal-upload-closer').click()
-            
-            // updateList()
-        })
+        const url = apiUrl(['yt-upload',pk])
+        const response = await fetch(url).then(r=>r.json())
+        const {thumbnail} = response.data
+        apiUrl(['yt-uploads/thumbnails',thumbnail])
     }
     useEffect(()=>{
         if(data){
@@ -66,7 +78,7 @@ const UploadForm = ({data=null, className,hideForm,updateList})=>{
             setVideo(video)
             setCategory(category)
             setTags(tags)
-            setThumbnail(thumbnail)
+            setThumbnail(apiUrl(['yt-uploads/thumbnails',thumbnail]))
             if(data.id){
                 getRemoteRowData()
             }
@@ -143,7 +155,7 @@ const UploadForm = ({data=null, className,hideForm,updateList})=>{
             <label className="font-bold">Thumbnail</label>
         </div>
         <div className="flex-grow">
-            <input tabIndex={6} type="file" className={inputCls}  onChange={e=>setThumbnailFile(e.target)}/>
+            <input tabIndex={6} type="file" ref={thumbnailRef} className={inputCls}  onChange={e=>setThumbnailFile(e.target)}/>
         </div>
         {
             thumbnail?<div className="flex-grow">

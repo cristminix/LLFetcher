@@ -6,84 +6,9 @@ import Grid from "../../../components/shared/Grid"
 import Button from "../../../components/shared/ux/Button"
 import {formatBytes, sendMessage, slugify} from "../../../global/fn"
 import UploadForm, {createUntitledUpload} from "./form/UploadForm"
-// import CheckBox from "../../../components/shared/ux/CheckBox"
-// import { devApiUrl } from "../developers/fn"
+import { apiUrl } from "./fn"
+
 import jQuery from "jquery"
-import Queue from "../developers/queue-man/Queue"
-class MessageQueue {
-    queue = null
-    running = false
-   constructor(){
-    this.queue = new Queue()
-   }
-   
-   run(){
-    if(!this.running){
-        this.running = true
-        this.runDelayed()
-    }
-   }
-
-   async sendMessageAsync(eventName, data, target, callback){
-    return new Promise((resolve, reject) => {
-        try{
-            // console.log(eventName, data, target)
-            sendMessage(eventName, data, target, response=>{
-                if(typeof callback == 'function'){
-                    callback(response)
-                }
-                resolve(response)
-            })
-        }catch(e){
-            resolve(e)
-        }
-        
-
-    })
-   }
-   async runDelayed(){
-    const emptyQueue = this.queue.isEmpty()
-    console.log(emptyQueue)
-    while(!emptyQueue){
-        const message = this.queue.dequeue()
-        const {eventName, data, target, callback} = message
-        await this.sendMessageAsync(eventName, data, target, callback)
-    }
-    this.running = false
-   }
-   enqueue(queue){
-    this.queue.enqueue(queue)
-    
-   }
-   sendMessage(eventName, data, target, callback) {
-        const messageId = (new Date).getTime().toString()
-
-        const queue = {messageId, eventName, data, target, callback}
-        this.enqueue(queue)
-        this.run()
-    }
-}
-const messageQueue = new MessageQueue()
-
-const ImgYtUpload = ({className,pk})=>{
-    const [source64,setSource64] = useState('')
-    useEffect(()=>{
-        if(pk){
-            setTimeout(async()=>{
-                messageQueue.sendMessage(`nm.api.cms.ytupload.get`, {pk},'background',response=>{
-                    // if(response.data.pk == pk){
-                        console.log({response})
-                        const {thumbnail} = response.output
-                        setSource64(thumbnail)
-                    // }
-                })
-            },1000)
-            
-        }
-    },[pk])
-
-    return <><img src={source64}/></>
-}
 
 const YTUpload = ({store,config,pageNumber}) => {
     const [grid,setGrid] = useState({
@@ -133,10 +58,10 @@ const YTUpload = ({store,config,pageNumber}) => {
     const deleteForm = async(item,index)=>{
         // console.log(item)
         if(confirm(`Are you sure want to delete this upload "${item.title}"`)){
-            sendMessage(`nm.api.cms.ytupload.delete`, {pk:item.id},'background',response=>{
-                console.log({response})
-                updateList()
-            })
+            const url = apiUrl(['yt-upload/delete',item.id])
+            const response = await fetch(url,{method:'POST'}).then(r=>r.json())
+            console.log({response})
+            updateList()
         }
 
     }
@@ -157,11 +82,14 @@ const YTUpload = ({store,config,pageNumber}) => {
                 // if(!item.callback_called){
                 //     console.log('callbackFields called')
                 //     item.callback_called = true
-                    
-                    return <ImgYtUpload pk={item.id}/>
+                    return <img className="w-full h-full" src={`http://localhost:7700/api/cms/yt-uploads/thumbnails/${value}`}/>
+                    // return <ImgYtUpload pk={item.id}/>
                 // }
 				// 
-			}, 
+			},
+            description : (field, value, item, index) => {
+				return <p className="w-[250px] line-clamp-6">{value}</p>
+			} 
 			// value : (field, value, item, index) => {
 			// 	return editorFactory(item, index)
 			// }
@@ -187,40 +115,17 @@ const YTUpload = ({store,config,pageNumber}) => {
     const updateList = async () => {
         console.log('updateList called')
         const page = parseInt(pageNumber) || 1
-        /*const nGrid  = await fetch(`http://localhost:7001/api/cms/users`).then(r=>r.json())
-        
+     
+        const {limit, order_by,order_dir} = grid
+        const url = apiUrl('yt-uploads',{limit,page, order_by,order_dir})
+        const response = await fetch(url).then(r=>r.json())
+        const nGrid = response
         setGrid(prevGrid => {
             return {
-               ...prevGrid,
-               ...nGrid
+                ...prevGrid,
+                ...nGrid
             }
-        })
-        */
-        const {limit, order_by,order_dir} = grid
-        sendMessage(`nm.api.cms.ytupload.list`, {limit,page, order_by,order_dir},'background',response=>{
-            // console.log({response})
-            if(response.output){
-                const nGrid = response.output
-                setGrid(prevGrid => {
-                    return {
-                       ...prevGrid,
-                       ...nGrid
-                    }
-                })
-                
-            }
-            /*
-            setGrid(prevGrid => {
-                return {
-                   ...prevGrid,
-                    records : prevGrid.records.map((n_record,n_index) =>
-                        n_index === idx ? { ...n_record, status:2, output : response } : n_record
-                    )
-                }
-            })
-            */
-
-        })
+        }) 
     }
     useEffect(()=>{
         // if(pageNumber){

@@ -36,6 +36,7 @@ const main = async()=>{
         console.error(e)
     }
     console.log("Generating registry-entries.reg")
+    console.log("Please double-click or run registry-entries.reg")
     /*
     Windows Registry Editor Version 5.00
 

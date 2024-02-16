@@ -3,11 +3,37 @@ import path from "path"
 import express from 'express'
 import http from 'http'
 import os from 'os'
-
+import bodyParser from 'body-parser'
+import fs from 'fs'
+import 'reflect-metadata'
+import cors from "cors"
 import bunyan from 'bunyan-sfdx-no-dtrace'
 import RequestLogger from 'bunyan-request-logger'
-import base64 from 'base-64'
 import { DS } from "./api/data-source/index.js"
+import routers from "./api/routes/routers.js"
+
+let BASEPATH = '.'
+let LOGPATH = os.tmpdir() + '/llfetcher-native.log'
+
+const dotHomeDetected = await fs.existsSync('.home')
+
+if(!dotHomeDetected){
+    BASEPATH = '../..'
+}
+
+LOGPATH =  `${BASEPATH}/logs/llfetcher-native.log`
+
+const CMS_DB_ENGINE = 'sqlite'
+const CMS_DB_LOCATION = `${BASEPATH}/storage/cms.sqlite`
+
+console.log('ENV:')
+console.log(`BASEPATH: ${BASEPATH}`)
+console.log(`LOGPATH: ${LOGPATH}`)
+
+const ENV = {
+    BASEPATH,LOGPATH,CMS_DB_ENGINE,CMS_DB_LOCATION
+}
+
 
 
 function isBase64(str) {
@@ -16,14 +42,14 @@ function isBase64(str) {
   }
   
 
-const logPath = os.tmpdir() + '/llfetcher-native.log'
+// const logPath = os.tmpdir() + '/llfetcher-native.log'
 const loggerConfig = {
     name: 'llfetcher-native',
     streams: [{
         type: 'rotating-file',
-        path: logPath,
+        path: LOGPATH,
         count: 7,
-        period: '1d' // Others: 1h, 1w, 1m, 1y. See https://github.com/trentm/node-bunyan#stream-type-rotating-file
+        period: '1h' // Others: 1h, 1w, 1m, 1y. See https://github.com/trentm/node-bunyan#stream-type-rotating-file
     }],
     level: 'debug'
     // format: ':method :url :status-code'
@@ -33,11 +59,14 @@ const LOG = bunyan.createLogger(loggerConfig)
 const HTTP_LOG = RequestLogger(loggerConfig).requestLogger()
 
 const app = express()
-const datasource = new DS(LOG)
+const datasource = new DS(CMS_DB_ENGINE, CMS_DB_LOCATION, LOG)
 let ds = null
-app.use(HTTP_LOG)
 
-app.get('/:eventName', function(request, response) {
+
+app.use(HTTP_LOG)
+app.use(bodyParser.urlencoded({ extended: true }))
+app.get('/native-messaging/:eventName', function(request, response) {
+
 
     const delay = request.query.delay
     // On an HTTP request, write stuff to stdout to communicate with Chrome.
@@ -121,6 +150,7 @@ ds = datasource.initialize()
 if(ds){
     ds.then(f=>{
         LOG.info('Database connected')
+        routers.attach(app, datasource, ENV)
     }).catch(e=>{
         LOG.error('Database not connected')
     })

@@ -3,8 +3,8 @@ import GridItemEmpty from './GridEmpty'
 import GridActions from './GridActions'
 class GridItems extends React.Component{
 	spanCls = "my-2 h-8 block bg-gray-200 rounded-full dark:bg-gray-700"
-	tdCls  = "px-6 py-4 text-sm font-medium text-gray-800 dark:text-gray-200"
-	tdCls2 = "px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
+	tdCls  = "px-6 py-4 text-sm font-medium text-gray-800 dark:text-gray-200 align-top"
+	tdCls2 = "px-6 py-4 whitespace-nowrap text-right text-sm font-medium align-top"
 	trCls = "odd:bg-white even:bg-gray-100 hover:bg-gray-100 dark:odd:bg-gray-800 dark:even:bg-gray-700 dark:hover:bg-gray-700"
 	linkCls = "text-blue-500 hover:text-blue-700"
 	editorFactory = () => {console.log(`dummy editorFactory`) }
@@ -63,7 +63,7 @@ class GridItems extends React.Component{
 									// console.log(item)
 								fieldText = options.editorFactory(editor, field, value, item, index,fieldIndex)
 							}
-		              		return (<td key={fieldIndex} className={this.tdCls + " truncate ..."}>{fieldText}</td>)
+		              		return (<td key={fieldIndex} className={this.tdCls}>{fieldText}</td>)
 		              	})
 		              }
 		              

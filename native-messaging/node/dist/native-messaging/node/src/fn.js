@@ -1,5 +1,5 @@
 
-
+import mime from 'mime-types'
 function sendMessageToChrome(output, logger) {
     let outputMessage = JSON.stringify(output)
     const buf = Buffer.alloc(4) // 32 bits.
@@ -19,8 +19,14 @@ const controllerPrefixMatch = (cmd,ctrl) =>{
     const regex = new RegExp(`^${ctrl.prefix}`)
     return regex.test(cmd)
 }
-
+function getFileExtensionFromMimeType(mimeType) {
+    // Get the file extension from the MIME type
+    const extension = mime.extension(mimeType);
+  
+    return extension || 'unknown';
+  }
 export{
     sendMessageToChrome,
-    controllerPrefixMatch   
+    controllerPrefixMatch  ,
+    getFileExtensionFromMimeType
 }

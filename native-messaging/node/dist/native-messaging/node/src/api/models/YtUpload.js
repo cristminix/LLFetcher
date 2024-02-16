@@ -30,7 +30,7 @@ export class MYtUpload{
         this.manager = ds.manager
     }
 
-    async create(title,description,video,category,tags,thumbnail){
+    async create(title, description,category,tags,thumbnail,video){
         const ytupload = new YtUpload()
         ytupload.title = title
 		ytupload.description = description
@@ -44,7 +44,7 @@ export class MYtUpload{
         // try{
             record = await this.manager.save(ytupload)
         // }catch(err){
-            console.log(err)
+            // console.log(err)
 
         // }
         return record
@@ -134,7 +134,7 @@ export class MYtUpload{
             // const ytuploads =  await this.manager.find(YtUpload, option)
             // const
             const records = await this.ds.createQueryBuilder(YtUpload,"a")
-            .select(['a.id','a.title','a.description','a.category','a.tags','a.createDate','a.owner'])//,title,description,category,tags,video,createDate,owner")
+            .select(['a.id','a.title','a.description','a.category','a.tags','a.createDate','a.owner','a.thumbnail'])//,title,description,category,tags,video,createDate,owner")
             .orderBy(`a.${order_by}`,order_dir.toUpperCase())
             // .skip(offset)
             // .take(limit)

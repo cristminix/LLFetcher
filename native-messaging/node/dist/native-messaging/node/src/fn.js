@@ -20,8 +20,7 @@ const controllerPrefixMatch = (cmd,ctrl) =>{
     return regex.test(cmd)
 }
 function getFileExtensionFromMimeType(mimeType) {
-    // Get the file extension from the MIME type
-    const extension = mime.extension(mimeType);
+    const extension = mime.extension(mimeType)
   
     return extension || 'unknown';
   }

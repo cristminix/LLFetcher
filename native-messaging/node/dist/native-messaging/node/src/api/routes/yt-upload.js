@@ -6,7 +6,7 @@ import fs from 'fs'
 import serveIndex from 'serve-index'
 import 'reflect-metadata'
 import path from "path"
-import slugify from'slugify'
+// import slugify from'slugify'
 import { getFileExtensionFromMimeType } from "../../fn.js"
 
 class YtUploadRouter {
@@ -15,9 +15,10 @@ class YtUploadRouter {
     router = null
     env = null
     uploader = null
-    
-    constructor(datasource, env){
+    logger = null
+    constructor(datasource, env,logger){
         this.env = env
+        this.logger = logger
         this.datasource = datasource
         this.mYtUpload = this.datasource.factory('MYtUpload', true)
         this.uploader = multer({ dest: `${env.BASEPATH}/storage/thumbnails` })
@@ -41,10 +42,9 @@ class YtUploadRouter {
 
     async create(req,res){
         // Route logic for handling POST '/yt-upload/create'
-        let {title, description,tags, category,thumbnail, video} = req.body
-        console.log(req.files)
+        let {title, description,tags,category, thumbnail, video} = req.body
+        this.logger.info(req.files)
         const [file] = req.files
-        
         if(file){
             const ext = getFileExtensionFromMimeType(file.mimetype)
             const baseName = path.basename(file.path)
@@ -53,21 +53,30 @@ class YtUploadRouter {
             const newFilePath = `${this.env.BASEPATH}/storage/thumbnails/${thumbnail}`
             fs.rename(oldFilePath, newFilePath, (err) => {
                 if (err) {
-                    console.error('Error renaming file:', err)
+                    this.logger.info('Error renaming file:', err)
                 } else {
-                    console.log('File renamed successfully!')
-                    
+                    this.logger.info('File renamed successfully!')
+                   
                 }
             })
         }    
-        const  ytupload = await this.mYtUpload.create(title, description,category,tags,thumbnail,video)
-        res.send({data: ytupload})
+        
+        let  ytupload = null
+        try{
+            ytupload = await this.mYtUpload.create(title, description,category,tags,thumbnail,video)
+
+            res.send({data: ytupload})
+        }catch(e){
+            res.send({data: e.toString()})
+
+        }
+
     }
 
     async update(req,res){
         // Route logic for handling POST '/yt-upload/update'
         // const _id = req.params.id
-        console.log(req.body)
+        this.logger.info(req.body)
        
         
         
@@ -81,7 +90,7 @@ class YtUploadRouter {
         const existingRec = await this.mYtUpload.getByPk(id)
         if(existingRec){
             
-            console.log(req.files)
+            this.logger.info(req.files)
             const [file] = req.files
             let {thumbnail} = existingRec
             let fileUpdated = false
@@ -95,16 +104,16 @@ class YtUploadRouter {
                 const newFilePath = `${this.env.BASEPATH}/storage/thumbnails/${thumbnail}`
                 fs.rename(oldFilePath, newFilePath, (err) => {
                     if (err) {
-                        console.error('Error renaming file:', err)
+                        this.logger.info('Error renaming file:', err)
                     } else {
-                        console.log('File renamed successfully!')
+                        this.logger.info('File renamed successfully!')
                         const oldThumbnailPath = `${this.env.BASEPATH}/storage/thumbnails/${oldThumbnail}`
 
                         fs.unlink(oldThumbnailPath, (err) => {
                             if (err) {
-                              console.error('Error deleting file:', err);
+                              this.logger.info('Error deleting file:', err);
                             } else {
-                              console.log('File deleted successfully!');
+                              this.logger.info('File deleted successfully!');
                             }
                         })
                     }
@@ -132,16 +141,16 @@ class YtUploadRouter {
         }
         const existingRec = await this.mYtUpload.getByPk(id)
         
-        // console.log(id)
+        // this.logger.info(id)
         if(existingRec){
             const  ytupload = await this.mYtUpload.delete(id)
             const oldThumbnailPath = `${this.env.BASEPATH}/storage/thumbnails/${existingRec.thumbnail}`
 
             fs.unlink(oldThumbnailPath, (err) => {
                 if (err) {
-                  console.error('Error deleting file:', err);
+                  this.logger.info('Error deleting file:', err);
                 } else {
-                  console.log('File deleted successfully!');
+                  this.logger.info('File deleted successfully!');
                 }
             })
             res.send({success:true, data: ytupload, message: 'Record deleted'})

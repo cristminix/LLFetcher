@@ -26,9 +26,9 @@ LOGPATH =  `${BASEPATH}/logs/llfetcher-native.log`
 const CMS_DB_ENGINE = 'sqlite'
 const CMS_DB_LOCATION = `${BASEPATH}/storage/cms.sqlite`
 
-console.log('ENV:')
-console.log(`BASEPATH: ${BASEPATH}`)
-console.log(`LOGPATH: ${LOGPATH}`)
+// console.log('ENV:')
+// console.log(`BASEPATH: ${BASEPATH}`)
+// console.log(`LOGPATH: ${LOGPATH}`)
 
 const ENV = {
     BASEPATH,LOGPATH,CMS_DB_ENGINE,CMS_DB_LOCATION
@@ -150,7 +150,7 @@ ds = datasource.initialize()
 if(ds){
     ds.then(f=>{
         LOG.info('Database connected')
-        routers.attach(app, datasource, ENV)
+        routers.attach(app, datasource, ENV,LOG)
     }).catch(e=>{
         LOG.error('Database not connected')
     })

@@ -17,8 +17,9 @@ const store = Store.getInstance()
 const config = AppConfig.getInstance();
 store.ready(()=>{
   ReactDOM.createRoot(document.getElementById('root')).render(
-    <React.StrictMode>
+    // <React.StrictMode>
       <Router store={store} config={config}/>
-    </React.StrictMode>)
+    // </React.StrictMode>
+    )
 
 })

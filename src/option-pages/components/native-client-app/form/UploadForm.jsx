@@ -87,16 +87,25 @@ const UploadForm = ({data=null, className,hideForm,updateList})=>{
  
     
     useEffect(()=>{
-        HSOverlay.autoInit()
-    },[])
+        const el = HSOverlay.autoInit()
+        console.log(el)
+      },[])
+    useEffect( () => () => {
+      try{
+        document.querySelector("div[data-hs-overlay-backdrop-template]").remove()
+      }catch(e){
+        console.error(e)
+      }
+      console.log("unmount")
+    }, [] )
     return <>
     <button id="basic-modal-upload-clicker" type="button" className="hidden py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600" data-hs-overlay="#hs-basic-modal-upload">
   Open modal
 </button>
 
 <div id="hs-basic-modal-upload" className="hs-overlay hs-overlay-open:opacity-100 hs-overlay-open:duration-500 hidden w-full h-full fixed top-0 start-0 z-[60] opacity-0 overflow-x-hidden transition-all overflow-y-auto pointer-events-none">
-  <div className="hs-overlay-open:opacity-100 hs-overlay-open:duration-500 opacity-0 transition-all sm:max-w-lg sm:w-full m-3 sm:mx-auto">
-    <div className="flex flex-col bg-white border shadow-sm rounded-xl pointer-events-auto dark:bg-gray-800 dark:border-gray-700 dark:shadow-slate-700/[.7]">
+  <div className="hs-overlay-open:opacity-100 hs-overlay-open:duration-500 opacity-0 transition-all sm:max-w-lg sm:w-full m-3 sm:mx-auto ]">
+    <div className="flex w-[700px] flex-col bg-white border shadow-sm rounded-xl pointer-events-auto dark:bg-gray-800 dark:border-gray-700 dark:shadow-slate-700/[.7]">
       <div className="flex justify-between items-center py-3 px-4 border-b dark:border-gray-700">
         <h3 className="font-bold text-gray-800 dark:text-white">
           {title}

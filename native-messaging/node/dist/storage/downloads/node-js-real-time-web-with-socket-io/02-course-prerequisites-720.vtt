@@ -1,0 +1,57 @@
+WEBVTT
+
+1
+00:00:01.020 --> 00:00:03.525
+- [Instruktur] Karena kursus ini adalah eksplorasi tentang
+
+2
+00:00:03.525 --> 00:00:06.030
+cara membangun API dengan Node dan Express, beberapa
+
+3
+00:00:06.030 --> 00:00:08.535
+pemahaman dasar tentang Node, npm, dan perintahnya bukanlah
+
+4
+00:00:08.535 --> 00:00:11.040
+suatu keharusan, tetapi akan membantu Anda.
+
+5
+00:00:11.040 --> 00:00:13.720
+Pengalaman berikutnya dengan JavaScript, terutama sintaks
+
+6
+00:00:13.720 --> 00:00:16.400
+ES6, sangat penting untuk kursus ini karena inilah yang
+
+7
+00:00:16.400 --> 00:00:19.080
+kami gunakan dalam kursus ini.
+
+8
+00:00:19.080 --> 00:00:21.730
+Seperti yang akan Anda lihat, saya berjalan di Mac, tetapi
+
+9
+00:00:21.730 --> 00:00:24.380
+Anda dapat mengikuti di PC karena alatnya bekerja persis
+
+10
+00:00:24.380 --> 00:00:27.030
+sama di kedua platform.
+
+11
+00:00:27.030 --> 00:00:28.777
+Selain itu, saya menggunakan VS Code sebagai editor kode
+
+12
+00:00:28.777 --> 00:00:30.524
+saya, tetapi jangan ragu untuk menggunakan alat apa pun
+
+13
+00:00:30.524 --> 00:00:32.271
+yang Anda inginkan, meskipun saya sarankan menggunakan
+
+14
+00:00:32.271 --> 00:00:34.020
+editor dengan terminal bawaan.

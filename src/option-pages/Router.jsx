@@ -36,6 +36,8 @@ export default function Router({config, store}){
                 <Route  path="/native-client-app" element={<NativeClientApp store={store} config={config}/>} loader={ncAppLoader}/>
                 <Route  path="/native-client-app/:module" element={<NativeClientApp store={store} config={config}/>} loader={ncAppLoader}/>
                 <Route  path="/native-client-app/:module/page/:pageNumber" element={<NativeClientApp store={store} config={config}/>} loader={ncAppLoader}/>
+                <Route  path="/native-client-app/:module/:fk" element={<NativeClientApp store={store} config={config}/>} loader={ncAppLoader}/>
+                <Route  path="/native-client-app/:module/:fk/page/:pageNumber" element={<NativeClientApp store={store} config={config}/>} loader={ncAppLoader}/>
                 
             </Route>
                 

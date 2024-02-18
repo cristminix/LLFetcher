@@ -1,6 +1,6 @@
 
 import {calculateOffset, calculateTotalPages} from "../libs/utils.js"
-
+import YtUploadTT from "./YtUploadTT.js"
 class YtUpload {
     constructor(id, title, description, category, tags, thumbnail, video, createDate, owner){
         this.id = id
@@ -120,25 +120,17 @@ export class MYtUpload{
             const total_pages = calculateTotalPages(total_records, limit) 
             const offset = calculateOffset(page, limit)
             
-            /*
-            let option = {
-                skip : offset,
-                take : limit,
-                order: {}
-            }
-            option.order[order_by] = order_dir
-            if(typeof filter == 'object'){
-                option = Object.assign(option,filter)
-            }*/
-    
-            // const ytuploads =  await this.manager.find(YtUpload, option)
-            // const
-            const records = await this.ds.createQueryBuilder(YtUpload,"a")
-            .select(['a.id','a.title','a.description','a.category','a.tags','a.createDate','a.owner','a.thumbnail'])//,title,description,category,tags,video,createDate,owner")
+          
+            const records = await this.ds.getRepository(YtUpload)
+            .createQueryBuilder("a")//createQueryBuilder(YtUpload,"a")
+            .leftJoin(YtUploadTT, "tt", "tt.uploadId = a.id")
+            .select(['a.id id','a.title title','a.description description','a.category category','a.tags tags','a.createDate createDate','a.owner owner','a.thumbnail thumbnail'])//,title,description,category,tags,video,createDate,owner")
+            .addSelect('COUNT(tt.id)', 'ttCount')
             .orderBy(`a.${order_by}`,order_dir.toUpperCase())
-            // .skip(offset)
-            // .take(limit)
-            .getMany()
+            .offset(offset)
+            .take(limit)
+            .groupBy('a.id')
+            .getRawMany()
             
             return { page, limit, order_by, order_dir, records, total_pages, total_records}
     

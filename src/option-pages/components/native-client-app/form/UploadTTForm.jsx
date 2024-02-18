@@ -18,12 +18,13 @@ const createUntitledUpload = ()=>{
 
     return {title,description,video,category,tags,thumbnail}
 }
-const UploadForm = ({data=null, className,hideForm,updateList})=>{
+const UploadTTForm = ({data=null, className,hideForm,updateList,uploadId})=>{
     const [title,setTitle] = useState('')
     const [description,setDescription] = useState('')
-    const [video,setVideo] = useState('')
-    const [category,setCategory] = useState('')
-    const [tags,setTags] = useState('')
+    // const [uploadId,setUploadId] = useState('')
+    // const [video,setVideo] = useState('')
+    // const [category,setCategory] = useState('')
+    // const [tags,setTags] = useState('')
     const [thumbnail,setThumbnail] = useState('')
     const thumbnailRef = useRef(null)
     const onEdit = f=> f
@@ -32,7 +33,7 @@ const UploadForm = ({data=null, className,hideForm,updateList})=>{
         if(data.id){
             pk = data.id
         }
-        const formDataItem = {pk,title,description,video,category,tags}
+        const formDataItem = {pk,uploadId,title,description}
         // sendMessage(`nm.api.cms.ytupload.${pk?'update':'create'}`, formData,'background',response=>{
         //     console.log({response})
         
@@ -42,7 +43,7 @@ const UploadForm = ({data=null, className,hideForm,updateList})=>{
         Object.keys(formDataItem).map((key)=>{
             formData.append(key,formDataItem[key])
         })
-        const url = apiUrl(['yt-upload',pk?`update/${pk}`:'create'])
+        const url = apiUrl(['yt-upload-tt',pk?`update/${pk}`:'create'])
         fetch(url, {
             method: 'POST',
             body: formData
@@ -66,21 +67,22 @@ const UploadForm = ({data=null, className,hideForm,updateList})=>{
     const getRemoteRowData = async()=>{
         // return
         const pk = data.id
-        const url = apiUrl(['yt-upload',pk])
+        const url = apiUrl(['yt-upload-tt',pk])
         const response = await fetch(url).then(r=>r.json())
         const {thumbnail} = response.data
-        apiUrl(['yt-uploads/thumbnails',thumbnail])
+        apiUrl(['yt-uploads-tts/thumbnails',thumbnail])
     }
     useEffect(()=>{
         if(data){
             // console.log(data)
-            const  {title,description,video,category,tags,thumbnail} =data
+            const  {title,description,uploadId,thumbnail} =data
             setTitle(title)
+            // setUploadId(uploadId)
             setDescription(description)
-            setVideo(video)
-            setCategory(category)
-            setTags(tags)
-            setThumbnail(apiUrl(['yt-uploads/thumbnails',thumbnail]))
+            // setVideo(video)
+            // setCategory(category)
+            // setTags(tags)
+            setThumbnail(apiUrl(['yt-uploads-tts/thumbnails',thumbnail]))
             if(data.id){
                 getRemoteRowData()
             }
@@ -121,6 +123,14 @@ const UploadForm = ({data=null, className,hideForm,updateList})=>{
       <form className={'className'}>
     <div className="flex  items-center p-2 px-2">
         <div className="w-[70px]">
+            <label className="font-bold">Upload ID</label>
+        </div>
+        <div className="flex-grow">
+            <input tabIndex={1} readOnly className={inputCls} value={uploadId} onChange={e=>f=>f}/>
+        </div>
+    </div>
+    <div className="flex  items-center p-2 px-2">
+        <div className="w-[70px]">
             <label className="font-bold">Title</label>
         </div>
         <div className="flex-grow">
@@ -135,32 +145,7 @@ const UploadForm = ({data=null, className,hideForm,updateList})=>{
             <textarea tabIndex={2} className={`${inputCls} ${niceScrollbarCls} min-h-6`} value={description} onChange={e=>setDescription(e.target.value)}/>
         </div>
     </div>
-    <div className="flex  items-center p-2 px-2">
-        <div className="w-[70px]">
-            <label className="font-bold">Category</label>
-        </div>
-        <div className="flex-grow">
-            <input tabIndex={3} className={inputCls} value={category} onChange={e=>setCategory(e.target.value)}/>
-        </div>
-    </div>
     
-    
-    <div className="flex  items-center p-2 px-2">
-        <div className="w-[70px]">
-            <label className="font-bold">Tags</label>
-        </div>
-        <div className="flex-grow">
-            <input tabIndex={4} className={inputCls} value={tags} onChange={e=>setTags(e.target.value)}/>
-        </div>
-    </div>
-    <div className="flex  items-center p-2 px-2">
-        <div className="w-[70px]">
-            <label className="font-bold">Video</label>
-        </div>
-        <div className="flex-grow">
-            <input tabIndex={5} type="text" className={`${inputCls}`} value={video} onChange={e=>setVideo(e.target.value)}/>
-        </div>
-    </div>
     <div className="flex  p-2 px-2">
         <div className="w-[80px]">
             <label className="font-bold">Thumbnail</label>
@@ -199,4 +184,4 @@ const UploadForm = ({data=null, className,hideForm,updateList})=>{
 export {
     createUntitledUpload
 }
-export default UploadForm
+export default UploadTTForm

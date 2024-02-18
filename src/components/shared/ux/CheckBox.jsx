@@ -20,9 +20,10 @@ class CheckBox extends Component{
     }
     componentWillReceiveProps(a,b){
         // console.log(a,b)
-        // if(this.ckRef.current){
-        //     this.ckRef.current.checked = b.checked
-        // }
+        let np = typeof b.checked!= "undefined"? b : a
+        if(this.ckRef.current){
+            this.ckRef.current.checked = np.checked
+        }
     }
     render(){
         const {id,checked,label, className, tabIndex} = this.props

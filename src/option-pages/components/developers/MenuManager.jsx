@@ -12,6 +12,7 @@ import jQuery from "jquery"
 const inputCls= "py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
 // console.log(import.meta.env)
 import { crc32 } from "crc"
+import { niceScrollbarCls } from "../ux/cls"
 const createUntitledMenu = ()=>{
     const idx = crc32((new Date).getTime().toString()).toString(16)
     const title = `Untitled-${idx}`
@@ -38,7 +39,12 @@ const MenuForm = ({data=null, className,hideForm})=>{
     const [hasChild,setHasChild] = useState(false)
     const onEdit = f=> f
     const saveForm = async(f) => {
-        const formData = {title, iconCls, path, order, hidden, hasChild, dev, parent, slug}
+        let formData = {title, iconCls, path, order, hidden, hasChild, dev, parent, slug}
+        // if(formData.dev !== true){
+        //     formData.dev = false
+        // }
+        // console.log(formData)
+        // return
         const options = {
             method: 'POST', // or 'PUT', 'DELETE', etc.
             headers: {
@@ -82,6 +88,13 @@ const MenuForm = ({data=null, className,hideForm})=>{
     
     useEffect(()=>{
         HSOverlay.autoInit()
+        return ()=>{
+            try{
+                document.querySelector("div[data-hs-overlay-backdrop-template]").remove()
+              }catch(e){
+                console.error(e)
+              }
+        }
     },[])
     return <>
     <button id="basic-modal-menu-clicker" type="button" className="hidden py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600" data-hs-overlay="#hs-basic-modal-menu">
@@ -107,7 +120,7 @@ const MenuForm = ({data=null, className,hideForm})=>{
             <label className="font-bold">Title</label>
         </div>
         <div className="flex-grow">
-            <input tabIndex={1} className={inputCls} defaultValue={title} onChange={e=>setTitle(e.target.value)}/>
+            <input tabIndex={1} className={inputCls} value={title} onChange={e=>setTitle(e.target.value)}/>
         </div>
     </div>
     <div className="flex  items-center p-2 px-2">
@@ -115,7 +128,7 @@ const MenuForm = ({data=null, className,hideForm})=>{
             <label className="font-bold">Slug</label>
         </div>
         <div className="flex-grow">
-            <input tabIndex={2} className={inputCls} defaultValue={slug} onChange={e=>setSlug(e.target.value)}/>
+            <input tabIndex={2} className={inputCls} value={slug} onChange={e=>setSlug(e.target.value)}/>
         </div>
     </div>
     <div className="flex  items-center p-2 px-2">
@@ -123,7 +136,7 @@ const MenuForm = ({data=null, className,hideForm})=>{
             <label className="font-bold">Path</label>
         </div>
         <div className="flex-grow">
-            <input tabIndex={3} className={inputCls} defaultValue={path} onChange={e=>setPath(e.target.value)}/>
+            <input tabIndex={3} className={inputCls} value={path} onChange={e=>setPath(e.target.value)}/>
         </div>
     </div>
     
@@ -133,7 +146,7 @@ const MenuForm = ({data=null, className,hideForm})=>{
             <label className="font-bold">Parent</label>
         </div>
         <div className="flex-grow">
-            <input tabIndex={4} className={inputCls} defaultValue={parent} onChange={e=>setParent(e.target.value)}/>
+            <input tabIndex={4} className={inputCls} value={parent} onChange={e=>setParent(e.target.value)}/>
         </div>
     </div>
     <div className="flex  items-center p-2 px-2">
@@ -141,7 +154,7 @@ const MenuForm = ({data=null, className,hideForm})=>{
             <label className="font-bold">Order</label>
         </div>
         <div className="w-[140px]">
-            <input tabIndex={5} type="number" className={`${inputCls}`} defaultValue={order} onChange={e=>setOrder(e.target.value)}/>
+            <input tabIndex={5} type="number" className={`${inputCls}`} value={order} onChange={e=>setOrder(e.target.value)}/>
         </div>
     </div>
     <div className="flex  items-center p-2 px-2">
@@ -149,7 +162,7 @@ const MenuForm = ({data=null, className,hideForm})=>{
             <label className="font-bold">Icon Cls</label>
         </div>
         <div className="flex-grow">
-            <input tabIndex={6} className={inputCls} defaultValue={iconCls} onChange={e=>setIconCls(e.target.value)}/>
+            <input tabIndex={6} className={inputCls} value={iconCls} onChange={e=>setIconCls(e.target.value)}/>
         </div>
     </div>      
     <div className="flex items-center p-2 px-2">
@@ -284,7 +297,7 @@ const MenuManager = ({store,config}) => {
 		numberWidthCls : '1/8',
 		actionWidthCls : '1/8',
 		widthCls : ['1/5'],
-		headers : ['Title','Path','Icon Cls','Hidden'],
+		headers : ['Title','Path','Icon','Hidden'],
 		fields : ['title','path','iconCls','hidden'],
 		enableEdit : true,
 		// editUrl : (item) =>{ return `/DBerences/tts-server/${item.key}`},
@@ -297,6 +310,9 @@ const MenuManager = ({store,config}) => {
 			// value : (field, value, item, index) => {
 			// 	return editorFactory(item, index)
 			// }
+            iconCls : (field, value, item, index) => {
+				return <i className={value}></i>
+			}
 		},
 
 		callbackActions : {
@@ -354,6 +370,8 @@ const MenuManager = ({store,config}) => {
                     crecord.slug = cslug
                     crecord.level = 1
                     crecord.parent = slug
+                    // crecord.dev
+                    // console.log(crecord)
                     records.push(crecord)
                 }
             }
@@ -399,7 +417,20 @@ const MenuManager = ({store,config}) => {
 	return(<div>
         <MenuForm data={formData} className={containerCls} hideForm={e=>setShowForm(false)}/>
         
-        
+        <div className="module-info mb-2">
+            <div className="flex  mb-2">
+            <div className="align-top relative w-[70px]">
+                <i className="bi bi-list-ul block absolute -mt-[18px]" style={{fontSize:'480%'}}></i>
+            </div>
+            <div className="">
+            <h1 className="text-xl font-semibold">Client Side Menu Manager</h1>
+            <p className="text-sm">Manage the sidebar menu of the application</p>
+            </div>
+            
+            </div>
+            <p className="text-sm">Modify <code>side_menu.json</code> file Backend using development <code>devApiUrl</code> triggered by <code>npm run dev</code></p>
+                        
+        </div>
         <div  className={`menu-manager ${containerCls}`}>
         <div className="explorer-toolbar">
             <div className="flex gap-2">
@@ -412,15 +443,17 @@ const MenuManager = ({store,config}) => {
             
         </div>		
         <div className="flex flex-col">
-              <div className="-m-1.5 overflow-x-auto">
+              <div className={`-m-1.5 overflow-x-auto ${niceScrollbarCls}`}>
                 <div className="p-1.5 min-w-full inline-block align-middle">
-                      <div className="overflow-hidden">
+                      <div className="">
                         {
                             grid ?<Grid options={gridOptions} records={grid.records} page={grid.page} limit={grid.limit} />:""
                         }
                         
                       </div>
-                      <div className="pager-container mt-3">
+                      
+                </div>
+              </div><div className="pager-container mt-3">
                         {
                             grid ? <Pager path="/database" 
                                  page={grid.page} 
@@ -431,8 +464,6 @@ const MenuManager = ({store,config}) => {
                           
 
                       </div>
-                </div>
-              </div>
         </div>		
         </div>		
     </div>) 

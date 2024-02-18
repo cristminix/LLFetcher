@@ -4,15 +4,16 @@ import {Component,createRef,useState,useEffect} from "react"
 import NativeClient from './native-client-app/NativeClient'
 import UserManagement from './native-client-app/UserManagement'
 import YTUpload from './native-client-app/YTUpload'
+import YTUploadTT from './native-client-app/YTUploadTT'
 
 export async function loader({ params }) {
-    const { module, pageNumber } = params
-    return { module, pageNumber }
+    const { module, fk,pageNumber } = params
+    return { module, pageNumber,fk }
 }
 
 
 const NativeClientApp = ({store,config}) => {
-    const {module, pageNumber} = useLoaderData()
+    const {module, pageNumber,fk} = useLoaderData()
 
     // let viewMode = table ? 'explorer' : 'manager'
     // if(table == 'table-manager'){
@@ -27,6 +28,9 @@ const NativeClientApp = ({store,config}) => {
     }
     else if(module == 'yt-upload'){
         return <YTUpload store={store} config={config} pageNumber={pageNumber}/>
+    }
+    else if(module == 'yt-upload-tt'){
+        return <YTUploadTT store={store} config={config} pageNumber={pageNumber} uploadId={fk}/>
     }
     else return <div className="native-client-app">
         {

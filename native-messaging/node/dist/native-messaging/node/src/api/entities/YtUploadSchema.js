@@ -52,7 +52,7 @@ const YtUploadSchema = new EntitySchema({
 			nullable : true, 
 
         },
-    } 
+    }
        
     
 })

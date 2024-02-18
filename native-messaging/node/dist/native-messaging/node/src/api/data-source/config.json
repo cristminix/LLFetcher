@@ -109,11 +109,11 @@
         }
       }
     },
-    "yt_upload_data":{
+    "yt_upload_data": {
       "schema": "YtUploadDataSchema",
       "model": "YtUploadData",
-      "pk":"id",
-      "fields":[
+      "pk": "id",
+      "fields": [
         "id",
         "uploadId",
         "kind",
@@ -184,6 +184,32 @@
         null,
         null,
         null,
+        null
+      ]
+    },
+    "yt_upload_tt": {
+      "schema": "YtUploadTTSchema",
+      "model": "YtUploadTT",
+      "pk": "id",
+      "fields": [
+        "uploadId",
+        "id",
+        "title",
+        "description",
+        "thumbnail"
+      ],
+      "types": [
+        "int",
+        "int",
+        "varchar",
+        "varchar",
+        "varchar"
+      ],
+      "lengths": [
+        null,
+        null,
+        225,
+        400,
         null
       ]
     }

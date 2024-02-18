@@ -195,6 +195,69 @@
           }
         }
       }
+    },
+    "yt-upload-tt": {
+      "routePath": "/api/cms/yt-upload-tt",
+      "routes": {
+        "list": {
+          "path": "{routePath}s",
+          "authenticated": false,
+          "groups": [],
+          "method": "get",
+          "controller": "getList",
+          "queryStrings": {
+            "order_by": {
+              "type": "string",
+              "defaultValue": "id"
+            },
+            "order_dir": {
+              "type": "string",
+              "defaultValue": "asc"
+            },
+            "limit": {
+              "type": "int",
+              "defaultValue": 5
+            },
+            "page": {
+              "type": "int",
+              "defaultValue": 1
+            }
+          }
+        },
+        "create": {
+          "path": "{routePath}/create",
+          "authenticated": false,
+          "groups": [],
+          "method": "post",
+          "controller": "create"
+        },
+        "update": {
+          "path": "{routePath}/update",
+          "authenticated": false,
+          "groups": [],
+          "method": "post",
+          "controller": "update",
+          "queryStrings": {
+            "id": {
+              "type": "int",
+              "required": true
+            }
+          }
+        },
+        "delete": {
+          "path": "{routePath}/delete",
+          "authenticated": false,
+          "groups": [],
+          "method": "post",
+          "controller": "delete",
+          "postData": {
+            "id": {
+              "type": "int",
+              "required": true
+            }
+          }
+        }
+      }
     }
   }
 }

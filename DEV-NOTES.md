@@ -2,6 +2,8 @@
 This some trouble shooting that I have found during development process, sometime make things complicated and more sucks and tricky
 
 ## Common
+### React Hook Component on mounted or `useEffect` called twice
+Remove `<React.StrictMode>` from `main.js` where `React.createRoot` called
 
 ### Consider using `IndexedDB` 
 Use `IndexedDB` for persistent storage on the client side beause of it support for large data size instead of `chrome.storage.*` or old `localStorage` approximately max `10MB` serialized string value
@@ -31,6 +33,8 @@ Workaround:
 I just disable  `onTab` event handlers on this plugin
 
 Replace ```node_modules/@preline/overlay/index.js``` with ```patch/@preline/overlay/index.js```
+
+*still find solutions*
 
 ### Remove preline modal backdrop on component unmount
 ```

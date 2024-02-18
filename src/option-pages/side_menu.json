@@ -46,6 +46,15 @@
           "order": "2",
           "hidden": false,
           "hasChild": false
+        },
+        "yt-upload-tt": {
+          "title": "YT Upload T&T",
+          "iconCls": "fa fa-youtube",
+          "path": "/native-client-app/yt-upload-tt",
+          "order": 0,
+          "hidden": false,
+          "hasChild": false,
+          "dev": false
         }
       }
     },
@@ -81,7 +90,7 @@
           "iconCls": "bi bi-gear",
           "order": "-1",
           "hidden": false,
-          "dev": false
+          "dev": true
         },
         "dev-api": {
           "title": "Dev Api",

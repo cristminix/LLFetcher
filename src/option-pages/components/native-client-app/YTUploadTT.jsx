@@ -5,13 +5,15 @@ import Pager from "../../../components/shared/Pager"
 import Grid from "../../../components/shared/Grid"
 import Button from "../../../components/shared/ux/Button"
 import {formatBytes, sendMessage, slugify} from "../../../global/fn"
-import UploadForm, {createUntitledUpload} from "./form/UploadForm"
+import UploadTTForm, {createUntitledUpload} from "./form/UploadTTForm"
 import { apiUrl } from "./fn"
 
 import jQuery from "jquery"
 import { niceScrollbarCls } from "../ux/cls"
+import { useLocation } from "react-router-dom"
 
-const YTUpload = ({store,config,pageNumber}) => {
+const YTUploadTT = ({store,config,pageNumber,uploadId}) => {
+    
     const [grid,setGrid] = useState({
         records : [],
         limit : 5,
@@ -59,16 +61,14 @@ const YTUpload = ({store,config,pageNumber}) => {
     const deleteForm = async(item,index)=>{
         // console.log(item)
         if(confirm(`Are you sure want to delete this upload "${item.title}"`)){
-            const url = apiUrl(['yt-upload/delete',item.id])
+            const url = apiUrl(['yt-upload-tt/delete',item.id])
             const response = await fetch(url,{method:'POST'}).then(r=>r.json())
             console.log({response})
             updateList()
         }
 
     }
-    const goToTT = (item)=>{
-        document.location.hash=`/native-client-app/yt-upload-tt/${item.id}`
-    }
+  
     
     const gridOptions = {
 		numberWidthCls : 'w-[10px]',
@@ -97,7 +97,7 @@ const YTUpload = ({store,config,pageNumber}) => {
 			// 	return editorFactory(item, index)
 			// }
             title : (field, value, item, index) => {
-                const thumbnailUrl = `${apiUrl(['yt-uploads','thumbnails',item.thumbnail])}`
+                const thumbnailUrl = `${apiUrl(['yt-uploads-tts','thumbnails',item.thumbnail])}`
 				return <>
                     <div className="flex text-left gap-2">
                         <div className="w-1/4"><img src={thumbnailUrl}/></div>
@@ -118,24 +118,22 @@ const YTUpload = ({store,config,pageNumber}) => {
             edit : (item, index, options, linkCls, gridAction) => {
 				return <>
                 
-                <Button title="T&T" loading={false} icon="bi bi-collection" caption={`${item.ttCount}`} onClick={e => goToTT(item, index)}/>
                 <Button title="Edit" loading={false} icon="fa fa-edit" caption="" onClick={e => editForm(item, index)}/>
-                {
-                item.ttCount==0?<Button title="Delete" disabled={item.ttCount>0} loading={false} icon="fa fa-trash" caption="" onClick={e => deleteForm(item, index)}/>:null
-                }
+                <Button title="Delete" loading={false} icon="fa fa-trash" caption="" onClick={e => deleteForm(item, index)}/>
                 
             </>
 	   
 			}
 		}
 	}
+     
     
     const updateList = async () => {
         console.log('updateList called')
         const page = parseInt(pageNumber) || 1
      
         const {limit, order_by,order_dir} = grid
-        const url = apiUrl('yt-uploads',{limit,page, order_by,order_dir})
+        const url = apiUrl('yt-upload-tts',{uploadId,limit,page, order_by,order_dir})
         const response = await fetch(url).then(r=>r.json())
         const nGrid = response
         setGrid(prevGrid => {
@@ -145,26 +143,32 @@ const YTUpload = ({store,config,pageNumber}) => {
             }
         }) 
     }
+   
     useEffect(()=>{
         // if(pageNumber){
             updateList()
         // }        
-    },[pageNumber])
-    
+    },[pageNumber,uploadId])
+    const backToYtUpload = ()=>{
+        document.location.hash = `/native-client-app/yt-upload`
+    }
 	const containerCls = "border mb-2 rounded-xl shadow-sm p-6 dark:bg-gray-800 dark:border-gray-700"
 	return(<div className="min-h-screen">
-        <UploadForm updateList={e=>updateList()} data={formData} className={containerCls} hideForm={e=>setShowForm(false)}/>
+        <UploadTTForm uploadId={uploadId} updateList={e=>updateList()} data={formData} className={containerCls} hideForm={e=>setShowForm(false)}/>
 
         {
             // showForm?<MenuForm data={formData} className={containerCls} hideForm={e=>setShowForm(false)}/>:null
         }
         
         <div  className={`user-manager ${containerCls}`}>
-        <div className="grid-toolbar pb-4">
-            <div className="flex justify-end gap-2">
+        <div className="grid-toolbar py-2">
+            <div className="flex justify-between gap-2">
                 {/* <Button onClick={e=>exportMenu(e)} caption="Export json" icon="fa fa-file-text"/> */}
                 {
-                    !showForm?<Button onClick={e=>addForm()} icon="fa fa-plus" caption=""/>:null
+                    !showForm?<>
+                    <Button onClick={e=>backToYtUpload()} icon="fa fa-chevron-left" caption=""/>
+                    <Button onClick={e=>addForm()} icon="fa fa-plus" caption=""/>
+                    </>:null
                 }
                 
             </div>
@@ -184,7 +188,7 @@ const YTUpload = ({store,config,pageNumber}) => {
               </div>
               <div className="pager-container mt-3">
                         {
-                            grid ? <Pager path="/native-client-app/yt-upload" 
+                            grid ? <Pager path={`/native-client-app/yt-upload-tt/${uploadId}`} 
                                  page={grid.page} 
                                  total_pages={grid.total_pages} 
                                  limit={grid.limit}
@@ -198,4 +202,4 @@ const YTUpload = ({store,config,pageNumber}) => {
     </div>) 
 }
 
-export default YTUpload
+export default YTUploadTT

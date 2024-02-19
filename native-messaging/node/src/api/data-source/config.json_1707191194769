@@ -1,0 +1,36 @@
+{
+    "#schema": "List of available Schema class and Model with the table name as key",
+    "schema" : {
+        "cms_user" : {
+            "schema" : "UserSchema",
+            "model" : "User",
+            "fields" : ["id",  "username", "passwd",  "email",   "firstName","lastName", "displayName", "avatarUrl", "groupId","createdBy","createDate","lastUpdated"],
+            "types" :  ["int", "varchar",  "varchar", "varchar", "varchar",   "varchar",  "varchar",     "varchar" ,  "int",    "int",      "datetime",  "datetime"],
+            "lengths" :[null,  25,         25,        25,         25,         25,         25,            25,          null,      null,       null,        null],
+            "validations": [null,
+                               "required,min=8,validUsername,checkUsername,uniqueUsername", 
+                                          "required,min=8,validPasswd", 
+                                                      "required,validEmail,uniqueEmail",
+                                                                 "required,min=3",
+                                                                             null,        null,         "validUrl",   "validGroupId",  null, null  ],
+            "pk" : "id",
+
+            "nullable" : ["passwd","lastName", "displayName", "avatarUrl", "groupId", "createdBy", "createDate", "lastUpdated"]
+        },
+        "cms_setting" : {
+            "schema" : "CmsSettingSchema",
+            "model" : "CmsSetting",
+            "fields" : ["id", "profileName","theme", "setAsDefault","createDate", "lastUpdated"],
+            "types" : ["int", "varchar",     "varchar","int",         "datetime",   "datetime"],
+            "lengths" : [null,20,100,null,null,null],
+            "pk": "id",
+            "nullable" : ["setAsDefault"],
+            "enums" : {
+                "target" : {
+                    "admin" : "Admin",
+                    "public" : "public"
+                }
+            }
+        }
+    }
+}

@@ -15,7 +15,7 @@ const manifest = {
 
 const main = async()=>{
     const [nodeFullPath,currentFileFullPath,browserName,extId] = process.argv
-    const binFullPath = path.resolve(`${__dirname}/dist/llfetcher-native.exe`)
+    const binFullPath = path.resolve(`${__dirname}/llfetcher-native.exe`)
     if(browserName.length <=4 || extId.length <= 4){
         console.error(`Usage install.bat <browser> <extension_id>
         \nExample:
@@ -23,7 +23,7 @@ const main = async()=>{
     install.bat chrome ncfdbofhgnoammldlfcfdkcldpbepjhc`)
         process.exit(1)
     }
-    const manifestFilePath = `${__dirname}/dist/manifest.json`
+    const manifestFilePath = `${__dirname}/manifest.json`
     manifest.path = binFullPath
     manifest.allowed_origins.push(`chrome-extension://${extId}/`)
     console.log(manifest)
@@ -37,17 +37,10 @@ const main = async()=>{
     }
     console.log("Generating registry-entries.reg")
     console.log("Please double-click or run registry-entries.reg")
-    /*
-    Windows Registry Editor Version 5.00
-
-[HKEY_CURRENT_USER\Software\Microsoft\Edge\NativeMessagingHosts\com.cristminix.llfetcher]
-@="E:\\projects\\LLFetcher\\native-messaging\\node\\dist\\manifest.json"
-
-
-    */
+    
     let manifestFullPath = JSON.stringify(path.resolve(manifestFilePath))
     console.log(manifestFullPath)
-    const regFilePath = `${__dirname}/dist/registry-entries.reg`
+    const regFilePath = `${__dirname}/registry-entries.reg`
     let registryKey = `HKEY_CURRENT_USER\\Software\\Google\\Chrome\\NativeMessagingHosts\\`
     if(browserName === 'msedge'){
         registryKey = `HKEY_CURRENT_USER\\Software\\Microsoft\\Edge\\NativeMessagingHosts\\`

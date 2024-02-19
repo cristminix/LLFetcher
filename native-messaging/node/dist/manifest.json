@@ -1,9 +1,0 @@
-{
-  "name": "com.cristminix.llfetcher",
-  "description": "LLFetcher is stand for LinkedIn Learning Fetcher",
-  "path": "E:\\projects\\LLFetcher\\native-messaging\\node\\dist\\llfetcher-native.exe",
-  "type": "stdio",
-  "allowed_origins": [
-    "chrome-extension://ncfdbofhgnoammldlfcfdkcldpbepjhc/"
-  ]
-}

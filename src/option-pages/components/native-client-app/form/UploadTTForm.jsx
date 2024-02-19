@@ -121,7 +121,7 @@ const UploadTTForm = ({data=null, className,hideForm,updateList,uploadId})=>{
       </div>
       <div className="p-4 overflow-y-auto">
       <form className={'className'}>
-    <div className="flex  items-center p-2 px-2">
+    <div className="flex  items-center p-2 px-2 hidden">
         <div className="w-[70px]">
             <label className="font-bold">Upload ID</label>
         </div>

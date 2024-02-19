@@ -8,16 +8,8 @@
     "build-script-inject": "esbuild src/content-pages/content-inject.jsx --minify --bundle --outdir=src/content-pages/dist --loader:.js=jsx",
     "build": "npm run build-script-inject && vite build &&  cpy preline.js dist/",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview",
-    "messaging": "node native-messaging/node/src/main.mjs",
-    "messaging-app": "node native-messaging/node/dist/llfetcher-native.mjs",
-    "messaging-dist": "native-messaging/node/dist/llfetcher-native.exe",
-    "build-messaging": "esbuild native-messaging/node/src/main.mjs --format=esm --platform=node --bundle --outfile=native-messaging/node/dist/llfetcher-native.mjs",
-    "pkg-messaging-dist": "pkg -t node18-win native-messaging/node/dist/llfetcher-native.cjs  --out-path=native-messaging/node/dist",
-    "pkg-messaging": "pkg -t node18-win native-messaging/node/src/main.cjs  --out-path=native-messaging/node/dist",
-    "nexe-messaging-dist": "nexe native-messaging/node/dist/llfetcher-native.mjs  -o native-messaging/node/dist/llfetcher-native.exe",
-    "nexe-messaging-build": "nexe native-messaging/node/src/main.mjs  -o native-messaging/node/dist/llfetcher-native.exe -b"
-  },
+    "preview": "vite preview"
+   },
   "dependencies": {
     "@popperjs/core": "^2.11.7",
     "@preline/accordion": "^2.0.1",

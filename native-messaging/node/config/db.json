@@ -1,0 +1,4 @@
+{
+    "engine": "sqlite",
+    "location": "${app.storageDir}/cms.sqlite"
+}

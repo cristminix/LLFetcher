@@ -13,15 +13,17 @@ class YtUploadRouter {
     datasource = null
     mYtUpload = null
     router = null
-    env = null
+    appConfig = null
     uploader = null
     logger = null
-    constructor(datasource, env,logger){
-        this.env = env
+    thumbnailDir = null
+    constructor(datasource, appConfig,logger){
+        this.appConfig = appConfig
         this.logger = logger
         this.datasource = datasource
         this.mYtUpload = this.datasource.factory('MYtUpload', true)
-        this.uploader = multer({ dest: `${env.BASEPATH}/storage/thumbnails` })
+        this.thumbnailDir = appConfig.get('module.thumbnailDir')
+        this.uploader = multer({ dest: this.thumbnailDir })
         this.router = express.Router()
         this.initRouter()
     }
@@ -50,7 +52,7 @@ class YtUploadRouter {
             const baseName = path.basename(file.path)
             thumbnail = `${baseName}.${ext}`
             const oldFilePath = file.path
-            const newFilePath = `${this.env.BASEPATH}/storage/thumbnails/${thumbnail}`
+            const newFilePath = `${this.thumbnailDir}/${thumbnail}`
             fs.rename(oldFilePath, newFilePath, (err) => {
                 if (err) {
                     this.logger.info('Error renaming file:', err)
@@ -101,13 +103,13 @@ class YtUploadRouter {
                 const oldThumbnail = existingRec.thumbnail
                 thumbnail = `${baseName}.${ext}`
                 const oldFilePath = file.path
-                const newFilePath = `${this.env.BASEPATH}/storage/thumbnails/${thumbnail}`
+                const newFilePath = `${this.thumbnailDir}/${thumbnail}`
                 fs.rename(oldFilePath, newFilePath, (err) => {
                     if (err) {
                         this.logger.info('Error renaming file:', err)
                     } else {
                         this.logger.info('File renamed successfully!')
-                        const oldThumbnailPath = `${this.env.BASEPATH}/storage/thumbnails/${oldThumbnail}`
+                        const oldThumbnailPath = `${this.thumbnailDir}/${oldThumbnail}`
 
                         fs.unlink(oldThumbnailPath, (err) => {
                             if (err) {
@@ -144,7 +146,7 @@ class YtUploadRouter {
         // this.logger.info(id)
         if(existingRec){
             const  ytupload = await this.mYtUpload.delete(id)
-            const oldThumbnailPath = `${this.env.BASEPATH}/storage/thumbnails/${existingRec.thumbnail}`
+            const oldThumbnailPath = `${this.thumbnailDir}/${existingRec.thumbnail}`
 
             fs.unlink(oldThumbnailPath, (err) => {
                 if (err) {
@@ -161,7 +163,7 @@ class YtUploadRouter {
         }
     }
     initRouter(){
-        const staticPath = path.join(this.env.BASEPATH, '/storage/thumbnails')
+        const staticPath = path.join(this.appConfig.get('basepath'), this.thumbnailDir)
 
         this.router.use('/yt-uploads/thumbnails', express.static(staticPath)); // Serve static files
         this.router.use('/yt-uploads/thumbnails', serveIndex(staticPath, { 'icons': true }))

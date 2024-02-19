@@ -1,0 +1,7 @@
+{
+    "host" : "127.0.0.1",
+    "port" : 7700,
+    "storageDir" : "storage",
+    "logDir" : "logs",
+    "downloadDir" : "${storageDir}/downloads"
+}

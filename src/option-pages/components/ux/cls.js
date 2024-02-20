@@ -39,10 +39,19 @@ const inputCls= "py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus
 const inputClsError = `${inputCls} focus:border-red-500 focus:ring-red-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400`
 
 const inputClsSuccess = `${inputCls} focus:border-teal-500 focus:ring-teal-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400`
-
+const btnCls = "hidden py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
+const modalCls = "hs-overlay hs-overlay-open:opacity-100 hs-overlay-open:duration-500 hidden w-full h-full fixed top-0 start-0 z-[60] opacity-0 overflow-x-hidden transition-all overflow-y-auto pointer-events-none hs-overlay-backdrop-open:bg-blue-950/90  "
+const modalBtnCloseCls = "flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-full border border-transparent text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-gray-700 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
+const modalBtnFrmCloseCls = "py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-white dark:hover:bg-gray-800 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
+const modalBtnFrmSaveCls = "py-2 px-3 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600"
 export {
     cls0,cls1,cls2,cls3,cls4,cls5,cls6,cls7,cls8,cls9,cls10,
     cls11,cls12,cls13,cls14,cls15,cls16,cls17,cls18,cls19,cls20,
     cls21,cls22,cls23,cls24,cls25,cls26,cls27,cls28,cls29,cls30,
-    cls31,cls32,cls33,cls34,niceScrollbarCls,inputCls,inputClsError,inputClsSuccess
+    cls31,cls32,cls33,cls34,niceScrollbarCls,inputCls,inputClsError,inputClsSuccess,
+    btnCls,
+    modalCls,
+    modalBtnCloseCls,
+    modalBtnFrmCloseCls,
+    modalBtnFrmSaveCls
 }

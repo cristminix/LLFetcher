@@ -102,10 +102,9 @@ class YtUploadRouter {
         const validationErrors = validationResult(req)
         const [file] = req.files
         // console.log(req.files)
-        let errors = this.validateImageFile('thumbnail',req.files)
+        let errorThumbnails = this.validateImageFile('thumbnail',req.files)
         let errorValidations = validationErrors.array()
-        errors=[...errors,...errorValidations]
-        // errors = [...errors,...]
+        const errors=[...errorValidations,...errorThumbnails]
         if(errors.length>0){
             // in every situation, only this part of code is going to be executed
             return res.status(422).json({errors});

@@ -9,7 +9,7 @@
     "build": "npm run build-script-inject && vite build &&  cpy preline.js dist/",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
-   },
+  },
   "dependencies": {
     "@popperjs/core": "^2.11.7",
     "@preline/accordion": "^2.0.1",
@@ -21,6 +21,7 @@
     "bunyan-sfdx-no-dtrace": "^1.8.2",
     "country-list": "^2.3.0",
     "crc": "^4.3.2",
+    "crypto-js": "^4.2.0",
     "fetch-retry": "^5.0.6",
     "file-saver": "^2.0.5",
     "fontawesome-4.7": "^4.7.0",

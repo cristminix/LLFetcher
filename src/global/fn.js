@@ -323,6 +323,15 @@ const getFile64=async(file) =>{
     })
     
 }
+function isEmpty(value) {
+    return (
+        value === undefined ||
+        value === null ||
+        (typeof value === 'string' && value.trim() === '') ||
+        (typeof value === 'number' && isNaN(value)) ||
+        (Array.isArray(value) && value.length > 0) 
+    )
+}
 export {
     applyJQueryContainsRegex,
     slugify,
@@ -335,5 +344,6 @@ export {
     timeout,
     calculateSpeed,formatLeadingZeros,
     getQueryStringFromUrlAsObject,
-    getFile64   
+    getFile64,
+    isEmpty   
 }

@@ -37,10 +37,10 @@ const YTUpload = ({store,config,pageNumber}) => {
         setShowForm(true)
 
         jQuery('#basic-modal-upload-clicker').trigger("click")
-        setTimeout(()=>{
-            jQuery('#hs-basic-modal-upload form input:first').focus()
+        // setTimeout(()=>{
+        //     jQuery('#hs-basic-modal-upload form input:first').focus()
 
-        },1000)
+        // },1000)
 
     }
     const editForm = async(item,index)=>{
@@ -50,10 +50,10 @@ const YTUpload = ({store,config,pageNumber}) => {
         setShowForm(true)
         
         jQuery('#basic-modal-upload-clicker').trigger("click")
-        setTimeout(()=>{
-            jQuery('#hs-basic-modal-upload form input:first').focus()
+        // setTimeout(()=>{
+        //     jQuery('#hs-basic-modal-upload form input:first').focus()
 
-        },1000)
+        // },1000)
 
     }
     const deleteForm = async(item,index)=>{

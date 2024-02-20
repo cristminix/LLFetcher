@@ -8,6 +8,7 @@ import 'reflect-metadata'
 import path from "path"
 // import slugify from'slugify'
 import { getFileExtensionFromMimeType } from "../../fn.js"
+import {check, validationResult,checkSchema} from 'express-validator'
 
 class YtUploadRouter {
     datasource = null
@@ -23,9 +24,63 @@ class YtUploadRouter {
         this.datasource = datasource
         this.mYtUpload = this.datasource.factory('MYtUpload', true)
         this.thumbnailDir = appConfig.get('module.thumbnailDir')
-        this.uploader = multer({ dest: this.thumbnailDir })
+        this.uploader = multer({ 
+            // limits: 100,
+            // limits: {fileSize: 4 * Math.pow(1024, 2 /* MBs*/)},
+            // fileFilter(req, file, cb){
+                //Validate the files as you wish, this is just an example
+                // cb(null, file.mimetype === 'image/png' || file.mimetype === 'image/jpeg' || file.mimetype === 'image/webp')
+            // },
+            dest: this.thumbnailDir 
+        })
         this.router = express.Router()
         this.initRouter()
+    }
+    validateImageFile(fieldname,files){
+        let errors = []
+        // let messages = []
+        // let notEmpty = false
+        let filteredFiles = files.filter(item=>item.fieldname == fieldname)
+        // console.log(files,fieldname)
+        // console.log(filteredFiles)
+        if(filteredFiles.length == 0){
+            errors.push({
+                type: 'field',
+                path: fieldname,
+                msg: `${fieldname} is required`
+            })
+        }else{
+            const [file] = filteredFiles
+            const validMime = file.mimetype === 'image/png' || file.mimetype === 'image/jpeg' || file.mimetype === 'image/webp'
+            if(!validMime){
+                errors.push({
+                path: fieldname,
+                    
+                    type: 'mimetype',
+                    msg: `${fieldname} must be a valid image file`
+                })
+            }
+    
+            const validSize = file.size <= 1024 * 1024 * 1// 1MB
+            if(!validSize){
+                errors.push({
+                path: fieldname,
+                type: 'filesize',
+                    msg: `${fieldname} must be less than 1MB`
+                })
+            }
+            if(errors.length > 0){
+                this.logger.info('yt-upload.validateImageFile delete file')
+                fs.unlink(file.path, (err) => {
+                    if (err) {
+                        this.logger.info('Error deleting file:', err)
+                    } else {
+                        this.logger.info('File deleted successfully!')
+                    }
+                })
+            }
+        }
+        return errors
     }
     getRouter(){
         return this.router
@@ -44,9 +99,22 @@ class YtUploadRouter {
 
     async create(req,res){
         // Route logic for handling POST '/yt-upload/create'
+        const validationErrors = validationResult(req)
+        const [file] = req.files
+        // console.log(req.files)
+        let errors = this.validateImageFile('thumbnail',req.files)
+        let errorValidations = validationErrors.array()
+        errors=[...errors,...errorValidations]
+        // errors = [...errors,...]
+        if(errors.length>0){
+            // in every situation, only this part of code is going to be executed
+            return res.status(422).json({errors});
+        }else{
+            // inserting into DB
+            // res.send();
+        }
         let {title, description,tags,category, thumbnail, video} = req.body
         this.logger.info(req.files)
-        const [file] = req.files
         if(file){
             const ext = getFileExtensionFromMimeType(file.mimetype)
             const baseName = path.basename(file.path)
@@ -78,7 +146,24 @@ class YtUploadRouter {
     async update(req,res){
         // Route logic for handling POST '/yt-upload/update'
         // const _id = req.params.id
-        this.logger.info(req.body)
+        const validationErrors = validationResult(req)
+        const [file] = req.files
+        // console.log(req.files)
+        let errors = validationErrors.array()
+
+        if(file){
+            let errorThumbnails = this.validateImageFile('thumbnail',req.files)
+            errors=[...errors,...errorThumbnails]
+
+        }
+        // errors = [...errors,...]
+        if(errors.length>0){
+            // in every situation, only this part of code is going to be executed
+            return res.status(422).json({errors});
+        }else{
+            // inserting into DB
+            // res.send();
+        }
        
         
         
@@ -169,8 +254,18 @@ class YtUploadRouter {
         this.router.use('/yt-uploads/thumbnails', serveIndex(staticPath, { 'icons': true }))
         this.router.get('/yt-uploads', async (req, res) => await this.getList(req, res))
         this.router.get('/yt-upload/:id',async (req, res) => await this.get(req, res))
-        this.router.post('/yt-upload/create',this.uploader.array("thumbnail"),async (req, res) => await this.create(req,res))
-        this.router.post('/yt-upload/update/:id?',this.uploader.array("thumbnail"),async (req, res) => await this.update(req, res))
+        this.router.post('/yt-upload/create',this.uploader.array("thumbnail"),
+            // formValidation
+            check('title', 'title field is required').not().isEmpty(),
+            check('description', 'description field is required').not().isEmpty(),
+            async (req, res) => await this.create(req,res)
+        )
+        this.router.post('/yt-upload/update/:id?',this.uploader.array("thumbnail"),
+            // formValidation
+            check('title', 'title field is required').not().isEmpty(),
+            check('description', 'description field is required').not().isEmpty(),
+            async (req, res) => await this.update(req, res)
+         )
         this.router.post('/yt-upload/delete/:id?',async (req, res) => await this.delete(req,res))
     }
 }

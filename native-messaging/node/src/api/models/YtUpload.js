@@ -126,20 +126,19 @@ export class MYtUpload{
             .leftJoin(YtUploadTT, "tt", "tt.uploadId = a.id")
             .select(['a.id id','a.title title','a.description description','a.category category','a.tags tags','a.createDate createDate','a.owner owner','a.thumbnail thumbnail'])//,title,description,category,tags,video,createDate,owner")
             .addSelect('COUNT(tt.id)', 'ttCount')
+            .groupBy('a.id').offset(offset)
             .orderBy(`a.${order_by}`,order_dir.toUpperCase())
-            .offset(offset)
-            .take(limit)
-            .groupBy('a.id')
+            .limit(limit)
             .getRawMany()
             
-            return { page, limit, order_by, order_dir, records, total_pages, total_records}
+            return {offset, page, limit, order_by, order_dir, records, total_pages, total_records}
     
         }catch(e){
             console.error(e)
             // res.send(e)
     
         }
-        return { page, limit, order_by, order_dir, records:[], total_pages:0, total_records:0}
+        return { offset, page, limit, order_by, order_dir, records:[], total_pages:0, total_records:0}
 
     }
     async getList2(page=1, limit=5, order_by='id', order_dir='asc', filter=null){

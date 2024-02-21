@@ -7,6 +7,13 @@
         }
       }
     },
+    "auth": {
+      "routes": {
+        "generate": {
+          "path": "{routePath}/generateToken"
+        }
+      }
+    },
     "user": {
       "routePath": "/api/cms/user",
       "routes": {

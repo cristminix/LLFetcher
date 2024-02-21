@@ -1,5 +1,6 @@
-
 import mime from 'mime-types'
+import jwt from 'jsonwebtoken'
+
 function sendMessageToChrome(output, logger) {
     let outputMessage = JSON.stringify(output)
     const buf = Buffer.alloc(4) // 32 bits.
@@ -24,8 +25,14 @@ function getFileExtensionFromMimeType(mimeType) {
   
     return extension || 'unknown';
   }
+
+function generateAccessToken(identity, TOKEN_SECRET) {
+    return jwt.sign(identity,TOKEN_SECRET, { expiresIn: '1800s' });
+}
+
 export{
     sendMessageToChrome,
     controllerPrefixMatch  ,
-    getFileExtensionFromMimeType
+    getFileExtensionFromMimeType,
+    generateAccessToken
 }

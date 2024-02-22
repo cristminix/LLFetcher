@@ -56,7 +56,7 @@ class YtUploadRouter extends AuthenticatedRouter {
         })
       }
 
-      const validSize = file.size <= 1024 * 1024 * 1 // 1MB
+      const validSize = file.size <= 1024 * 1024 * 4 // 1MB
       if (!validSize) {
         errors.push({
           path: fieldname,
@@ -94,8 +94,8 @@ class YtUploadRouter extends AuthenticatedRouter {
   async get(req, res) {
     // Route logic for handling GET '/yt-upload/:id'
     let id = req.params.id
-    const ytupload = await this.mYtUpload.getByPk(id)
-    res.send({ data: ytupload })
+    const row = await this.mYtUpload.getByPk(id)
+    res.send({ row })
   }
 
   async create(req, res) {
@@ -109,9 +109,6 @@ class YtUploadRouter extends AuthenticatedRouter {
     if (errors.length > 0) {
       // in every situation, only this part of code is going to be executed
       return res.status(422).json({ errors })
-    } else {
-      // inserting into DB
-      // res.send();
     }
     let { title, description, tags, category, thumbnail, video } = req.body
     this.logger.info(req.files)
@@ -250,25 +247,49 @@ class YtUploadRouter extends AuthenticatedRouter {
       },
       async (req, res) => await this.getList(req, res)
     )
-    this.router.get("/yt-upload/states", async (req, res) => await this.getState(req, res))
-    this.router.get("/yt-upload/:id", async (req, res) => await this.get(req, res))
+    this.router.get(
+      "/yt-upload/states",
+      async (req, res, next) => {
+        this.authenticateToken(req, res, next)
+      },
+      async (req, res) => await this.getState(req, res)
+    )
+    this.router.get(
+      "/yt-upload/:id",
+      async (req, res, next) => {
+        this.authenticateToken(req, res, next)
+      },
+      async (req, res) => await this.get(req, res)
+    )
     this.router.post(
       "/yt-upload/create",
+      async (req, res, next) => {
+        this.authenticateToken(req, res, next)
+      },
       this.uploader.array("thumbnail"),
       // formValidation
       check("title", "title field is required").not().isEmpty(),
       check("description", "description field is required").not().isEmpty(),
       async (req, res) => await this.create(req, res)
     )
-    this.router.post(
+    this.router.put(
       "/yt-upload/update/:id?",
+      async (req, res, next) => {
+        this.authenticateToken(req, res, next)
+      },
       this.uploader.array("thumbnail"),
       // formValidation
       check("title", "title field is required").not().isEmpty(),
       check("description", "description field is required").not().isEmpty(),
       async (req, res) => await this.update(req, res)
     )
-    this.router.post("/yt-upload/delete/:id?", async (req, res) => await this.delete(req, res))
+    this.router.delete(
+      "/yt-upload/delete/:id?",
+      async (req, res, next) => {
+        this.authenticateToken(req, res, next)
+      },
+      async (req, res) => await this.delete(req, res)
+    )
   }
 }
 

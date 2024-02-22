@@ -8,7 +8,7 @@ import { btnCls, modalCls, modalBtnCloseCls, modalBtnFrmCloseCls, modalBtnFrmSav
 import CryptoJS from "crypto-js"
 
 import { FormRow, FormRowImageValidation, FormRowValidation } from "./Form"
-// import HSOverlay from "@preline/overlay"
+import { Prx } from "../../../../global/fn"
 
 const createUntitledUpload = () => {
   const idx = crc32(new Date().getTime().toString()).toString(16)
@@ -23,6 +23,9 @@ const createUntitledUpload = () => {
 }
 
 const UploadForm = ({
+  requestToken,
+  getRequestToken,
+  setRequestToken,
   data = null,
   className,
   hideForm,
@@ -116,50 +119,49 @@ const UploadForm = ({
       formData.append(key, formDataItem[key])
     })
     const url = apiUrl(["yt-upload", pk ? `update/${pk}` : "create"])
+    const method = pk ? "put" : "post"
     try {
-      const data = await fetch(url, {
-        method: "POST",
-        body: formData,
-      }).then((response) => response.json())
-
-      let hasErrors = false
-      if (data.errors) {
-        if (data.errors.length > 0) {
-          hasErrors = 1
-        }
-      }
-
-      if (hasErrors) {
-        console.log(data)
-        const { errors } = data
-        let newValidationErrors = {}
-        let firstField = null
-        errors.map((item) => {
-          if (!firstField) {
-            firstField = item.path
+      const { data, validJson, code, text } = await Prx[method](url, requestToken, formData)
+      if (validJson) {
+        let hasErrors = false
+        if (data.errors) {
+          if (data.errors.length > 0) {
+            hasErrors = 1
           }
-          newValidationErrors[item.path] = { message: item.msg }
-        })
-        setValidationErrors(newValidationErrors)
-        toast("Error processing form", "error")
-
-        // focus first field
-        jQuery(`#${formId}`).find(`.${firstField}:first`).focus()
-      } else {
-        // console.log(data)
-        hideModalForm()
-        updateFormChecksum(data)
-        setValidationErrors({})
-        if (!pk) {
-          toast("Record created", "success")
-          goToLastPage()
-        } else {
-          toast("Record updated", "success")
-          updateList()
         }
+        if (hasErrors) {
+          const { errors } = data
+          let newValidationErrors = {}
+          let firstField = null
+          errors.map((item) => {
+            if (!firstField) {
+              firstField = item.path
+            }
+            newValidationErrors[item.path] = { message: item.msg }
+          })
+          setValidationErrors(newValidationErrors)
+          toast("Error processing form", "error")
+
+          // focus first field
+          jQuery(`#${formId}`).find(`.${firstField}:first`).trigger("focus")
+        } else {
+          // console.log(data)
+          hideModalForm()
+          updateFormChecksum(data)
+          setValidationErrors({})
+          if (!pk) {
+            toast("Record created", "success")
+            goToLastPage()
+          } else {
+            toast("Record updated", "success")
+            updateList()
+          }
+        }
+      } else {
+        toast(`Failed to create record server sent http ${code} ${text}`, "error")
       }
-    } catch (error) {
-      console.error("Error:", error)
+    } catch (e) {
+      toast(e.toString(), "error")
     }
   }
   const setThumbnailFile = async (target) => {
@@ -181,11 +183,20 @@ const UploadForm = ({
   const getRemoteRowData = async () => {
     const pk = data.id
     const url = apiUrl(["yt-upload", pk])
-    const response = await fetch(url).then((r) => r.json())
-    const { thumbnail } = response.data
-    const thumbnailUrl = apiUrl(["yt-uploads/thumbnails", thumbnail])
-    setThumbnailUrl(thumbnailUrl)
-    setFormChecksum(calculateFormChecksum(response.data))
+
+    try {
+      const { data, validJson, code, text } = await Prx.get(url, requestToken)
+      if (validJson) {
+        const { thumbnail } = data.row
+        const thumbnailUrl = apiUrl(["yt-uploads/thumbnails", thumbnail])
+        setThumbnailUrl(thumbnailUrl)
+        setFormChecksum(calculateFormChecksum(data.row))
+      } else {
+        toast(`Failed to get record id:${pk} server sent http ${code} ${text}`, "error")
+      }
+    } catch (e) {
+      toast(e.toString(), "error")
+    }
   }
   const initFormData = (data) => {
     if (data) {

@@ -58,21 +58,25 @@ const YTUpload = ({ store, config, pageNumber }) => {
     if (confirm(`Are you sure want to delete this upload "${item.title}"`)) {
       const url = apiUrl(["yt-upload/delete", item.id])
       try {
-        const response = await fetch(url, { method: "POST" }).then((r) => r.json())
-        console.log({ response })
-        const { success, message } = response
-        toast(message, success ? "success" : "error")
+        const { data, validJson, code, text } = await Prx.delete(url, requestToken)
+        if (validJson) {
+          const { success, message } = data
+          toast(message, success ? "success" : "error")
 
-        if (success) {
-          const listState = await getListState(grid.limit, grid.page)
-          const { total_pages, record_count } = listState
-          if (record_count === 0) {
-            goToPage(total_pages)
-          } else {
-            updateList()
+          if (success) {
+            const listState = await getListState(grid.limit, grid.page)
+            const { total_pages, record_count } = listState
+            if (record_count === 0) {
+              goToPage(total_pages)
+            } else {
+              updateList()
+            }
           }
+        } else {
+          toast(`Failed to delete id:${item.id} server sent http ${code} ${text}`, "error")
         }
       } catch (e) {
+        console.log(e)
         toast(e.toString(), "error")
       }
     }
@@ -81,8 +85,18 @@ const YTUpload = ({ store, config, pageNumber }) => {
     document.location.hash = `/native-client-app/yt-upload-tt/${item.id}`
   }
   const getListState = async (limit = null, page = null) => {
+    let response = {}
     const url = apiUrl("yt-upload/states", { limit, page })
-    const response = await fetch(url).then((r) => r.json())
+    try {
+      const { data, validJson, code, text } = await Prx.get(url, requestToken)
+      if (validJson) {
+        response = data
+      } else {
+        toast(`Failed to get states server sent http ${code} ${text}`, "error")
+      }
+    } catch (e) {
+      toast(e.toString(), "error")
+    }
     return response
   }
   const goToPage = (pageNum) => {
@@ -151,17 +165,13 @@ const YTUpload = ({ store, config, pageNumber }) => {
   }
 
   const updateList = async () => {
-    console.log("updateList called")
+    // console.log("updateList called")
     const page = parseInt(pageNumber) || 1
 
     const { limit, order_by, order_dir } = grid
     const url = apiUrl("yt-uploads", { limit, page, order_by, order_dir })
     try {
-      const { data, validJson, code, text } = await Prx.get(url, {
-        headers: {
-          Authorization: `Bearer ${requestToken}`,
-        },
-      })
+      const { data, validJson, code, text } = await Prx.get(url, requestToken)
       if (validJson) {
         const nGrid = data
         setGrid((prevGrid) => {
@@ -185,13 +195,13 @@ const YTUpload = ({ store, config, pageNumber }) => {
   }, [pageNumber, requestToken])
 
   const retrieveIdentityToken = async () => {
-    console.log(`retrieveIdentityToken`)
+    // console.log(`retrieveIdentityToken`)
     const appId = config.getAppId()
     const url = apiUrl(["auth/generateToken", appId])
     try {
-      const { data, validJson, code, text } = await Prx.post(url)
+      const { data, validJson, code, text } = await Prx.post(url, null)
       if (validJson) {
-        console.log(data)
+        // console.log(data)
         const { token } = data
         setRequestToken(token)
       } else {
@@ -212,6 +222,10 @@ const YTUpload = ({ store, config, pageNumber }) => {
     <div className="min-h-screen">
       <Toast ref={toastRef} />
       <UploadForm
+        requestToken={requestToken}
+        setRequestToken={setRequestToken}
+        getRequestToken={retrieveIdentityToken}
+        showForm={showForm}
         toast={toast}
         goToLastPage={goToLastPage}
         updateList={(e) => updateList()}

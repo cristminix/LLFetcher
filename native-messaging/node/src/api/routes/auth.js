@@ -21,8 +21,12 @@ class AuthRouter {
   async generateToken(req, res) {
     let { appId } = req.params
     const TOKEN_SECRET = this.appConfig.get("auth.TOKEN_SECRET")
-    const token = generateAccessToken(appId, TOKEN_SECRET)
-    res.send({ appId, token })
+    const allowedIdentities = this.appConfig.get("auth.allowedIdentities")
+    if (allowedIdentities.includes(appId)) {
+      const token = generateAccessToken(appId, TOKEN_SECRET)
+      res.send({ appId, token })
+    }
+    res.send({ appId, token: null })
   }
 
   initRouter() {

@@ -336,6 +336,87 @@ const waitForElm = (selector) => {
     })
   })
 }
+
+const getJsonResponse = async (response) => {
+  let data = null,
+    text = "",
+    validJson = false,
+    validData = false,
+    code = response.status,
+    ok = response.ok
+
+  try {
+    data = await response.json()
+    validJson = true
+  } catch (error) {
+    text = response.statusText
+    // console.log(error)
+  }
+  return { data, text, ok, code, validJson, validData }
+}
+const getResponse = async (response) => {
+  let data = null,
+    text = "",
+    validData = false,
+    code = response.status,
+    ok = response.ok
+
+  try {
+    data = await response.text()
+    validData = true
+  } catch (error) {
+    text = response.statusText
+    // console.log(error)
+  }
+  return { data, text, ok, code, validData }
+}
+
+class Prx {
+  static async get(url, options = {}, t = "json") {
+    return new Promise((resolve, reject) => {
+      fetch(url, options)
+        .then((response) => {
+          if (t == "json") {
+            getJsonResponse(response).then((jsonResponse) => {
+              resolve(jsonResponse)
+            })
+          } else {
+            getResponse().then((jsonResponse) => {
+              resolve(jsonResponse)
+            })
+          }
+        })
+
+        .catch((error) => {
+          reject(error)
+        })
+    })
+  }
+  static async post(url, options = {}, t = "json") {
+    let option = {
+      method: "POST",
+    }
+    option = { ...option, ...options }
+    console.log(option)
+    return new Promise((resolve, reject) => {
+      fetch(url, option)
+        .then((response) => {
+          if (t == "json") {
+            getJsonResponse(response).then((jsonResponse) => {
+              resolve(jsonResponse)
+            })
+          } else {
+            getResponse().then((jsonResponse) => {
+              resolve(jsonResponse)
+            })
+          }
+        })
+        .catch((error) => {
+          reject(error)
+        })
+    })
+  }
+}
 export {
   applyJQueryContainsRegex,
   slugify,
@@ -352,4 +433,5 @@ export {
   getFile64,
   isEmpty,
   waitForElm,
+  Prx,
 }

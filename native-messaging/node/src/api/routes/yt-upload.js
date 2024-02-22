@@ -25,12 +25,6 @@ class YtUploadRouter extends AuthenticatedRouter {
     this.mYtUpload = this.datasource.factory("MYtUpload", true)
     this.thumbnailDir = appConfig.get("module.thumbnailDir")
     this.uploader = multer({
-      // limits: 100,
-      // limits: {fileSize: 4 * Math.pow(1024, 2 /* MBs*/)},
-      // fileFilter(req, file, cb){
-      //Validate the files as you wish, this is just an example
-      // cb(null, file.mimetype === 'image/png' || file.mimetype === 'image/jpeg' || file.mimetype === 'image/webp')
-      // },
       dest: this.thumbnailDir,
     })
     this.router = express.Router()
@@ -249,7 +243,13 @@ class YtUploadRouter extends AuthenticatedRouter {
 
     this.router.use("/yt-uploads/thumbnails", express.static(staticPath)) // Serve static files
     this.router.use("/yt-uploads/thumbnails", serveIndex(staticPath, { icons: true }))
-    this.router.get("/yt-uploads", /*this.authenticateToken,*/ async (req, res) => await this.getList(req, res))
+    this.router.get(
+      "/yt-uploads",
+      async (req, res, next) => {
+        this.authenticateToken(req, res, next)
+      },
+      async (req, res) => await this.getList(req, res)
+    )
     this.router.get("/yt-upload/states", async (req, res) => await this.getState(req, res))
     this.router.get("/yt-upload/:id", async (req, res) => await this.get(req, res))
     this.router.post(

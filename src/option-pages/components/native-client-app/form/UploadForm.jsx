@@ -31,6 +31,7 @@ const UploadForm = ({
   modalBtnId = "basic-modal-upload-clicker",
   modalCloseBtnId = "basic-modal-upload-closer-x",
   goToLastPage,
+  toast,
 }) => {
   const [pk, setPk] = useState("")
   const [title, setTitle] = useState("")
@@ -140,6 +141,7 @@ const UploadForm = ({
           newValidationErrors[item.path] = { message: item.msg }
         })
         setValidationErrors(newValidationErrors)
+        toast("Error processing form", "error")
 
         // focus first field
         jQuery(`#${formId}`).find(`.${firstField}:first`).focus()
@@ -149,8 +151,10 @@ const UploadForm = ({
         updateFormChecksum(data)
         setValidationErrors({})
         if (!pk) {
+          toast("Record created", "success")
           goToLastPage()
         } else {
+          toast("Record updated", "success")
           updateList()
         }
       }

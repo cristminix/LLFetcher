@@ -36,7 +36,6 @@ class ManualRouter {
   }
 
   initRouter() {
-    console.log("initRouter")
     this.router.get("/man/getFile/:path", async (req, res) => await this.getFile(req, res))
   }
 }

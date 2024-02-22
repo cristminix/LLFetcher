@@ -1,4 +1,5 @@
 import express from "express"
+import { generateAccessToken } from "../../fn.js"
 
 class AuthRouter {
   datasource = null
@@ -8,7 +9,8 @@ class AuthRouter {
   logger = null
   constructor(datasource, appConfig, logger) {
     this.datasource = datasource
-    // this.mUser = this.datasource.factory("MUser", true)
+    this.appConfig = appConfig
+    this.logger = logger
     this.router = express.Router()
     this.initRouter()
   }
@@ -17,15 +19,15 @@ class AuthRouter {
   }
 
   async generateToken(req, res) {
-    // Route logic for handling POST '/user/create'
-    let { username, email, firstName } = req.body
-
-    const user = await this.mUser.create(username, email, firstName)
-    res.send({ data: user })
+    let { appId } = req.params
+    const TOKEN_SECRET = this.appConfig.get("auth.TOKEN_SECRET")
+    const token = generateAccessToken(appId, TOKEN_SECRET)
+    res.send({ appId, token })
   }
 
   initRouter() {
-    this.router.post("/auth/generateToken:identity", async (req, res) => await this.generateToken(req, res))
+    // console.log("initRouter")
+    this.router.post("/auth/generateToken/:appId", async (req, res) => await this.generateToken(req, res))
   }
 }
 

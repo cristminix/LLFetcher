@@ -10,7 +10,7 @@ import { apiUrl } from "./fn"
 import jQuery from "jquery"
 import { niceScrollbarCls } from "../ux/cls"
 import Toast from "../../../components/shared/ux/Toast"
-
+import { Prx } from "../../../global/fn"
 const YTUpload = ({ store, config, pageNumber }) => {
   const toastRef = useRef(null)
   const [grid, setGrid] = useState({
@@ -29,7 +29,7 @@ const YTUpload = ({ store, config, pageNumber }) => {
 
   const [formData, setFormData] = useState(null)
   const [showForm, setShowForm] = useState(false)
-
+  const [requestToken, setRequestToken] = useState(null)
   const onRefresh = (f) => updateList()
   const toast = (message, t) => {
     if (toastRef.current) {
@@ -157,22 +157,55 @@ const YTUpload = ({ store, config, pageNumber }) => {
     const { limit, order_by, order_dir } = grid
     const url = apiUrl("yt-uploads", { limit, page, order_by, order_dir })
     try {
-      const response = await fetch(url).then((r) => r.json())
-      const nGrid = response
-      setGrid((prevGrid) => {
-        return {
-          ...prevGrid,
-          ...nGrid,
-        }
+      const { data, validJson, code, text } = await Prx.get(url, {
+        headers: {
+          Authorization: `Bearer ${requestToken}`,
+        },
       })
+      if (validJson) {
+        const nGrid = data
+        setGrid((prevGrid) => {
+          return {
+            ...prevGrid,
+            ...nGrid,
+          }
+        })
+      } else {
+        toast(`Failed to get list server sent http ${code} ${text}`, "error")
+      }
     } catch (e) {
       console.log(e)
       toast(e.toString(), "error")
     }
   }
   useEffect(() => {
-    updateList()
-  }, [pageNumber])
+    if (requestToken) {
+      updateList()
+    }
+  }, [pageNumber, requestToken])
+
+  const retrieveIdentityToken = async () => {
+    console.log(`retrieveIdentityToken`)
+    const appId = config.getAppId()
+    const url = apiUrl(["auth/generateToken", appId])
+    try {
+      const { data, validJson, code, text } = await Prx.post(url)
+      if (validJson) {
+        console.log(data)
+        const { token } = data
+        setRequestToken(token)
+      } else {
+        toast(`Failed to get request token ${appId} server sent http ${code} ${text}`, "error")
+      }
+    } catch (e) {
+      console.log(e)
+      toast(e.toString(), "error")
+    }
+  }
+
+  useEffect(() => {
+    retrieveIdentityToken()
+  }, [])
 
   const containerCls = "border mb-2 rounded-xl shadow-sm p-6 dark:bg-gray-800 dark:border-gray-700"
   return (

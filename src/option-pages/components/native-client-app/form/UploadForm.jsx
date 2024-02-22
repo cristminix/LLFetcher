@@ -30,9 +30,9 @@ const UploadForm = ({
   className,
   hideForm,
   updateList,
-  formId = "hs-basic-modal-upload",
-  modalBtnId = "basic-modal-upload-clicker",
-  modalCloseBtnId = "basic-modal-upload-closer-x",
+  formId,
+  modalBtnId,
+  modalCloseBtnId,
   goToLastPage,
   toast,
 }) => {

@@ -10,7 +10,7 @@ import { apiUrl } from "./fn"
 import jQuery from "jquery"
 import { niceScrollbarCls } from "../ux/cls"
 import Toast from "../../../components/shared/ux/Toast"
-import { Prx } from "../../../global/fn"
+import { Prx, requestIdentityToken } from "../../../global/fn"
 const YTUpload = ({ store, config, pageNumber }) => {
   const toastRef = useRef(null)
   const [grid, setGrid] = useState({
@@ -23,9 +23,9 @@ const YTUpload = ({ store, config, pageNumber }) => {
     order_dir: "asc",
   })
 
-  const formId = "hs-basic-modal-upload"
-  const modalBtnId = "basic-modal-upload-clicker"
-  const modalCloseBtnId = "basic-modal-upload-closer-x"
+  const formId = "basic-modal-upload-tt"
+  const modalBtnId = `${formId}-clicker`
+  const modalCloseBtnId = `${formId}-clicker-closer-x`
 
   const [formData, setFormData] = useState(null)
   const [showForm, setShowForm] = useState(false)
@@ -82,7 +82,7 @@ const YTUpload = ({ store, config, pageNumber }) => {
     }
   }
   const goToTT = (item) => {
-    document.location.hash = `/native-client-app/yt-upload-tt/${item.id}`
+    document.location.hash = `/native-client-app/yt-upload-tt/${item.id}?parentPage=${grid.page}`
   }
   const getListState = async (limit = null, page = null) => {
     let response = {}
@@ -197,19 +197,10 @@ const YTUpload = ({ store, config, pageNumber }) => {
   const retrieveIdentityToken = async () => {
     // console.log(`retrieveIdentityToken`)
     const appId = config.getAppId()
-    const url = apiUrl(["auth/generateToken", appId])
-    try {
-      const { data, validJson, code, text } = await Prx.post(url, null)
-      if (validJson) {
-        // console.log(data)
-        const { token } = data
-        setRequestToken(token)
-      } else {
-        toast(`Failed to get request token ${appId} server sent http ${code} ${text}`, "error")
-      }
-    } catch (e) {
-      console.log(e)
-      toast(e.toString(), "error")
+    const url = apiUrl("auth/generateToken")
+    const token = await requestIdentityToken(appId, url, toast)
+    if (token) {
+      setRequestToken(token)
     }
   }
 
@@ -232,6 +223,9 @@ const YTUpload = ({ store, config, pageNumber }) => {
         data={formData}
         className={containerCls}
         hideForm={(e) => setShowForm(false)}
+        formId={formId}
+        modalBtnId={modalBtnId}
+        modalCloseBtnId={modalCloseBtnId}
       />
 
       <div className={`user-manager ${containerCls}`}>

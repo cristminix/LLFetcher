@@ -1,187 +1,360 @@
 import { useEffect, useRef, useState } from "react"
 import { crc32 } from "crc"
-import {formatBytes, sendMessage, slugify, getFile64} from "../../../../global/fn"
+import { getFile64, isEmpty } from "../../../../global/fn"
 import jQuery from "jquery"
-const inputCls= "py-3 px-4 block w-full border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:ring-gray-600"
-import CheckBox from "../../../../components/shared/ux/CheckBox"
+
 import { apiUrl } from "../fn"
-import Button from "../../../../components/shared/ux/Button"
-import { niceScrollbarCls } from "../../ux/cls"
-const createUntitledUpload = ()=>{
-    const idx = crc32((new Date).getTime().toString()).toString(16)
-    const title = `Untitled-${idx}`
-    const description = `About ${title}`
-    const video = ``
-    const category = 'uncategory'
-    const tags = 'sample'
-    const thumbnail= 'none'
+import { btnCls, modalCls, modalBtnCloseCls, modalBtnFrmCloseCls, modalBtnFrmSaveCls } from "../../ux/cls"
+import CryptoJS from "crypto-js"
 
-    return {title,description,video,category,tags,thumbnail}
+import { FormRow, FormRowImageValidation, FormRowValidation } from "./Form"
+import { Prx } from "../../../../global/fn"
+
+const createUntitledUpload = () => {
+  const idx = crc32(new Date().getTime().toString()).toString(16)
+  const title = `Untitled-${idx}`
+  const description = `About ${title}`
+
+  return { title, description, thumbnail: "" }
 }
-const UploadTTForm = ({data=null, className,hideForm,updateList,uploadId})=>{
-    const [title,setTitle] = useState('')
-    const [description,setDescription] = useState('')
-    // const [uploadId,setUploadId] = useState('')
-    // const [video,setVideo] = useState('')
-    // const [category,setCategory] = useState('')
-    // const [tags,setTags] = useState('')
-    const [thumbnail,setThumbnail] = useState('')
-    const thumbnailRef = useRef(null)
-    const onEdit = f=> f
-    const saveForm = async(f) => {
-        let pk=null
-        if(data.id){
-            pk = data.id
-        }
-        const formDataItem = {pk,uploadId,title,description}
-        // sendMessage(`nm.api.cms.ytupload.${pk?'update':'create'}`, formData,'background',response=>{
-        //     console.log({response})
-        
-        // })
-        const formData = new FormData()
-        formData.append('thumbnail',thumbnailRef.current.files[0])
-        Object.keys(formDataItem).map((key)=>{
-            formData.append(key,formDataItem[key])
-        })
-        const url = apiUrl(['yt-upload-tt',pk?`update/${pk}`:'create'])
-        fetch(url, {
-            method: 'POST',
-            body: formData
-          })
-          .then(response => response.json())
-          .then(data => {
-            console.log(data)
-            jQuery('#basic-modal-upload-closer').click()
-            
-            updateList()    
-        })
-        .catch(error => console.error('Error:', error))
-        
+
+const UploadTTForm = ({
+  uploadId,
+  requestToken,
+  getRequestToken,
+  setRequestToken,
+  data = null,
+  className,
+  hideForm,
+  updateList,
+  formId,
+  modalBtnId,
+  modalCloseBtnId,
+  goToLastPage,
+  toast,
+}) => {
+  const [pk, setPk] = useState("")
+  const [title, setTitle] = useState("")
+  const [description, setDescription] = useState("")
+
+  const [thumbnail, setThumbnail] = useState("")
+  const [thumbnailValid, setThumbnailValid] = useState(false)
+  const [thumbnailUrl, setThumbnailUrl] = useState("")
+  const thumbnailRef = useRef(null)
+  const formRef = useRef(null)
+  const onTabExecutedRef = useRef(false)
+  let onTabNextIndexRef = useRef(0)
+
+  const [validationErrors, setValidationErrors] = useState({})
+  const [formChecksum, setFormChecksum] = useState("")
+
+  const calculateFormChecksum = (data = null) => {
+    let formDataItem = null
+    if (data) {
+      const { id, title, description, thumbnail } = data
+      formDataItem = { uploadId, id, title, description, thumbnail }
+    } else {
+      formDataItem = { uploadId, id: pk, title, description, thumbnail }
     }
-    const setThumbnailFile= async(target)=>{
-        const file64 = await getFile64(target.files[0])
-        console.log(target)
-        console.log(file64)
-        setThumbnail(file64)
+    if (!formDataItem.id) {
+      formDataItem.id = null
     }
-    const getRemoteRowData = async()=>{
-        // return
-        const pk = data.id
-        const url = apiUrl(['yt-upload-tt',pk])
-        const response = await fetch(url).then(r=>r.json())
-        const {thumbnail} = response.data
-        apiUrl(['yt-uploads-tts/thumbnails',thumbnail])
+    let values = []
+    const keys = Object.keys(formDataItem)
+    for (const key of keys) {
+      const value = formDataItem[key]
+      values.push(key + "=" + value)
     }
-    useEffect(()=>{
-        if(data){
-            // console.log(data)
-            const  {title,description,uploadId,thumbnail} =data
-            setTitle(title)
-            // setUploadId(uploadId)
-            setDescription(description)
-            // setVideo(video)
-            // setCategory(category)
-            // setTags(tags)
-            setThumbnail(apiUrl(['yt-uploads-tts/thumbnails',thumbnail]))
-            if(data.id){
-                getRemoteRowData()
-            }
-        }
-    },[data])
- 
-    
-    useEffect(()=>{
-        const el = HSOverlay.autoInit()
-        console.log(el)
-      },[])
-    useEffect( () => () => {
-      try{
-        document.querySelector("div[data-hs-overlay-backdrop-template]").remove()
-      }catch(e){
-        console.error(e)
+    // console.log(values)
+    var formString = values.join("&")
+    return CryptoJS.SHA256(formString).toString()
+  }
+  const updateFormChecksum = (data = null) => {
+    const newFormChecksum = calculateFormChecksum(data)
+    setFormChecksum(newFormChecksum)
+  }
+  const isFormDirty = () => {
+    const currentFormChecksum = calculateFormChecksum(null)
+    return currentFormChecksum !== formChecksum
+  }
+  const hideModalForm = (e) => {
+    thumbnailRef.current.value = ""
+    const modalIdSelector = `#${formId}`
+    HSOverlay.close(modalIdSelector)
+    hideForm()
+
+    if (e) {
+      return e.preventDefault()
+    }
+  }
+  const onCancelForm = (e) => {
+    if (isFormDirty()) {
+      if (confirm("Data might not being saved, Are you sure to cancel?")) {
+        hideModalForm(e)
       }
-      console.log("unmount")
-    }, [] )
-    return <>
-    <button id="basic-modal-upload-clicker" type="button" className="hidden py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600" data-hs-overlay="#hs-basic-modal-upload">
-  Open modal
-</button>
-
-<div id="hs-basic-modal-upload" className="hs-overlay hs-overlay-open:opacity-100 hs-overlay-open:duration-500 hidden w-full h-full fixed top-0 start-0 z-[60] opacity-0 overflow-x-hidden transition-all overflow-y-auto pointer-events-none">
-  <div className="hs-overlay-open:opacity-100 hs-overlay-open:duration-500 opacity-0 transition-all sm:max-w-lg sm:w-full m-3 sm:mx-auto ]">
-    <div className="flex w-[700px] flex-col bg-white border shadow-sm rounded-xl pointer-events-auto dark:bg-gray-800 dark:border-gray-700 dark:shadow-slate-700/[.7]">
-      <div className="flex justify-between items-center py-3 px-4 border-b dark:border-gray-700">
-        <h3 className="font-bold text-gray-800 dark:text-white">
-          {title}
-        </h3>
-        <button type="button" id="basic-modal-upload-closer" onClick={e=>hideForm(e)} className="flex justify-center items-center w-7 h-7 text-sm font-semibold rounded-full border border-transparent text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none dark:text-white dark:hover:bg-gray-700 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600" data-hs-overlay="#hs-basic-modal-upload">
-          <span className="sr-only">Close</span>
-          <svg className="flex-shrink-0 w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-        </button>
-      </div>
-      <div className="p-4 overflow-y-auto">
-      <form className={'className'}>
-    <div className="flex  items-center p-2 px-2 hidden">
-        <div className="w-[70px]">
-            <label className="font-bold">Upload ID</label>
-        </div>
-        <div className="flex-grow">
-            <input tabIndex={1} readOnly className={inputCls} value={uploadId} onChange={e=>f=>f}/>
-        </div>
-    </div>
-    <div className="flex  items-center p-2 px-2">
-        <div className="w-[70px]">
-            <label className="font-bold">Title</label>
-        </div>
-        <div className="flex-grow">
-            <input tabIndex={1} className={inputCls} value={title} onChange={e=>setTitle(e.target.value)}/>
-        </div>
-    </div>
-    <div className="flex p-2 px-2 align-top">
-        <div className="w-[70px] align-top">
-            <label className="font-bold">Description</label>
-        </div>
-        <div className="flex-grow">
-            <textarea tabIndex={2} className={`${inputCls} ${niceScrollbarCls} min-h-6`} value={description} onChange={e=>setDescription(e.target.value)}/>
-        </div>
-    </div>
-    
-    <div className="flex  p-2 px-2">
-        <div className="w-[80px]">
-            <label className="font-bold">Thumbnail</label>
-        </div>
-        <div className="flex-grow relative pl-2">
-            <div className="absolute flex flex-row justify-end w-full items-center px-2">
-                <Button icon="fa fa-upload" caption="Change Picture" onClick={e=>thumbnailRef.current.click()}/>
-            </div>
-            <input tabIndex={6} type="file" ref={thumbnailRef} className={`hidden ${inputCls}`}  onChange={e=>setThumbnailFile(e.target)}/>
-        
-        {
-            thumbnail?<div className="flex-grow rounded rounded-md overflow-hidden">
-                <img src={`${thumbnail}`}/>
-            </div>:null
+    } else {
+      hideModalForm(e)
+    }
+    if (e) {
+      return e.preventDefault()
+    }
+  }
+  const saveForm = async (f) => {
+    let pk = null
+    if (data.id) {
+      pk = data.id
+    }
+    const formDataItem = { uploadId, id: pk, title, description }
+    const formData = new FormData()
+    const [file] = thumbnailRef.current.files
+    if (file) {
+      formData.append("thumbnail", file)
+    }
+    Object.keys(formDataItem).map((key) => {
+      formData.append(key, formDataItem[key])
+    })
+    const url = apiUrl(["yt-upload-tt", pk ? `update/${pk}` : "create"])
+    const method = pk ? "put" : "post"
+    try {
+      const { data, validJson, code, text } = await Prx[method](url, requestToken, formData)
+      if (validJson) {
+        let hasErrors = false
+        if (data.errors) {
+          if (data.errors.length > 0) {
+            hasErrors = 1
+          }
         }
+        if (hasErrors) {
+          const { errors } = data
+          let newValidationErrors = {}
+          let firstField = null
+          errors.map((item) => {
+            if (!firstField) {
+              firstField = item.path
+            }
+            newValidationErrors[item.path] = { message: item.msg }
+          })
+          setValidationErrors(newValidationErrors)
+          toast("Error processing form", "error")
+
+          // focus first field
+          jQuery(`#${formId}`).find(`.${firstField}:first`).trigger("focus")
+        } else {
+          // console.log(data)
+          hideModalForm()
+          updateFormChecksum(data)
+          setValidationErrors({})
+          if (!pk) {
+            toast("Record created", "success")
+            goToLastPage()
+          } else {
+            toast("Record updated", "success")
+            updateList()
+          }
+        }
+      } else {
+        toast(`Failed to create record server sent http ${code} ${text}`, "error")
+      }
+    } catch (e) {
+      toast(e.toString(), "error")
+    }
+  }
+  const setThumbnailFile = async (target) => {
+    const file64 = await getFile64(target.files[0])
+    const [file] = target.files
+    setThumbnail(file.name)
+    const fileType = file.type.split("/")[0]
+    if (fileType === "image") {
+      setThumbnailValid(true)
+      setThumbnailUrl(file64)
+      const newValidationErrors = { ...validationErrors }
+      delete newValidationErrors.thumbnail
+      setValidationErrors(newValidationErrors)
+    } else {
+      alert("Only image file is allowed")
+      thumbnailRef.current.value = ""
+    }
+  }
+  const getRemoteRowData = async () => {
+    const pk = data.id
+    const url = apiUrl(["yt-upload-tt", pk])
+
+    try {
+      const { data, validJson, code, text } = await Prx.get(url, requestToken)
+      if (validJson) {
+        const { thumbnail } = data.row
+        const thumbnailUrl = apiUrl(["yt-upload-tts/thumbnails", thumbnail])
+        setThumbnailUrl(thumbnailUrl)
+        setFormChecksum(calculateFormChecksum(data.row))
+      } else {
+        toast(`Failed to get record id:${pk} server sent http ${code} ${text}`, "error")
+      }
+    } catch (e) {
+      toast(e.toString(), "error")
+    }
+  }
+  const initFormData = (data) => {
+    if (data) {
+      const { id, title, description, thumbnail } = data
+      setPk(id)
+      setTitle(title)
+      setDescription(description)
+
+      setThumbnail(thumbnail)
+      if (isEmpty(thumbnail)) {
+        setThumbnailValid(false)
+      } else {
+        setThumbnailUrl(apiUrl(["yt-upload-tts/thumbnails", thumbnail]))
+        setThumbnailValid(true)
+      }
+      setTimeout(() => {
+        const initialFormChecksum = calculateFormChecksum(data)
+        // console.log(initialFormChecksum)
+        setFormChecksum(initialFormChecksum)
+        setValidationErrors({})
+      }, 256)
+      if (data.id) {
+        getRemoteRowData()
+      }
+    }
+  }
+  useEffect(() => {
+    initFormData(data)
+  }, [data])
+
+  const onTab = (target, focusableElements) => {
+    console.log(onTabExecutedRef.current)
+    if (!onTabExecutedRef.current) {
+      onTabExecutedRef.current = true
+      // Your code here (will run only once)
+      console.log(`onTab called`)
+      if (!focusableElements.length) return false
+
+      const focused = target.element.overlay.querySelector(":focus")
+      const focusedIndex = Array.from(focusableElements).indexOf(focused)
+      try {
+        if (focusedIndex > -1) {
+          onTabNextIndexRef.current = focusedIndex + 1
+          focusableElements[onTabNextIndexRef.current].focus()
+        } else {
+          focusableElements[0].focus()
+        }
+      } catch (e) {
+        focusableElements[0].focus()
+        onTabNextIndexRef.current = 0
+      }
+
+      // jQuery(target.element).prop("hasOnTabHandler", 0)
+      setTimeout(() => {
+        onTabExecutedRef.current = false
+      }, 256)
+    } else {
+      setTimeout(() => {
+        onTabExecutedRef.current = false
+      }, 256)
+    }
+  }
+  useEffect(() => {
+    onTabExecutedRef.current = false
+    HSOverlay.onTabOverride = (t, e) => {
+      onTab(t, e)
+    }
+    HSOverlay.onEscapeOverride = (t) => {
+      // console.log(t)
+      // onCancelForm()
+      // HSOverlay.onEscapeDefault(t)
+    }
+    const $el = jQuery(`#${modalBtnId}`)
+    if (!$el.prop("hasOverlay")) {
+      $el.prop("hasOverlay", "yes")
+      HSOverlay.autoInit()
+    }
+    return () => {
+      onTabExecutedRef.current = false
+
+      try {
+        document.querySelector("div[data-hs-overlay-backdrop-template]").remove()
+      } catch (e) {}
+    }
+  }, [])
+
+  return (
+    <>
+      <button id={`${modalBtnId}`} type="button" className={btnCls} data-hs-overlay={`#${formId}`}>
+        Open modal
+      </button>
+      <div id={formId} className={modalCls}>
+        <div className="hs-overlay-open:opacity-100 hs-overlay-open:duration-500 opacity-0 transition-all sm:max-w-lg sm:w-full m-3 sm:mx-auto ]">
+          <div className="flex w-[700px] flex-col bg-white border shadow-sm rounded-xl pointer-events-auto dark:bg-gray-800 dark:border-gray-700 dark:shadow-slate-700/[.7]">
+            <div className="flex justify-between items-center py-3 px-4 border-b dark:border-gray-700">
+              <h3 className="font-bold text-gray-800 dark:text-white">{title}</h3>
+              <button type="button" id={`${modalCloseBtnId}`} onClick={(e) => onCancelForm(e)} className={modalBtnCloseCls}>
+                <span className="sr-only">Close</span>
+                <svg
+                  className="flex-shrink-0 w-4 h-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M18 6 6 18" />
+                  <path d="m6 6 12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-4 overflow-y-auto">
+              <form className={"className"} ref={formRef}>
+                <FormRowValidation
+                  validationErrors={validationErrors}
+                  label="Title"
+                  value={title}
+                  fieldname="title"
+                  onChange={(e) => {
+                    setTitle(e.target.value)
+                  }}
+                  autofocus="yes"
+                />
+                <FormRowValidation
+                  validationErrors={validationErrors}
+                  useTextArea={true}
+                  label="Description"
+                  value={description}
+                  fieldname="description"
+                  onChange={(e) => {
+                    setDescription(e.target.value)
+                  }}
+                />
+
+                <FormRowImageValidation
+                  validationErrors={validationErrors}
+                  label="Thumbnail"
+                  onChange={(e) => setThumbnailFile(e.target)}
+                  fieldname="thumbnail"
+                  inputRef={thumbnailRef}
+                  imageUrl={thumbnailUrl}
+                  validImage={thumbnailValid}
+                />
+              </form>
+            </div>
+            <div className="flex justify-end items-center gap-x-2 py-3 px-4 border-t dark:border-gray-700">
+              <button onClick={(e) => onCancelForm(e)} type="button" className={modalBtnFrmCloseCls}>
+                Cancel
+              </button>
+              <button tabIndex={10} onClick={(e) => saveForm(e)} type="button" className={modalBtnFrmSaveCls}>
+                Save changes
+              </button>
+            </div>
+          </div>
         </div>
-    </div>      
-   
-           
-    </form>
       </div>
-      <div className="flex justify-end items-center gap-x-2 py-3 px-4 border-t dark:border-gray-700">
-        <button tabIndex={9} onClick={e=>hideForm(e)} type="button" className="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-white dark:hover:bg-gray-800 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600" data-hs-overlay="#hs-basic-modal-upload">
-          Close
-        </button>
-        <button tabIndex={10} onClick={e=>saveForm(e)} type="button" className="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600">
-          Save changes
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
     </>
+  )
 }
 
-export {
-    createUntitledUpload
-}
+export { createUntitledUpload }
 export default UploadTTForm

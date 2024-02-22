@@ -1,16 +1,18 @@
 import express from "express"
 import { generateAccessToken } from "../../fn.js"
-
+import multer from "multer"
 class AuthRouter {
   datasource = null
   mUser = null
   router = null
   appConfig = null
   logger = null
+  multer = null
   constructor(datasource, appConfig, logger) {
     this.datasource = datasource
     this.appConfig = appConfig
     this.logger = logger
+    this.multer = multer()
     this.router = express.Router()
     this.initRouter()
   }
@@ -19,7 +21,7 @@ class AuthRouter {
   }
 
   async generateToken(req, res) {
-    let { appId } = req.params
+    let { appId } = req.body
     const TOKEN_SECRET = this.appConfig.get("auth.TOKEN_SECRET")
     const allowedIdentities = this.appConfig.get("auth.allowedIdentities")
     if (allowedIdentities.includes(appId)) {
@@ -31,7 +33,7 @@ class AuthRouter {
 
   initRouter() {
     // console.log("initRouter")
-    this.router.post("/auth/generateToken/:appId", async (req, res) => await this.generateToken(req, res))
+    this.router.post("/auth/generateToken", this.multer.none(), async (req, res) => await this.generateToken(req, res))
   }
 }
 

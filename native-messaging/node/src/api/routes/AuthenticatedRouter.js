@@ -18,7 +18,6 @@ class AuthenticatedRouter {
     if (token == null) return res.sendStatus(401)
     // console.log(this.appConfig)
     const TOKEN_SECRET = this.appConfig.get("auth.TOKEN_SECRET")
-    console.log(TOKEN_SECRET)
     jwt.verify(token, TOKEN_SECRET, (err, name) => {
       if (err) {
         this.logger.info(err)

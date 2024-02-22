@@ -5,7 +5,7 @@ import serveIndex from "serve-index"
 import "reflect-metadata"
 import path from "path"
 // import slugify from'slugify'
-import { getFileExtensionFromMimeType } from "../../fn.js"
+import { getFileExtensionFromMimeType, validateImageFile } from "../../fn.js"
 import { check, validationResult, checkSchema } from "express-validator"
 import AuthenticatedRouter from "./AuthenticatedRouter.js"
 
@@ -32,49 +32,7 @@ class YtUploadRouter extends AuthenticatedRouter {
   }
 
   validateImageFile(fieldname, files) {
-    let errors = []
-    // let messages = []
-    // let notEmpty = false
-    let filteredFiles = files.filter((item) => item.fieldname == fieldname)
-    // console.log(files,fieldname)
-    // console.log(filteredFiles)
-    if (filteredFiles.length == 0) {
-      errors.push({
-        type: "field",
-        path: fieldname,
-        msg: `${fieldname} is required`,
-      })
-    } else {
-      const [file] = filteredFiles
-      const validMime = file.mimetype === "image/png" || file.mimetype === "image/jpeg" || file.mimetype === "image/webp"
-      if (!validMime) {
-        errors.push({
-          path: fieldname,
-
-          type: "mimetype",
-          msg: `${fieldname} must be a valid image file`,
-        })
-      }
-
-      const validSize = file.size <= 1024 * 1024 * 4 // 1MB
-      if (!validSize) {
-        errors.push({
-          path: fieldname,
-          type: "filesize",
-          msg: `${fieldname} must be less than 1MB`,
-        })
-      }
-      if (errors.length > 0) {
-        this.logger.info("yt-upload.validateImageFile delete file")
-        fs.unlink(file.path, (err) => {
-          if (err) {
-            this.logger.info("Error deleting file:", err)
-          } else {
-            this.logger.info("File deleted successfully!")
-          }
-        })
-      }
-    }
+    let errors = validateImageFile(fieldname, files, this.logger, 4)
     return errors
   }
   getRouter() {
@@ -153,9 +111,6 @@ class YtUploadRouter extends AuthenticatedRouter {
     if (errors.length > 0) {
       // in every situation, only this part of code is going to be executed
       return res.status(422).json({ errors })
-    } else {
-      // inserting into DB
-      // res.send();
     }
 
     let id

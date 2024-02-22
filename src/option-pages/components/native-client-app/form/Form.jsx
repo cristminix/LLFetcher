@@ -1,26 +1,20 @@
 import Button from "../../../../components/shared/ux/Button"
 import { ValidationErrIcon } from "../../../../components/shared/ux/ValidationIcon"
 import { inputCls, niceScrollbarCls, inputClsError } from "../../ux/cls"
-const FormRow = ({ label, onChange, value }) => {
+const FormRow = ({ label, onChange = (f) => f, value }) => {
   return (
     <div className="flex  items-center p-2 px-2">
       <div className="w-[70px]">
         <label className="font-bold">{label}</label>
       </div>
       <div className="flex-grow">
-        <input
-          className={inputCls}
-          value={value}
-          onChange={(e) => {
-            onChange(e)
-          }}
-        />
+        <input className={inputCls} value={value} onChange={onChange} />
       </div>
     </div>
   )
 }
 
-const FormRowValidation = ({ label, onChange, value, validationErrors, fieldname, autofocus = false, useTextArea = false, className = "" }) => {
+const FormRowValidation = ({ label, onChange = (f) => f, value, validationErrors, fieldname, autofocus = false, useTextArea = false, className = "" }) => {
   return (
     <div className="flex  items-center p-2 px-2">
       <div className="w-[70px]">
@@ -33,14 +27,14 @@ const FormRowValidation = ({ label, onChange, value, validationErrors, fieldname
               className={`${validationErrors[fieldname] ? inputClsError : inputCls}  ${niceScrollbarCls} ${fieldname} ${className} min-h-[128px]`}
               value={value}
               onChange={onChange}
-              autofocus={autofocus}
+              autofocus={autofocus} /*eslint-disable*/
             ></textarea>
           ) : (
             <input
               className={`${validationErrors[fieldname] ? inputClsError : inputCls} ${fieldname} ${className}`}
               value={value}
               onChange={onChange}
-              autofocus={autofocus}
+              autofocus={autofocus} /*eslint-disable*/
             />
           )}
           {validationErrors[fieldname] && <ValidationErrIcon absolute="yes" />}

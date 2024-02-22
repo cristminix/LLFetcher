@@ -28,5 +28,46 @@ function getFileExtensionFromMimeType(mimeType) {
 function generateAccessToken(identity, TOKEN_SECRET) {
   return jwt.sign({ name: identity }, TOKEN_SECRET, { expiresIn: 60 * 60 })
 }
+function validateImageFile(fieldname, files, logger, maxFileSizeMb = 1) {
+  let errors = []
+  let filteredFiles = files.filter((item) => item.fieldname == fieldname)
+  if (filteredFiles.length == 0) {
+    errors.push({
+      type: "field",
+      path: fieldname,
+      msg: `${fieldname} is required`,
+    })
+  } else {
+    const [file] = filteredFiles
+    const validMime = file.mimetype === "image/png" || file.mimetype === "image/jpeg" || file.mimetype === "image/webp"
+    if (!validMime) {
+      errors.push({
+        path: fieldname,
 
-export { sendMessageToChrome, controllerPrefixMatch, getFileExtensionFromMimeType, generateAccessToken }
+        type: "mimetype",
+        msg: `${fieldname} must be a valid image file`,
+      })
+    }
+
+    const validSize = file.size <= 1024 * 1024 * maxFileSizeMb // 1MB
+    if (!validSize) {
+      errors.push({
+        path: fieldname,
+        type: "filesize",
+        msg: `${fieldname} must be less than 1MB`,
+      })
+    }
+    if (errors.length > 0) {
+      logger.info("validateImageFile delete file")
+      fs.unlink(file.path, (err) => {
+        if (err) {
+          logger.info("Error deleting file:", err)
+        } else {
+          logger.info("File deleted successfully!")
+        }
+      })
+    }
+  }
+  return errors
+}
+export { sendMessageToChrome, controllerPrefixMatch, getFileExtensionFromMimeType, generateAccessToken, validateImageFile }

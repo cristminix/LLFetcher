@@ -261,6 +261,26 @@
           "dev": true
         }
       }
+    },
+    "manuals": {
+      "title": "Manuals",
+      "iconCls": "fa fa-bookmark",
+      "path": "/manuals",
+      "order": 0,
+      "hidden": false,
+      "hasChild": true,
+      "dev": false,
+      "childItems": {
+        "dev-notes": {
+          "title": "Dev Notes",
+          "iconCls": "fa fa-cog",
+          "path": "/manuals/dev-notes",
+          "order": 0,
+          "hidden": false,
+          "hasChild": false,
+          "dev": false
+        }
+      }
     }
   },
   "hasChild": true

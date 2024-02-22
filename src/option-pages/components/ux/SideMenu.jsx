@@ -1,35 +1,83 @@
-import {cls10,cls11,cls12,cls13,cls14,cls15,cls16,
-    cls17,cls18,cls19,cls20,cls21,cls22,cls23,cls24,cls25,cls26,cls27
-  } from "./cls";
+import { cls10, cls11, cls12, cls13, cls14, cls15, cls16, cls17, cls18, cls19, cls20, cls21, cls22, cls23, cls24, cls25, cls26, cls27 } from "./cls"
 
-import {useState, useEffect, Component} from "react"
-import { NavLink } from 'react-router-dom';
+import { useState, useEffect, Component } from "react"
+import { NavLink } from "react-router-dom"
 import side_menu from "../../side_menu.json"
-import AccordionMenu from "./side-menu/AccordionMenu";
-import Menu from "./side-menu/Menu";
+import AccordionMenu from "./side-menu/AccordionMenu"
+import Menu from "./side-menu/Menu"
+// import { HSOverlay } from "preline";
+import jQuery from "jquery"
+import { waitForElm } from "../../../global/fn"
 class SideMenu extends Component {
-  constructor(props){
+  selector = "#application-sidebar"
+  backdropSelector = "div#sidebar-overlay-backdrop[data-hs-overlay-backdrop-template]"
+  constructor(props) {
     super(props)
     this.state = {
-      sideMenuLinks:Object.assign({},side_menu.links),
-      hideSidebar:false
+      sideMenuLinks: Object.assign({}, side_menu.links),
+      hideSidebar: false,
     }
   }
-  reload(){
+  reload() {
     // console.log('SideBar.reloadSidebar()')
     // this.setState({
     //   sideMenuLinks:
     // })
     this.setState({
-      sideMenuLinks:Object.assign({},side_menu.links)
+      sideMenuLinks: Object.assign({}, side_menu.links),
     })
   }
-  render(){
-    const {store,config} =this.props
-    return (<>
-    <nav data-hs-accordion-always-open="" className={cls13}> 
-         <Menu data={this.state.sideMenuLinks} store={store} config={config} />
-         {/*
+  waitBackdrop() {
+    waitForElm(this.backdropSelector).then((el) => {
+      const $el = jQuery(el)
+      $el.on("click", () => {
+        this.hideOverlay()
+        $el.remove()
+        setTimeout(() => {
+          // console.log("Check backdrop 2")
+          this.waitBackdrop()
+        }, 3000)
+      })
+      const hasHandler = $el.prop("hasHandler")
+      if (!hasHandler) {
+        $el.prop("hasHandler", "yes")
+        setTimeout(() => {
+          // console.log("Check backdrop 1")
+          this.waitBackdrop()
+        }, 3000)
+      }
+    })
+  }
+  hideOverlay() {
+    const overlayInstance = this.getOverlay()
+    if (overlayInstance) {
+      overlayInstance.element.close()
+    }
+  }
+  getOverlay() {
+    let instance = null
+    try {
+      const target = document.querySelector(this.selector)
+      instance = HSOverlay.getInstance(target, true)
+    } catch (e) {
+      // console.log(e)
+    }
+    return instance
+  }
+  componentDidMount() {
+    this.waitBackdrop()
+    const overlayInstance = this.getOverlay()
+    if (!overlayInstance) {
+      HSOverlay.autoInit()
+    }
+  }
+  render() {
+    const { store, config } = this.props
+    return (
+      <>
+        <nav className={cls13}>
+          <Menu data={this.state.sideMenuLinks} store={store} config={config} />
+          {/*
          <ul className={cls14}> 
            <li> 
              <a href="#" className={cls15}> 
@@ -183,9 +231,10 @@ class SideMenu extends Component {
             Documentation
            </a> </li> 
     </ul> */}
-       </nav></>)
+        </nav>
+      </>
+    )
   }
 }
 
 export default SideMenu
-    

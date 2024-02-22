@@ -35,10 +35,10 @@ export default function Router({ config, store }) {
         <Route path="/native-client-app/:module/:fk" element={<NativeClientApp store={store} config={config} />} loader={ncAppLoader} />
         <Route path="/native-client-app/:module/:fk/page/:pageNumber" element={<NativeClientApp store={store} config={config} />} loader={ncAppLoader} />
         <Route path="/manuals" element={<ManualApp store={store} config={config} />} loader={manualAppLoader} />
-        <Route path="/manuals/:page" element={<ManualApp store={store} config={config} />} loader={manualAppLoader} />
-        <Route path="/manuals/:module/page/:pageNumber" element={<ManualApp store={store} config={config} />} loader={manualAppLoader} />
-        <Route path="/manuals/:module/:fk" element={<ManualApp store={store} config={config} />} loader={manualAppLoader} />
-        <Route path="/manuals/:module/:fk/page/:pageNumber" element={<ManualApp store={store} config={config} />} loader={manualAppLoader} />
+        <Route path="/manuals/:mod" element={<ManualApp store={store} config={config} />} loader={manualAppLoader} />
+        <Route path="/manuals/:mod/page/:pageNumber" element={<ManualApp store={store} config={config} />} loader={manualAppLoader} />
+        <Route path="/manuals/:mod/:fk" element={<ManualApp store={store} config={config} />} loader={manualAppLoader} />
+        <Route path="/manuals/:mod/:fk/page/:pageNumber" element={<ManualApp store={store} config={config} />} loader={manualAppLoader} />
       </Route>
     )
   )

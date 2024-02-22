@@ -7,6 +7,14 @@
         }
       }
     },
+    "man": {
+      "routePath": "/api/cms/user",
+      "routes": {
+        "getFile": {
+          "path": "{routePath}/getFile"
+        }
+      }
+    },
     "auth": {
       "routes": {
         "generate": {

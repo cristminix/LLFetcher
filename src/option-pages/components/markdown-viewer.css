@@ -1,0 +1,41 @@
+ 
+@tailwind base; 
+@tailwind components; 
+@tailwind utilities;
+
+.markdown-viewer{
+    @apply  text-base text-gray-800 dark:text-gray-200   [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-slate-700 dark:[&::-webkit-scrollbar-thumb]:bg-slate-500
+}
+
+.markdown-viewer h1 {
+    @apply text-4xl dark:text-white py-2
+}
+.markdown-viewer h2 {
+    @apply text-3xl dark:text-white py-2
+}
+.markdown-viewer h3 {
+    @apply text-2xl dark:text-white py-2
+}
+
+.markdown-viewer ul {
+    @apply list-disc list-inside text-gray-800 dark:text-white
+}
+.markdown-viewer ol {
+    @apply list-decimal list-inside text-gray-800 dark:text-white
+}
+.markdown-viewer ul li {
+    @apply marker:text-blue-600 list-disc ps-5 space-y-2 text-sm text-gray-600 dark:text-gray-400 ml-2
+}
+.markdown-viewer p {
+    
+    @apply dark:text-white my-2
+}
+.markdown-viewer pre {
+    @apply dark:bg-slate-800 p-4 rounded rounded-xl
+}
+.markdown-viewer pre > code {
+    @apply dark:text-gray-300 
+}
+.markdown-viewer code {
+    @apply dark:text-amber-300 
+}

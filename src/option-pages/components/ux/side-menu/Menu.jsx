@@ -132,16 +132,16 @@ const Menu = ({ data, store, config }) => {
   const activateActiveAccordion = () => {
     Object.keys(data).map((key, index) => {
       const item = data[key]
-      console.log(item)
+      //   console.log(item)
       const activeAccordionMenuMatch = pathname.match(item.path)
       if (activeAccordionMenuMatch) {
         let [path] = activeAccordionMenuMatch
         path = path.replace(/^\//, "")
-        console.log(path)
+        // console.log(path)
         const $activeAc = jQuery(`li[path=${path}]`)
         if ($activeAc.length > 0) {
           const $activeAcBtn = $activeAc.find("button:first")
-          console.log($activeAcBtn)
+          //   console.log($activeAcBtn)
           $activeAcBtn.trigger("click")
         }
       }

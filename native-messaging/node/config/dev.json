@@ -1,0 +1,5 @@
+{
+    "comment" : "Your vite dev server to enable cors to specific domain",
+    "host" : "127.0.0.1",
+    "port" : 5000
+}

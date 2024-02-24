@@ -149,6 +149,7 @@ const Menu = ({ data, store, config }) => {
   }
   useEffect(() => {
     HSAccordion.autoInit()
+    console.log("accordion updated")
     setTimeout(() => {
       activateActiveAccordion()
     }, 1000)

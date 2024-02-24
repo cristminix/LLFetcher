@@ -1,0 +1,104 @@
+@tailwind base; 
+@tailwind components; 
+@tailwind utilities;
+
+.cp_tree-table {
+  @apply text-sm;
+    /* font-size: 14px;
+    color: #040402;
+    background: #fff;
+    border: 1px solid rgba(55, 53, 47, 0.2); */
+    /* font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; */
+  }
+  .cp_tree-table_viewport{
+    @apply h-screen [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-slate-700 dark:[&::-webkit-scrollbar-thumb]:bg-slate-500;
+  }
+  /* Header */
+  
+  .cp_tree-table .cp_tree-table_header {
+    /* @apply px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase; */
+    /* color: rgba(55, 53, 47, 0.6);
+    background: rgba(242, 241, 238, 0.6);
+    border-bottom: 1px solid rgba(55, 53, 47, 0.09); */
+    @apply text-left text-xs font-medium text-gray-500 uppercase;
+  }
+  
+  /* Employees & Expenses */
+  
+  .cp_tree-table .cp_tree-table_header-cell>.t-right {
+    @apply text-right;
+  }
+  
+  /* Cells */
+  
+  .cp_tree-table .cp_tree-table_cell,
+  .cp_tree-table .cp_tree-table_header-cell {
+    @apply flex items-center px-2;
+  }
+  
+  /* Editable cell */
+  
+  .cp_tree-table .cp_tree-table_cell>input {
+    /* font-size: 14px;
+    outline: none;
+    width: 100%;
+    height: 100%;
+    padding: 5px 8px;
+    box-sizing: border-box;
+    box-shadow: inset 0 0 0 1px rgba(55, 53, 47, 0.16);
+    border: 1px solid transparent; */
+  }
+  
+  .cp_tree-table .cp_tree-table_cell>input:hover {
+    /* box-shadow: inset 0 0 0 1px #0f55eb; */
+  }
+  
+  .cp_tree-table .cp_tree-table_cell>input:focus {
+    /* background: #edf6fc;
+    box-shadow: inset 0 0 0 1px #0f55eb; */
+  }
+  
+  /* Index cell  */
+  
+  .cp_tree-table .cp_tree-table_cell .toggle-button {
+     @apply relative inline-block h-[14px] align-middle pb-[5px] m-0 cursor-pointer outline-none;
+  }
+  
+  .cp_tree-table .cp_tree-table_cell .toggle-button::after {
+
+  }
+  
+  .cp_tree-table .cp_tree-table_cell .toggle-button+span {
+    /* vertical-align: middle; */
+    @apply align-middle;
+  }
+  
+  .cp_tree-table .cp_tree-table_cell>.without-children>span {
+    /* padding-left: 15px; */
+    @apply pl-[15px];
+}
+  
+  .cp_tree-table .cp_tree-table_cell>.with-children>span {
+    /* font-weight: 600; */
+    @apply font-bold
+  }
+  
+  /* Employees cell */
+  
+  .cp_tree-table .cp_tree-table_cell>.employees-cell {
+    width: 100%;
+    /* text-align: right; */
+    @apply text-right;
+}
+  
+  /* Expenses cell */
+  
+  .cp_tree-table .cp_tree-table_cell>.expenses-cell {
+    /* font-family: 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', Menlo, Courier, monospace; */
+    font-weight: 400;
+    width: 100%;
+    /* text-align: right;
+    padding-right: 10px; */
+    @apply text-right pr-[10px];
+}
+  

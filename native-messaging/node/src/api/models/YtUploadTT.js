@@ -36,7 +36,7 @@ export class MYtUploadTT {
     try {
       record = await this.manager.save(ytuploadtt)
     } catch (err) {
-      console.log(err)
+      // console.log(err)
     }
     return record
   }
@@ -49,7 +49,7 @@ export class MYtUploadTT {
 
       record = ytuploadtt
     } catch (e) {
-      console.error(e)
+      // console.error(e)
     }
 
     return record
@@ -66,7 +66,7 @@ export class MYtUploadTT {
         record = await this.manager.save(ytuploadtt)
       }
     } catch (e) {
-      console.error(e)
+      // console.error(e)
     }
     return record
   }
@@ -80,7 +80,7 @@ export class MYtUploadTT {
         record = await this.manager.remove(ytuploadtt)
       }
     } catch (e) {
-      console.error(e)
+      // console.error(e)
     }
     return record
   }
@@ -108,7 +108,7 @@ export class MYtUploadTT {
       }
       return { limit, total_pages, total_records, record_count: records.length }
     } catch (e) {
-      console.error(e)
+      // console.error(e)
       //   res.send(e)
     }
     return { limit, total_pages: 0, total_records: 0, record_count: 0 }
@@ -138,7 +138,6 @@ export class MYtUploadTT {
         .orderBy(`a.${order_by}`, order_dir.toUpperCase())
         .where("a.uploadId = :uploadId", { uploadId })
         .getRawOne()
-      console.log(record)
       const total_records = record.count
       const total_pages = calculateTotalPages(total_records, limit)
       const offset = calculateOffset(page, limit)
@@ -154,7 +153,6 @@ export class MYtUploadTT {
 
       return { page, limit, order_by, order_dir, records, total_pages, total_records }
     } catch (e) {
-      console.error(e)
       // res.send(e)
     }
     return { page, limit, order_by, order_dir, records: [], total_pages: 0, total_records: 0 }

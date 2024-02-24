@@ -56,7 +56,8 @@
           "hasChild": false,
           "dev": false
         }
-      }
+      },
+      "dev": true
     },
     "download": {
       "title": "Download",
@@ -150,6 +151,24 @@
           "hidden": false,
           "hasChild": false,
           "dev": true
+        },
+        "tree-table": {
+          "title": "Tree Table",
+          "iconCls": "fa fa-table",
+          "path": "/developer/tree-table",
+          "order": 0,
+          "hidden": false,
+          "hasChild": false,
+          "dev": false
+        },
+        "jsstore": {
+          "title": "JS Store",
+          "iconCls": "fa fa-cog",
+          "path": "/developer/jsstore",
+          "order": 0,
+          "hidden": false,
+          "hasChild": false,
+          "dev": false
         }
       }
     },
@@ -269,12 +288,21 @@
       "order": 0,
       "hidden": false,
       "hasChild": true,
-      "dev": false,
+      "dev": true,
       "childItems": {
         "dev-notes": {
           "title": "Dev Notes",
           "iconCls": "fa fa-cog",
           "path": "/manuals/dev-notes",
+          "order": 0,
+          "hidden": false,
+          "hasChild": false,
+          "dev": false
+        },
+        "js-store": {
+          "title": "JsStore",
+          "iconCls": "fa fa-cog",
+          "path": "/manuals/js-store",
           "order": 0,
           "hidden": false,
           "hasChild": false,

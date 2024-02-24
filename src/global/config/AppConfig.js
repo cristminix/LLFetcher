@@ -1,5 +1,7 @@
 import { v4 } from "uuid"
 import jQuery from "jquery"
+import { makeDelay } from "../fn"
+const delayFn = makeDelay(256)
 /**
  * localStorage
  * key value serialized Config
@@ -59,6 +61,7 @@ class UiConfig extends LsConfig {
 
   hiddenSidebar_callback_keys = []
   reloadSidebar_callback_keys = []
+  onResize_callback_keys = []
   constructor() {
     const config_key = "uiTtsConfig"
     super(config_key)
@@ -102,6 +105,47 @@ class UiConfig extends LsConfig {
 	  	},[])
 	 * }
  	 * */
+  windowSize = { width: 0, height: 0 }
+  triggerResize = false
+  applyResizeEvent(callback, callback_key) {
+    // console.log(this.onResize_callback_keys)
+    if (typeof callback === "function") {
+      if (!this.onResize_callback_keys.includes(callback_key)) {
+        const $main_content = jQuery("#root")
+        const $win = jQuery(window)
+        this.windowSize.width = $win.width()
+        this.windowSize.height = $win.height()
+
+        $win.on("resize", () => {
+          const $uWin = jQuery(window)
+          const oW = this.windowSize.width
+          const oH = this.windowSize.height
+          const nW = $uWin.width()
+          const nH = $uWin.height()
+
+          // console.log(oW, oH)
+
+          if (oW != nW || oH != nH || this.triggerResize) {
+            this.windowSize.width = nW
+            this.windowSize.height = nH
+            const viewPortSize = {
+              width: $main_content.width(),
+              height: $main_content.height(),
+            }
+            const windowSize = this.windowSize
+            delayFn(() => {
+              callback(viewPortSize, windowSize, $main_content)
+            })
+          }
+        })
+        setTimeout(() => {
+          this.triggerResize = true
+          jQuery(window).trigger("resize")
+        }, 1000)
+        this.onResize_callback_keys.push(callback_key)
+      }
+    }
+  }
   applyHiddenSidebarStatus(setHideSidebar, callback, callback_key) {
     setHideSidebar(this.getHiddenSidebarStatus())
     if (typeof callback === "function") {

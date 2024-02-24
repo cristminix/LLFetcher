@@ -1,24 +1,45 @@
 import { useEffect } from "react"
 import Button from "../../../components/shared/ux/Button"
-import {createDownloadFile} from "../../../global/fn"
+import { createDownloadFile } from "../../../global/fn"
 // import DropdownSelect from "../../../components/shared/ux/DropdownSelect"
 import DropdownMenu from "../../../components/shared/ux/DropdownMenu"
 
 // const btnCls = "py-3 px-4 inline-flex justify-center items-center gap-2 -mt-px -ml-px first:rounded-t-lg last:rounded-b-lg sm:first:rounded-l-lg sm:mt-0 sm:first:ml-0 sm:first:rounded-tr-none sm:last:rounded-bl-none sm:last:rounded-r-lg border font-medium bg-white text-gray-700 align-middle hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-all text-sm dark:bg-gray-800 dark:hover:bg-slate-800 dark:border-gray-700 dark:text-gray-400"
-const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/store,selectedFmt, course, sections,tocs,clearStatusBar,logStatusBar,queueResume,queueFinished, dmsetup,queueManRef, alreadySetup, setAlreadySetup,reconfigureSetup, setRunSetup, runSetup, setReconfigureSetup, queueStarted = false, startDownloadQueue, stopDownloadQueue}) => {
-    console.log(`queueResume:${queueResume}`)  
+const ToolbarMan = ({
+  /*setSelectedFmt,setAvailableFmt,setDmsetup,*/ store,
+  selectedFmt,
+  course,
+  sections,
+  tocs,
+  clearStatusBar,
+  logStatusBar,
+  queueResume,
+  queueFinished,
+  dmsetup,
+  queueManRef,
+  alreadySetup,
+  setAlreadySetup,
+  reconfigureSetup,
+  setRunSetup,
+  runSetup,
+  setReconfigureSetup,
+  queueStarted = false,
+  startDownloadQueue,
+  stopDownloadQueue,
+}) => {
+  console.log(`queueResume:${queueResume}`)
   // const [loadingStartQueue, setLoadingStartQueue] = useState(false)
-    /**
-     * Starts the download queue. 
-     * 
-     * Calls startDownloadQueue() to begin queue processing.
-     * Logs messages to console.
-     * Triggers the QueueMan component to start the queue.
-     */
+  /**
+   * Starts the download queue.
+   *
+   * Calls startDownloadQueue() to begin queue processing.
+   * Logs messages to console.
+   * Triggers the QueueMan component to start the queue.
+   */
   const onStartQueue = async (e) => {
     // setLoadingStartQueue(true)
     startDownloadQueue()
-    console.log('startQueue')
+    console.log("startQueue")
     console.log(queueManRef)
     queueManRef.current.triggerQueue(true)
   }
@@ -33,17 +54,15 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/store,selecte
     // setLoadingStartQueue(false)
     stopDownloadQueue()
 
-    console.log('stopQueue')
+    console.log("stopQueue")
     queueManRef.current.triggerQueue(false)
-
-
-    }
-    /**
-     * Sets the reconfigureSetup state to true to trigger reconfiguration of the download setup.
-     * 
-     * This will reset the selected format, available formats list, and dmsetup data.
-     * It will also open the download setup UI to allow reselecting the format.
-     */
+  }
+  /**
+   * Sets the reconfigureSetup state to true to trigger reconfiguration of the download setup.
+   *
+   * This will reset the selected format, available formats list, and dmsetup data.
+   * It will also open the download setup UI to allow reselecting the format.
+   */
   const onReconfigure = async () => {
     // setSelectedFmt("Select Format")
     // setDmsetup(null)
@@ -51,30 +70,29 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/store,selecte
     setReconfigureSetup(true)
     console.log("reconfigure")
   }
-    
-    /**
-     * Resets the download queue.
-     * 
-     * Prompts the user to confirm resetting the queue. 
-     * If confirmed, calls the QueueMan component's triggerResetQueue() 
-     * method to reset the queue state and restart downloading.
-     * 
-     * Logs a message to the console.
-     */
+
+  /**
+   * Resets the download queue.
+   *
+   * Prompts the user to confirm resetting the queue.
+   * If confirmed, calls the QueueMan component's triggerResetQueue()
+   * method to reset the queue state and restart downloading.
+   *
+   * Logs a message to the console.
+   */
   const onResetQueue = async () => {
     console.log("onResetQueue")
     if (confirm("Are you sure want to reset Queue ?")) {
       const queueMan = queueManRef.current
       queueMan.triggerResetQueue()
-
     }
   }
   /**
    * Opens the source code repository for the course in a new browser tab.
-     * 
-     * Gets the sourceRepo URL from the dmsetup state.
-     * Opens the URL in a new browser tab using window.open().
-     */
+   *
+   * Gets the sourceRepo URL from the dmsetup state.
+   * Opens the URL in a new browser tab using window.open().
+   */
   const openSourceRepo = async () => {
     const { sourceRepo } = dmsetup
     // const config = {sourceRepo}
@@ -83,7 +101,7 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/store,selecte
   }
   /**
    * Opens the exercise file associated with the course in a new browser tab.
-   * 
+   *
    * Gets the exerciseFile URL from the dmsetup state.
    * Opens the URL in a new browser tab using window.open().
    */
@@ -95,43 +113,52 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/store,selecte
     // createDownloadFile('exercise_file', config)
   }
 
-    /**
-     * Downloads a playlist file to execute course content downloads.
-     * 
-     * Assembles a configuration object with the course slug, format, 
-     * and TOC data.  
-     * 
-     * Passes the configuration to the createDownloadFile() function
-     * to generate the playlist file for downloading.
-     */
+  /**
+   * Downloads a playlist file to execute course content downloads.
+   *
+   * Assembles a configuration object with the course slug, format,
+   * and TOC data.
+   *
+   * Passes the configuration to the createDownloadFile() function
+   * to generate the playlist file for downloading.
+   */
   const downloadPlaylist = async () => {
     const slug = course.slug
     const fmt = selectedFmt
     console.log(dmsetup)
-    const {enableFilenameIndex}=dmsetup
+    const { enableFilenameIndex } = dmsetup
     const config = {
-      slug, fmt, sections, tocs, enableFilenameIndex
+      slug,
+      fmt,
+      sections,
+      tocs,
+      enableFilenameIndex,
     }
-    createDownloadFile('playlist', config)
+    createDownloadFile("playlist", config)
   }
   /**
-     * Downloads a shell script to execute course content downloads.
-     * 
-     * Assembles a configuration object with the course slug, format, 
-     * section and TOC data, and the exercise file info. 
-     * 
-     * Passes the configuration to the createDownloadFile() function
-     * to generate the shell script file for downloading.
-     */
+   * Downloads a shell script to execute course content downloads.
+   *
+   * Assembles a configuration object with the course slug, format,
+   * section and TOC data, and the exercise file info.
+   *
+   * Passes the configuration to the createDownloadFile() function
+   * to generate the shell script file for downloading.
+   */
   const downloadHelper = async () => {
     const { exerciseFiles, enableFilenameIndex } = dmsetup
 
     const slug = course.slug
     const fmt = selectedFmt
     const config = {
-      slug, fmt, sections, tocs, exerciseFiles, enableFilenameIndex
+      slug,
+      fmt,
+      sections,
+      tocs,
+      exerciseFiles,
+      enableFilenameIndex,
     }
-    createDownloadFile('shell_script', config)
+    createDownloadFile("shell_script", config)
   }
 
   const downloadHelperCmd = async () => {
@@ -140,9 +167,14 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/store,selecte
     const slug = course.slug
     const fmt = selectedFmt
     const config = {
-      slug, fmt, sections, tocs, exerciseFiles, enableFilenameIndex
+      slug,
+      fmt,
+      sections,
+      tocs,
+      exerciseFiles,
+      enableFilenameIndex,
     }
-    createDownloadFile('batch_script', config)
+    createDownloadFile("batch_script", config)
   }
   /*  
   const isValidExerciseFile = (exerciseFile)=>{
@@ -161,135 +193,161 @@ const ToolbarMan = ({/*setSelectedFmt,setAvailableFmt,setDmsetup,*/store,selecte
     }
     return validFile
   }*/
-  useEffect(()=>{
+  useEffect(() => {
     console.log(dmsetup)
-  },[dmsetup])
+  }, [dmsetup])
 
-  const onSelectDdToolbar=async(e)=>{
-    if(e=='reset_queue_setup'){
-      if(confirm("Are you sure want to reset Queue Setup")){
-        const {courseId} = dmsetup
+  const onSelectDdToolbar = async (e) => {
+    if (e == "reset_queue_setup") {
+      if (confirm("Are you sure want to reset Queue Setup")) {
+        const { courseId } = dmsetup
         console.log(courseId)
-        await store.get('DMSetup').deleteByCourseId(courseId)
-        await store.get('DMStatus').deleteByCourseId(courseId)
+        await store.get("DMSetup").deleteByCourseId(courseId)
+        await store.get("DMStatus").deleteByCourseId(courseId)
         document.location.reload()
       }
-      
-    }
-    else if(e=='play_in_video_player'){
-      document.location.hash=`/developer/video-player?slug=${course.slug}`
-    }
-    else if(e=='view_on_dev_queue_man'){
-      document.location.hash=`/developer/queue-man?slug=${course.slug}`
-    }
-    else if(e=='reconfigure'){
+    } else if (e == "play_in_video_player") {
+      document.location.hash = `/developer/video-player?slug=${course.slug}`
+    } else if (e == "view_on_dev_queue_man") {
+      document.location.hash = `/developer/queue-man?slug=${course.slug}`
+    } else if (e == "reconfigure") {
       onReconfigure()
-    }
-    else if(e=='refresh_course_data'){
-      document.location.hash=`/course/add/${course.slug}?useM3Rec=0&refresh=1`
-
+    } else if (e == "refresh_course_data") {
+      document.location.hash = `/course/add/${course.slug}?useM3Rec=0&refresh=1`
     }
     // console.log(e)
   }
 
   const ddToolbarData = [
     {
-      text:'Recofigure Queue Setup',
-      value:'reconfigure',
-      icon:'fa fa-cog'
+      text: "Recofigure Queue Setup",
+      value: "reconfigure",
+      icon: "fa fa-cog",
     },
     {
-      text:'Reset Queue Setup',
-      value:'reset_queue_setup',
-      icon:'bi bi-trash'
+      text: "Reset Queue Setup",
+      value: "reset_queue_setup",
+      icon: "bi bi-trash",
     },
     {
-      text:'Play in Video Player',
-      value:'play_in_video_player',
-      icon:'bi bi-play'
+      text: "Play in Video Player",
+      value: "play_in_video_player",
+      icon: "bi bi-play",
     },
     {
-      text:'Refresh Course Data',
-      value:'refresh_course_data',
-      icon:'bi bi-arrow-clockwise'
-    }
+      text: "Refresh Course Data",
+      value: "refresh_course_data",
+      icon: "bi bi-arrow-clockwise",
+    },
   ]
-  return (<><div className="toolbar-man pr-2 pt-4 pb-1">
+  return (
+    <>
+      <div className="toolbar-man pr-2 pt-4 pb-1">
         <div className="toolbar-man-container">
-        
-
-<div className="flex gap-2 flex-wrap justify-end">
-  {
-    alreadySetup ? <>
-    
-    {
-      !reconfigureSetup ? <>
-      {
-        !queueFinished ? <>
-          {/* <Button onMouseOut={e=>clearStatusBar()} 
+          <div className="flex gap-2 flex-wrap justify-end">
+            {alreadySetup ? (
+              <>
+                {!reconfigureSetup ? (
+                  <>
+                    {!queueFinished ? (
+                      <>
+                        {/* <Button onMouseOut={e=>clearStatusBar()} 
                   onMouseOver={e=>logStatusBar('ToolbarMan',`${queueResume?'Resume Queue' : 'Start Queue'}`)}
                   loading={queueStarted} className="" disabled={queueStarted} caption={queueResume?"Resume":"Start Queue"} icon="fa fa-play" onClick={e=>onStartQueue(e)}/> */}
 
-          {
-            !queueStarted ? <>
-
-          {/*<Button onMouseOut={e=>clearStatusBar()} 
+                        {!queueStarted ? (
+                          <>
+                            {/*<Button onMouseOut={e=>clearStatusBar()} 
                   onMouseOver={e=>logStatusBar('ToolbarMan',`Reconfigure Queue Setup`)}
                   caption="Reconfigure" icon="fa fa-cog" onClick={e=>onReconfigure(e)}/>*/}
-            
-            </>:<>
-          {/* <Button onMouseOut={e=>clearStatusBar()} 
+                          </>
+                        ) : (
+                          <>
+                            {/* <Button onMouseOut={e=>clearStatusBar()} 
                   onMouseOver={e=>logStatusBar('ToolbarMan',`Stop Current Queue`)}
                   disabled={!queueStarted} caption="Stop Queue" icon="fa fa-square" onClick={e=>onStopQueue(e)}/>
              */}
-            </>
-          }
-        </> : <>
-          {/* <Button  onMouseOut={e=>clearStatusBar()} 
+                          </>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        {/* <Button  onMouseOut={e=>clearStatusBar()} 
                   onMouseOver={e=>logStatusBar('ToolbarMan',`Reset Current Queue`)}
                   className=""  caption="Reset Queue" icon="fa fa-refresh" onClick={e=>onResetQueue(e)}/> */}
-          
-        </>
-      }
-      </>: <></>
-    }
-    {
-      dmsetup && !reconfigureSetup  ? <>
-        
-       
-         
-           {
-              dmsetup.exerciseFiles ? dmsetup.exerciseFiles.length > 0 ? <>
-                <DropdownMenu className="" data={dmsetup.exerciseFiles.map(item=>{return{value:item.url,text:item.name}})} onSelect={url=>openExerciseFile(url)} label="Exercise Files" itemIcon="fa fa-file-archive-o" labelIcon="fa fa-folder-o" />
-              </> : '': ''
-            } 
-            {
-              dmsetup.sourceRepo ? <><Button onClick={e=>openSourceRepo(e)} className="" label="Source Repo:" title={dmsetup.sourceRepo} caption="Source Repo" icon="fa fa-file-archive-o"/></> : ''
-            }
-          <span className="mb-2">{course.description}</span>  
-          <Button onClick={e=>downloadPlaylist(e)}  className="" caption="Playlist.m3u" icon="bi bi-collection-play"/>
-            <Button onClick={e=>downloadHelper(e)} className="" caption="Helper.sh" icon="bi bi-terminal-fill"/>
-            <Button onClick={e=>downloadHelperCmd(e)} className="" caption="Helper.cmd" icon="bi bi-terminal"/>
-          
-          <DropdownMenu className={`p-0`} data={ddToolbarData} onSelect={(e)=>onSelectDdToolbar(e)} labelIcon="fa fa-cog"/>
-      </>:''
-    }
-    
-    
-    </> : <>
-    {
-      !runSetup ?<Button onMouseOut={e=>clearStatusBar()} 
-      onMouseOver={e=>logStatusBar('ToolbarMan',`Run Setup Queue`)} onClick={e=>setRunSetup(true)} icon="fa fa-cog" caption="Run Queue Setup"/> : ""
-    }
-        
-    </>
-  }
-  
-  
-</div>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <></>
+                )}
+                {dmsetup && !reconfigureSetup ? (
+                  <>
+                    {dmsetup.exerciseFiles ? (
+                      dmsetup.exerciseFiles.length > 0 ? (
+                        <>
+                          <DropdownMenu
+                            className=""
+                            data={dmsetup.exerciseFiles.map((item) => {
+                              return { value: item.url, text: item.name }
+                            })}
+                            onSelect={(url) => openExerciseFile(url)}
+                            label="Exercise Files"
+                            itemIcon="fa fa-file-archive-o"
+                            labelIcon="fa fa-folder-o"
+                          />
+                        </>
+                      ) : (
+                        ""
+                      )
+                    ) : (
+                      ""
+                    )}
+                    {dmsetup.sourceRepo ? (
+                      <>
+                        <Button
+                          onClick={(e) => openSourceRepo(e)}
+                          className=""
+                          label="Source Repo:"
+                          title={dmsetup.sourceRepo}
+                          caption="Source Repo"
+                          icon="fa fa-file-archive-o"
+                        />
+                      </>
+                    ) : (
+                      ""
+                    )}
+
+                    <Button onClick={(e) => downloadPlaylist(e)} className="" caption="Playlist.m3u" icon="bi bi-collection-play" />
+                    <Button onClick={(e) => downloadHelper(e)} className="" caption="Helper.sh" icon="bi bi-terminal-fill" />
+                    <Button onClick={(e) => downloadHelperCmd(e)} className="" caption="Helper.cmd" icon="bi bi-terminal" />
+
+                    <DropdownMenu className={`p-0`} data={ddToolbarData} onSelect={(e) => onSelectDdToolbar(e)} labelIcon="fa fa-cog" />
+                  </>
+                ) : (
+                  ""
+                )}
+              </>
+            ) : (
+              <>
+                {!runSetup ? (
+                  <Button
+                    onMouseOut={(e) => clearStatusBar()}
+                    onMouseOver={(e) => logStatusBar("ToolbarMan", `Run Setup Queue`)}
+                    onClick={(e) => setRunSetup(true)}
+                    icon="fa fa-cog"
+                    caption="Run Queue Setup"
+                  />
+                ) : (
+                  ""
+                )}
+              </>
+            )}
+          </div>
         </div>
-    </div></>)
+      </div>
+    </>
+  )
 }
 
 export default ToolbarMan
-    

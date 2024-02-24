@@ -34,7 +34,7 @@ const fixConfigTemplateValue = (source, target, defaultSourceKey = "app") => {
 class AppConfig {
   data = {}
   path = "config"
-  keys = ["app", "db", "module", "auth"]
+  keys = ["app", "db", "module", "auth", "dev"]
   logger = null
   static instance = null
   static getInstance() {

@@ -39,6 +39,18 @@ class Menu extends JsStoreDB {
       return Menu.instance
     }
   }
+  static arrayToTreeData(array) {
+    const treeData = []
+    const height = 50
+    for (const item of array) {
+      const treeItem = {
+        data: item,
+        height,
+      }
+      treeData.push(treeItem)
+    }
+    return treeData
+  }
   async getList(parent = -1, limit = 5, page = 1, orderBy = "order", orderDir = "asc") {
     const total_records = await this.getCount(parent)
 
@@ -213,6 +225,16 @@ class Menu extends JsStoreDB {
 
     console.log(currentOrder, nextRecord)
     return ok
+  }
+  async getMenuList(maxRow = 100, createTreeData = false, exportMode = false) {
+    const lists = await this.getList(-1, maxRow)
+    const menus = !createTreeData ? lists.records : Menu.arrayToTreeData(lists.records)
+    for (const menu of menus) {
+      const subLists = await this.getList(!createTreeData ? menu.id : menu.data.id, maxRow)
+      const childMenus = !createTreeData ? subLists.records : Menu.arrayToTreeData(subLists.records)
+      menu.children = childMenus
+    }
+    return menus
   }
 }
 

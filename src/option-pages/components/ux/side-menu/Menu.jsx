@@ -2,8 +2,9 @@ import { useEffect } from "react"
 import { cls14, cls15, cls16, cls22, cls23, cls24, cls25, cls17, cls18, cls19, cls20, cls27 } from "../cls"
 import { useLocation, NavLink } from "react-router-dom"
 import jQuery from "jquery"
+import { makeDelay } from "../../../../global/fn"
 const DEV_MODE = import.meta.env.DEV
-
+const delay = makeDelay(1000)
 const MenuItem = ({ hasChild, title, path, icon, name, childrens, index }) => {
   const activeTabCls = "flex items-center gap-x-3.5 py-2 px-2.5 bg-gray-100 text-sm text-slate-700 rounded-md dark:bg-gray-900 dark:text-white"
   const activeMenuCls = "bg-gray-100 text-sm text-slate-700 rounded-md dark:bg-gray-900 dark:text-white"
@@ -99,7 +100,7 @@ const Menu = ({ data, store, config }) => {
   const { pathname } = useLocation()
 
   const getChildrenByModel = (item) => {
-    let childrens = {}
+    let childrens = []
     if (item.model) {
       const modelName = item.model
       const modelObj = store.get(modelName)
@@ -113,12 +114,13 @@ const Menu = ({ data, store, config }) => {
               const title = cItem[item.displayField]
               const slug = cItem[item.slugField]
               const path = item.childRoutePath.replace(/{SLUG_VALUE}/, slug)
-              childrens[slug] = {
+              childrens.push({
+                slug,
                 title,
                 name: slug,
                 path,
                 iconCls: item.iconCls,
-              }
+              })
             }
           } catch (e) {
             console.error(e)
@@ -130,9 +132,9 @@ const Menu = ({ data, store, config }) => {
     return childrens
   }
   const activateActiveAccordion = () => {
-    Object.keys(data).map((key, index) => {
-      const item = data[key]
-      //   console.log(item)
+    data.map((item) => {
+      // const item = data[key]
+      console.log(item)
       const activeAccordionMenuMatch = pathname.match(item.path)
       if (activeAccordionMenuMatch) {
         let [path] = activeAccordionMenuMatch
@@ -140,7 +142,7 @@ const Menu = ({ data, store, config }) => {
         // console.log(path)
         const $activeAc = jQuery(`li[path=${path}]`)
         if ($activeAc.length > 0) {
-          const $activeAcBtn = $activeAc.find("button:first")
+          const $activeAcBtn = $activeAc.find("button")
           //   console.log($activeAcBtn)
           $activeAcBtn.trigger("click")
         }
@@ -148,18 +150,21 @@ const Menu = ({ data, store, config }) => {
     })
   }
   useEffect(() => {
-    HSAccordion.autoInit()
-    console.log("accordion updated")
-    setTimeout(() => {
-      activateActiveAccordion()
-    }, 1000)
-  }, [])
+    delay(() => {
+      HSAccordion.autoInit()
+      console.log("accordion updated")
+      delay(() => {
+        console.log("activateActiveAccordion")
+        activateActiveAccordion()
+      })
+    })
+  }, [data])
   return (
     <>
       <ul className={cls14}>
-        {Object.keys(data).map((key, index) => {
-          const item = data[key]
-          let childrens = item.childItems || {}
+        {data.map((item, index) => {
+          // const item = data[key]
+          let childrens = item.children
           // console.log(item)
           if (typeof item.dev !== "undefined") {
           } else {
@@ -177,13 +182,16 @@ const Menu = ({ data, store, config }) => {
           const useModel = item.useModel || false
           if (useModel) {
             childrens = getChildrenByModel(item)
-            item.hasChild = Object.keys(childrens).length > 0
+            item.hasChild = true
           }
+          // item.hasChild = childrens.length > 0
+
+          console.log(item.hasChild)
           return (
             <MenuItem
               key={index}
               childrens={childrens}
-              name={key}
+              name={item.slug}
               index={index}
               hasChild={item.hasChild}
               title={item.title}

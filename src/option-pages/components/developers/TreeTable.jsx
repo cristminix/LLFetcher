@@ -1,5 +1,5 @@
 import fr from "fetch-retry"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { devApiUrl } from "./fn"
 import { TreeTable, TreeState } from "cp-react-tree-table"
 import "./treeTable.css"
@@ -8,43 +8,9 @@ import Button from "../../../components/shared/ux/Button"
 import jQuery from "jquery"
 import side_menu from "../../side_menu.json"
 import Menu from "../../../global/models/Menu"
+import { getInputFileContent } from "../../../global/fn"
 const mMenu = Menu.getInstance()
-function genData() {
-  return [
-    { data: { name: "Company A", expenses: "60,000", employees: "5", contact: "Nicholas Watson" }, height: 32 },
-    { data: { name: "Company B", expenses: "70,000", employees: "5", contact: "Dani Hopkinson" }, height: 32 },
-    { data: { name: "Company C", expenses: "50,000", employees: "4", contact: "Jacob Ellery" }, height: 32 },
-    { data: { name: "Company D", expenses: "230,000", employees: "9", contact: "Kate Stewart" }, height: 32 },
-    { data: { name: "Company E", expenses: "310,000", employees: "8", contact: "Louise Fall" }, height: 32 },
-    { data: { name: "Company F", expenses: "110,000", employees: "5", contact: "Owen Thompson" }, height: 32 },
-    { data: { name: "Company G", expenses: "250,000", employees: "18", contact: "Fred Wilton" }, height: 32 },
-    { data: { name: "Company H", expenses: "180,000", employees: "7", contact: "William Dallas" }, height: 32 },
-    {
-      data: { name: "Company I", expenses: "105,000", employees: "22", contact: "Makenzie Higgs" },
-      children: [
-        {
-          data: { name: "Department 1", expenses: "75,000", employees: "18", contact: "Florence Carter" },
-          children: [
-            { data: { name: "Group alpha", expenses: "25,000", employees: "8", contact: "Doug Moss" } },
-            { data: { name: "Group beta", expenses: "10,000", employees: "6", contact: "Camila Devonport" } },
-            { data: { name: "Group gamma", expenses: "40,000", employees: "4", contact: "Violet Curtis" } },
-          ],
-        },
-        { data: { name: "Department 2", expenses: "30,000", employees: "4", contact: "Selena Rycroft" }, height: 32 },
-      ],
-    },
-    { data: { name: "Company J", expenses: "370,000", employees: "13", contact: "Ron Douglas" }, height: 32 },
-    { data: { name: "Company K", expenses: "500,000", employees: "15", contact: "Michael Jacobs" }, height: 32 },
-    { data: { name: "Company L", expenses: "230,000", employees: "10", contact: "Stephanie Egerton" }, height: 32 },
-    { data: { name: "Company M", expenses: "90,000", employees: "25", contact: "Michael Buckley" }, height: 32 },
-    { data: { name: "Company N", expenses: "370,000", employees: "13", contact: "Sabrina Rowlands" }, height: 32 },
-    { data: { name: "Company O", expenses: "500,000", employees: "15", contact: "Lana Watt" }, height: 32 },
-    { data: { name: "Company P", expenses: "230,000", employees: "10", contact: "Evelynn Calderwood" }, height: 32 },
-    { data: { name: "Company Q", expenses: "90,000", employees: "25", contact: "Jade Morley" }, height: 32 },
-  ]
-}
 
-const MOCK_DATA = genData()
 const paddingCls = {
   15: "pl-[15px] ",
   30: "pl-[30px] ",
@@ -64,104 +30,49 @@ const TreeTableAppState = ({ lastRow = null }) => {
 }
 const TreeTableApp = ({ config, store }) => {
   const [blockMainContent, setBlockMainContent] = useState(false)
-  const [treeValue, setTreeValue] = useState(TreeState.create(MOCK_DATA))
+
   const [treeMenuData, setTreeMenuData] = useState(TreeState.create([]))
   const [vH, setVh] = useState(260)
   const [lastRow, setLastRow] = useState(null)
-  const getSideMenuChildren = async (topMenu, record) => {
-    const { childItems } = topMenu
-    const childKeys = Object.keys(childItems)
-    const childrens = []
-    const height = 50
-    for (const key of childKeys) {
-      const children = childItems[key]
 
-      const { dev, hidden, order, path, title, iconCls } = children
-      const treeItem = {
-        data: { dev: dev ? true : false, slug: key, hidden: hidden ? true : false, order: parseInt(order), path, title, iconCls },
-        height,
-      }
-      treeItem.data.parent = record.id
-      treeItem.data.level = 1
-      console.log(treeItem.data)
-      await mMenu.insertOrUpdate(treeItem.data, "slug")
-      childrens.push(treeItem)
-    }
-    return childrens
-  }
-  const convertSideMenuToTreeData = async (sideMenu) => {
-    const topKeys = Object.keys(sideMenu.links)
-    const treeData = []
-    const height = 50
-    for (const key of topKeys) {
-      const topMenu = sideMenu.links[key]
-      const slug = key
-      const {
-        // slug,
-        childIconCls,
-        childRoutePath,
-        dev,
-        displayField,
-        hasChild,
-        hidden,
-        iconCls,
-        model,
-        modelListMethod,
-        order,
-        path,
-        slugField,
-        title,
-        useModel,
-      } = topMenu
-
-      const treeItem = {
-        data: {
-          slug,
-          childIconCls,
-          childRoutePath,
-          dev: dev ? true : false,
-          displayField,
-          hasChild: hasChild ? true : false,
-          hidden: hidden ? true : false,
-          iconCls,
-          model,
-          modelListMethod,
-          order,
-          path,
-          slugField,
-          title,
-          useModel: useModel ? true : false,
-        },
-        height,
-      }
-      let childrens = null
-      const record = await mMenu.insertOrUpdate(treeItem.data, "slug")
-
-      if (topMenu.hasChild) {
-        childrens = await getSideMenuChildren(topMenu, record)
-        treeItem.children = childrens
-      }
-      treeData.push(treeItem)
-      // insert or update
-      console.log(record)
-    }
-    return treeData
-  }
-
-  const arrayToTreeData = (array) => {
-    const treeData = []
-    const height = 50
-    for (const item of array) {
-      const treeItem = {
-        data: item,
-        height,
-      }
-      treeData.push(treeItem)
-    }
-    return treeData
-  }
   const main = async () => {
     await updateList()
+  }
+  const exportMenu = async (e) => {
+    const menus = await mMenu.getMenuList(100)
+    const filename = `menu-${new Date().getTime()}.json`
+    let buffer = JSON.stringify(menus, null, 2)
+    let objectURL = null
+    let anchor = document.createElement("a")
+
+    objectURL = window.URL.createObjectURL(new Blob([buffer]))
+    anchor.download = filename
+
+    anchor.href = objectURL
+    anchor.click()
+    console.log(menus)
+  }
+  const inputFileImportRef = useRef(null)
+  const importMenu = async (e) => {
+    setBlockMainContent(true)
+    const file = inputFileImportRef.current.files[0]
+    const content = await getInputFileContent(file)
+    const menus = JSON.parse(content)
+    for (const menu of menus) {
+      delete menu.id
+      console.log(menu)
+      const record = await mMenu.insertOrUpdate(menu, "slug")
+      for (const child of menu.children) {
+        delete child.id
+        child.parent = record.id
+        const childRecord = await mMenu.insertOrUpdate(child, "slug")
+        console.log(childRecord)
+      }
+    }
+    // console.log(menus)
+    await updateList()
+    config.getUiConfig().reloadSidebar()
+    setBlockMainContent(false)
   }
   const addMenuForm = async (item) => {
     console.log(item)
@@ -190,18 +101,9 @@ const TreeTableApp = ({ config, store }) => {
     // setBlockMainContent(false)
   }
   const updateList = async () => {
-    // setBlockMainContent(true)
-    const maxRow = 100
-    const lists = await mMenu.getList(-1, maxRow)
-    const menus = arrayToTreeData(lists.records)
-    for (const menu of menus) {
-      const subLists = await mMenu.getList(menu.data.id, maxRow)
-      const childMenus = arrayToTreeData(subLists.records)
-      menu.children = childMenus
-    }
+    const menus = await mMenu.getMenuList(100, true)
     const treeMenuData = TreeState.create(menus)
     setTreeMenuData(treeMenuData)
-    // setBlockMainContent(false)
 
     setTimeout(() => {
       if (lastRow) {
@@ -210,9 +112,6 @@ const TreeTableApp = ({ config, store }) => {
         $toggleBtn.trigger("click")
       }
     }, 256)
-    // TreeState.expandAll(treeMenuData)
-    // const rowModel = treeValue.findRowModel(lastRow.model)
-    // console.log(rowModel)
   }
 
   const handleOnChange2 = (newValue) => {
@@ -246,9 +145,20 @@ const TreeTableApp = ({ config, store }) => {
     <div className={`menu-manager ${containerCls}`}>
       {/* <TreeTableAppState lastRow={lastRow} /> */}
       <div className="explorer-toolbar pb-2">
-        <div className="flex gap-2">
-          <Button onClick={(e) => exportMenu(e)} caption="Export json" icon="fa fa-file-text" />
-          {!showForm ? <Button onClick={(e) => addMenuForm()} icon="fa fa-plus" caption="Add" /> : null}
+        <div className="flex gap-2 justify-between">
+          <div className="flex gap-2">
+            <input type="file" ref={inputFileImportRef} className="hidden" onChange={(e) => importMenu(e)} />
+            <Button
+              onClick={(e) => {
+                inputFileImportRef.current.value = ""
+                inputFileImportRef.current.click()
+              }}
+              caption="Import json"
+              icon="fa fa-file-text"
+            />
+            <Button onClick={(e) => exportMenu(e)} caption="Export json" icon="fa fa-file-text" />
+          </div>
+          {!showForm ? <Button onClick={(e) => addMenuForm()} icon="fa fa-plus" caption="" /> : null}
         </div>
       </div>
 
@@ -354,20 +264,6 @@ const TreeTableApp = ({ config, store }) => {
           </div>
         )}
       </div>
-      {/* 
-      <div className="flex flex-col">
-        <div className={`-m-1.5 overflow-x-auto ${niceScrollbarCls}`}>
-          <div className="p-1.5 min-w-full inline-block align-middle">
-            <h4 className="font-bold">TreeTable</h4>
-            <MyTreeTable config={config} value={treeValue} height={vH} onChange={handleOnChange}>
-              <TreeTable.Column basis="180px" grow="0" renderCell={renderIndexCell} renderHeaderCell={() => <span>Name</span>} />
-              <TreeTable.Column renderCell={renderEditableCell} renderHeaderCell={() => <span>Contact person</span>} />
-              <TreeTable.Column renderCell={renderEmployeesCell} renderHeaderCell={() => <span className="t-right">Employees</span>} />
-              <TreeTable.Column renderCell={renderExpensesCell} renderHeaderCell={() => <span className="t-right">Expenses ($)</span>} />
-            </MyTreeTable>
-          </div>
-        </div>
-      </div> */}
     </div>
   )
 }

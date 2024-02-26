@@ -8,24 +8,24 @@ import Menu from "./side-menu/Menu"
 // import { HSOverlay } from "preline";
 import jQuery from "jquery"
 import { waitForElm } from "../../../global/fn"
+import MenuDB from "../../../global/models/Menu"
+
+const mMenu = MenuDB.getInstance()
+
 class SideMenu extends Component {
   selector = "#application-sidebar"
   backdropSelector = "div#sidebar-overlay-backdrop[data-hs-overlay-backdrop-template]"
   constructor(props) {
     super(props)
     this.state = {
-      sideMenuLinks: Object.assign({}, side_menu.links),
+      // sideMenuLinks: Object.assign({}, side_menu.links),
+      menus: [],
       hideSidebar: false,
     }
   }
-  reload() {
-    // console.log('SideBar.reloadSidebar()')
-    // this.setState({
-    //   sideMenuLinks:
-    // })
-    this.setState({
-      sideMenuLinks: Object.assign({}, side_menu.links),
-    })
+  async reload() {
+    const menus = await mMenu.getMenuList(100)
+    this.setState({ menus })
   }
   waitBackdrop() {
     waitForElm(this.backdropSelector).then((el) => {
@@ -64,19 +64,22 @@ class SideMenu extends Component {
     }
     return instance
   }
-  componentDidMount() {
+  async componentDidMount() {
     this.waitBackdrop()
     const overlayInstance = this.getOverlay()
     if (!overlayInstance) {
       HSOverlay.autoInit()
     }
+    const menus = await mMenu.getMenuList(100)
+    this.setState({ menus })
   }
   render() {
     const { store, config } = this.props
+    const { menus } = this.state
     return (
       <>
         <nav className={cls13}>
-          <Menu data={this.state.sideMenuLinks} store={store} config={config} />
+          <Menu data={menus} store={store} config={config} />
           {/*
          <ul className={cls14}> 
            <li> 

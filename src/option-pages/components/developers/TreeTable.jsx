@@ -7,6 +7,8 @@ import { inputCls, niceScrollbarCls } from "../ux/cls"
 import Button from "../../../components/shared/ux/Button"
 import jQuery from "jquery"
 import side_menu from "../../side_menu.json"
+import Menu from "../../../global/models/Menu"
+const mMenu = Menu.getInstance()
 function genData() {
   return [
     { data: { name: "Company A", expenses: "60,000", employees: "5", contact: "Nicholas Watson" }, height: 32 },
@@ -48,36 +50,49 @@ const paddingCls = {
   30: "pl-[30px] ",
   45: "pl-[45px] ",
 }
-class MyTreeTable extends TreeTable {
-  constructor(props) {
-    super(props)
-  }
+
+const TreeTableAppState = ({ lastRow = null }) => {
+  return (
+    <div className="absolute top-0 start-1/2 -translate-x-1/2">
+      <div className="max-w-xs bg-white border border-gray-200 rounded-xl shadow-lg dark:bg-gray-800 dark:border-gray-700" role="alert">
+        <div className="p-2 sm:p-4">
+          <span>lastRow:{JSON.stringify(lastRow)}</span>
+        </div>
+      </div>
+    </div>
+  )
 }
 const TreeTableApp = ({ config, store }) => {
+  const [blockMainContent, setBlockMainContent] = useState(false)
   const [treeValue, setTreeValue] = useState(TreeState.create(MOCK_DATA))
   const [treeMenuData, setTreeMenuData] = useState(TreeState.create([]))
   const [vH, setVh] = useState(260)
-
-  const getSideMenuChildren = (topMenu) => {
+  const [lastRow, setLastRow] = useState(null)
+  const getSideMenuChildren = async (topMenu, record) => {
     const { childItems } = topMenu
     const childKeys = Object.keys(childItems)
     const childrens = []
-    const height = 32
+    const height = 50
     for (const key of childKeys) {
       const children = childItems[key]
-      const { dev, slug, hidden, order, path, title, iconCls } = children
+
+      const { dev, hidden, order, path, title, iconCls } = children
       const treeItem = {
-        data: { dev, slug, hidden, order, path, title, iconCls },
+        data: { dev: dev ? true : false, slug: key, hidden: hidden ? true : false, order: parseInt(order), path, title, iconCls },
         height,
       }
+      treeItem.data.parent = record.id
+      treeItem.data.level = 1
+      console.log(treeItem.data)
+      await mMenu.insertOrUpdate(treeItem.data, "slug")
       childrens.push(treeItem)
     }
     return childrens
   }
-  const convertSideMenuToTreeData = (sideMenu) => {
+  const convertSideMenuToTreeData = async (sideMenu) => {
     const topKeys = Object.keys(sideMenu.links)
     const treeData = []
-    const height = 32
+    const height = 50
     for (const key of topKeys) {
       const topMenu = sideMenu.links[key]
       const slug = key
@@ -104,10 +119,10 @@ const TreeTableApp = ({ config, store }) => {
           slug,
           childIconCls,
           childRoutePath,
-          dev,
+          dev: dev ? true : false,
           displayField,
-          hasChild,
-          hidden,
+          hasChild: hasChild ? true : false,
+          hidden: hidden ? true : false,
           iconCls,
           model,
           modelListMethod,
@@ -115,39 +130,99 @@ const TreeTableApp = ({ config, store }) => {
           path,
           slugField,
           title,
-          useModel,
+          useModel: useModel ? true : false,
         },
         height,
       }
       let childrens = null
+      const record = await mMenu.insertOrUpdate(treeItem.data, "slug")
+
       if (topMenu.hasChild) {
-        childrens = getSideMenuChildren(topMenu)
+        childrens = await getSideMenuChildren(topMenu, record)
         treeItem.children = childrens
+      }
+      treeData.push(treeItem)
+      // insert or update
+      console.log(record)
+    }
+    return treeData
+  }
+
+  const arrayToTreeData = (array) => {
+    const treeData = []
+    const height = 50
+    for (const item of array) {
+      const treeItem = {
+        data: item,
+        height,
       }
       treeData.push(treeItem)
     }
     return treeData
   }
+  const main = async () => {
+    await updateList()
+  }
+  const addMenuForm = async (item) => {
+    console.log(item)
+  }
+  const editMenuForm = async (item) => {
+    console.log(item)
+  }
+  const deleteMenuForm = async (item) => {
+    console.log(item)
+  }
+  const moveUp = async (row) => {
+    // console.log(item)
+    // setBlockMainContent(true)
+    const ok = await mMenu.moveUp(row.data.id)
+    if (ok) {
+      updateList()
+    }
+    // setBlockMainContent(false)
+  }
+  const moveDown = async (row) => {
+    // setBlockMainContent(true)
+    const ok = await mMenu.moveDown(row.data.id)
+    if (ok) {
+      updateList()
+    }
+    // setBlockMainContent(false)
+  }
+  const updateList = async () => {
+    // setBlockMainContent(true)
+    const maxRow = 100
+    const lists = await mMenu.getList(-1, maxRow)
+    const menus = arrayToTreeData(lists.records)
+    for (const menu of menus) {
+      const subLists = await mMenu.getList(menu.data.id, maxRow)
+      const childMenus = arrayToTreeData(subLists.records)
+      menu.children = childMenus
+    }
+    const treeMenuData = TreeState.create(menus)
+    setTreeMenuData(treeMenuData)
+    // setBlockMainContent(false)
 
-  const main = () => {
-    console.log(side_menu)
-    const treeData = convertSideMenuToTreeData(side_menu)
-    setTreeMenuData(TreeState.create(treeData))
-    console.log(treeData)
+    setTimeout(() => {
+      if (lastRow) {
+        const { slug } = lastRow
+        const $toggleBtn = jQuery(`button.${slug}`)
+        $toggleBtn.trigger("click")
+      }
+    }, 256)
+    // TreeState.expandAll(treeMenuData)
+    // const rowModel = treeValue.findRowModel(lastRow.model)
+    // console.log(rowModel)
   }
 
-  const handleOnChange = (newValue) => {
-    setTreeValue(newValue)
-  }
   const handleOnChange2 = (newValue) => {
+    console.log(newValue)
     setTreeMenuData(newValue)
   }
-  const renderNameCell = (row) => {
-    return <span>{row.data.name}</span>
-  }
+
   const setAutoViewPortHeight = () => {
     config.getUiConfig().applyResizeEvent((rootSize, windowSize, $root) => {
-      const { width, height } = windowSize
+      const { height } = windowSize
       if (height >= 260) {
         setVh(height)
       }
@@ -155,59 +230,11 @@ const TreeTableApp = ({ config, store }) => {
   }
   useEffect(() => {
     setAutoViewPortHeight()
+    return () => {
+      config.getUiConfig().unsetResizeEvent("MyTreeTable")
+    }
   }, [])
 
-  useEffect(() => {
-    console.log(treeMenuData)
-    // setAutoViewPortHeight()
-  }, [treeMenuData])
-
-  const renderIndexCell = (row) => {
-    // const paddingCls = `px-[${(row.metadata.depth + 1) * 15}px] `
-    return (
-      <div className={`${paddingCls[row.metadata.depth * 15]} ${row.metadata.hasChildren ? "with-children" : "without-children"}`}>
-        {row.metadata.hasChildren ? (
-          <button
-            className="p-2"
-            onClick={(e) => {
-              console.log(row)
-              row.toggleChildren()
-            }}
-          >
-            <i className={`fa fa-${row.$state.isExpanded ? "minus" : "plus"}`} />
-          </button>
-        ) : (
-          ""
-        )}
-
-        <span>{row.data.name}</span>
-      </div>
-    )
-  }
-
-  const renderEmployeesCell = (row) => {
-    return <span className="employees-cell">{row.data.employees}</span>
-  }
-
-  const renderExpensesCell = (row) => {
-    return <span className="expenses-cell">{row.data.expenses}</span>
-  }
-
-  const renderEditableCell = (row) => {
-    return (
-      <input
-        className={inputCls}
-        type="text"
-        value={row.data.contact}
-        onChange={(event) => {
-          row.updateData({
-            ...row.data,
-            contact: event.target.value,
-          })
-        }}
-      />
-    )
-  }
   useEffect((f) => {
     main()
   }, [])
@@ -217,73 +244,115 @@ const TreeTableApp = ({ config, store }) => {
 
   return (
     <div className={`menu-manager ${containerCls}`}>
+      {/* <TreeTableAppState lastRow={lastRow} /> */}
       <div className="explorer-toolbar pb-2">
         <div className="flex gap-2">
           <Button onClick={(e) => exportMenu(e)} caption="Export json" icon="fa fa-file-text" />
           {!showForm ? <Button onClick={(e) => addMenuForm()} icon="fa fa-plus" caption="Add" /> : null}
         </div>
       </div>
-      <div className="flex flex-col">
-        <div className={`-m-1.5 overflow-x-auto ${niceScrollbarCls}`}>
-          <div className="p-1.5 min-w-full inline-block align-middle">
-            {treeMenuData.hasData ? (
-              <TreeTable config={config} value={treeMenuData} height={vH} onChange={handleOnChange2}>
-                <TreeTable.Column
-                  basis="180px"
-                  grow="0"
-                  renderCell={(row) => {
-                    return (
-                      <div className={`${paddingCls[row.metadata.depth * 15]} ${row.metadata.hasChildren ? "with-children" : "without-children"}`}>
-                        {row.metadata.hasChildren ? (
-                          <button
-                            className="p-2"
-                            onClick={(e) => {
-                              console.log(row)
-                              row.toggleChildren()
-                            }}
-                          >
-                            <i className={`fa fa-${row.$state.isExpanded ? "minus" : "plus"}`} />
-                          </button>
-                        ) : (
-                          ""
-                        )}
 
-                        <span>{row.data.title}</span>
-                      </div>
-                    )
-                  }}
-                  renderHeaderCell={() => <span>Title</span>}
-                />
-                <TreeTable.Column
-                  basis="250px"
-                  grow="1"
-                  renderCell={(row) => {
-                    return <span className="path-cell font-mono">{row.data.path}</span>
-                  }}
-                  renderHeaderCell={() => <code>Path</code>}
-                />
-                <TreeTable.Column
-                  renderCell={(row) => {
-                    return (
-                      <span className="path-iconCls font-mono p-2">
-                        <i className={`${row.data.iconCls}`} />
-                      </span>
-                    )
-                  }}
-                  renderHeaderCell={() => <span>Icon</span>}
-                />
-                <TreeTable.Column
-                  renderCell={(row) => {
-                    return <span className="path-cell">{row.data.hidden}</span>
-                  }}
-                  renderHeaderCell={() => <span>Hidden</span>}
-                />
-              </TreeTable>
-            ) : (
-              "No menu data"
-            )}
+      <div className="flex flex-col relative min-h-screen">
+        {blockMainContent ? (
+          <>
+            <div className="absolute top-0 start-0 w-full h-full bg-white/[.5] rounded-lg dark:bg-gray-800/[.4]"></div>
+
+            <div className="absolute top-1/2 start-1/2 transform -translate-x-1/2 -translate-y-1/2">
+              <div
+                className="animate-spin inline-block w-6 h-6 border-[3px] border-current border-t-transparent text-blue-600 rounded-full dark:text-blue-500"
+                role="status"
+                aria-label="loading"
+              >
+                <span className="sr-only">Loading...</span>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className={`-m-1.5 overflow-x-auto ${niceScrollbarCls}`}>
+            <div className="p-1.5 min-w-full inline-block align-middle">
+              {treeMenuData.hasData ? (
+                <TreeTable config={config} value={treeMenuData} height={vH} onChange={handleOnChange2}>
+                  <TreeTable.Column
+                    basis="180px"
+                    grow="0"
+                    renderCell={(row) => {
+                      return (
+                        <div className={`${paddingCls[row.metadata.depth * 15]} ${row.metadata.hasChildren ? "with-children" : "without-children"}`}>
+                          {row.metadata.hasChildren ? (
+                            <button
+                              className={`p-2 ${row.data.slug}`}
+                              onClick={(e) => {
+                                console.log(row)
+                                setLastRow({ expanded: !row.$state.isExpanded, level: row.data.level, pk: row.data.id, slug: row.data.slug })
+                                row.toggleChildren()
+                              }}
+                            >
+                              <i className={`fa fa-${row.$state.isExpanded ? "minus" : "plus"}`} />
+                            </button>
+                          ) : (
+                            ""
+                          )}
+
+                          <span>{row.data.title}</span>
+                        </div>
+                      )
+                    }}
+                    renderHeaderCell={() => <span>Title</span>}
+                  />
+                  <TreeTable.Column
+                    basis="128px"
+                    grow="1"
+                    renderCell={(row) => {
+                      return <span className="path-cell font-mono">{row.data.path}</span>
+                    }}
+                    renderHeaderCell={() => <code>Path</code>}
+                  />
+                  <TreeTable.Column
+                    basis="80px"
+                    grow="0"
+                    renderCell={(row) => {
+                      return (
+                        <span className="path-iconCls font-mono p-2">
+                          <i className={`${row.data.iconCls}`} />
+                        </span>
+                      )
+                    }}
+                    renderHeaderCell={() => <span>Icon</span>}
+                  />
+                  <TreeTable.Column
+                    basis="80px"
+                    grow="0"
+                    renderCell={(row) => {
+                      return <span className="path-cell">{row.data.hidden ? "true" : "false"}</span>
+                    }}
+                    renderHeaderCell={() => <span>Hidden</span>}
+                  />
+                  <TreeTable.Column
+                    renderCell={(row) => {
+                      return (
+                        <div className="flex gap-2">
+                          <Button loading={false} icon="fa fa-chevron-up" title="Move Up" caption="" onClick={(e) => moveUp(row)} />
+                          <Button loading={false} icon="fa fa-chevron-down" title="Move Down" caption="" onClick={(e) => moveDown(row)} />
+
+                          {row.data.hasChild ? (
+                            <Button loading={false} icon="fa fa-plus" caption="" title="Add Child" onClick={(e) => addMenuForm(row)} />
+                          ) : null}
+                          <Button loading={false} icon="fa fa-edit" title="Edit" caption="" onClick={(e) => editMenuForm(row)} />
+                          {!row.metadata.hasChildren ? (
+                            <Button loading={false} icon="fa fa-trash" title="Delete?" caption="" onClick={(e) => deleteMenuForm(row)} />
+                          ) : null}
+                        </div>
+                      )
+                    }}
+                    renderHeaderCell={() => <span>Action</span>}
+                  />
+                </TreeTable>
+              ) : (
+                "No menu data"
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
       {/* 
       <div className="flex flex-col">

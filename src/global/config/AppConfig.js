@@ -107,6 +107,12 @@ class UiConfig extends LsConfig {
  	 * */
   windowSize = { width: 0, height: 0 }
   triggerResize = false
+  unsetResizeEvent(callback_key) {
+    const index = this.onResize_callback_keys.indexOf(callback_key)
+    if (index > -1) {
+      this.onResize_callback_keys.splice(index, 1)
+    }
+  }
   applyResizeEvent(callback, callback_key) {
     // console.log(this.onResize_callback_keys)
     if (typeof callback === "function") {

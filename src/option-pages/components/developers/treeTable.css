@@ -10,6 +10,9 @@
     border: 1px solid rgba(55, 53, 47, 0.2); */
     /* font-family: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; */
   }
+  .cp_tree-table_row{
+    @apply py-2 h-auto
+  }
   .cp_tree-table_viewport{
     @apply h-screen [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-slate-700 dark:[&::-webkit-scrollbar-thumb]:bg-slate-500;
   }

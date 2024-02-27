@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react"
 import { TreeTable, TreeState } from "cp-react-tree-table"
-import { niceScrollbarCls } from "../../../components/shared/ux/cls"
-import Button from "../../../components/shared/ux/Button"
+import { niceScrollbarCls } from "@/components/shared/ux/cls"
+import Button from "@/components/shared/ux/Button"
 import jQuery from "jquery"
-import Menu from "../../../global/models/Menu"
-import { getInputFileContent } from "../../../global/fn"
+import Menu from "@/global/models/Menu"
+import { getInputFileContent } from "@/global/fn"
 import MenuForm, { createUntitledMenu } from "./menu-manager/MenuForm"
-import Toast from "../../../components/shared/ux/Toast"
-import "../../../global/styles/treeTable.css"
+import Toast from "@/components/shared/ux/Toast"
+import "@/global/styles/treeTable.css"
 
 const mMenu = Menu.getInstance()
 

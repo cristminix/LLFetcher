@@ -1,33 +1,10 @@
-import {
-  cls10,
-  cls11,
-  cls12,
-  cls13,
-  cls14,
-  cls15,
-  cls16,
-  cls17,
-  cls18,
-  cls19,
-  cls20,
-  cls21,
-  cls22,
-  cls23,
-  cls24,
-  cls25,
-  cls26,
-  cls27,
-} from "../../../components/shared/ux/cls"
+import { cls13 } from "@/components/shared/ux/cls"
 
-import { useState, useEffect, Component } from "react"
-import { NavLink } from "react-router-dom"
-import side_menu from "../../side_menu.json"
-import AccordionMenu from "./side-menu/AccordionMenu"
+import { Component } from "react"
 import Menu from "./side-menu/Menu"
-// import { HSOverlay } from "preline";
 import jQuery from "jquery"
-import { waitForElm } from "../../../global/fn"
-import MenuDB from "../../../global/models/Menu"
+import { waitForElm } from "@/global/fn"
+import MenuDB from "@/global/models/Menu"
 
 const mMenu = MenuDB.getInstance()
 

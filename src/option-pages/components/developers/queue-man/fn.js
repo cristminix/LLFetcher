@@ -1,11 +1,11 @@
-import { courseUrlFromSlug, isTimeExpired } from "../../../../global/course-api/course_fn"
-import { formatLeadingZeros } from "../../../../global/fn"
+import { isTimeExpired } from "@/global/course-api/course_fn"
+import { formatLeadingZeros } from "@/global/fn"
 import { QueueResult } from "./Queue"
 import JsFileDownloader from "js-file-downloader"
 // import FileSaver from 'stream-writer'
-import { sendMessage } from "../../../../global/fn"
+import { sendMessage } from "@/global/fn"
 import streamSaver from "streamsaver"
-import UserData from "../../../../global/models/UserData"
+// import UserData from "@/global/models/UserData"
 const cdl_getOpeningIds = () => {
   var ids = []
   try {

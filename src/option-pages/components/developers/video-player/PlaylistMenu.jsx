@@ -1,4 +1,4 @@
-import { cls14, cls15, cls16, cls22, cls23, cls24, cls25, cls17, cls18, cls19, cls20, cls27 } from "../../../../components/shared/ux/cls"
+import { cls14, cls15, cls16, cls22, cls23, cls24, cls25, cls17, cls18, cls19, cls20, cls27 } from "@/components/shared/ux/cls"
 import { useLocation, NavLink } from "react-router-dom"
 
 const MenuItem = ({ hasChild, title, path, icon, name, childrens, index, onSelectMenu, parentPath = null }) => {

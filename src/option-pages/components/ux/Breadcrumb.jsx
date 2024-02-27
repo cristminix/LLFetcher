@@ -1,4 +1,4 @@
-import { cls0, cls1, cls2, cls3, cls4, cls5, cls6, cls7, cls8, cls9 } from "../../../components/shared/ux/cls"
+import { cls6, cls7, cls8, cls9 } from "@/components/shared/ux/cls"
 import { useLocation } from "react-router-dom"
 const BreadcrumbItem = ({ title, slug }) => {
   return (

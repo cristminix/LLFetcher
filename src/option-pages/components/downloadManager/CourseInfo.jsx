@@ -1,8 +1,8 @@
 import CourseAuthors from "./CourseAuthors"
-import { courseUrlFromSlug, authorUrlFromSlug, isTimeExpired } from "../../../global/course-api/course_fn"
+import { courseUrlFromSlug, authorUrlFromSlug, isTimeExpired } from "@/global/course-api/course_fn"
 import { getCode, getName } from "country-list"
 import { useEffect, useState } from "react"
-import CourseApi from "../../../global/course-api/CourseApi"
+import CourseApi from "@/global/course-api/CourseApi"
 
 const CourseInfo = ({ store, course, updateCourse, authors, selectedFmt, selectedTrans }) => {
   // console.log(course)

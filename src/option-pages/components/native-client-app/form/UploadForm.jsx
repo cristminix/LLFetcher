@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from "react"
 import { crc32 } from "crc"
-import { getFile64, isEmpty } from "../../../../global/fn"
+import { getFile64, isEmpty } from "@/global/fn"
 import jQuery from "jquery"
 
 import { apiUrl } from "../fn"
-import { btnCls, modalCls, modalBtnCloseCls, modalBtnFrmCloseCls, modalBtnFrmSaveCls } from "../../../../components/shared/ux/cls"
+import { btnCls, modalCls, modalBtnCloseCls, modalBtnFrmCloseCls, modalBtnFrmSaveCls } from "@/components/shared/ux/cls"
 import CryptoJS from "crypto-js"
 
-import { FormRow, FormRowImageValidation, FormRowValidation } from "../../../../components/shared/ux/Form"
-import { Prx } from "../../../../global/fn"
+import { FormRow, FormRowImageValidation, FormRowValidation } from "@/components/shared/ux/Form"
+import { Prx } from "@/global/fn"
 
 const createUntitledUpload = () => {
   const idx = crc32(new Date().getTime().toString()).toString(16)

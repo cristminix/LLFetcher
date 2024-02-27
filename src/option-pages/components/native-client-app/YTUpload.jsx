@@ -1,16 +1,16 @@
 // import schema from "../../side_menu.json"
 
 import { useEffect, useState, useRef } from "react"
-import Pager from "../../../components/shared/Pager"
-import Grid from "../../../components/shared/Grid"
-import Button from "../../../components/shared/ux/Button"
+import Pager from "@/components/shared/Pager"
+import Grid from "@/components/shared/Grid"
+import Button from "@/components/shared/ux/Button"
 import UploadForm, { createUntitledUpload } from "./form/UploadForm"
 import { apiUrl } from "./fn"
 
 import jQuery from "jquery"
-import { niceScrollbarCls } from "../../../components/shared/ux/cls"
-import Toast from "../../../components/shared/ux/Toast"
-import { Prx, requestIdentityToken } from "../../../global/fn"
+import { niceScrollbarCls } from "@/components/shared/ux/cls"
+import Toast from "@/components/shared/ux/Toast"
+import { Prx, requestIdentityToken } from "@/global/fn"
 const YTUpload = ({ store, config, pageNumber }) => {
   const toastRef = useRef(null)
   const [grid, setGrid] = useState({

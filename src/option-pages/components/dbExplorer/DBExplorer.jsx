@@ -4,9 +4,9 @@ import DBEditorInteger from "./db-editor/DBEditorInteger"
 import DBEditorObject from "./db-editor/DBEditorObject"
 import DBEditorString from "./db-editor/DBEditorString"
 
-import Pager from "../../../components/shared/Pager"
-import Grid from "../../../components/shared/Grid"
-import { makeDelay } from "../../../global/fn"
+import Pager from "@/components/shared/Pager"
+import Grid from "@/components/shared/Grid"
+import { makeDelay } from "@/global/fn"
 import config from "./config.json"
 
 // export async function loader({ params }) {

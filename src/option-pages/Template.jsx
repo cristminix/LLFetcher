@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import Sidebar from "./components/ux/Sidebar"
 import SidebarToggle from "./components/ux/SidebarToggle"
 import Content from "./components/ux/Content"
-import DialogContent from "../components/shared/ux/DialogContent"
+import DialogContent from "@/components/shared/ux/DialogContent"
 
 import { cls0 } from "../components/shared/ux/cls"
 const Template = ({ store, config }) => {

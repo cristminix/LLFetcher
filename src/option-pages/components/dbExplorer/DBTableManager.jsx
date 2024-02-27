@@ -1,11 +1,11 @@
 import schema from "./schema.json"
 
 import { useEffect, useState } from "react"
-import Pager from "../../../components/shared/Pager"
-import Grid from "../../../components/shared/Grid"
-import Button from "../../../components/shared/ux/Button"
-import { formatBytes } from "../../../global/fn"
-import { niceScrollbarCls } from "../../../components/shared/ux/cls"
+import Pager from "@/components/shared/Pager"
+import Grid from "@/components/shared/Grid"
+import Button from "@/components/shared/ux/Button"
+import { formatBytes } from "@/global/fn"
+import { niceScrollbarCls } from "@/components/shared/ux/cls"
 
 const DBTableManager = ({ store, config }) => {
   const [grid, setGrid] = useState({

@@ -1,8 +1,8 @@
 import { useEffect } from "react"
-import { cls14, cls15, cls16, cls22, cls23, cls24, cls25, cls17, cls18, cls19, cls20, cls27 } from "../../../../components/shared/ux/cls"
+import { cls14, cls22, cls24, cls25, cls17, cls18, cls19, cls20 } from "@/components/shared/ux/cls"
 import { useLocation, NavLink } from "react-router-dom"
 import jQuery from "jquery"
-import { makeDelay } from "../../../../global/fn"
+import { makeDelay } from "@/global/fn"
 const DEV_MODE = import.meta.env.DEV
 const delay = makeDelay(1000)
 const MenuItem = ({ hasChild, title, path, icon, name, childrens, index }) => {

@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react"
-import Button from "../../../components/shared/ux/Button"
-import DropdownSelect from "../../../components/shared/ux/DropdownSelect"
-import CourseApi from "../../../global/course-api/CourseApi"
-import CheckBox from "../../../components/shared/ux/CheckBox"
-import AdvancedSelect from "../../../components/shared/ux/AdvancedSelect"
+import Button from "@/components/shared/ux/Button"
+import DropdownSelect from "@/components/shared/ux/DropdownSelect"
+import CourseApi from "@/global/course-api/CourseApi"
+import CheckBox from "@/components/shared/ux/CheckBox"
+import AdvancedSelect from "@/components/shared/ux/AdvancedSelect"
 import { getCode, getName } from "country-list"
 
 const QueueSetup = ({

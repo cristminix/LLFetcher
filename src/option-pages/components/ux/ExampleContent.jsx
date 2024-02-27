@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react"
-import { cls16, cls28, cls29, cls30, cls31, cls32, cls33, cls34 } from "../../../components/shared/ux/cls"
-import { Outlet, useOutlet } from "react-router-dom"
+import { cls28 } from "@/components/shared/ux/cls"
+import { useOutlet } from "react-router-dom"
 import DownloadManager from "../DownloadManager"
 const ExampleContent = ({ store, config }) => {
   // const [outletEmpty, setOutletEmpty] = useState(true)

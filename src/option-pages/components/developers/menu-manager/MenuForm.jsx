@@ -1,11 +1,11 @@
 import { crc32 } from "crc"
 import { useState, useEffect, useRef } from "react"
-import { btnCls, modalCls, modalBtnCloseCls, modalBtnFrmCloseCls, modalBtnFrmSaveCls } from "../../../../components/shared/ux/cls"
-import { FormRowValidation, FormRow, FormRowCheckbox } from "../../../../components/shared/ux/Form"
+import { btnCls, modalCls, modalBtnCloseCls, modalBtnFrmCloseCls, modalBtnFrmSaveCls } from "@/components/shared/ux/cls"
+import { FormRowValidation, FormRow, FormRowCheckbox } from "@/components/shared/ux/Form"
 import jQuery from "jquery"
 import CryptoJS from "crypto-js"
 
-import { slugify } from "../../../../global/fn"
+import { slugify } from "@/global/fn"
 const createUntitledMenu = () => {
   const idx = crc32(new Date().getTime().toString()).toString(16)
   const title = `Untitled-${idx}`

@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { cls14, cls15, cls16, cls22, cls23, cls24, cls25, cls17, cls18, cls19, cls20, cls27 } from "../cls"
+import { cls14, cls15, cls16, cls22, cls23, cls24, cls25, cls17, cls18, cls19, cls20, cls27 } from "../../../../components/shared/ux/cls"
 import { useLocation, NavLink } from "react-router-dom"
 import jQuery from "jquery"
 import { makeDelay } from "../../../../global/fn"
@@ -144,7 +144,10 @@ const Menu = ({ data, store, config }) => {
         if ($activeAc.length > 0) {
           const $activeAcBtn = $activeAc.find("button")
           //   console.log($activeAcBtn)
-          $activeAcBtn.trigger("click")
+          const $parent = $activeAcBtn.parent()
+          if (!$parent.hasClass("active")) {
+            $activeAcBtn.trigger("click")
+          }
         }
       }
     })

@@ -8,7 +8,8 @@ import UploadTTForm, { createUntitledUpload } from "./form/UploadTTForm"
 import { apiUrl } from "./fn"
 
 import jQuery from "jquery"
-import { niceScrollbarCls } from "../ux/cls"
+import { niceScrollbarCls } from "../../../components/shared/ux/cls"
+
 import Toast from "../../../components/shared/ux/Toast"
 import { Prx, requestIdentityToken } from "../../../global/fn"
 import { useLocation } from "react-router-dom"

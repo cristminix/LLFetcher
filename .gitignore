@@ -24,3 +24,4 @@ dist-ssr
 *.sw?
 *.zip
 package-lock.json
+unused

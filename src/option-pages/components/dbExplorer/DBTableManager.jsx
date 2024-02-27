@@ -5,6 +5,7 @@ import Pager from "../../../components/shared/Pager"
 import Grid from "../../../components/shared/Grid"
 import Button from "../../../components/shared/ux/Button"
 import { formatBytes } from "../../../global/fn"
+import { niceScrollbarCls } from "../../../components/shared/ux/cls"
 
 const DBTableManager = ({ store, config }) => {
   const [grid, setGrid] = useState({
@@ -181,13 +182,13 @@ const DBTableManager = ({ store, config }) => {
         </div>
       </div>
       <div className="flex flex-col">
-        <div className="-m-1.5 overflow-x-auto">
+        <div className={"-m-1.5 overflow-x-auto " + niceScrollbarCls}>
           <div className="p-1.5 min-w-full inline-block align-middle">
             <div className="">{grid ? <Grid options={gridOptions} records={grid.records} page={grid.page} limit={grid.limit} /> : ""}</div>
-            <div className="pager-container mt-3">
-              {grid ? <Pager path="/database" page={grid.page} total_pages={grid.total_pages} limit={grid.limit} onRefresh={onRefresh} /> : ""}
-            </div>
           </div>
+        </div>
+        <div className="pager-container mt-3">
+          {grid ? <Pager path="/database" page={grid.page} total_pages={grid.total_pages} limit={grid.limit} onRefresh={onRefresh} /> : ""}
         </div>
       </div>
     </div>

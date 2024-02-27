@@ -236,6 +236,19 @@ class Menu extends JsStoreDB {
     }
     return menus
   }
+  async import(menus) {
+    for (const menu of menus) {
+      delete menu.id
+      console.log(menu)
+      const record = await this.insertOrUpdate(menu, "slug")
+      for (const child of menu.children) {
+        delete child.id
+        child.parent = record.id
+        const childRecord = await this.insertOrUpdate(child, "slug")
+        console.log(childRecord)
+      }
+    }
+  }
 }
 
 export default Menu

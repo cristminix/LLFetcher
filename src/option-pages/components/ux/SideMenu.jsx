@@ -1,4 +1,23 @@
-import { cls10, cls11, cls12, cls13, cls14, cls15, cls16, cls17, cls18, cls19, cls20, cls21, cls22, cls23, cls24, cls25, cls26, cls27 } from "./cls"
+import {
+  cls10,
+  cls11,
+  cls12,
+  cls13,
+  cls14,
+  cls15,
+  cls16,
+  cls17,
+  cls18,
+  cls19,
+  cls20,
+  cls21,
+  cls22,
+  cls23,
+  cls24,
+  cls25,
+  cls26,
+  cls27,
+} from "../../../components/shared/ux/cls"
 
 import { useState, useEffect, Component } from "react"
 import { NavLink } from "react-router-dom"

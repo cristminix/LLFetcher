@@ -6,7 +6,7 @@ import { formatBytes, timeout } from "../../../global/fn"
 import { checkQueueIsAllFinished, downloadMedia, downloadVtt, fetchQMeta, selectMediaUrl, selectVttUrl } from "./queue-man/fn"
 import Toast from "../../../components/shared/ux/Toast"
 import Button from "../../../components/shared/ux/Button"
-import { niceScrollbarCls } from "../ux/cls"
+import { niceScrollbarCls } from "../../../components/shared/ux/cls"
 import { courseUrlFromSlug } from "../../../global/course-api/course_fn"
 import DropdownMenu from "../../../components/shared/ux/DropdownMenu"
 const DEV_MODE = import.meta.env.DEV

@@ -8,7 +8,7 @@ import UploadForm, { createUntitledUpload } from "./form/UploadForm"
 import { apiUrl } from "./fn"
 
 import jQuery from "jquery"
-import { niceScrollbarCls } from "../ux/cls"
+import { niceScrollbarCls } from "../../../components/shared/ux/cls"
 import Toast from "../../../components/shared/ux/Toast"
 import { Prx, requestIdentityToken } from "../../../global/fn"
 const YTUpload = ({ store, config, pageNumber }) => {

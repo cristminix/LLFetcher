@@ -1,46 +1,75 @@
-import { useEffect, useRef, useState } from "react"
 import { crc32 } from "crc"
-import { getFile64, isEmpty } from "../../../../global/fn"
-import jQuery from "jquery"
-
-import { apiUrl } from "../fn"
+import { useState, useEffect, useRef } from "react"
 import { btnCls, modalCls, modalBtnCloseCls, modalBtnFrmCloseCls, modalBtnFrmSaveCls } from "../../../../components/shared/ux/cls"
+import { FormRowValidation, FormRow, FormRowCheckbox } from "../../../../components/shared/ux/Form"
+import jQuery from "jquery"
 import CryptoJS from "crypto-js"
 
-import { FormRow, FormRowImageValidation, FormRowValidation } from "../../../../components/shared/ux/Form"
-import { Prx } from "../../../../global/fn"
-
-const createUntitledUpload = () => {
+import { slugify } from "../../../../global/fn"
+const createUntitledMenu = () => {
   const idx = crc32(new Date().getTime().toString()).toString(16)
   const title = `Untitled-${idx}`
-  const description = `About ${title}`
+  const slug = slugify(title)
+  const path = `/${slug}`
+  const iconCls = "fa fa-cog"
+  const order = 0
+  const hasChild = false
 
-  return { title, description, thumbnail: "" }
+  const level = 0
+  const parent = -1
+  const hidden = true
+  const dev = true
+
+  const useModel = false
+  const model = ""
+  const modelListMethod = ""
+  const slugField = ""
+  const displayField = ""
+  const childRoutePath = ""
+  const childIconCls = ""
+
+  return {
+    title,
+    slug,
+    parent,
+    path,
+    iconCls,
+    hidden,
+    dev,
+    level,
+    order,
+    hasChild,
+    useModel,
+    model,
+    modelListMethod,
+    slugField,
+    displayField,
+    childRoutePath,
+    childIconCls,
+  }
 }
-
-const UploadTTForm = ({
-  uploadId,
-  requestToken,
-  getRequestToken,
-  setRequestToken,
-  data = null,
-  className,
-  hideForm,
-  updateList,
-  formId,
-  modalBtnId,
-  modalCloseBtnId,
-  goToLastPage,
-  toast,
-}) => {
+const MenuForm = ({ data = null, className, hideForm, updateList, formId, modalBtnId, modalCloseBtnId, toast, mMenu }) => {
   const [pk, setPk] = useState("")
   const [title, setTitle] = useState("")
-  const [description, setDescription] = useState("")
+  const [slug, setSlug] = useState("")
+  const [path, setPath] = useState("")
+  const [iconCls, setIconCls] = useState("")
+  const [order, setOrder] = useState(0)
+  const [hasChild, setHasChild] = useState(false)
 
-  const [thumbnail, setThumbnail] = useState("")
-  const [thumbnailValid, setThumbnailValid] = useState(false)
-  const [thumbnailUrl, setThumbnailUrl] = useState("")
-  const thumbnailRef = useRef(null)
+  const [level, setLevel] = useState(0)
+  const [parent, setParent] = useState(-1)
+  const [hidden, setHidden] = useState(false)
+  const [dev, setDev] = useState(false)
+
+  const [useModel, setUseModel] = useState(false)
+  const [model, setModel] = useState("")
+  const [modelListMethod, setModelListMethod] = useState("")
+  const [slugField, setSlugField] = useState("")
+  const [displayField, setDisplayField] = useState("")
+  const [childRoutePath, setChildRoutePath] = useState("")
+  const [childIconCls, setChildIconCls] = useState("")
+
   const formRef = useRef(null)
   const onTabExecutedRef = useRef(false)
   let onTabNextIndexRef = useRef(0)
@@ -51,10 +80,10 @@ const UploadTTForm = ({
   const calculateFormChecksum = (data = null) => {
     let formDataItem = null
     if (data) {
-      const { id, title, description, thumbnail } = data
-      formDataItem = { uploadId, id, title, description, thumbnail }
+      const { id, title, slug, parent, path, iconCls, hidden, dev, level, order, hasChild, useModel } = data
+      formDataItem = { id, title, slug, parent, path, iconCls, hidden, dev, level, order, hasChild, useModel }
     } else {
-      formDataItem = { uploadId, id: pk, title, description, thumbnail }
+      formDataItem = { id: pk, title, slug, parent, path, iconCls, hidden, dev, level, order, hasChild, useModel }
     }
     if (!formDataItem.id) {
       formDataItem.id = null
@@ -78,7 +107,6 @@ const UploadTTForm = ({
     return currentFormChecksum !== formChecksum
   }
   const hideModalForm = (e) => {
-    thumbnailRef.current.value = ""
     const modalIdSelector = `#${formId}`
     HSOverlay.close(modalIdSelector)
     hideForm()
@@ -99,114 +127,69 @@ const UploadTTForm = ({
       return e.preventDefault()
     }
   }
+  const formValidation = (data) => {}
   const saveForm = async (f) => {
     let pk = null
     if (data.id) {
       pk = data.id
     }
-    const formDataItem = { uploadId, id: pk, title, description }
-    const formData = new FormData()
-    const [file] = thumbnailRef.current.files
-    if (file) {
-      formData.append("thumbnail", file)
-    }
-    Object.keys(formDataItem).map((key) => {
-      formData.append(key, formDataItem[key])
-    })
-    const url = apiUrl(["yt-upload-tt", pk ? `update/${pk}` : "create"])
-    const method = pk ? "put" : "post"
-    try {
-      const { data, validJson, code, text } = await Prx[method](url, requestToken, formData)
-      if (validJson) {
-        let hasErrors = false
-        if (data.errors) {
-          if (data.errors.length > 0) {
-            hasErrors = 1
-          }
+    const row = { title, slug, parent, path, iconCls, hidden, dev, level, order, hasChild, useModel }
+    let validationFailed = false
+    if (validationFailed) {
+      const errors = []
+      let newValidationErrors = {}
+      let firstField = null
+      errors.map((item) => {
+        if (!firstField) {
+          firstField = item.path
         }
-        if (hasErrors) {
-          const { errors } = data
-          let newValidationErrors = {}
-          let firstField = null
-          errors.map((item) => {
-            if (!firstField) {
-              firstField = item.path
-            }
-            newValidationErrors[item.path] = { message: item.msg }
-          })
-          setValidationErrors(newValidationErrors)
-          toast("Error processing form", "error")
-
-          // focus first field
-          jQuery(`#${formId}`).find(`.${firstField}:first`).trigger("focus")
-        } else {
-          // console.log(data)
-          hideModalForm()
-          updateFormChecksum(data)
-          setValidationErrors({})
-          if (!pk) {
-            toast("Record created", "success")
-            goToLastPage()
-          } else {
-            toast("Record updated", "success")
-            updateList()
-          }
-        }
-      } else {
-        toast(`Failed to create record server sent http ${code} ${text}`, "error")
-      }
-    } catch (e) {
-      toast(e.toString(), "error")
-    }
-  }
-  const setThumbnailFile = async (target) => {
-    const file64 = await getFile64(target.files[0])
-    const [file] = target.files
-    setThumbnail(file.name)
-    const fileType = file.type.split("/")[0]
-    if (fileType === "image") {
-      setThumbnailValid(true)
-      setThumbnailUrl(file64)
-      const newValidationErrors = { ...validationErrors }
-      delete newValidationErrors.thumbnail
+        newValidationErrors[item.path] = { message: item.msg }
+      })
       setValidationErrors(newValidationErrors)
+      toast("Error processing form", "error")
+
+      // focus first field
+      jQuery(`#${formId}`).find(`.${firstField}:first`).trigger("focus")
     } else {
-      alert("Only image file is allowed")
-      thumbnailRef.current.value = ""
+      let data = pk ? await mMenu.update(pk, row) : await mMenu.insert(row)
+      hideModalForm()
+      updateFormChecksum(data)
+      setValidationErrors({})
+
+      toast(`Record ${pk ? "Updated" : "Created"}`, "success")
+      await mMenu.fixOrder(data.parent)
+      updateList()
     }
   }
   const getRemoteRowData = async () => {
+    return
+    /*
     const pk = data.id
-    const url = apiUrl(["yt-upload-tt", pk])
-
-    try {
-      const { data, validJson, code, text } = await Prx.get(url, requestToken)
-      if (validJson) {
-        const { thumbnail } = data.row
-        const thumbnailUrl = apiUrl(["yt-upload-tts/thumbnails", thumbnail])
-        setThumbnailUrl(thumbnailUrl)
-        setFormChecksum(calculateFormChecksum(data.row))
-      } else {
-        toast(`Failed to get record id:${pk} server sent http ${code} ${text}`, "error")
-      }
-    } catch (e) {
-      toast(e.toString(), "error")
+    const row = await mMenu.get(pk)
+    console.log(row)
+    if (row) {
+      setFormChecksum(calculateFormChecksum(row))
+    } else {
+      toast("No recordfound", "error")
     }
+    */
   }
   const initFormData = (data) => {
+    // console.log(data)
     if (data) {
-      const { id, title, description, thumbnail } = data
+      const { id, title, slug, parent, path, iconCls, hidden, dev, level, order, hasChild, useModel } = data
       setPk(id)
       setTitle(title)
-      setDescription(description)
-
-      setThumbnail(thumbnail)
-      if (isEmpty(thumbnail)) {
-        setThumbnailValid(false)
-      } else {
-        setThumbnailUrl(apiUrl(["yt-upload-tts/thumbnails", thumbnail]))
-        setThumbnailValid(true)
-      }
+      setPath(path)
+      setSlug(slug)
+      setParent(parent)
+      setIconCls(iconCls)
+      setHidden(hidden)
+      setDev(dev)
+      setLevel(level)
+      setOrder(order)
+      setHasChild(hasChild)
+      setUseModel(useModel)
       setTimeout(() => {
         const initialFormChecksum = calculateFormChecksum(data)
         // console.log(initialFormChecksum)
@@ -283,7 +266,7 @@ const UploadTTForm = ({
       <button id={`${modalBtnId}`} type="button" className={btnCls} data-hs-overlay={`#${formId}`}>
         Open modal
       </button>
-      <div id={formId} className={`${modalCls} text-xs`}>
+      <div id={formId} className={modalCls}>
         <div className="hs-overlay-open:opacity-100 hs-overlay-open:duration-500 opacity-0 transition-all sm:max-w-lg sm:w-full m-3 sm:mx-auto ]">
           <div className="flex w-[700px] flex-col bg-white border shadow-sm rounded-xl pointer-events-auto dark:bg-gray-800 dark:border-gray-700 dark:shadow-slate-700/[.7]">
             <div className="flex justify-between items-center py-3 px-4 border-b dark:border-gray-700">
@@ -321,24 +304,54 @@ const UploadTTForm = ({
                 />
                 <FormRowValidation
                   validationErrors={validationErrors}
-                  useTextArea={true}
-                  label="Description"
-                  value={description}
-                  fieldname="description"
+                  label="Slug"
+                  value={slug}
+                  fieldname="slug"
                   onChange={(e) => {
-                    setDescription(e.target.value)
+                    setSlug(e.target.value)
                   }}
                 />
-
-                <FormRowImageValidation
+                <FormRowValidation
                   validationErrors={validationErrors}
-                  label="Thumbnail"
-                  onChange={(e) => setThumbnailFile(e.target)}
-                  fieldname="thumbnail"
-                  inputRef={thumbnailRef}
-                  imageUrl={thumbnailUrl}
-                  validImage={thumbnailValid}
+                  label="Path"
+                  value={path}
+                  fieldname="path"
+                  onChange={(e) => {
+                    setPath(e.target.value)
+                  }}
                 />
+                <FormRowValidation
+                  validationErrors={validationErrors}
+                  label="Icon Cls"
+                  value={iconCls}
+                  fieldname="iconCls"
+                  onChange={(e) => {
+                    setIconCls(e.target.value)
+                  }}
+                />
+                <FormRowValidation
+                  validationErrors={validationErrors}
+                  label="Parent"
+                  value={parent}
+                  fieldname="parent"
+                  readonly={true}
+                  onChange={(e) => {
+                    // setParent(e.target.value)
+                  }}
+                />
+                <FormRowValidation
+                  validationErrors={validationErrors}
+                  label="Order"
+                  value={order}
+                  fieldname="order"
+                  onChange={(e) => {
+                    setOrder(e.target.value)
+                  }}
+                />
+                <FormRowCheckbox value={hidden} onChange={setHidden} label="Hidden" />
+                <FormRowCheckbox value={dev} onChange={setDev} label="Dev" />
+                <FormRowCheckbox value={hasChild} onChange={setHasChild} label="Has Child" />
+                <FormRowCheckbox value={useModel} onChange={setUseModel} label="Use Model" />
               </form>
             </div>
             <div className="flex justify-end items-center gap-x-2 py-3 px-4 border-t dark:border-gray-700">
@@ -356,5 +369,5 @@ const UploadTTForm = ({
   )
 }
 
-export { createUntitledUpload }
-export default UploadTTForm
+export default MenuForm
+export { createUntitledMenu }

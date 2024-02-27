@@ -67,7 +67,15 @@ class JsStoreDB {
     })
     return results.length > 0 ? results[0] : null
   }
-  async delete(pk) {}
+  async delete(pk) {
+    const rowsDeleted = await this.connection.remove({
+      from: this.table,
+      where: {
+        [this.pk]: pk,
+      },
+    })
+    return rowsDeleted
+  }
   async insert(row) {
     const insertedRow = await this.connection.insert({
       into: this.table,

@@ -1,28 +1,34 @@
 import React, { useEffect, useState } from "react"
-import {
-    cls16,
-    cls28,cls29,cls30,cls31,cls32,cls33,cls34
-} from "./cls"
-import { Outlet, useOutlet } from 'react-router-dom';
-import DownloadManager from "../DownloadManager";
-const ExampleContent = ({store, config}) => {
-    // const [outletEmpty, setOutletEmpty] = useState(true)
-    const [hideSidebar,setHideSidebar] = useState(false)
-	useEffect(()=>{
-    	config.getUiConfig().applyHiddenSidebarStatus(setHideSidebar,(status)=>{
-	      console.log(status)
-	      setHideSidebar(status)
-	    },'example-content')
-  	},[])
-    const outlet = useOutlet()
-    useEffect(() => {
- 
-    }, [/*props.children*/])
-    const mainContentCls = !hideSidebar ? `${cls28} pb-2`: `${cls28} lg:ps-8`
-    return (<><div className={`${mainContentCls}`}> 
-        {/*<!-- Page Heading -->*/} 
+import { cls16, cls28, cls29, cls30, cls31, cls32, cls33, cls34 } from "../../../components/shared/ux/cls"
+import { Outlet, useOutlet } from "react-router-dom"
+import DownloadManager from "../DownloadManager"
+const ExampleContent = ({ store, config }) => {
+  // const [outletEmpty, setOutletEmpty] = useState(true)
+  const [hideSidebar, setHideSidebar] = useState(false)
+  useEffect(() => {
+    config.getUiConfig().applyHiddenSidebarStatus(
+      setHideSidebar,
+      (status) => {
+        console.log(status)
+        setHideSidebar(status)
+      },
+      "example-content"
+    )
+  }, [])
+  const outlet = useOutlet()
+  useEffect(
+    () => {},
+    [
+      /*props.children*/
+    ]
+  )
+  const mainContentCls = !hideSidebar ? `${cls28} pb-2` : `${cls28} lg:ps-8`
+  return (
+    <>
+      <div className={`${mainContentCls}`}>
+        {/*<!-- Page Heading -->*/}
 
-        {outlet||<DownloadManager store={store} config={config}/>}
+        {outlet || <DownloadManager store={store} config={config} />}
         {/*
         <header> 
           <p className={cls29}> Starter Pages &amp; Examples </p> 
@@ -42,9 +48,10 @@ const ExampleContent = ({store, config}) => {
           </div> 
         </header> 
         */}
-        {/*<!-- End Page Heading -->*/} 
-      </div></>)
+        {/*<!-- End Page Heading -->*/}
+      </div>
+    </>
+  )
 }
 
 export default ExampleContent
-    

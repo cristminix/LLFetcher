@@ -1,56 +1,15 @@
-import { v4 } from "uuid"
+import LsConfig from "./LsConfig"
 import jQuery from "jquery"
 import { makeDelay } from "../fn"
+
 const delayFn = makeDelay(256)
-/**
- * localStorage
- * key value serialized Config
- * */
-class LsConfig {
-  config_key = null
-  data = null
 
-  constructor(config_key) {
-    this.config_key = config_key
-    this.init()
-  }
-
-  init() {
-    if (!this.config_key) {
-      config_key = `ls_config_${v4()}`
-    }
-    this.getData()
-  }
-
-  /**
-   * set unique config key for localStorage key
-   * */
-  setConfigKey(key) {
-    this.config_key = key
-  }
-  /**
-   * get data by key
-   * */
-  getData(key) {
-    try {
-      this.data = JSON.parse(localStorage[this.config_key])
-    } catch (e) {
-      if (!this.data) {
-        this.data = {}
-      }
-    }
-    if (!key) return this.data
-
-    if (!this.data[key]) return null
-
-    return this.data[key]
-  }
-  /**
-   * set data by key
-   * */
-  setData(key, value) {
-    this.data[key] = value
-    localStorage[this.config_key] = JSON.stringify(this.data)
+class VersionConfig extends LsConfig {
+  constructor() {
+    const config_key = "llfetcher_version_config"
+    super(config_key)
+    this.setData("version", 3.0)
+    this.setData("firstInstall", true)
   }
 }
 /**
@@ -63,7 +22,7 @@ class UiConfig extends LsConfig {
   reloadSidebar_callback_keys = []
   onResize_callback_keys = []
   constructor() {
-    const config_key = "uiTtsConfig"
+    const config_key = "llfetcher_ui_config"
     super(config_key)
     this.setData("defaultTheme", this.defaultTheme)
   }
@@ -197,6 +156,7 @@ class AppConfig {
   appId = "llfetcher-chrome-ext-30"
 
   uiConfig = null
+  versionConfig = null
 
   static instance = null
   /**
@@ -219,6 +179,7 @@ class AppConfig {
    * */
   constructor() {
     this.uiConfig = new UiConfig()
+    this.versionConfig = new VersionConfig()
   }
   getAppId() {
     return this.appId

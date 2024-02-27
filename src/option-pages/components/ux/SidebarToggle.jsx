@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import Breadcrumb from "./Breadcrumb"
-import { cls0, cls1, cls2, cls3, cls4, cls5, cls6, cls7, cls8, cls9 } from "./cls"
+import { cls0, cls1, cls2, cls3, cls4, cls5, cls6, cls7, cls8, cls9 } from "../../../components/shared/ux/cls"
 const SidebarToggle = ({ store, config }) => {
   const [hideSidebar, setHideSidebar] = useState(true)
   useEffect(() => {

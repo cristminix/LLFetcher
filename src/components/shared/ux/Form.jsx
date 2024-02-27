@@ -1,14 +1,15 @@
-import Button from "../../../../components/shared/ux/Button"
-import { ValidationErrIcon } from "../../../../components/shared/ux/ValidationIcon"
-import { inputCls, niceScrollbarCls, inputClsError } from "../../ux/cls"
-const FormRow = ({ label, onChange = (f) => f, value }) => {
+import Button from "./Button"
+import CheckBox from "./CheckBox"
+import { ValidationErrIcon } from "./ValidationIcon"
+import { inputCls, niceScrollbarCls, inputClsError } from "./cls"
+const FormRow = ({ label, onChange = (f) => f, value, readonly = false }) => {
   return (
     <div className="flex  items-center p-2 px-2">
       <div className="w-[70px]">
         <label className="font-bold">{label}</label>
       </div>
       <div className="flex-grow">
-        <input className={inputCls} value={value} onChange={onChange} />
+        <input className={inputCls} value={value} onChange={onChange} readOnly={readonly} />
       </div>
     </div>
   )
@@ -83,4 +84,16 @@ const FormRowImageValidation = ({ label, onChange, validationErrors, fieldname, 
   )
 }
 
-export { FormRow, FormRowValidation, FormRowImageValidation }
+const FormRowCheckbox = ({ label, onChange = (f) => f, value }) => {
+  return (
+    <div className="flex items-center p-2 px-2">
+      <div>
+        <CheckBox tabIndex={8} label="" checked={value} onChange={(checked) => onChange(checked)} />
+      </div>
+      <div className="w-[140px]">
+        <label className="font-bold">{label}</label>
+      </div>
+    </div>
+  )
+}
+export { FormRowCheckbox, FormRow, FormRowValidation, FormRowImageValidation }

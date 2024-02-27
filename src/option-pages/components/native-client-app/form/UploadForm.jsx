@@ -4,10 +4,10 @@ import { getFile64, isEmpty } from "../../../../global/fn"
 import jQuery from "jquery"
 
 import { apiUrl } from "../fn"
-import { btnCls, modalCls, modalBtnCloseCls, modalBtnFrmCloseCls, modalBtnFrmSaveCls } from "../../ux/cls"
+import { btnCls, modalCls, modalBtnCloseCls, modalBtnFrmCloseCls, modalBtnFrmSaveCls } from "../../../../components/shared/ux/cls"
 import CryptoJS from "crypto-js"
 
-import { FormRow, FormRowImageValidation, FormRowValidation } from "./Form"
+import { FormRow, FormRowImageValidation, FormRowValidation } from "../../../../components/shared/ux/Form"
 import { Prx } from "../../../../global/fn"
 
 const createUntitledUpload = () => {
@@ -290,7 +290,7 @@ const UploadForm = ({
       <button id={`${modalBtnId}`} type="button" className={btnCls} data-hs-overlay={`#${formId}`}>
         Open modal
       </button>
-      <div id={formId} className={modalCls}>
+      <div id={formId} className={`${modalCls} text-xs`}>
         <div className="hs-overlay-open:opacity-100 hs-overlay-open:duration-500 opacity-0 transition-all sm:max-w-lg sm:w-full m-3 sm:mx-auto ]">
           <div className="flex w-[700px] flex-col bg-white border shadow-sm rounded-xl pointer-events-auto dark:bg-gray-800 dark:border-gray-700 dark:shadow-slate-700/[.7]">
             <div className="flex justify-between items-center py-3 px-4 border-b dark:border-gray-700">

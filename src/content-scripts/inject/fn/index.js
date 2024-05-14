@@ -1,0 +1,7 @@
+export { createReactRootElement } from "./createReactRootElement"
+export { attachRouteChangesEvent } from "./attachRouteChangesEvent"
+export { getCourseSlugByPath } from "./getCourseSlugByPath"
+export { pauseVideo } from "./pauseVideo"
+export { detectVideoJs } from "./detectVideoJs"
+export { isCoursePage } from "./isCoursePage"
+export { waitForElm } from "./waitForElm"

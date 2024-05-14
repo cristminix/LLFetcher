@@ -1,8 +1,15 @@
 // background.js
-import { getTableSize, getTableCount } from "../global/models/service-workers/ChromeStorageIndexedDBWorker"
+import {
+  getTableSize,
+  getTableCount,
+} from "@/global/class/models/service-workers/ChromeStorageIndexedDBWorker"
 
-import { connect, sendNativeMessage, sendNativeMessageAsync } from "./native-messaging"
-import AppInstaller from "../global/installer/AppInstaller.js"
+import {
+  connect,
+  sendNativeMessage,
+  sendNativeMessageAsync,
+} from "./native-messaging"
+import AppInstaller from "@/global/class/installer/AppInstaller"
 import {
   idb_connect,
   idb_get,
@@ -11,7 +18,7 @@ import {
   idb_delete,
   // idb_close,
   idb_create_store,
-} from "../global/models/fn.js"
+} from "@/global/class/models/fn"
 
 const installer = new AppInstaller()
 installer.isFreshIstall().then((freshInstall) => {
@@ -27,13 +34,16 @@ const update_csidb = async (record) => await idb_update("csidb", record, conn)
 
 // const delete_csidb = async (dbName, clear = false) => await idb_delete("csidb", dbName, clear, conn)
 
-const insert_prxCache = async (records) => await idb_insert("prxCache", records, conn)
+const insert_prxCache = async (records) =>
+  await idb_insert("prxCache", records, conn)
 
 const get_prxCache = async (key) => await idb_get("prxCache", key, conn)
 
-const update_prxCache = async (record) => await idb_update("prxCache", record, conn)
+const update_prxCache = async (record) =>
+  await idb_update("prxCache", record, conn)
 
-const delete_prxCache = async (key, clear = false) => await idb_delete("prxCache", key, clear, conn)
+const delete_prxCache = async (key, clear = false) =>
+  await idb_delete("prxCache", key, clear, conn)
 
 const create_idb_store = async () => {
   conn = await idb_create_store([
@@ -128,13 +138,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
   } else if (request.action === "activateTab") {
     const { url, optionPageBaseUrl } = request
-    chrome.tabs.query({ url: `${chrome.runtime.getURL(`${optionPageBaseUrl}options.html`)}*` }, function (tabs) {
-      var activeTab = tabs[0]
-      // Activate the tab
-      chrome.tabs.update(activeTab.id, { active: true })
-      // Change the URL
-      chrome.tabs.update(activeTab.id, { url })
-    })
+    chrome.tabs.query(
+      { url: `${chrome.runtime.getURL(`${optionPageBaseUrl}options.html`)}*` },
+      function (tabs) {
+        var activeTab = tabs[0]
+        // Activate the tab
+        chrome.tabs.update(activeTab.id, { active: true })
+        // Change the URL
+        chrome.tabs.update(activeTab.id, { url })
+      }
+    )
   }
   return true
 })

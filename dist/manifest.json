@@ -14,15 +14,8 @@
   ],
   "host_permissions": [
     "https://www.linkedin.com/learning/*",
-    "https://www.youtube.com/*",
     "http://localhost:5000/*",
-    "http://127.0.0.1:5000/*",
-    "http://localhost:7700/*",
-    "http://127.0.0.1:7700/*",
-    "http://localhost:7000/*",
-    "http://127.0.0.1:7000/*",
-    "http://127.0.0.1:7001/*",
-    "http://localhost:7001/*"
+    "http://127.0.0.1:5000/*"
   ],
   "background": {
     "service_worker": "service-worker-loader.js",
@@ -31,15 +24,17 @@
   "content_scripts": [
     {
       "js": [
-        "assets/content.js-loader-X1SZcxv1.js"
+        "src/content-scripts/main.js-loader.js"
       ],
       "matches": [
-        "https://www.linkedin.com/learning/*"
+        "https://www.linkedin.com/learning/*",
+        "http://localhost:5000/*",
+        "http://127.0.0.1:5000/*"
       ]
     }
   ],
   "options_ui": {
-    "page": "src/option-pages/options.html",
+    "page": "src/option/index.html",
     "open_in_tab": true
   },
   "icons": {
@@ -51,7 +46,7 @@
     "128": "logo/icon-128.png"
   },
   "action": {
-    "default_popup": "index.html",
+    "default_popup": "src/popup/index.html",
     "default_icon": {
       "16": "logo/icon-16.png",
       "19": "logo/icon-19.png",
@@ -63,14 +58,22 @@
   },
   "web_accessible_resources": [
     {
+      "resources": [
+        "src/content-scripts/inject/dist/content-inject.js",
+        "src/content-scripts/inject/dist/content-inject.css"
+      ],
       "matches": [
         "https://www.linkedin.com/*"
       ],
+      "use_dynamic_url": true
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
       "resources": [
-        "src/content-pages/dist/content-inject.js",
-        "src/content-pages/dist/content-inject.css",
-        "assets/index-1JXFPcb5.js",
-        "assets/content.js-OnMJFtla.js"
+        "**/*",
+        "*"
       ],
       "use_dynamic_url": true
     }

@@ -10,6 +10,7 @@ import AuthenticatedRouter from "./AuthenticatedRouter.js"
 class YtUploadTTRouter extends AuthenticatedRouter {
   datasource = null
   mYtUploadTT = null
+  mYtUpload = null
   router = null
   appConfig = null
   uploader = null
@@ -22,7 +23,9 @@ class YtUploadTTRouter extends AuthenticatedRouter {
     this.logger = logger
     this.datasource = datasource
     this.mYtUploadTT = this.datasource.factory("MYtUploadTT", true)
+    this.mYtUpload = this.datasource.factory("MYtUpload", true)
     this.thumbnailDir = appConfig.get("module.thumbnailTTDir")
+    this.thumbnailUploadDir = appConfig.get("module.thumbnailDir")
     this.uploader = multer({ dest: `${this.thumbnailDir}` })
 
     this.router = express.Router()
@@ -55,6 +58,8 @@ class YtUploadTTRouter extends AuthenticatedRouter {
   }
 
   async create(req, res) {
+    let success = false
+
     // Route logic for handling POST '/yt-upload-tt/create'
     const validationErrors = validationResult(req)
     const [file] = req.files
@@ -87,12 +92,72 @@ class YtUploadTTRouter extends AuthenticatedRouter {
     try {
       record = await this.mYtUploadTT.create(uploadId, title, description, thumbnail)
 
-      res.send({ data: record })
+      res.send({ success, data: record })
     } catch (e) {
-      res.send({ data: e.toString() })
+      res.send({ success, data: e.toString() })
     }
   }
+  async clone(req, res) {
+    // Route logic for handling POST '/yt-upload-tt/clone'
+    let success = false
+    const errorValidations = validationResult(req)
+    if (errorValidations.length > 0) {
+      // in every situation, only this part of code is going to be executed
+      return res.status(422).json({ errors })
+    }
+    // this.logger.info(req.files)
+    let existingRec = null
 
+    let { kind, pk } = req.body
+    let thumbnailPath = null
+    if (kind === "upload") {
+      existingRec = await this.mYtUpload.getByPk(pk)
+    } else {
+      existingRec = await this.mYtUploadTT.getByPk(pk)
+    }
+    const hash = new Date().getTime()
+    if (existingRec) {
+      if (kind === "upload") {
+        thumbnailPath = path.resolve(`${this.thumbnailUploadDir}/${existingRec.thumbnail}`)
+      } else {
+        thumbnailPath = path.resolve(`${this.thumbnailDir}/${existingRec.thumbnail}`)
+      }
+      let { title, uploadId, description, thumbnail } = existingRec
+      title = `${title} (#${hash})`
+      if (kind === "upload") {
+        uploadId = existingRec.id
+      }
+      const newRecord = { title, uploadId, description, thumbnail }
+      const newThumbnail = `${hash}-${thumbnail}`
+      const newThumbnailPath = `${this.thumbnailDir}/${newThumbnail}`
+      newRecord.thumbnail = newThumbnail
+
+      const thumbnailExists = await fs.existsSync(thumbnailPath)
+      if (thumbnailExists) {
+        try {
+          await fs.copyFileSync(thumbnailPath, newThumbnailPath)
+          this.logger.info(`yt-upload-tt.clone :  Copied thumbnail from ${thumbnailPath} to ${newThumbnailPath}`)
+        } catch (e) {
+          this.logger.info(`yt-upload-tt.clone :  Error copying thumbnail from ${thumbnailPath} to ${newThumbnailPath}`)
+        }
+      } else {
+        this.logger.info(`yt-upload-tt.clone : Thumbnail ${thumbnailPath} does not exist`)
+      }
+
+      let record = null
+
+      try {
+        record = await this.mYtUploadTT.create(uploadId, title, description, newThumbnail)
+        if (record) {
+          success = true
+        }
+        res.send({ success, data: record })
+      } catch (e) {
+        res.send({ success, errors: [{ type: "Esception", message: e.toString() }] })
+      }
+    }
+    return res.send({ success, errors: [{ type: "unknown", message: "unknown error" }] })
+  }
   async update(req, res) {
     // Route logic for handling POST '/yt-upload-tt/update'
     const validationErrors = validationResult(req)
@@ -223,6 +288,16 @@ class YtUploadTTRouter extends AuthenticatedRouter {
       check("title", "title field is required").not().isEmpty(),
       check("description", "description field is required").not().isEmpty(),
       async (req, res) => await this.create(req, res)
+    )
+    this.router.post(
+      "/yt-upload-tt/clone",
+      async (req, res, next) => {
+        this.authenticateToken(req, res, next)
+      },
+      this.uploader.array("thumbnail"),
+      check("kind", "kind field is required").not().isEmpty(),
+      check("pk", "pk field is required").not().isEmpty(),
+      async (req, res) => await this.clone(req, res)
     )
     this.router.put(
       "/yt-upload-tt/update/:id?",

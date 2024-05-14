@@ -151,8 +151,8 @@ class YtUploadRouter extends AuthenticatedRouter {
           }
         })
       }
-      const { title, description, tags, video } = req.body
-      let updatedData = { title, description, tags, video }
+      const { title, description, category,tags, video } = req.body
+      let updatedData = { title, description, category, tags, video }
       if (fileUpdated) {
         updatedData.thumbnail = thumbnail
       }

@@ -29,7 +29,7 @@ export default defineConfig({
   ],
   rollupOptions: {
     input: {
-      // popup: resolve(__dirname, 'src/popup/popup.html'),
+      // popup: resolve(__dirname, "./popup.html"),
       // main: resolve(__dirname, 'popup.html'),
       // nested: resolve(__dirname, 'nested/index.html'),
     },

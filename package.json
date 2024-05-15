@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "bsi": "npm run build-script-inject && npm run cp:bsi",
     "cp:bsi": "cpy src/content-scripts/inject/dist dist",
-    "patch:build": "node src/patch-scripts/patch-build.js"
+    "patch:build": "node src/patch-scripts/patch-build.js",
+    "patch:dev":"nodemon --watch src/patch-scripts src/patch-scripts/patch-build.js"
   },
   "dependencies": {
     "@editorjs/editorjs": "^2.29.0",

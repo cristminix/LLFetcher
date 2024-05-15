@@ -9,7 +9,9 @@
     "build": "npm run build-script-inject && vite build &&  cpy preline.js dist/",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "bsi" : "npm run build-script-inject"
+    "bsi": "npm run build-script-inject && npm run cp:bsi",
+    "cp:bsi": "cpy src/content-scripts/inject/dist dist",
+    "patch:build": "node src/patch-scripts/patch-build.js"
   },
   "dependencies": {
     "@editorjs/editorjs": "^2.29.0",
@@ -44,6 +46,7 @@
     "react-router-dom": "^6.13.0",
     "react18-json-view": "^0.2.6",
     "rollup-plugin-node-polyfills": "^0.2.1",
+    "rollup-plugin-visualizer": "^5.12.0",
     "streamsaver": "^2.0.6",
     "underscore": "^1.13.6",
     "uuid": "^9.0.1",
@@ -57,11 +60,13 @@
     "@types/react-dom": "^18.2.15",
     "@vitejs/plugin-react": "^4.2.0",
     "autoprefixer": "^10.4.16",
+    "cheerio": "^1.0.0-rc.12",
     "cpy-cli": "^5.0.0",
     "eslint": "^8.53.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.4",
+    "nodemon": "^3.1.0",
     "postcss": "^8.4.32",
     "tailwindcss": "^3.3.5",
     "vite": "^5.0.0",

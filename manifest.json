@@ -25,7 +25,7 @@
         }
     ],
     "options_ui": {
-      "page": "src/option/index.html",
+      "page": ["src/option/index.html","src/content-scripts/inject/index.html"],
       "open_in_tab": true
     },
     "icons": {
@@ -53,8 +53,6 @@
           "https://www.linkedin.com/*"
         ],
         "resources": [
-          "src/content-scripts/inject/dist/content-inject.js",
-          "src/content-scripts/inject/dist/content-inject.css"
         ],
         "use_dynamic_url": true
       }

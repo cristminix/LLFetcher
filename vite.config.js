@@ -1,4 +1,5 @@
-import { defineConfig } from "vite"
+import { defineConfig, splitVendorChunkPlugin } from "vite"
+
 import react from "@vitejs/plugin-react"
 import { crx } from "@crxjs/vite-plugin"
 import manifest from "./manifest.json"
@@ -9,6 +10,10 @@ import { nodePolyfills } from "vite-plugin-node-polyfills"
 import path from "path"
 // https://vitejs.dev/config/
 export default defineConfig({
+  build:{
+    minify:false,
+    target:"esnext"
+  },
   server: {
     hmr: {
       port: 5001,
@@ -18,6 +23,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    splitVendorChunkPlugin(),
     express({
       // the server files export a middleware as default
       // this config can be a glob
@@ -29,7 +35,7 @@ export default defineConfig({
   ],
   rollupOptions: {
     input: {
-      // popup: resolve(__dirname, "./popup.html"),
+      // "content-inject": resolve(__dirname, "./src/content-scripts/inject/index.html"),
       // main: resolve(__dirname, 'popup.html'),
       // nested: resolve(__dirname, 'nested/index.html'),
     },

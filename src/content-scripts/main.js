@@ -1,9 +1,12 @@
 import ContentScript from "./class/ContentScript"
-import { injectScriptAsync } from "./fn"
+import { injectScriptAsync, injectLinkAsync } from "./fn"
 
 const main = async () => {
   window.contentScript = new ContentScript()
-  await injectScriptAsync("src/content-scripts/inject/dist/content-inject.js")
+  /*INJECT_START*/
+  await injectScriptAsync("BLA")
+  await injectLinkAsync("BLA")
+  /*INJECT_END*/
 }
 
 main()

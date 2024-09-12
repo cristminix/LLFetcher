@@ -5,8 +5,7 @@
 
 You can use it as Linkedin Learning Video Downloader for offline use.
 
-  [![HitCount](https://hits.dwyl.com/cristminix/LLFetcher.svg?style=flat-square)](http://hits.dwyl.com/cristminix/LLFetcher)
-
+  [![HitCount](https://hits.dwyl.com/cristminix/LLFetcher.svg?style=flat)](http://hits.dwyl.com/cristminix/LLFetcher)
 
 
 # **How to install this extension to your Chrome browser**

@@ -4,7 +4,7 @@ import react from "@vitejs/plugin-react"
 import { crx } from "@crxjs/vite-plugin"
 import manifest from "./manifest.json"
 import { resolve } from "path"
-import express from "vite-plugin-express"
+// import express from "vite-plugin-express"
 import { fileURLToPath } from "node:url"
 import { nodePolyfills } from "vite-plugin-node-polyfills"
 import path from "path"
@@ -23,13 +23,13 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    splitVendorChunkPlugin(),
-    express({
-      // the server files export a middleware as default
-      // this config can be a glob
-      middlewareFiles: "./src/express/dev-api/router.js",
-      prefixUrl: "/dev-api",
-    }),
+    // splitVendorChunkPlugin(),
+    // express({
+    //   // the server files export a middleware as default
+    //   // this config can be a glob
+    //   middlewareFiles: "./src/express/dev-api/router.js",
+    //   prefixUrl: "/dev-api",
+    // }),
     crx({ manifest }),
     nodePolyfills(),
   ],

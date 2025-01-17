@@ -24,7 +24,7 @@
   "content_scripts": [
     {
       "js": [
-        "assets/main.js-loader-3-SdY_uV.js"
+        "assets/main.js-loader-Bl9SHH-x.js"
       ],
       "matches": [
         "https://www.linkedin.com/learning/*",
@@ -67,9 +67,13 @@
         "https://www.linkedin.com/*"
       ],
       "resources": [
+        "assets/index-CZ1hE2dh.js",
+        "assets/waitForElm-BcNoclUa.js",
+        "assets/sendMessage-Clh2_OhT.js",
+        "assets/main.js-Cp-zW40G.js",
         "assets/*"
       ],
-      "use_dynamic_url": true
+      "use_dynamic_url": false
     }
   ]
 }

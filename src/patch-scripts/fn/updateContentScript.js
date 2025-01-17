@@ -1,6 +1,8 @@
 import fs from "fs"
 import path from "path"
-import cheerio from "cheerio"
+import {load} from "cheerio"
+
+// console.log(cheerio)
 import { lookupContentScriptFile } from "./lookupContentScriptPath.js"
 export const updateContentScript = async (distPath) => {
   const INJECT_LOCATION_SIGNATURE = ">>==INJECT_LOCATION_SIGNATURE==<<"
@@ -61,7 +63,7 @@ export const updateContentScript = async (distPath) => {
   )
   console.log(`Reading ${contentInjectHtmlPath}`)
   let buffer = fs.readFileSync(contentInjectHtmlPath, "utf-8")
-  let $ = cheerio.load(buffer, { xml: true })
+  let $ =  load(buffer, { xml: true })
   console.log("Reading link tags")
   let links = $("link")
   for (const link of links) {

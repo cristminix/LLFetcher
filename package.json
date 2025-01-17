@@ -6,13 +6,13 @@
   "scripts": {
     "dev": "vite",
     "build-script-inject": "esbuild src/content-scripts/inject/main.jsx --minify --bundle --outfile=src/content-scripts/inject/dist/content-inject.js --loader:.js=jsx",
-    "build": "npm run build-script-inject && vite build &&  cpy preline.js dist/",
+    "build": "vite build &&npm run build-script-inject && npm run cp:bsi &&  cpy preline.js dist/",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "bsi": "npm run build-script-inject && npm run cp:bsi",
-    "cp:bsi": "cpy src/content-scripts/inject/dist dist",
-    "patch:build": "node src/patch-scripts/patch-build.js",
-    "patch:dev":"nodemon --watch src/patch-scripts src/patch-scripts/patch-build.js"
+    "cp:bsi": "cpy src/content-scripts/inject/dist dist/assets/content-script-inject  --flat",
+    "patch:build": "vite-node src/patch-scripts/patch-build.js",
+    "patch:dev": "nodemon --watch src/patch-scripts src/patch-scripts/patch-build.js"
   },
   "dependencies": {
     "@editorjs/editorjs": "^2.29.0",
@@ -61,7 +61,7 @@
     "@types/react-dom": "^18.2.15",
     "@vitejs/plugin-react": "^4.2.0",
     "autoprefixer": "^10.4.16",
-    "cheerio": "^1.0.0-rc.12",
+    "cheerio": "^1.0.0",
     "cpy-cli": "^5.0.0",
     "eslint": "^8.53.0",
     "eslint-plugin-react": "^7.33.2",
@@ -71,7 +71,9 @@
     "postcss": "^8.4.32",
     "tailwindcss": "^3.3.5",
     "vite": "^5.0.0",
+    "vite-node": "^3.0.0",
     "vite-plugin-express": "^1.0.3",
     "vite-plugin-node-polyfills": "^0.19.0"
-  }
+  },
+  "packageManager": "pnpm@9.15.3+sha512.1f79bc245a66eb0b07c5d4d83131240774642caaa86ef7d0434ab47c0d16f66b04e21e0c086eb61e62c77efc4d7f7ec071afad3796af64892fae66509173893a"
 }

@@ -1,3 +1,4 @@
+import { detectVideoJs } from "./detectVideoJs"
 export const pauseVideo = (timeout = 5000) => {
   detectVideoJs(() => {
     setTimeout(() => {

@@ -1,4 +1,4 @@
-import { injectLink } from "./injectScript"
+import { injectLink } from "./injectLink"
 /**
  * Injects a script tag asynchronously into the DOM at the body element.
  *
@@ -10,7 +10,7 @@ export const injectLinkAsync = async (  rel,
   href,
   preload=true,tag="body", callback = (f) => f) => {
   return new Promise((resolve, reject) => {
-    injectScript(
+    injectLink(
       rel,
       chrome.runtime.getURL(href),
   preload,

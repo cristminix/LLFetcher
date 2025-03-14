@@ -1,3 +1,7 @@
+import {generateM3u} from "@/global/fn/generateM3u.js";
+import {generateShellScript} from "@/global/fn/generateShellScript.js";
+import {generateBatchScript} from "@/global/fn/generateBatchScript.js";
+
 export function createDownloadFile(kind, config) {
   let fileObject = null
   let objectURL = null

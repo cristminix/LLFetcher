@@ -1,3 +1,5 @@
+import {formatLeadingZeros} from "@/global/fn/formatLeadingZeros.js";
+
 export function generateShellScript(config) {
   const scriptFile = `${config.slug}-${config.fmt}-helper.sh`
   const courseDir = config.slug

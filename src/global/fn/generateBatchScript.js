@@ -1,3 +1,5 @@
+import {formatLeadingZeros} from "@/global/fn/formatLeadingZeros.js";
+
 export function generateBatchScript(config) {
   const scriptFile = `${config.slug}-${config.fmt}-helper.cmd`
   const courseDir = config.slug

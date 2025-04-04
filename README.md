@@ -5,7 +5,7 @@
 
 You can use it as Linkedin Learning Video Downloader for offline use.
 
-[![Hits](https://hits.cristminix.workers.dev/llfetcher.svg?action=view&count_bg=%233DC8C0&title_bg=%23555555&title=Visits&edge_flat=false)]
+![Hits](https://hits.cristminix.workers.dev/llfetcher.svg?action=view&count_bg=%233DC8C0&title_bg=%23555555&title=Hits&edge_flat=false)
 
 
 # **How to install this extension to your Chrome browser**

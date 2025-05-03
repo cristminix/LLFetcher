@@ -15,6 +15,5 @@ To install this chrome extension manually we recommend you download zip file in 
 
 # DONATE
 - Paypal waybeeofficial@gmail.com
-- Buy me a coffe https://www.buymeacoffee.com/waybeeofficial
 
 Starting version 3.0+

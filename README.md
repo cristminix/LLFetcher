@@ -14,5 +14,7 @@ To install this chrome extension manually we recommend you download zip file in 
 
 
 # DONATE
-- Paypal waybeeofficial@gmail.com
+- Just subscribe on my youtube channel [https://www.youtube.com/@pbseven]
+
+  
 Starting version 3.0+
